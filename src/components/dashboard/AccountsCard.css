@@ -2,11 +2,9 @@
   background: #ffffff;
   border-radius: 0.75rem;
   box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
-  padding: 2rem 2.25rem;
+  padding: 1.75rem 2rem;
   display: flex;
   flex-direction: column;
-  min-height: 275px;
-  height: 100%;
   box-sizing: border-box;
 }
 
@@ -15,13 +13,13 @@
   font-weight: 600;
   color: #181c32;
   line-height: 1.2;
-  margin: 0 0 1.25rem;
+  margin: 0 0 1.1rem;
 }
 
 .accounts-card__body {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.1rem;
 }
 
 .accounts-card__metric {
@@ -29,13 +27,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 2.75rem;
 }
 
 .accounts-card__label {
   display: inline-flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.1rem;
   font-size: 1rem;
   color: #7e8299;
   font-weight: 500;

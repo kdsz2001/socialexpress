@@ -5,8 +5,6 @@
   padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
-  min-height: 275px;
-  height: 100%;
   box-sizing: border-box;
 }
 

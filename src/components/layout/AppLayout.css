@@ -27,8 +27,8 @@
 }
 
 .app-content__inner {
-  flex: 1 0 auto;
-  padding-bottom: 30px;
+  flex: 0 0 auto;
+  padding-bottom: 20px;
 }
 
 .app-footer {
