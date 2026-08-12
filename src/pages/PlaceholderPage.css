@@ -2,27 +2,27 @@
   background: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  padding: 40px 32px;
-  max-width: 640px;
-  animation: dashboard-in 0.35s ease both;
+  padding: 28px 24px;
+  max-width: 560px;
+  animation: dashboard-in 0.3s ease both;
 }
 
 .placeholder-page h1 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--text-primary);
 }
 
 .placeholder-page p {
   color: var(--text-secondary);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
 }
 
 @keyframes dashboard-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

@@ -2,22 +2,22 @@
   background: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  padding: 18px;
-  animation: card-rise 0.5s ease both;
+  padding: 12px;
+  animation: card-rise 0.4s ease both;
 }
 
-.accounts-card:nth-child(7) { animation-delay: 0.35s; }
-.accounts-card:nth-child(8) { animation-delay: 0.4s; }
+.accounts-card:nth-child(7) { animation-delay: 0.28s; }
+.accounts-card:nth-child(8) { animation-delay: 0.32s; }
 
 .accounts-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .accounts-card__title {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -25,6 +25,11 @@
 .accounts-card__icon {
   display: grid;
   place-items: center;
+}
+
+.accounts-card__icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .accounts-card--payable .accounts-card__icon {
@@ -38,7 +43,7 @@
 .accounts-card__body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .accounts-card__metric {
@@ -48,13 +53,13 @@
 }
 
 .accounts-card__label {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .accounts-card__value {
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -69,7 +74,7 @@
 @keyframes card-rise {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

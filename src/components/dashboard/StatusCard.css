@@ -2,34 +2,34 @@
   background: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  padding: 18px 18px 14px;
-  animation: card-rise 0.5s ease both;
+  padding: 12px 12px 10px;
+  animation: card-rise 0.4s ease both;
 }
 
-.status-card:nth-child(1) { animation-delay: 0.05s; }
-.status-card:nth-child(2) { animation-delay: 0.1s; }
-.status-card:nth-child(3) { animation-delay: 0.15s; }
+.status-card:nth-child(1) { animation-delay: 0.04s; }
+.status-card:nth-child(2) { animation-delay: 0.08s; }
+.status-card:nth-child(3) { animation-delay: 0.12s; }
 
 .status-card__title {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .status-card__list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .status-card__item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
   font-weight: 500;
   transition: transform 0.15s ease;
 }
@@ -41,12 +41,17 @@
 .status-card__label {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+}
+
+.status-card__label svg {
+  width: 14px;
+  height: 14px;
 }
 
 .status-card__value {
   font-weight: 600;
-  min-width: 1.5rem;
+  min-width: 1.25rem;
   text-align: right;
 }
 
@@ -68,7 +73,7 @@
 @keyframes card-rise {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

@@ -21,7 +21,7 @@
 .app-content {
   flex: 1;
   overflow: auto;
-  padding: 20px 24px 32px;
+  padding: 14px 16px 22px;
 }
 
 .app-overlay {
@@ -53,6 +53,6 @@
   }
 
   .app-content {
-    padding: 16px;
+    padding: 12px;
   }
 }

@@ -9,8 +9,8 @@
   --main-bg: #f4f6fa;
   --topbar-bg: #ffffff;
   --card-bg: #ffffff;
-  --card-shadow: 0 2px 12px rgba(26, 27, 46, 0.06);
-  --card-radius: 12px;
+  --card-shadow: 0 1px 8px rgba(26, 27, 46, 0.05);
+  --card-radius: 10px;
 
   --text-primary: #1a1b2e;
   --text-secondary: #6b7280;
@@ -31,12 +31,13 @@
   --accent-teal: #0d9488;
   --accent-red: #e53e3e;
 
-  --sidebar-width: 260px;
-  --sidebar-collapsed: 72px;
-  --topbar-height: 56px;
+  --sidebar-width: 220px;
+  --sidebar-collapsed: 64px;
+  --topbar-height: 48px;
 
   font-family: 'Poppins', system-ui, sans-serif;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.45;
   font-weight: 400;
   color: var(--text-primary);
   font-synthesis: none;
@@ -84,4 +85,32 @@ ul {
 img {
   max-width: 100%;
   display: block;
+}
+
+/* Scrollbars sofisticadas (conteúdo principal) */
+.app-content {
+  scrollbar-width: thin;
+  scrollbar-color: #c5cad6 transparent;
+}
+
+.app-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.app-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  background: #c5cad6;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.app-content::-webkit-scrollbar-thumb:hover {
+  background: #a8b0c0;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
