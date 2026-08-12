@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { ChevronUp } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
+import { ClientsSubheader } from './ClientsSubheader'
 import './AppLayout.css'
 
 const PAGE_TITLES: Record<string, string> = {
@@ -85,6 +86,7 @@ export function AppLayout() {
       )}
       <div className="app-main">
         <Topbar onMenuClick={toggle} />
+        {location.pathname === '/clientes' && <ClientsSubheader />}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
             <Outlet />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, CloudUpload, Download, Plus } from 'lucide-react'
+import { Search, Plus } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import './Clients.css'
 
@@ -11,32 +11,6 @@ export function Clients() {
 
   return (
     <div className="clients">
-      <header className="clients__subheader">
-        <div className="clients__heading">
-          <h1 className="clients__title">Clientes</h1>
-          <span className="clients__heading-sep" aria-hidden="true" />
-          <p className="clients__subtitle">Nenhum cliente cadastrado</p>
-        </div>
-        <div className="clients__header-actions">
-          <button
-            type="button"
-            className="clients__icon-btn"
-            aria-label="Importar clientes"
-            data-tooltip="Importar clientes"
-          >
-            <CloudUpload size={18} strokeWidth={2} />
-          </button>
-          <button
-            type="button"
-            className="clients__icon-btn"
-            aria-label="Exportar clientes"
-            data-tooltip="Exportar clientes"
-          >
-            <Download size={18} strokeWidth={2} />
-          </button>
-        </div>
-      </header>
-
       <section className="clients__card">
         <div className="clients__toolbar">
           <label className="clients__search">
