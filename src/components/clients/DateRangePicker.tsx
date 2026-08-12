@@ -87,6 +87,25 @@ export function rangeForPreset(preset: Exclude<DatePreset, 'escolher'>): {
   return { start, end }
 }
 
+/** Se o intervalo bater com um atalho, devolve o preset; senão "escolher". */
+export function matchPreset(start: Date, end: Date): DatePreset {
+  const a = startOfDay(start)
+  const b = startOfDay(end)
+  const shortcuts: Exclude<DatePreset, 'escolher'>[] = [
+    'hoje',
+    'semana',
+    'proxima-semana',
+    'mes',
+  ]
+
+  for (const id of shortcuts) {
+    const range = rangeForPreset(id)
+    if (sameDay(a, range.start) && sameDay(b, range.end)) return id
+  }
+
+  return 'escolher'
+}
+
 function addMonths(date: Date, amount: number) {
   return new Date(date.getFullYear(), date.getMonth() + amount, 1)
 }
@@ -146,16 +165,17 @@ export function DateRangePicker({
 
   const selectDay = (day: Date) => {
     const value = startOfDay(day)
-    setDraftPreset('escolher')
 
     if (picking === 'start' || value < draftStart) {
       setDraftStart(value)
       setDraftEnd(value)
+      setDraftPreset(matchPreset(value, value))
       setPicking('end')
       return
     }
 
     setDraftEnd(value)
+    setDraftPreset(matchPreset(draftStart, value))
     setPicking('start')
   }
 
