@@ -1,5 +1,6 @@
 :root {
   --sidebar-bg: #1e1e2d;
+  --sidebar-brand-bg: #1a1a27;
   --sidebar-text: #a2a3b7;
   --sidebar-text-active: #ffffff;
   --sidebar-hover: rgba(255, 255, 255, 0.04);

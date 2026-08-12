@@ -23,6 +23,8 @@
   gap: 8px;
   padding: 0 18px 0 25px;
   flex-shrink: 0;
+  background: var(--sidebar-brand-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .sidebar.is-collapsed .sidebar__brand {
@@ -44,16 +46,16 @@
 
 .sidebar__logo-text {
   font-family: 'Montserrat', 'Poppins', sans-serif;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #ffffff;
   line-height: 1;
 }
 
 .sidebar__mark {
-  width: 16px;
+  width: 20px;
   height: auto;
   display: block;
   flex-shrink: 0;
@@ -61,7 +63,7 @@
 }
 
 .sidebar__mark--solo {
-  width: 24px;
+  width: 28px;
 }
 
 .sidebar__toggle {
@@ -86,12 +88,16 @@
   overflow-x: hidden;
   padding: 10px 0 20px;
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.sidebar__nav:hover {
   scrollbar-color: var(--sidebar-scroll-thumb) transparent;
 }
 
-/* Scrollbar Perfect Scrollbar / Clarial (#637099) */
+/* Scrollbar só aparece no hover (estilo Clarial/Perfect Scrollbar) */
 .sidebar__nav::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 
 .sidebar__nav::-webkit-scrollbar-track {
@@ -99,12 +105,15 @@
 }
 
 .sidebar__nav::-webkit-scrollbar-thumb {
-  background: var(--sidebar-scroll-thumb);
+  background: transparent;
   border-radius: 4px;
-  opacity: 1;
 }
 
-.sidebar__nav::-webkit-scrollbar-thumb:hover {
+.sidebar__nav:hover::-webkit-scrollbar-thumb {
+  background: var(--sidebar-scroll-thumb);
+}
+
+.sidebar__nav:hover::-webkit-scrollbar-thumb:hover {
   background: #7a85ad;
 }
 
