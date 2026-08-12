@@ -1,7 +1,7 @@
 .accounts-card {
-  background: var(--card-bg);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
   padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
@@ -10,78 +10,75 @@
   box-sizing: border-box;
 }
 
-.accounts-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
 .accounts-card__title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #181c32;
   line-height: 1.2;
-  margin: 0;
-}
-
-.accounts-card__icon {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.accounts-card__icon-mark {
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.accounts-card--payable .accounts-card__icon {
-  background: #ffe2e5;
-  color: #f64e60;
-}
-
-.accounts-card--receivable .accounts-card__icon {
-  background: #c9f7f5;
-  color: #1bc5bd;
+  margin: 0 0 1.25rem;
 }
 
 .accounts-card__body {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 1.35rem;
-  flex: 1;
+  gap: 1.25rem;
 }
 
 .accounts-card__metric {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 1rem;
   min-height: 2.75rem;
 }
 
 .accounts-card__label {
-  font-size: 1.05rem;
-  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 1rem;
+  color: #7e8299;
   font-weight: 500;
 }
 
+.accounts-card__metric-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.42rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.accounts-card__metric-icon svg {
+  width: 2.35rem;
+  height: 2.35rem;
+}
+
+.accounts-card--payable .accounts-card__metric-icon {
+  background: #ffe2e5;
+  color: #f64e60;
+}
+
+.accounts-card--receivable .accounts-card__metric-icon {
+  background: #c9f7f5;
+  color: #1bc5bd;
+}
+
 .accounts-card__value {
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 600;
   background: #f3f6f9;
   border-radius: 0.42rem;
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1rem;
   min-width: 6.5rem;
+  min-height: 2.75rem;
   text-align: center;
   line-height: 1.2;
   box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .accounts-card--payable .accounts-card__value {

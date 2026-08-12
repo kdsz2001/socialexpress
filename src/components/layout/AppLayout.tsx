@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { ChevronUp } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import './AppLayout.css'
@@ -22,6 +23,8 @@ export function AppLayout() {
   const isMobile = useIsMobile()
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const contentRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     setCollapsed(isMobile)
@@ -31,7 +34,24 @@ export function AppLayout() {
     if (isMobile) setCollapsed(true)
   }, [location.pathname, isMobile])
 
+  useEffect(() => {
+    const el = contentRef.current
+    if (!el) return
+
+    const onScroll = () => {
+      setShowScrollTop(el.scrollTop > 200)
+    }
+
+    onScroll()
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [])
+
   const toggle = () => setCollapsed((v) => !v)
+
+  const scrollToTop = () => {
+    contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <div className={`app-shell ${collapsed ? 'is-collapsed' : ''}`}>
@@ -46,10 +66,22 @@ export function AppLayout() {
       )}
       <div className="app-main">
         <Topbar onMenuClick={toggle} />
-        <main className="app-content">
-          <Outlet />
+        <main className="app-content" ref={contentRef}>
+          <div className="app-content__inner">
+            <Outlet />
+          </div>
+          <footer className="app-footer">2016© Social Express</footer>
         </main>
       </div>
+
+      <button
+        type="button"
+        className={`scrolltop${showScrollTop ? ' is-visible' : ''}`}
+        aria-label="Voltar ao topo"
+        onClick={scrollToTop}
+      >
+        <ChevronUp size={22} strokeWidth={2.25} />
+      </button>
     </div>
   )
 }

@@ -21,7 +21,25 @@
 .app-content {
   flex: 1;
   overflow: auto;
-  padding: 25px 30px 30px;
+  display: flex;
+  flex-direction: column;
+  padding: 25px 30px 0;
+}
+
+.app-content__inner {
+  flex: 1 0 auto;
+  padding-bottom: 30px;
+}
+
+.app-footer {
+  flex-shrink: 0;
+  background: #ffffff;
+  margin: 0 -30px 0;
+  padding: 14px 30px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #b5b5c3;
+  border-top: 1px solid #ebedf3;
 }
 
 .app-overlay {
@@ -32,6 +50,44 @@
   border: none;
   cursor: pointer;
   animation: overlay-in 0.2s ease both;
+}
+
+/* Botão voltar ao topo — estilo Clarial/Metronic (.scrolltop) */
+.scrolltop {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  position: fixed;
+  bottom: 40px;
+  right: 20px;
+  cursor: pointer;
+  z-index: 100;
+  background-color: #3699ff;
+  border: none;
+  border-radius: 0.42rem;
+  color: #ffffff;
+  opacity: 0.3;
+  box-shadow: 0 0 15px 0 rgba(54, 153, 255, 0.25);
+}
+
+.scrolltop.is-visible {
+  display: flex;
+  animation: animation-scrolltop 0.4s ease-out 1;
+}
+
+.scrolltop:hover {
+  opacity: 1;
+}
+
+@keyframes animation-scrolltop {
+  from {
+    margin-bottom: -15px;
+  }
+  to {
+    margin-bottom: 0;
+  }
 }
 
 @keyframes overlay-in {
@@ -53,6 +109,18 @@
   }
 
   .app-content {
-    padding: 15px;
+    padding: 15px 15px 0;
+  }
+
+  .app-footer {
+    margin: 0 -15px 0;
+    padding: 12px 15px;
+  }
+
+  .scrolltop {
+    bottom: 30px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
   }
 }
