@@ -161,7 +161,7 @@
 .sidebar.is-collapsed .sidebar__tie-toggle {
   width: 34px;
   height: 36px;
-  margin-top: -12px; /* entre o gap grande e o excesso de cima */
+  margin-top: -10px; /* desce bem pouco em relação à gola */
   transform: rotate(0deg);
   background: transparent;
   z-index: 1;
