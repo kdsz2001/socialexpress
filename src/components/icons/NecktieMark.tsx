@@ -55,7 +55,7 @@ export function NecktieMark({
           </linearGradient>
         ) : (
           <>
-            {/* Idle: corpo escuro, ponta azul escuro suave */}
+            {/* Idle: corpo escuro, ponta azul um pouco mais visível */}
             <linearGradient
               id={idleGid}
               x1="20"
@@ -66,8 +66,8 @@ export function NecktieMark({
             >
               <stop offset="0%" stopColor="#3F4254" stopOpacity="0.42" />
               <stop offset="50%" stopColor="#3F4254" stopOpacity="0.38" />
-              <stop offset="72%" stopColor="#2A4F8C" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#2A4F8C" stopOpacity="0.92" />
+              <stop offset="72%" stopColor="#2F5FA0" stopOpacity="0.72" />
+              <stop offset="100%" stopColor="#3A6DB0" stopOpacity="1" />
             </linearGradient>
             {/* Hover: azul mais claro se espalhando pelo corpo */}
             <linearGradient
