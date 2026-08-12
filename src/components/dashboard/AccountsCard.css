@@ -5,7 +5,8 @@
   padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  min-height: 275px;
+  height: 100%;
   box-sizing: border-box;
 }
 
@@ -52,7 +53,9 @@
 .accounts-card__body {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  justify-content: center;
+  gap: 1.35rem;
+  flex: 1;
 }
 
 .accounts-card__metric {

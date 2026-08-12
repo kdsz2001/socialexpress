@@ -6,6 +6,7 @@
 .dashboard__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: minmax(275px, auto);
   gap: 25px;
   align-items: stretch;
 }
