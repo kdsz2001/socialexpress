@@ -1,35 +1,35 @@
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard,
-  Users,
+  Monitor,
+  User,
   Calendar,
-  PartyPopper,
-  Package,
-  UserCog,
-  ShoppingCart,
-  Wallet,
-  Truck,
-  BarChart3,
+  Wine,
+  Users,
+  Receipt,
+  Banknote,
+  Shirt,
+  Activity,
   Settings,
-  History,
+  BookOpen,
   ChevronsLeft,
   ChevronsRight,
 } from 'lucide-react'
+import { TieIcon } from '../icons/TieIcon'
 import './Sidebar.css'
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/clientes', label: 'Clientes', icon: Users },
+  { to: '/', label: 'Dashboard', icon: Monitor },
+  { to: '/clientes', label: 'Clientes', icon: User },
   { to: '/agenda', label: 'Agenda', icon: Calendar },
-  { to: '/eventos', label: 'Eventos', icon: PartyPopper },
-  { to: '/produtos', label: 'Produtos', icon: Package },
-  { to: '/funcionarios', label: 'Funcionários', icon: UserCog },
-  { to: '/pedidos', label: 'Pedidos', icon: ShoppingCart },
-  { to: '/financeiro', label: 'Financeiro', icon: Wallet },
-  { to: '/fornecedores', label: 'Fornecedores', icon: Truck },
-  { to: '/relatorios', label: 'Relatórios', icon: BarChart3 },
+  { to: '/eventos', label: 'Eventos', icon: Wine },
+  { to: '/produtos', label: 'Produtos', icon: TieIcon },
+  { to: '/funcionarios', label: 'Funcionários', icon: Users },
+  { to: '/pedidos', label: 'Pedidos', icon: Receipt },
+  { to: '/financeiro', label: 'Financeiro', icon: Banknote },
+  { to: '/fornecedores', label: 'Fornecedores', icon: Shirt },
+  { to: '/relatorios', label: 'Relatórios', icon: Activity },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
-  { to: '/historicos', label: 'Históricos', icon: History },
+  { to: '/historicos', label: 'Históricos', icon: BookOpen },
 ] as const
 
 type SidebarProps = {
@@ -80,13 +80,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   to={item.to}
                   end={isDashboard}
                   className={({ isActive }) => {
-                    // Dashboard nunca fica marcada; outras opções usam seleção bem sutil
                     if (isDashboard || !isActive) return 'sidebar__link'
                     return 'sidebar__link is-active'
                   }}
                   title={collapsed ? item.label : undefined}
                 >
-                  <Icon size={18} strokeWidth={1.75} />
+                  <Icon size={18} strokeWidth={1.5} />
                   {!collapsed && <span>{item.label}</span>}
                 </NavLink>
               </li>

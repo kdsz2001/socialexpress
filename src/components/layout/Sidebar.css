@@ -147,24 +147,24 @@
 }
 
 .sidebar__link:hover svg {
-  color: #3699ff;
+  color: #ffffff;
 }
 
 /* Seleção quase imperceptível (como Clarial: #1b1b28 sobre #1e1e2d) */
 .sidebar__link.is-active {
   background: #1b1b28;
-  color: #a2a3b7;
+  color: #cfcfd8;
 }
 
 .sidebar__link svg {
   flex-shrink: 0;
   width: 1.4rem;
   height: 1.4rem;
-  color: #494b74;
+  color: #cfcfd8; /* ícones "acesos" — claros como no Clarial */
 }
 
 .sidebar__link.is-active svg {
-  color: #494b74;
+  color: #cfcfd8;
 }
 
 @media (max-width: 900px) {
