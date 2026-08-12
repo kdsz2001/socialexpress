@@ -109,8 +109,8 @@
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 36px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -120,8 +120,11 @@
   cursor: pointer;
   color: #ffffff;
   background: transparent;
-  /* Aberta: gira +90° (horário) → ponta da gravata vira seta ← */
-  transform: rotate(90deg);
+  /*
+    scaleY afina a silhueta; depois rotate(90°) deita como seta ←
+    (ponta + chevrons <<<).
+  */
+  transform: rotate(90deg) scaleY(0.72);
   transition:
     transform 0.5s cubic-bezier(0.33, 1, 0.32, 1),
     margin 0.5s cubic-bezier(0.33, 1, 0.32, 1),
@@ -140,10 +143,10 @@
 }
 
 .sidebar.is-collapsed .sidebar__tie-toggle {
-  width: 36px;
-  height: 32px;
-  margin-top: -14px; /* crescente beija o V da gola */
-  transform: rotate(0deg);
+  width: 40px;
+  height: 36px;
+  margin-top: -8px;
+  transform: rotate(0deg) scaleY(1);
   background: transparent;
   z-index: 1;
 }
@@ -154,27 +157,28 @@
 
 .sidebar__necktie {
   display: block;
-  width: 18px;
+  width: 15px;
   height: auto;
   color: #ffffff;
 }
 
 .sidebar__necktie .necktie__full,
-.sidebar__necktie .necktie__docked {
+.sidebar__necktie .necktie__docked,
+.sidebar__necktie .necktie__chevrons {
   transition: opacity 0.35s ease;
 }
 
 .sidebar.is-collapsed .sidebar__necktie {
-  width: 12px;
+  width: 11px;
+}
+
+.sidebar__tie-toggle:hover .necktie__chevrons {
+  fill: #585866;
 }
 
 /* Gola por cima do crescente no encaixe */
 .sidebar.is-collapsed .sidebar__emblem {
   z-index: 2;
-}
-
-.sidebar.is-collapsed .sidebar__tie-toggle {
-  z-index: 1;
 }
 
 .sidebar__nav {
