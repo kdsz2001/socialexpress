@@ -18,10 +18,20 @@ export function Clients() {
           <p className="clients__subtitle">Nenhum cliente cadastrado</p>
         </div>
         <div className="clients__header-actions">
-          <button type="button" className="clients__icon-btn" aria-label="Importar">
+          <button
+            type="button"
+            className="clients__icon-btn"
+            aria-label="Importar clientes"
+            data-tooltip="Importar clientes"
+          >
             <CloudUpload size={18} strokeWidth={2} />
           </button>
-          <button type="button" className="clients__icon-btn" aria-label="Exportar">
+          <button
+            type="button"
+            className="clients__icon-btn"
+            aria-label="Exportar clientes"
+            data-tooltip="Exportar clientes"
+          >
             <Download size={18} strokeWidth={2} />
           </button>
         </div>
