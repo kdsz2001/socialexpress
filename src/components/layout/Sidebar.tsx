@@ -66,7 +66,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
           aria-expanded={!collapsed}
         >
-          <NecktieMark className="sidebar__necktie" />
+          <NecktieMark className="sidebar__necktie" docked={collapsed} />
         </button>
       </div>
 

@@ -1,28 +1,51 @@
 import type { SVGProps } from 'react'
 
+type NecktieMarkProps = SVGProps<SVGSVGElement> & {
+  title?: string
+  /** true = encaixada sob a gola (sem laterais/cintura do pescoço) */
+  docked?: boolean
+}
+
+/** Logo completa — crescente U, pescoço, corpo, ponta */
+const D_FULL =
+  'M8.5 5Q20 16.2 31.5 5L30.2 12 28.2 18 26.5 23 27.8 30 30.5 42 31 52.5 20 62.5 9 52.5 9.5 42 12.2 30 13.5 23 11.8 18 9.8 12Z'
+
+/** Encaixe — mesmo crescente + ponta, sem cintura do pescoço */
+const D_DOCKED =
+  'M8.5 5Q20 16.2 31.5 5L29.5 14 30.2 28 31 52.5 20 62.5 9 52.5 9.8 28 10.5 14Z'
+
 /**
- * Gravata geométrica meio-seta (branca via currentColor).
- * Vertical → encaixa no V da gola.
- * rotate(-90deg) → seta ← (recolher).
+ * Gravata da logo Social Express — crescente (U) no topo.
+ * Aberta: silhueta completa. Encaixada: sem laterais do pescoço.
  */
 export function NecktieMark({
   className,
   title,
+  docked = false,
   ...props
-}: SVGProps<SVGSVGElement> & { title?: string }) {
+}: NecktieMarkProps) {
   return (
     <svg
-      viewBox="0 0 24 48"
+      viewBox="0 0 40 64"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      data-docked={docked ? 'true' : 'false'}
       aria-hidden={title ? undefined : true}
       role={title ? 'img' : undefined}
       {...props}
     >
       {title ? <title>{title}</title> : null}
-      {/* Cauda em V → nó → corpo → ponta (lê como seta deitada) */}
-      <path d="M5 1.5h5.5L12 6l1.5-4.5H19v3.2L14.2 9.5l3.8 4.8-2.7 2.5 1.2 18.7L12 46.8 7.5 35.5l1.2-18.7-2.7-2.5 3.8-4.8L5 4.7V1.5Z" />
+      <path
+        className="necktie__full"
+        style={{ opacity: docked ? 0 : 1 }}
+        d={D_FULL}
+      />
+      <path
+        className="necktie__docked"
+        style={{ opacity: docked ? 1 : 0 }}
+        d={D_DOCKED}
+      />
     </svg>
   )
 }

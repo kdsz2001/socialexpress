@@ -38,8 +38,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 74px;
-  padding: 10px 6px 6px;
+  height: 78px;
+  padding: 12px 6px 8px;
   gap: 0;
 }
 
@@ -140,11 +140,12 @@
 }
 
 .sidebar.is-collapsed .sidebar__tie-toggle {
-  width: 34px;
-  height: 26px;
-  margin-top: -10px;
+  width: 36px;
+  height: 32px;
+  margin-top: -14px; /* crescente beija o V da gola */
   transform: rotate(0deg);
   background: transparent;
+  z-index: 1;
 }
 
 .sidebar.is-collapsed .sidebar__tie-toggle:hover {
@@ -153,13 +154,27 @@
 
 .sidebar__necktie {
   display: block;
-  width: 17px;
+  width: 18px;
   height: auto;
   color: #ffffff;
 }
 
+.sidebar__necktie .necktie__full,
+.sidebar__necktie .necktie__docked {
+  transition: opacity 0.35s ease;
+}
+
 .sidebar.is-collapsed .sidebar__necktie {
-  width: 11px;
+  width: 12px;
+}
+
+/* Gola por cima do crescente no encaixe */
+.sidebar.is-collapsed .sidebar__emblem {
+  z-index: 2;
+}
+
+.sidebar.is-collapsed .sidebar__tie-toggle {
+  z-index: 1;
 }
 
 .sidebar__nav {
