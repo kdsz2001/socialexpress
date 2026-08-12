@@ -5,6 +5,21 @@ import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import './AppLayout.css'
 
+const PAGE_TITLES: Record<string, string> = {
+  '/': 'Dashboard',
+  '/clientes': 'Clientes',
+  '/agenda': 'Agenda',
+  '/eventos': 'Eventos',
+  '/produtos': 'Produtos',
+  '/funcionarios': 'Funcionários',
+  '/pedidos': 'Pedidos',
+  '/financeiro': 'Financeiro',
+  '/fornecedores': 'Fornecedores',
+  '/relatorios': 'Relatórios',
+  '/configuracoes': 'Configurações',
+  '/historicos': 'Históricos',
+}
+
 function useIsMobile(breakpoint = 900) {
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.innerWidth <= breakpoint,
@@ -33,6 +48,10 @@ export function AppLayout() {
   useEffect(() => {
     if (isMobile) setCollapsed(true)
   }, [location.pathname, isMobile])
+
+  useEffect(() => {
+    document.title = PAGE_TITLES[location.pathname] ?? 'Social Express'
+  }, [location.pathname])
 
   useEffect(() => {
     const el = contentRef.current
