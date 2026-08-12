@@ -11,9 +11,10 @@ export function Clients() {
 
   return (
     <div className="clients">
-      <header className="clients__header">
+      <header className="clients__subheader">
         <div className="clients__heading">
           <h1 className="clients__title">Clientes</h1>
+          <span className="clients__heading-sep" aria-hidden="true" />
           <p className="clients__subtitle">Nenhum cliente cadastrado</p>
         </div>
         <div className="clients__header-actions">

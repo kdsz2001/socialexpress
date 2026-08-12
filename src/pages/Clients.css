@@ -3,28 +3,44 @@
   animation: clients-in 0.35s ease both;
 }
 
-.clients__header {
+/* Faixa branca estilo Clarial (título + status + import/export) */
+.clients__subheader {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  background: #ffffff;
+  margin: -25px -30px 25px;
+  padding: 18px 30px;
+  border-bottom: 1px solid #ebedf3;
 }
 
 .clients__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .clients__title {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: #181c32;
   line-height: 1.35;
+  white-space: nowrap;
+}
+
+.clients__heading-sep {
+  width: 1px;
+  height: 16px;
+  background: #e4e6ef;
+  flex-shrink: 0;
 }
 
 .clients__subtitle {
-  margin: 0.15rem 0 0;
+  margin: 0;
   font-size: 0.95rem;
   font-weight: 400;
   color: #b5b5c3;
@@ -181,6 +197,11 @@
 }
 
 @media (max-width: 700px) {
+  .clients__subheader {
+    margin: -15px -15px 20px;
+    padding: 14px 15px;
+  }
+
   .clients__toolbar {
     flex-direction: column;
     align-items: stretch;
