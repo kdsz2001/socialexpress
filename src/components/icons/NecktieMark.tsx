@@ -6,13 +6,17 @@ type NecktieMarkProps = SVGProps<SVGSVGElement> & {
 }
 
 const BRAND_BLUE = '#3699FF'
+/* Idle aberto — cinza-azulado apagado estilo seta Clarial */
+const IDLE_MUTED = '#5E6278'
+const IDLE_MUTED_MID = '#6D6F88'
+const IDLE_MUTED_TIP = '#8A8DA8'
 const TIE_PATH =
   'M8.5 4.5Q20 16.5 31.5 4.5L28.8 14.5 27.8 21 28.6 31 29.2 44 20 58 10.8 44 11.4 31 12.2 21 11.2 14.5Z'
 
 /**
- * Gravata azul Clarial.
- * Aberta: um pouco apagada, ponta mais acesa; acende no hover.
- * Fechada: fade na ponta, encaixe sob a gola.
+ * Gravata / seta estilo Clarial.
+ * Aberta: cinza-azulada apagada; azul vivo só no hover.
+ * Fechada: azul com fade na ponta, encaixe sob a gola.
  */
 export function NecktieMark({
   className,
@@ -54,11 +58,11 @@ export function NecktieMark({
             </>
           ) : (
             <>
-              {/* Nó mais apagado; ponta mais acesa (vira ← após rotate) */}
-              <stop offset="0%" stopColor={BRAND_BLUE} stopOpacity="0.28" />
-              <stop offset="38%" stopColor={BRAND_BLUE} stopOpacity="0.38" />
-              <stop offset="68%" stopColor={BRAND_BLUE} stopOpacity="0.62" />
-              <stop offset="100%" stopColor={BRAND_BLUE} stopOpacity="0.95" />
+              {/* Idle: cinza-azulado (img 2); ponta um pouco mais clara → ← após rotate */}
+              <stop offset="0%" stopColor={IDLE_MUTED} stopOpacity="0.75" />
+              <stop offset="40%" stopColor={IDLE_MUTED_MID} stopOpacity="0.85" />
+              <stop offset="72%" stopColor={IDLE_MUTED_TIP} stopOpacity="0.95" />
+              <stop offset="100%" stopColor={IDLE_MUTED_TIP} stopOpacity="1" />
             </>
           )}
         </linearGradient>
