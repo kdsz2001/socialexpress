@@ -73,14 +73,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <ul>
           {navItems.map((item) => {
             const Icon = item.icon
+            const isDashboard = item.to === '/'
             return (
               <li key={item.to}>
                 <NavLink
                   to={item.to}
-                  end={'end' in item ? item.end : false}
-                  className={({ isActive }) =>
-                    `sidebar__link ${isActive ? 'is-active' : ''}`
-                  }
+                  end={isDashboard}
+                  className={({ isActive }) => {
+                    // Dashboard nunca fica marcada; outras opções usam seleção bem sutil
+                    if (isDashboard || !isActive) return 'sidebar__link'
+                    return 'sidebar__link is-active'
+                  }}
                   title={collapsed ? item.label : undefined}
                 >
                   <Icon size={18} strokeWidth={1.75} />
