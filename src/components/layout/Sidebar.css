@@ -142,13 +142,18 @@
 }
 
 .sidebar__link:hover {
-  background: var(--sidebar-hover);
-  color: var(--sidebar-text-active);
+  background: #1b1b28;
+  color: #ffffff;
 }
 
+.sidebar__link:hover svg {
+  color: #3699ff;
+}
+
+/* Seleção quase imperceptível (como Clarial: #1b1b28 sobre #1e1e2d) */
 .sidebar__link.is-active {
-  background: var(--sidebar-active-bg);
-  color: var(--sidebar-active-color);
+  background: #1b1b28;
+  color: #a2a3b7;
 }
 
 .sidebar__link svg {
@@ -158,9 +163,8 @@
   color: #494b74;
 }
 
-.sidebar__link:hover svg,
 .sidebar__link.is-active svg {
-  color: inherit;
+  color: #494b74;
 }
 
 @media (max-width: 900px) {
