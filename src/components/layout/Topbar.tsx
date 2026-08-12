@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Search, Menu, X } from 'lucide-react'
+import { ProfileDrawer } from './ProfileDrawer'
 import './Topbar.css'
 
 type TopbarProps = {
@@ -8,6 +9,7 @@ type TopbarProps = {
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
   const [query, setQuery] = useState('')
   const panelRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -40,6 +42,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [searchOpen])
+
+  const openProfile = () => {
+    setSearchOpen(false)
+    setProfileOpen(true)
+  }
 
   return (
     <header className="topbar">
@@ -111,11 +118,21 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           )}
         </div>
 
-        <div className="topbar__user">
-          <span className="topbar__greeting">Olá, Kelton Djames Schulze</span>
-          <div className="topbar__avatar" aria-hidden="true" />
-        </div>
+        <button
+          type="button"
+          className={`topbar__user${profileOpen ? ' is-open' : ''}`}
+          aria-label="Abrir perfil"
+          aria-expanded={profileOpen}
+          onClick={openProfile}
+        >
+          <span className="topbar__greeting">
+            Olá, <strong>Kelton Djames Schulze</strong>
+          </span>
+          <span className="topbar__avatar" aria-hidden="true" />
+        </button>
       </div>
+
+      <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} />
     </header>
   )
 }
