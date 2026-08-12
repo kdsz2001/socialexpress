@@ -1,0 +1,244 @@
+.daterange {
+  width: min(720px, calc(100vw - 48px));
+  background: #ffffff;
+  border-radius: 0.55rem;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.18);
+  overflow: hidden;
+  animation: daterange-in 0.16s ease both;
+}
+
+.daterange__body {
+  display: flex;
+  min-height: 320px;
+}
+
+.daterange__presets {
+  width: 180px;
+  flex-shrink: 0;
+  padding: 0.75rem 0;
+  border-right: 1px solid #ebedf3;
+}
+
+.daterange__preset {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 0.7rem 1.15rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #3f4254;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.daterange__preset:hover {
+  background: #f3f6f9;
+  color: #3699ff;
+}
+
+.daterange__preset.is-active {
+  background: #e1f0ff;
+  color: #3699ff;
+}
+
+.daterange__calendars {
+  flex: 1;
+  min-width: 0;
+  padding: 0.85rem 1rem 1rem;
+  position: relative;
+}
+
+.daterange__nav {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.daterange__nav-btn {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 0.35rem;
+  color: #7e8299;
+  pointer-events: auto;
+  background: transparent;
+}
+
+.daterange__nav-btn:hover {
+  background: #f3f6f9;
+  color: #3699ff;
+}
+
+.daterange__months {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding-top: 0.35rem;
+}
+
+.daterange__month-title {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #3f4254;
+  margin-bottom: 0.75rem;
+  line-height: 28px;
+}
+
+.daterange__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.35rem;
+}
+
+.daterange__weekdays span {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #b5b5c3;
+  padding: 0.25rem 0;
+}
+
+.daterange__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.daterange__day {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.daterange__day:hover {
+  background: #f3f6f9;
+  color: #3699ff;
+}
+
+.daterange__day.is-outside {
+  color: #b5b5c3;
+}
+
+.daterange__day.is-in-range {
+  background: #e1f0ff;
+  color: #3699ff;
+  border-radius: 0;
+}
+
+.daterange__day.is-selected {
+  background: #e1f0ff;
+  color: #3699ff;
+  font-weight: 600;
+  border-radius: 0.35rem;
+}
+
+.daterange__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.15rem;
+  border-top: 1px solid #ebedf3;
+  flex-wrap: wrap;
+}
+
+.daterange__summary {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #7e8299;
+}
+
+.daterange__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.daterange__cancel,
+.daterange__apply {
+  height: 36px;
+  padding: 0 1rem;
+  border-radius: 0.42rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.daterange__cancel {
+  background: #f3f6f9;
+  color: #3f4254;
+}
+
+.daterange__cancel:hover {
+  background: #e4e6ef;
+}
+
+.daterange__apply {
+  background: #3699ff;
+  color: #ffffff;
+}
+
+.daterange__apply:hover {
+  background: #187de4;
+}
+
+@keyframes daterange-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 780px) {
+  .daterange {
+    width: min(420px, calc(100vw - 32px));
+  }
+
+  .daterange__body {
+    flex-direction: column;
+  }
+
+  .daterange__presets {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.65rem;
+    border-right: 0;
+    border-bottom: 1px solid #ebedf3;
+  }
+
+  .daterange__preset {
+    width: auto;
+    border-radius: 0.42rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .daterange__months {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

@@ -1,72 +1,16 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Search, Plus, CalendarDays, ArrowUp } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
+import {
+  DATE_PRESETS,
+  DateRangePicker,
+  formatBr,
+  rangeForPreset,
+  type DatePreset,
+} from '../components/clients/DateRangePicker'
 import './Clients.css'
 
-type DatePreset =
-  | 'hoje'
-  | 'semana'
-  | 'proxima-semana'
-  | 'mes'
-  | 'escolher'
-
-const DATE_PRESETS: { id: DatePreset; label: string }[] = [
-  { id: 'hoje', label: 'De hoje' },
-  { id: 'semana', label: 'Dessa semana' },
-  { id: 'proxima-semana', label: 'Da próxima semana' },
-  { id: 'mes', label: 'Desse mês' },
-  { id: 'escolher', label: 'Escolher datas' },
-]
-
-function pad(n: number) {
-  return String(n).padStart(2, '0')
-}
-
-function formatBr(date: Date) {
-  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`
-}
-
-function startOfWeek(date: Date) {
-  const d = new Date(date)
-  const day = d.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  d.setDate(d.getDate() + diff)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-function endOfWeek(date: Date) {
-  const d = startOfWeek(date)
-  d.setDate(d.getDate() + 6)
-  return d
-}
-
-function rangeForPreset(preset: DatePreset): { start: Date; end: Date } {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  if (preset === 'hoje') {
-    return { start: today, end: new Date(today) }
-  }
-
-  if (preset === 'semana') {
-    return { start: startOfWeek(today), end: endOfWeek(today) }
-  }
-
-  if (preset === 'proxima-semana') {
-    const next = new Date(today)
-    next.setDate(next.getDate() + 7)
-    return { start: startOfWeek(next), end: endOfWeek(next) }
-  }
-
-  if (preset === 'mes') {
-    const start = new Date(today.getFullYear(), today.getMonth(), 1)
-    const end = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-    return { start, end }
-  }
-
-  return { start: today, end: new Date(today) }
-}
+type PickerMode = 'menu' | 'calendar'
 
 export function Clients() {
   const [searchParams] = useSearchParams()
@@ -74,13 +18,15 @@ export function Clients() {
     searchParams.get('tab') === 'aniversariantes' ? 'aniversariantes' : 'todos'
   const [query, setQuery] = useState('')
   const [dateOpen, setDateOpen] = useState(false)
+  const [pickerMode, setPickerMode] = useState<PickerMode>('menu')
   const [datePreset, setDatePreset] = useState<DatePreset>('hoje')
-  const [dateLabel, setDateLabel] = useState(() => {
-    const { start, end } = rangeForPreset('hoje')
-    return `${formatBr(start)} até ${formatBr(end)}`
-  })
+  const initial = rangeForPreset('hoje')
+  const [rangeStart, setRangeStart] = useState(initial.start)
+  const [rangeEnd, setRangeEnd] = useState(initial.end)
   const dateWrapRef = useRef<HTMLDivElement>(null)
   const dateMenuId = useId()
+
+  const dateLabel = `${formatBr(rangeStart)} até ${formatBr(rangeEnd)}`
 
   useEffect(() => {
     if (!dateOpen) return
@@ -88,11 +34,15 @@ export function Clients() {
     const onPointerDown = (event: MouseEvent) => {
       if (!dateWrapRef.current?.contains(event.target as Node)) {
         setDateOpen(false)
+        setPickerMode('menu')
       }
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setDateOpen(false)
+      if (event.key === 'Escape') {
+        setDateOpen(false)
+        setPickerMode('menu')
+      }
     }
 
     document.addEventListener('mousedown', onPointerDown)
@@ -105,13 +55,30 @@ export function Clients() {
 
   useEffect(() => {
     setDateOpen(false)
+    setPickerMode('menu')
   }, [tab])
 
-  const applyPreset = (preset: DatePreset) => {
+  const openDate = () => {
+    setPickerMode(datePreset === 'escolher' ? 'calendar' : 'menu')
+    setDateOpen((open) => !open)
+  }
+
+  const applyPreset = (preset: Exclude<DatePreset, 'escolher'>) => {
+    const range = rangeForPreset(preset)
     setDatePreset(preset)
-    const { start, end } = rangeForPreset(preset)
-    setDateLabel(`${formatBr(start)} até ${formatBr(end)}`)
+    setRangeStart(range.start)
+    setRangeEnd(range.end)
     setDateOpen(false)
+    setPickerMode('menu')
+  }
+
+  const onMenuSelect = (preset: DatePreset) => {
+    if (preset === 'escolher') {
+      setDatePreset('escolher')
+      setPickerMode('calendar')
+      return
+    }
+    applyPreset(preset)
   }
 
   return (
@@ -138,7 +105,7 @@ export function Clients() {
                 className={`clients__date-field${dateOpen ? ' is-open' : ''}`}
                 aria-expanded={dateOpen}
                 aria-controls={dateMenuId}
-                onClick={() => setDateOpen((open) => !open)}
+                onClick={openDate}
               >
                 {dateLabel}
               </button>
@@ -148,12 +115,12 @@ export function Clients() {
                 aria-label="Abrir período"
                 aria-expanded={dateOpen}
                 aria-controls={dateMenuId}
-                onClick={() => setDateOpen((open) => !open)}
+                onClick={openDate}
               >
                 <CalendarDays size={16} strokeWidth={2} />
               </button>
 
-              {dateOpen && (
+              {dateOpen && pickerMode === 'menu' && (
                 <div
                   className="clients__date-menu"
                   id={dateMenuId}
@@ -167,11 +134,32 @@ export function Clients() {
                       role="option"
                       aria-selected={datePreset === item.id}
                       className={`clients__date-option${datePreset === item.id ? ' is-active' : ''}`}
-                      onClick={() => applyPreset(item.id)}
+                      onClick={() => onMenuSelect(item.id)}
                     >
                       {item.label}
                     </button>
                   ))}
+                </div>
+              )}
+
+              {dateOpen && pickerMode === 'calendar' && (
+                <div className="clients__date-popover" id={dateMenuId}>
+                  <DateRangePicker
+                    start={rangeStart}
+                    end={rangeEnd}
+                    preset={datePreset}
+                    onCancel={() => {
+                      setDateOpen(false)
+                      setPickerMode('menu')
+                    }}
+                    onApply={({ start, end, preset: nextPreset }) => {
+                      setRangeStart(start)
+                      setRangeEnd(end)
+                      setDatePreset(nextPreset)
+                      setDateOpen(false)
+                      setPickerMode('menu')
+                    }}
+                  />
                 </div>
               )}
             </div>
