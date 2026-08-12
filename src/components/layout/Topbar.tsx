@@ -13,6 +13,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const searchId = useId()
 
+  const hasQuery = query.trim().length > 0
+  // Futuro: substituir por resultados reais de pedido/produto/cliente
+  const results: unknown[] = []
+  const showEmptyState = hasQuery && results.length === 0
+
   useEffect(() => {
     if (!searchOpen) return
 
@@ -61,18 +66,28 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           </button>
 
           {searchOpen && (
-            <div className="topbar__search-panel" id={searchId} role="search">
+            <div
+              className={`topbar__search-panel ${showEmptyState ? 'has-result' : ''}`}
+              id={searchId}
+              role="search"
+            >
               <div className="topbar__search-form">
-                <Search size={16} strokeWidth={2} className="topbar__search-panel-icon" />
+                <Search
+                  size={16}
+                  strokeWidth={2}
+                  className="topbar__search-panel-icon"
+                />
                 <input
                   ref={inputRef}
-                  type="search"
+                  type="text"
                   className="topbar__search-input"
                   placeholder="Busque por pedido, produto ou cliente..."
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
                 />
-                {query && (
+                {hasQuery && (
                   <button
                     type="button"
                     className="topbar__search-clear"
@@ -82,10 +97,16 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                       inputRef.current?.focus()
                     }}
                   >
-                    <X size={14} strokeWidth={2} />
+                    <X size={16} strokeWidth={1.75} />
                   </button>
                 )}
               </div>
+
+              {showEmptyState && (
+                <div className="topbar__search-empty">
+                  Nenhum resultado encontrado
+                </div>
+              )}
             </div>
           )}
         </div>

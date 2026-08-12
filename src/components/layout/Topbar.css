@@ -63,15 +63,24 @@
   background: #ffffff;
   border-radius: 0.65rem;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.5rem;
   z-index: 50;
   animation: search-in 0.16s ease both;
+}
+
+.topbar__search-panel.has-result {
+  min-height: 220px;
 }
 
 .topbar__search-form {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.topbar__search-panel.has-result .topbar__search-form {
+  border-bottom: 1px solid #ebedf3;
+  padding-bottom: 0.75rem;
 }
 
 .topbar__search-panel-icon {
@@ -103,11 +112,19 @@
   border-radius: 4px;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
 }
 
 .topbar__search-clear:hover {
-  background: #f3f6f9;
   color: #7e8299;
+}
+
+.topbar__search-empty {
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #b5b5c3;
+  line-height: 1.5;
 }
 
 .topbar__user {
