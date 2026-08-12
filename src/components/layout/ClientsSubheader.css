@@ -114,22 +114,22 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* Exportar fica na borda direita — ancora o tooltip à direita do botão */
+/* Exportar: tip centrado no botão, caixa um pouco à esquerda p/ sobrar espaço no canto */
 .clients-subheader__btn--export .clients-subheader__tooltip {
-  left: auto;
-  right: 0;
-  transform: translateX(0) translateY(4px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-62%) translateY(4px);
 }
 
 .clients-subheader__btn--export .clients-subheader__tooltip::after {
-  left: auto;
-  right: 12px;
-  transform: none;
+  left: 62%;
+  right: auto;
+  transform: translateX(-50%);
 }
 
 .clients-subheader__btn--export:hover .clients-subheader__tooltip,
 .clients-subheader__btn--export:focus-visible .clients-subheader__tooltip {
-  transform: translateX(0) translateY(0);
+  transform: translateX(-62%) translateY(0);
 }
 
 @media (max-width: 900px) {
