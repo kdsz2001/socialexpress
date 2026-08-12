@@ -38,8 +38,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 78px;
-  padding: 12px 6px 8px;
+  height: 70px;
+  padding: 10px 6px 6px;
   gap: 0;
 }
 
@@ -159,9 +159,9 @@
 }
 
 .sidebar.is-collapsed .sidebar__tie-toggle {
-  width: 36px;
-  height: 42px;
-  margin-top: -10px;
+  width: 34px;
+  height: 36px;
+  margin-top: -18px; /* sobe a gravatinha perto da gola */
   transform: rotate(0deg);
   background: transparent;
   z-index: 1;
@@ -178,15 +178,7 @@
 }
 
 .sidebar.is-collapsed .sidebar__necktie {
-  width: 13px;
-}
-
-.sidebar__tie-toggle:hover .necktie__chevrons path:nth-child(odd) {
-  stroke: #b8b9c8;
-}
-
-.sidebar__tie-toggle:hover .necktie__chevrons path:nth-child(even) {
-  stroke: #7a85ad;
+  width: 12px; /* um pouco menor = ponta sobe mais perto da gola */
 }
 
 /* Gola oficial por cima do crescente */
