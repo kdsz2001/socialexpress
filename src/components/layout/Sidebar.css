@@ -35,8 +35,8 @@
 
 .sidebar.is-collapsed .sidebar__brand {
   justify-content: center;
-  padding: 12px 8px 10px;
-  height: 76px;
+  padding: 12px 8px 6px;
+  height: 68px;
 }
 
 .sidebar__lockup {
@@ -98,7 +98,7 @@
   height: auto;
   display: block;
   position: relative;
-  z-index: 2;
+  z-index: 4; /* gola na frente da gravata no encaixe */
   object-fit: contain;
   user-select: none;
   pointer-events: none;
@@ -113,13 +113,14 @@
 }
 
 .sidebar.is-collapsed .sidebar__tie-dock {
-  height: 28px;
+  height: 20px;
 }
 
 /*
   Gravatinha = botão de recolher/expandir.
-  Expanded: à direita. Collapsed: encaixa sob a gola.
-  Easings X/Y diferentes criam arco natural no voo.
+  Sempre ancorada em left:50%; o deslocamento horizontal
+  é só via transform — assim o voo não “salta” enquanto a
+  largura da sidebar anima.
 */
 .sidebar__tie-toggle {
   position: absolute;
@@ -133,18 +134,18 @@
   color: #e8e8ef;
   background: transparent;
   border-radius: 8px;
-  /* Sempre via `left` (não `right`) para o voo interpolar sem salto */
   top: 50%;
-  left: calc(100% - 42px);
+  left: 50%;
   width: 30px;
   height: 38px;
-  transform: translate3d(0, -50%, 0) rotate(0deg) scale(1);
+  /* Empurrada para a direita no estado aberto */
+  transform: translate3d(calc(var(--sidebar-width) / 2 - 27px), -50%, 0)
+    rotate(0deg);
   transition:
     top 0.55s cubic-bezier(0.45, 0.05, 0.2, 1),
-    left 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     width 0.5s ease,
     height 0.5s ease,
-    transform 0.55s cubic-bezier(0.34, 1.2, 0.64, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     color 0.2s ease,
     background 0.2s ease;
 }
@@ -159,16 +160,13 @@
   outline-offset: 2px;
 }
 
-/* Encaixe perfeito sob a gola (estado recolhido) */
+/* Encaixe sob a gola (estado recolhido) */
 .sidebar__tie-toggle.is-docked {
-  top: 34px;
-  left: 50%;
+  top: 38px;
   width: 42px;
-  height: 42px;
-  transform: translate3d(-50%, 0, 0) rotate(0deg) scale(1);
+  height: 34px;
+  transform: translate3d(-50%, -50%, 0) rotate(0deg);
   background: transparent;
-  align-items: end;
-  padding-bottom: 2px;
 }
 
 .sidebar__tie-toggle.is-docked:hover {
@@ -176,7 +174,7 @@
 }
 
 .sidebar__necktie {
-  width: 13px;
+  width: 14px;
   height: auto;
   display: block;
   transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
@@ -184,12 +182,7 @@
 }
 
 .sidebar__tie-toggle.is-docked .sidebar__necktie {
-  width: 11px;
-  /* Sobe levemente para o U beijar o V da gola */
-  transform: translateY(-10px);
-  transition:
-    width 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.55s cubic-bezier(0.34, 1.15, 0.64, 1);
+  width: 13px;
 }
 
 .sidebar__nav {
