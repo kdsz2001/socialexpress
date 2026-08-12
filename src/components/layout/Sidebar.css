@@ -49,11 +49,23 @@
   gap: 7px;
   min-width: 0;
   white-space: nowrap;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sidebar__lockup--home {
+  cursor: pointer;
+}
+
+.sidebar__lockup--home:hover .sidebar__word,
+.sidebar__lockup--home:hover .sidebar__collar {
+  filter: brightness(1.08);
 }
 
 .sidebar.is-collapsed .sidebar__lockup {
   justify-content: center;
   pointer-events: none;
+  cursor: default;
 }
 
 .sidebar__word {
