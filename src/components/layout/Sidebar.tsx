@@ -11,10 +11,9 @@ import {
   Activity,
   Settings,
   BookOpen,
-  ChevronsLeft,
-  ChevronsRight,
 } from 'lucide-react'
 import { TieIcon } from '../icons/TieIcon'
+import { NecktieMark } from '../icons/NecktieMark'
 import './Sidebar.css'
 
 const navItems = [
@@ -41,31 +40,32 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside className={`sidebar ${collapsed ? 'is-collapsed' : ''}`}>
       <div className="sidebar__brand">
-        {collapsed ? (
-          <img
-            className="sidebar__mark sidebar__mark--solo"
-            src="/brand-mark-white.png"
-            alt="Social Express"
-          />
-        ) : (
-          <span className="sidebar__logo" aria-label="Social Express">
-            <span className="sidebar__logo-text">Social</span>
+        <div className="sidebar__lockup" aria-label="Social Express">
+          <span className="sidebar__word sidebar__word--social">Social</span>
+
+          <div className="sidebar__emblem">
             <img
-              className="sidebar__mark"
+              className="sidebar__collar"
               src="/brand-mark-white.png"
               alt=""
               aria-hidden="true"
+              draggable={false}
             />
-            <span className="sidebar__logo-text">Express</span>
-          </span>
-        )}
+            {/* Alvo visual do encaixe — a gravata anima até aqui */}
+            <span className="sidebar__tie-dock" aria-hidden="true" />
+          </div>
+
+          <span className="sidebar__word sidebar__word--express">Express</span>
+        </div>
+
         <button
           type="button"
-          className="sidebar__toggle"
+          className={`sidebar__tie-toggle${collapsed ? ' is-docked' : ''}`}
           onClick={onToggle}
           aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          aria-expanded={!collapsed}
         >
-          {collapsed ? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}
+          <NecktieMark className="sidebar__necktie" />
         </button>
       </div>
 
@@ -79,14 +79,18 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <NavLink
                   to={item.to}
                   end={isDashboard}
-                  className={({ isActive }) => {
-                    if (isDashboard || !isActive) return 'sidebar__link'
-                    return 'sidebar__link is-active'
-                  }}
-                  title={collapsed ? item.label : undefined}
+                  className={({ isActive }) =>
+                    [
+                      'sidebar__link',
+                      isDashboard ? 'sidebar__link--dashboard' : '',
+                      !isDashboard && isActive ? 'is-active' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')
+                  }
                 >
-                  <Icon size={18} strokeWidth={1.5} />
-                  {!collapsed && <span>{item.label}</span>}
+                  <Icon className="sidebar__icon" size={18} strokeWidth={1.5} />
+                  <span className="sidebar__label">{item.label}</span>
                 </NavLink>
               </li>
             )
