@@ -41,7 +41,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside className={`sidebar ${collapsed ? 'is-collapsed' : ''}`}>
       <div className="sidebar__brand">
-        {!collapsed && <span className="sidebar__logo">Clarial 2.0</span>}
+        {collapsed ? (
+          <img
+            className="sidebar__mark sidebar__mark--solo"
+            src="/brand-mark-white.png"
+            alt="Social Express"
+          />
+        ) : (
+          <span className="sidebar__logo" aria-label="Social Express">
+            <span className="sidebar__logo-text">Social</span>
+            <img
+              className="sidebar__mark"
+              src="/brand-mark-white.png"
+              alt=""
+              aria-hidden="true"
+            />
+            <span className="sidebar__logo-text">Express</span>
+          </span>
+        )}
         <button
           type="button"
           className="sidebar__toggle"

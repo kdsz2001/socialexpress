@@ -1,4 +1,4 @@
-# Clarial 2.0
+# Social Express
 
 Sistema de gestão com dashboard para provas, retiradas, devoluções, resultados financeiros, contas e agenda.
 

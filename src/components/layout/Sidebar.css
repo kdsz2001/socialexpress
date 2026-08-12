@@ -20,25 +20,55 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  gap: 6px;
+  padding: 0 12px 0 14px;
   flex-shrink: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .sidebar.is-collapsed .sidebar__brand {
   justify-content: center;
+  gap: 0;
   padding: 0 8px;
+  flex-direction: column;
+  height: auto;
+  min-height: var(--topbar-height);
+  padding-top: 12px;
+  padding-bottom: 8px;
+}
+
+.sidebar.is-collapsed .sidebar__toggle {
+  margin-top: 4px;
 }
 
 .sidebar__logo {
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  background: var(--brand-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
   white-space: nowrap;
+}
+
+.sidebar__logo-text {
+  font-family: 'Montserrat', 'Poppins', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.sidebar__mark {
+  width: 15px;
+  height: auto;
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.sidebar__mark--solo {
+  width: 24px;
 }
 
 .sidebar__toggle {

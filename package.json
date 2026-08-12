@@ -1,7 +1,7 @@
 {
-  "name": "clarial-2",
+  "name": "social-express",
   "private": true,
-  "version": "2.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
