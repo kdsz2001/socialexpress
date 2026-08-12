@@ -33,13 +33,13 @@
     gap 0.45s ease;
 }
 
-/* Fechado: empilha gola + gravata num único dock centralizado */
+/* Fechado: área da marca centralizada */
 .sidebar.is-collapsed .sidebar__brand {
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 70px;
-  padding: 8px 6px 6px;
+  padding: 10px 6px 6px;
   gap: 0;
 }
 
@@ -104,18 +104,20 @@
   pointer-events: none;
 }
 
-/* ——— Dock fechado: gola + gravata no mesmo eixo ——— */
+/* ——— Dock fechado: flex (espaçamento anterior), eixo único ——— */
 .sidebar__dock {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 40px;
-  height: 52px;
+  height: auto;
   margin: 0;
-  padding: 0;
+  padding: 2px 0 4px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
-  display: block;
   flex-shrink: 0;
 }
 
@@ -129,25 +131,17 @@
 }
 
 .sidebar__dock .sidebar__emblem {
-  position: absolute;
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 30px;
+  width: 29px;
   height: 18px;
   z-index: 2;
 }
 
 .sidebar__dock .sidebar__necktie--docked {
-  position: absolute;
-  top: 12px;
-  left: 50%;
-  /* -50% centra; +1px corrige peso óptico da silhueta */
-  transform: translateX(calc(-50% + 1px));
-  width: 15px;
-  height: auto;
-  z-index: 1;
   display: block;
+  width: 14px;
+  height: auto;
+  margin-top: -10px; /* mesmo espaço/encaixe que já tínhamos */
+  z-index: 1;
   pointer-events: none;
 }
 
