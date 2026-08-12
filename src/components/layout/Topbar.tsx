@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Search, Menu, X } from 'lucide-react'
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { ProfileDrawer } from './ProfileDrawer'
 import './Topbar.css'
 
@@ -8,8 +8,11 @@ type TopbarProps = {
   onMenuClick?: () => void
 }
 
+type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
+
 export function Topbar({ onMenuClick }: TopbarProps) {
   const location = useLocation()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -18,9 +21,16 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const searchId = useId()
 
-  const isClientsPage = location.pathname === '/clientes'
-  const clientsTab =
-    searchParams.get('tab') === 'aniversariantes' ? 'aniversariantes' : 'todos'
+  const isClientsSection = location.pathname.startsWith('/clientes')
+  const isClientCreate = location.pathname === '/clientes/cadastrar'
+  const paramTab = searchParams.get('tab')
+  const clientsTab: ClientsTab = isClientCreate
+    ? 'todos'
+    : paramTab === 'aniversariantes'
+      ? 'aniversariantes'
+      : paramTab === 'whatsapp'
+        ? 'whatsapp'
+        : 'todos'
 
   const hasQuery = query.trim().length > 0
   // Futuro: substituir por resultados reais de pedido/produto/cliente
@@ -55,12 +65,21 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     setProfileOpen(true)
   }
 
-  const setClientsTab = (tab: 'todos' | 'aniversariantes') => {
+  const setClientsTab = (tab: ClientsTab) => {
     if (tab === 'todos') {
-      setSearchParams({}, { replace: true })
-    } else {
-      setSearchParams({ tab }, { replace: true })
+      navigate('/clientes')
+      return
     }
+    if (tab === 'aniversariantes') {
+      navigate('/clientes?tab=aniversariantes')
+      return
+    }
+    // WhatsApp em massa — disponível na área de clientes (mesmo fluxo do Clarial)
+    if (isClientCreate) {
+      navigate('/clientes?tab=whatsapp')
+      return
+    }
+    setSearchParams({ tab: 'whatsapp' }, { replace: true })
   }
 
   return (
@@ -74,7 +93,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         <Menu size={22} strokeWidth={2} />
       </button>
 
-      {isClientsPage && (
+      {isClientsSection && (
         <div className="topbar__tabs" role="tablist" aria-label="Clientes">
           <button
             type="button"
@@ -93,6 +112,15 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             onClick={() => setClientsTab('aniversariantes')}
           >
             Aniversariantes
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={clientsTab === 'whatsapp'}
+            className={`topbar__tab${clientsTab === 'whatsapp' ? ' is-active' : ''}`}
+            onClick={() => setClientsTab('whatsapp')}
+          >
+            WhatsApp em massa
           </button>
         </div>
       )}

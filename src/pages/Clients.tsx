@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Search, Plus, CalendarDays, ArrowUp } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   DATE_PRESETS,
   DateRangePicker,
@@ -13,9 +13,14 @@ import './Clients.css'
 type PickerMode = 'menu' | 'calendar'
 
 export function Clients() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const tab =
-    searchParams.get('tab') === 'aniversariantes' ? 'aniversariantes' : 'todos'
+    searchParams.get('tab') === 'aniversariantes'
+      ? 'aniversariantes'
+      : searchParams.get('tab') === 'whatsapp'
+        ? 'whatsapp'
+        : 'todos'
   const [query, setQuery] = useState('')
   const [dateOpen, setDateOpen] = useState(false)
   const [pickerMode, setPickerMode] = useState<PickerMode>('menu')
@@ -163,14 +168,23 @@ export function Clients() {
                 </div>
               )}
             </div>
-          ) : (
-            <button type="button" className="clients__add">
+          ) : tab === 'whatsapp' ? null : (
+            <button
+              type="button"
+              className="clients__add"
+              onClick={() => navigate('/clientes/cadastrar')}
+            >
               <Plus size={16} strokeWidth={2.5} />
               Cadastrar cliente
             </button>
           )}
         </div>
 
+        {tab === 'whatsapp' ? (
+          <div className="clients__empty-panel">
+            <p>Envio em massa de WhatsApp em breve.</p>
+          </div>
+        ) : (
         <div className="clients__table-wrap">
           <table className="clients__table">
             <thead>
@@ -202,6 +216,7 @@ export function Clients() {
             </tbody>
           </table>
         </div>
+        )}
       </section>
     </div>
   )

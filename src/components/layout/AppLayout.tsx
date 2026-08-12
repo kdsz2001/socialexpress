@@ -9,6 +9,7 @@ import './AppLayout.css'
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
   '/clientes': 'Clientes',
+  '/clientes/cadastrar': 'Cadastro de clientes',
   '/agenda': 'Agenda',
   '/eventos': 'Eventos',
   '/produtos': 'Produtos',
@@ -86,7 +87,7 @@ export function AppLayout() {
       )}
       <div className="app-main">
         <Topbar onMenuClick={toggle} />
-        {location.pathname === '/clientes' && <ClientsSubheader />}
+        {location.pathname.startsWith('/clientes') && <ClientsSubheader />}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
             <Outlet />

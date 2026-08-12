@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { Dashboard } from './pages/Dashboard'
 import { Clients } from './pages/Clients'
+import { ClientCreate } from './pages/ClientCreate'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
@@ -23,6 +24,7 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="/clientes" element={<Clients />} />
+        <Route path="/clientes/cadastrar" element={<ClientCreate />} />
         {pages.map((page) => (
           <Route
             key={page.path}
