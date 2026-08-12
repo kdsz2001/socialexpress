@@ -124,7 +124,7 @@
     scaleY afina a silhueta; depois rotate(90°) deita como seta ←
     (ponta + chevrons <<<).
   */
-  transform: rotate(90deg) scaleY(0.72);
+  transform: rotate(90deg) scaleY(0.68);
   transition:
     transform 0.5s cubic-bezier(0.33, 1, 0.32, 1),
     margin 0.5s cubic-bezier(0.33, 1, 0.32, 1),
@@ -157,7 +157,7 @@
 
 .sidebar__necktie {
   display: block;
-  width: 15px;
+  width: 16px;
   height: auto;
   color: #ffffff;
 }
@@ -173,7 +173,7 @@
 }
 
 .sidebar__tie-toggle:hover .necktie__chevrons {
-  fill: #585866;
+  stroke: #4a4a58;
 }
 
 /* Gola por cima do crescente no encaixe */
