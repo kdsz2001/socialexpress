@@ -2,29 +2,31 @@
   background: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  padding: 1.75rem;
+  padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  box-sizing: border-box;
 }
 
 .accounts-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.35rem;
+  margin-bottom: 1.5rem;
 }
 
 .accounts-card__title {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #181c32;
   line-height: 1.2;
+  margin: 0;
 }
 
 .accounts-card__icon {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -32,7 +34,7 @@
 }
 
 .accounts-card__icon-mark {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -50,33 +52,33 @@
 .accounts-card__body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: auto;
+  gap: 1.15rem;
 }
 
 .accounts-card__metric {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  min-height: 2.5rem;
+  gap: 14px;
+  min-height: 2.75rem;
 }
 
 .accounts-card__label {
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .accounts-card__value {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   background: #f3f6f9;
   border-radius: 0.42rem;
-  padding: 0.55rem 0.9rem;
-  min-width: 6rem;
+  padding: 0.65rem 1rem;
+  min-width: 6.5rem;
   text-align: center;
   line-height: 1.2;
+  box-sizing: border-box;
 }
 
 .accounts-card--payable .accounts-card__value {

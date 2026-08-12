@@ -2,47 +2,50 @@
   background: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  padding: 1.75rem;
+  padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  box-sizing: border-box;
 }
 
 .results-card__title {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #181c32;
-  margin-bottom: 1.25rem;
+  margin: 0 0 1.5rem;
   line-height: 1.2;
 }
 
 .results-card__list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: auto;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .results-card__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  min-height: 2.5rem;
+  gap: 14px;
+  min-height: 2.75rem;
 }
 
 .results-card__label {
   display: inline-flex;
   align-items: center;
-  gap: 0.85rem;
-  font-size: 1rem;
+  gap: 1rem;
+  font-size: 1.05rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .results-card__icon {
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
   border-radius: 0.42rem;
   background: #c9f7f5;
   color: #1bc5bd;
@@ -52,19 +55,20 @@
 }
 
 .results-card__icon svg {
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .results-card__value {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #7e8299;
   white-space: nowrap;
   background: #f3f6f9;
   border-radius: 0.42rem;
-  padding: 0.55rem 0.9rem;
-  min-width: 6rem;
+  padding: 0.65rem 1rem;
+  min-width: 6.5rem;
   text-align: center;
   line-height: 1.2;
+  box-sizing: border-box;
 }
