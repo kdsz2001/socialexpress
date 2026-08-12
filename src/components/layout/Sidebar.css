@@ -140,7 +140,7 @@
   display: block;
   width: 16px; /* tamanho original da gravata */
   height: auto;
-  margin-top: -10px; /* encaixe sob a gola */
+  margin-top: -4px; /* separa um pouco da gola (não grudada) */
   z-index: 1;
   pointer-events: none;
 }
