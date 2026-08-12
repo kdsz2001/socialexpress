@@ -1,10 +1,10 @@
 import { Routes, Route } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { Dashboard } from './pages/Dashboard'
+import { Clients } from './pages/Clients'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
-  { path: '/clientes', title: 'Clientes' },
   { path: '/agenda', title: 'Agenda' },
   { path: '/eventos', title: 'Eventos' },
   { path: '/produtos', title: 'Produtos' },
@@ -22,6 +22,7 @@ export default function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<Dashboard />} />
+        <Route path="/clientes" element={<Clients />} />
         {pages.map((page) => (
           <Route
             key={page.path}
