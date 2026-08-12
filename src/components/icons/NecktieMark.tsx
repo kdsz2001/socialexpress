@@ -26,6 +26,7 @@ export function NecktieMark({
   return (
     <svg
       viewBox="0 0 40 64"
+      preserveAspectRatio="xMidYMid meet"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       data-docked={docked ? 'true' : 'false'}

@@ -33,15 +33,16 @@
     gap 0.45s ease;
 }
 
-/* Fechado: área da marca centralizada e um pouco mais baixa */
+/* Fechado: px pares + stack fixo (sem drift no zoom) */
 .sidebar.is-collapsed .sidebar__brand {
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  width: 70px;
   height: 70px;
   padding: 16px 0 6px;
   gap: 0;
+  box-sizing: border-box;
 }
 
 .sidebar__lockup {
@@ -105,13 +106,12 @@
   pointer-events: none;
 }
 
-/* ——— Dock fechado: flex (espaçamento anterior), eixo único ——— */
+/* ——— Dock fechado: larguras pares / altura inteira (zoom-stable) ——— */
 .sidebar__dock {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  width: 70px;
   height: auto;
   margin: 0;
   padding: 2px 0 4px;
@@ -136,20 +136,30 @@
   outline-offset: 2px;
 }
 
+.sidebar__dock-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 28px; /* par: (70-28)/2 = 21px exato */
+  flex-shrink: 0;
+}
+
 .sidebar__dock .sidebar__emblem {
-  width: 29px;
+  width: 28px;
   height: 18px;
-  margin: 0 auto;
+  margin: 0;
   z-index: 2;
 }
 
 .sidebar__dock .sidebar__necktie--docked {
   display: block;
-  width: 16px; /* tamanho original da gravata */
-  height: auto;
-  margin: -4px auto 0; /* gap ok; centro no mesmo eixo da gola */
+  width: 16px; /* par: (28-16)/2 = 6px exato */
+  height: 26px; /* inteiro — evita arredondamento no zoom */
+  margin: -4px 0 0;
+  flex-shrink: 0;
   z-index: 1;
   pointer-events: none;
+  overflow: visible;
 }
 
 /*

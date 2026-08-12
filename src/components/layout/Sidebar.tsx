@@ -72,10 +72,15 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             aria-label="Expandir menu"
             aria-expanded={false}
           >
-            <span className="sidebar__emblem" aria-hidden="true">
-              <span className="sidebar__collar" />
+            <span className="sidebar__dock-stack">
+              <span className="sidebar__emblem" aria-hidden="true">
+                <span className="sidebar__collar" />
+              </span>
+              <NecktieMark
+                className="sidebar__necktie sidebar__necktie--docked"
+                docked
+              />
             </span>
-            <NecktieMark className="sidebar__necktie sidebar__necktie--docked" docked />
           </button>
         ) : (
           <>
