@@ -64,6 +64,7 @@
 
 .sidebar.is-collapsed .sidebar__lockup {
   justify-content: center;
+  gap: 0;
   pointer-events: none;
   cursor: default;
 }
@@ -85,6 +86,7 @@
 }
 
 .sidebar.is-collapsed .sidebar__word {
+  display: none;
   opacity: 0;
   max-width: 0;
 }
@@ -129,8 +131,8 @@
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -140,7 +142,8 @@
   cursor: pointer;
   color: var(--brand-blue);
   background: transparent;
-  transform: rotate(90deg);
+  /* translateX antes do rotate sobe a gravata na horizontal (alinha com a logo) */
+  transform: rotate(90deg) translateX(-1px);
   transition:
     transform 0.5s cubic-bezier(0.33, 1, 0.32, 1),
     width 0.4s ease,
@@ -159,10 +162,11 @@
 }
 
 .sidebar.is-collapsed .sidebar__tie-toggle {
-  width: 34px;
-  height: 36px;
-  margin-top: -10px; /* desce bem pouco em relação à gola */
-  transform: rotate(0deg);
+  width: 30px;
+  height: 34px;
+  margin-top: -10px;
+  /* corrige encaixe um pouco à esquerda sob a gola */
+  transform: translateX(1px);
   background: transparent;
   z-index: 1;
 }
@@ -173,7 +177,7 @@
 
 .sidebar__necktie {
   display: block;
-  width: 15px;
+  width: 18px; /* altura visual ≈ tamanho da logo quando rotacionada */
   height: auto;
 }
 
@@ -198,7 +202,7 @@
 }
 
 .sidebar.is-collapsed .sidebar__necktie {
-  width: 14px; /* aumento mínimo */
+  width: 16px; /* proporção com a gola fechada */
 }
 
 /* Gola oficial por cima do crescente */
