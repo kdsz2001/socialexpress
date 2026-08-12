@@ -8,8 +8,9 @@ type NecktieMarkProps = SVGProps<SVGSVGElement> & {
 const BRAND_BLUE = '#3699FF'
 
 /**
- * Gravata no modelo da logo — crescente U → corpo → ponta,
- * azul Clarial, fade na ponta (sem riscos internos).
+ * Gravata no modelo da logo — azul Clarial, sem riscos.
+ * Aberta: preenchimento sólido.
+ * Fechada: fade na ponta para encaixar na gola oficial.
  */
 export function NecktieMark({
   className,
@@ -32,24 +33,26 @@ export function NecktieMark({
     >
       {title ? <title>{title}</title> : null}
 
-      <defs>
-        <linearGradient
-          id={gid}
-          x1="20"
-          y1="4"
-          x2="20"
-          y2="70"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor={BRAND_BLUE} stopOpacity="1" />
-          <stop offset="40%" stopColor={BRAND_BLUE} stopOpacity="1" />
-          <stop offset="70%" stopColor={BRAND_BLUE} stopOpacity="0.55" />
-          <stop offset="100%" stopColor={BRAND_BLUE} stopOpacity="0" />
-        </linearGradient>
-      </defs>
+      {docked ? (
+        <defs>
+          <linearGradient
+            id={gid}
+            x1="20"
+            y1="4"
+            x2="20"
+            y2="70"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor={BRAND_BLUE} stopOpacity="1" />
+            <stop offset="45%" stopColor={BRAND_BLUE} stopOpacity="1" />
+            <stop offset="75%" stopColor={BRAND_BLUE} stopOpacity="0.5" />
+            <stop offset="100%" stopColor={BRAND_BLUE} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+      ) : null}
 
       <path
-        fill={`url(#${gid})`}
+        fill={docked ? `url(#${gid})` : BRAND_BLUE}
         d="M8.5 4.8Q20 17.5 31.5 4.8L28.8 15.2 27.8 22.5 28.6 34 29.5 50 20 67.5 10.5 50 11.4 34 12.2 22.5 11.2 15.2Z"
       />
     </svg>
