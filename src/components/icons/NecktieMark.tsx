@@ -5,15 +5,10 @@ type NecktieMarkProps = SVGProps<SVGSVGElement> & {
   docked?: boolean
 }
 
-/** Silhueta fina da logo */
-const D_FULL =
-  'M12 4.2Q20 15.2 28 4.2L27 11 25.6 16.5 24.5 20.5 25.4 27 27.2 39 27.6 51 20 61 12.4 51 12.8 39 14.6 27 15.5 20.5 14.4 16.5 13 11Z'
-
-const D_DOCKED =
-  'M12 4.2Q20 15.2 28 4.2L26.6 13 27.2 28 27.6 51 20 61 12.4 51 12.8 28 13.4 13Z'
-
 /**
- * Gravata-seta: branca + chevrons cinza bem marcados (<<<).
+ * Gravata-seta profissional.
+ * Aberta: horizontal nativa, fina, ponta ← + nó + corpo + crescente → + <<< .
+ * Fechada: vertical fina no V da gola.
  */
 export function NecktieMark({
   className,
@@ -21,43 +16,49 @@ export function NecktieMark({
   docked = false,
   ...props
 }: NecktieMarkProps) {
+  if (docked) {
+    return (
+      <svg
+        viewBox="0 0 32 56"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+        className={className}
+        data-docked="true"
+        aria-hidden={title ? undefined : true}
+        role={title ? 'img' : undefined}
+        {...props}
+      >
+        {title ? <title>{title}</title> : null}
+        {/* Crescente → corpo fino → ponta */}
+        <path d="M9.5 3.5Q16 14 22.5 3.5L21 12.5 21.5 26 22 46 16 54.5 10 46 10.5 26 11 12.5Z" />
+      </svg>
+    )
+  }
+
   return (
     <svg
-      viewBox="0 0 40 64"
+      viewBox="0 0 72 18"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      data-docked={docked ? 'true' : 'false'}
+      data-docked="false"
       aria-hidden={title ? undefined : true}
       role={title ? 'img' : undefined}
       {...props}
     >
       {title ? <title>{title}</title> : null}
 
-      <path
-        className="necktie__full"
-        style={{ opacity: docked ? 0 : 1 }}
-        d={D_FULL}
-      />
-      <path
-        className="necktie__docked"
-        style={{ opacity: docked ? 1 : 0 }}
-        d={D_DOCKED}
-      />
+      {/*
+        Silhueta de gravata deitada (fina):
+        ponta ← · nó losango · corpo · crescente →
+      */}
+      <path d="M1.5 9 13 2.8 16.2 5.6 18.8 3.4 22.5 5.8H50L59.5 1.6Q49.5 9 59.5 16.4L50 12.2H22.5L18.8 14.6 16.2 12.4 13 15.2Z" />
 
-      {/* Traços cinza em V — bem grossos para ler em ~15px */}
-      <g
-        className="necktie__chevrons"
-        fill="none"
-        stroke="#5c5c6a"
-        strokeWidth="3.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={{ opacity: docked ? 0.2 : 1 }}
-      >
-        <path d="M14.8 25.5 20 30.8 25.2 25.5" />
-        <path d="M15.2 33 20 38 24.8 33" />
-        <path d="M15.8 40.5 20 45 24.2 40.5" />
+      {/* Chevrons <<< preenchidos — legíveis em tamanho pequeno */}
+      <g className="necktie__chevrons" fill="#4a4a58">
+        <path d="M28.8 5.2 24.2 9 28.8 12.8 27.1 12.8 23.6 9 27.1 5.2Z" />
+        <path d="M36.2 5.2 31.6 9 36.2 12.8 34.5 12.8 31 9 34.5 5.2Z" />
+        <path d="M43.6 5.2 39 9 43.6 12.8 41.9 12.8 38.4 9 41.9 5.2Z" />
       </g>
     </svg>
   )

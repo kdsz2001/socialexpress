@@ -101,35 +101,29 @@
 }
 
 /*
-  Gravata/seta em fluxo do flex.
-  Aberta: deitada (-90°) = seta ← à direita do wordmark.
-  Fechada: vertical, puxada para o V da gola.
+  Gravata-seta em fluxo do flex.
+  Aberta: SVG horizontal nativo (seta ←).
+  Fechada: SVG vertical encaixado na gola.
 */
 .sidebar__tie-toggle {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 44px;
-  height: 36px;
+  width: 52px;
+  height: 28px;
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   display: grid;
   place-items: center;
   cursor: pointer;
   color: #ffffff;
   background: transparent;
-  /*
-    scaleY afina a silhueta; depois rotate(90°) deita como seta ←
-    (ponta + chevrons <<<).
-  */
-  transform: rotate(90deg) scaleY(0.68);
   transition:
-    transform 0.5s cubic-bezier(0.33, 1, 0.32, 1),
-    margin 0.5s cubic-bezier(0.33, 1, 0.32, 1),
     width 0.4s ease,
     height 0.4s ease,
+    margin 0.45s cubic-bezier(0.33, 1, 0.32, 1),
     background 0.15s ease;
 }
 
@@ -143,10 +137,9 @@
 }
 
 .sidebar.is-collapsed .sidebar__tie-toggle {
-  width: 40px;
-  height: 36px;
+  width: 34px;
+  height: 32px;
   margin-top: -8px;
-  transform: rotate(0deg) scaleY(1);
   background: transparent;
   z-index: 1;
 }
@@ -157,23 +150,22 @@
 
 .sidebar__necktie {
   display: block;
-  width: 16px;
+  width: 42px;
   height: auto;
   color: #ffffff;
 }
 
-.sidebar__necktie .necktie__full,
-.sidebar__necktie .necktie__docked,
 .sidebar__necktie .necktie__chevrons {
-  transition: opacity 0.35s ease;
+  transition: fill 0.15s ease;
 }
 
 .sidebar.is-collapsed .sidebar__necktie {
-  width: 11px;
+  width: 10px;
+  height: auto;
 }
 
 .sidebar__tie-toggle:hover .necktie__chevrons {
-  stroke: #4a4a58;
+  fill: #3f3f4c;
 }
 
 /* Gola por cima do crescente no encaixe */
