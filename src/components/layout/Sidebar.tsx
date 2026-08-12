@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { TieIcon } from '../icons/TieIcon'
 import { NecktieMark } from '../icons/NecktieMark'
+import { CollarMark } from '../icons/CollarMark'
 import './Sidebar.css'
 
 const navItems = [
@@ -44,21 +45,21 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <span className="sidebar__word sidebar__word--social">Social</span>
 
           <div className="sidebar__emblem" aria-hidden="true">
-            <img
-              className="sidebar__collar"
-              src="/brand-mark-white.png"
-              alt=""
-              draggable={false}
-            />
+            {collapsed ? (
+              <CollarMark className="sidebar__collar sidebar__collar--dock" docked />
+            ) : (
+              <img
+                className="sidebar__collar"
+                src="/brand-mark-white.png"
+                alt=""
+                draggable={false}
+              />
+            )}
           </div>
 
           <span className="sidebar__word sidebar__word--express">Express</span>
         </div>
 
-        {/*
-          Uma só gravata: aberta = seta à direita (horizontal);
-          fechada = encaixa sob a gola (vertical).
-        */}
         <button
           type="button"
           className="sidebar__tie-toggle"

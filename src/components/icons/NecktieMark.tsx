@@ -1,4 +1,4 @@
-import type { SVGProps } from 'react'
+import { useId, type SVGProps } from 'react'
 
 type NecktieMarkProps = SVGProps<SVGSVGElement> & {
   title?: string
@@ -6,9 +6,8 @@ type NecktieMarkProps = SVGProps<SVGSVGElement> & {
 }
 
 /**
- * Gravata-seta profissional.
- * Aberta: horizontal nativa, fina, ponta ← + nó + corpo + crescente → + <<< .
- * Fechada: vertical fina no V da gola.
+ * Gravata no modelo exato da logo:
+ * crescente U → corpo → ponta, fade na ponta + linhas de seta.
  */
 export function NecktieMark({
   className,
@@ -16,49 +15,56 @@ export function NecktieMark({
   docked = false,
   ...props
 }: NecktieMarkProps) {
-  if (docked) {
-    return (
-      <svg
-        viewBox="0 0 32 56"
-        fill="currentColor"
-        xmlns="http://www.w3.org/2000/svg"
-        className={className}
-        data-docked="true"
-        aria-hidden={title ? undefined : true}
-        role={title ? 'img' : undefined}
-        {...props}
-      >
-        {title ? <title>{title}</title> : null}
-        {/* Crescente → corpo fino → ponta */}
-        <path d="M9.5 3.5Q16 14 22.5 3.5L21 12.5 21.5 26 22 46 16 54.5 10 46 10.5 26 11 12.5Z" />
-      </svg>
-    )
-  }
+  const reactId = useId().replace(/:/g, '')
+  const gid = `tieFade-${reactId}`
 
   return (
     <svg
-      viewBox="0 0 72 18"
-      fill="currentColor"
+      viewBox="0 0 40 72"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      data-docked="false"
+      data-docked={docked ? 'true' : 'false'}
       aria-hidden={title ? undefined : true}
       role={title ? 'img' : undefined}
       {...props}
     >
       {title ? <title>{title}</title> : null}
 
-      {/*
-        Silhueta de gravata deitada (fina):
-        ponta ← · nó losango · corpo · crescente →
-      */}
-      <path d="M1.5 9 13 2.8 16.2 5.6 18.8 3.4 22.5 5.8H50L59.5 1.6Q49.5 9 59.5 16.4L50 12.2H22.5L18.8 14.6 16.2 12.4 13 15.2Z" />
+      <defs>
+        <linearGradient
+          id={gid}
+          x1="20"
+          y1="4"
+          x2="20"
+          y2="70"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+          <stop offset="48%" stopColor="#ffffff" stopOpacity="1" />
+          <stop offset="72%" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
 
-      {/* Chevrons <<< preenchidos — legíveis em tamanho pequeno */}
-      <g className="necktie__chevrons" fill="#4a4a58">
-        <path d="M28.8 5.2 24.2 9 28.8 12.8 27.1 12.8 23.6 9 27.1 5.2Z" />
-        <path d="M36.2 5.2 31.6 9 36.2 12.8 34.5 12.8 31 9 34.5 5.2Z" />
-        <path d="M43.6 5.2 39 9 43.6 12.8 41.9 12.8 38.4 9 41.9 5.2Z" />
+      {/* Modelo exato: crescente no topo + corpo + ponta */}
+      <path
+        fill={`url(#${gid})`}
+        d="M8.5 4.8Q20 17.5 31.5 4.8L28.8 15.2 27.8 22.5 28.6 34 29.5 50 20 67.5 10.5 50 11.4 34 12.2 22.5 11.2 15.2Z"
+      />
+
+      {/* Linhas de seta cinza bem marcadas */}
+      <g
+        className="necktie__chevrons"
+        fill="none"
+        stroke="#6e6e7c"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={docked ? 0.65 : 1}
+      >
+        <path d="M14.5 26.5 20 32 25.5 26.5" />
+        <path d="M14.8 35.5 20 40.8 25.2 35.5" />
+        <path d="M15.4 44.5 20 49.5 24.6 44.5" />
       </g>
     </svg>
   )
