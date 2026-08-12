@@ -33,13 +33,13 @@
     gap 0.45s ease;
 }
 
-/* Fechado: área da marca centralizada */
+/* Fechado: área da marca centralizada e um pouco mais baixa */
 .sidebar.is-collapsed .sidebar__brand {
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   height: 70px;
-  padding: 10px 6px 6px;
+  padding: 16px 6px 6px;
   gap: 0;
 }
 
@@ -138,9 +138,9 @@
 
 .sidebar__dock .sidebar__necktie--docked {
   display: block;
-  width: 14px;
+  width: 16px; /* tamanho original da gravata */
   height: auto;
-  margin-top: -10px; /* mesmo espaço/encaixe que já tínhamos */
+  margin-top: -10px; /* encaixe sob a gola */
   z-index: 1;
   pointer-events: none;
 }
