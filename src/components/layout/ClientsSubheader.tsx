@@ -23,7 +23,7 @@ export function ClientsSubheader() {
         </button>
         <button
           type="button"
-          className="clients-subheader__btn"
+          className="clients-subheader__btn clients-subheader__btn--export"
           aria-label="Exportar clientes"
         >
           <Download size={18} strokeWidth={2} />

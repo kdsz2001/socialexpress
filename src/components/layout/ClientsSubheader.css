@@ -114,6 +114,24 @@
   transform: translateX(-50%) translateY(0);
 }
 
+/* Exportar fica na borda direita — ancora o tooltip à direita do botão */
+.clients-subheader__btn--export .clients-subheader__tooltip {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(4px);
+}
+
+.clients-subheader__btn--export .clients-subheader__tooltip::after {
+  left: auto;
+  right: 12px;
+  transform: none;
+}
+
+.clients-subheader__btn--export:hover .clients-subheader__tooltip,
+.clients-subheader__btn--export:focus-visible .clients-subheader__tooltip {
+  transform: translateX(0) translateY(0);
+}
+
 @media (max-width: 900px) {
   .clients-subheader {
     padding: 14px 15px;
