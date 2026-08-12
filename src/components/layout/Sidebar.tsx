@@ -65,29 +65,40 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <aside className={`sidebar ${collapsed ? 'is-collapsed' : ''}`}>
       <div className="sidebar__brand">
         {collapsed ? (
-          <div className="sidebar__lockup" aria-label="Social Express">
-            <BrandMark />
-          </div>
-        ) : (
-          <a
-            href="/"
-            className="sidebar__lockup sidebar__lockup--home"
-            aria-label="Social Express — atualizar página"
-            onClick={handleBrandClick}
+          <button
+            type="button"
+            className="sidebar__dock"
+            onClick={onToggle}
+            aria-label="Expandir menu"
+            aria-expanded={false}
           >
-            <BrandMark />
-          </a>
-        )}
+            <span className="sidebar__emblem" aria-hidden="true">
+              <span className="sidebar__collar" />
+            </span>
+            <NecktieMark className="sidebar__necktie sidebar__necktie--docked" docked />
+          </button>
+        ) : (
+          <>
+            <a
+              href="/"
+              className="sidebar__lockup sidebar__lockup--home"
+              aria-label="Social Express — atualizar página"
+              onClick={handleBrandClick}
+            >
+              <BrandMark />
+            </a>
 
-        <button
-          type="button"
-          className="sidebar__tie-toggle"
-          onClick={onToggle}
-          aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
-          aria-expanded={!collapsed}
-        >
-          <NecktieMark className="sidebar__necktie" docked={collapsed} />
-        </button>
+            <button
+              type="button"
+              className="sidebar__tie-toggle"
+              onClick={onToggle}
+              aria-label="Recolher menu"
+              aria-expanded
+            >
+              <NecktieMark className="sidebar__necktie" docked={false} />
+            </button>
+          </>
+        )}
       </div>
 
       <nav className="sidebar__nav" aria-label="Menu principal">

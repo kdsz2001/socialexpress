@@ -33,13 +33,13 @@
     gap 0.45s ease;
 }
 
-/* Fechado: empilha gola + gravata */
+/* Fechado: empilha gola + gravata num único dock centralizado */
 .sidebar.is-collapsed .sidebar__brand {
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 70px;
-  padding: 10px 6px 6px;
+  padding: 8px 6px 6px;
   gap: 0;
 }
 
@@ -62,13 +62,6 @@
   filter: brightness(1.08);
 }
 
-.sidebar.is-collapsed .sidebar__lockup {
-  justify-content: center;
-  gap: 0;
-  pointer-events: none;
-  cursor: default;
-}
-
 .sidebar__word {
   font-family: 'Montserrat', 'Poppins', sans-serif;
   font-size: 1.06rem;
@@ -85,12 +78,6 @@
     max-width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.sidebar.is-collapsed .sidebar__word {
-  display: none;
-  opacity: 0;
-  max-width: 0;
-}
-
 .sidebar__emblem {
   flex-shrink: 0;
   width: 21px;
@@ -105,11 +92,6 @@
     height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.sidebar.is-collapsed .sidebar__emblem {
-  width: 29px;
-  height: 18px;
-}
-
 /* Gola oficial (máscara do brand-mark) no azul Clarial */
 .sidebar__collar {
   display: block;
@@ -122,10 +104,56 @@
   pointer-events: none;
 }
 
+/* ——— Dock fechado: gola + gravata no mesmo eixo ——— */
+.sidebar__dock {
+  position: relative;
+  width: 40px;
+  height: 52px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+  flex-shrink: 0;
+}
+
+.sidebar__dock:hover {
+  background: rgba(54, 153, 255, 0.08);
+}
+
+.sidebar__dock:focus-visible {
+  outline: 2px solid rgba(54, 153, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.sidebar__dock .sidebar__emblem {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 18px;
+  z-index: 2;
+}
+
+.sidebar__dock .sidebar__necktie--docked {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  /* -50% centra; +1px corrige peso óptico da silhueta */
+  transform: translateX(calc(-50% + 1px));
+  width: 15px;
+  height: auto;
+  z-index: 1;
+  display: block;
+  pointer-events: none;
+}
+
 /*
   Gravata azul Clarial (modelo da logo).
   Aberta: gira 90° → seta ← .
-  Fechada: vertical encaixada no V da gola oficial.
 */
 .sidebar__tie-toggle {
   position: relative;
@@ -161,20 +189,6 @@
   outline-offset: 2px;
 }
 
-.sidebar.is-collapsed .sidebar__tie-toggle {
-  width: 30px;
-  height: 34px;
-  margin-top: -10px;
-  /* corrige encaixe um pouco à esquerda sob a gola */
-  transform: translateX(1px);
-  background: transparent;
-  z-index: 1;
-}
-
-.sidebar.is-collapsed .sidebar__tie-toggle:hover {
-  background: rgba(54, 153, 255, 0.08);
-}
-
 .sidebar__necktie {
   display: block;
   width: 18px; /* altura visual ≈ tamanho da logo quando rotacionada */
@@ -199,15 +213,6 @@
 
 .sidebar__necktie .necktie-mark__idle {
   transition: opacity 0.2s ease;
-}
-
-.sidebar.is-collapsed .sidebar__necktie {
-  width: 16px; /* proporção com a gola fechada */
-}
-
-/* Gola oficial por cima do crescente */
-.sidebar.is-collapsed .sidebar__emblem {
-  z-index: 2;
 }
 
 .sidebar__nav {
