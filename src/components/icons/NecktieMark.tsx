@@ -6,13 +6,12 @@ type NecktieMarkProps = SVGProps<SVGSVGElement> & {
 }
 
 const BRAND_BLUE = '#3699FF'
-const BODY_MUTED = '#3F4254'
 const TIE_PATH =
   'M8.5 4.5Q20 16.5 31.5 4.5L28.8 14.5 27.8 21 28.6 31 29.2 44 20 58 10.8 44 11.4 31 12.2 21 11.2 14.5Z'
 
 /**
  * Gravata / seta estilo Clarial.
- * Aberta: corpo escuro + leve azul escuro na ponta; hover só clareia a ponta.
+ * Aberta: corpo escuro + azul escuro na ponta; hover clareia ponta (e corpo só um pouco).
  * Fechada: azul com fade na ponta, encaixe sob a gola.
  */
 export function NecktieMark({
@@ -55,11 +54,27 @@ export function NecktieMark({
             </>
           ) : (
             <>
-              {/* Corpo escuro; ponta = --tie-tip (azul escuro, clareia no hover) */}
-              <stop offset="0%" stopColor={BODY_MUTED} stopOpacity="0.45" />
-              <stop offset="48%" stopColor={BODY_MUTED} stopOpacity="0.4" />
-              <stop offset="70%" stopColor="var(--tie-tip)" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="var(--tie-tip)" stopOpacity="0.95" />
+              {/* Corpo = --tie-body; ponta = --tie-tip (hover via CSS) */}
+              <stop
+                offset="0%"
+                stopColor="var(--tie-body)"
+                stopOpacity="var(--tie-body-opacity)"
+              />
+              <stop
+                offset="48%"
+                stopColor="var(--tie-body)"
+                stopOpacity="var(--tie-body-mid-opacity)"
+              />
+              <stop
+                offset="70%"
+                stopColor="var(--tie-tip)"
+                stopOpacity="var(--tie-tip-mid-opacity)"
+              />
+              <stop
+                offset="100%"
+                stopColor="var(--tie-tip)"
+                stopOpacity="var(--tie-tip-opacity)"
+              />
             </>
           )}
         </linearGradient>

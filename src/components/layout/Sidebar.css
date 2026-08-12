@@ -192,7 +192,7 @@
 }
 
 .sidebar__tie-toggle:hover {
-  background: rgba(54, 153, 255, 0.08);
+  background: transparent; /* sem “bola” no hover */
 }
 
 .sidebar__tie-toggle:focus-visible {
@@ -206,14 +206,24 @@
   height: auto;
 }
 
-/* Aberta: ponta azul escuro suave; hover só clareia a ponta (corpo fica escuro) */
+/* Aberta: ponta azul escuro; hover só clareia a seta (sem fundo) */
 .sidebar:not(.is-collapsed) .sidebar__necktie {
+  --tie-body: #3f4254;
+  --tie-body-opacity: 0.45;
+  --tie-body-mid-opacity: 0.4;
   --tie-tip: #2a4f8c;
+  --tie-tip-mid-opacity: 0.55;
+  --tie-tip-opacity: 0.95;
 }
 
 .sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .sidebar__necktie,
 .sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .sidebar__necktie {
-  --tie-tip: #3a6db0;
+  --tie-body: #545872;
+  --tie-body-opacity: 0.55;
+  --tie-body-mid-opacity: 0.5;
+  --tie-tip: #4a90e2;
+  --tie-tip-mid-opacity: 0.85;
+  --tie-tip-opacity: 1;
 }
 
 .sidebar__nav {
