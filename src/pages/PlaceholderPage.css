@@ -1,0 +1,31 @@
+.placeholder-page {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: 40px 32px;
+  max-width: 640px;
+  animation: dashboard-in 0.35s ease both;
+}
+
+.placeholder-page h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.placeholder-page p {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+@keyframes dashboard-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

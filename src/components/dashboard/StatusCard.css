@@ -1,0 +1,77 @@
+.status-card {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: 18px 18px 14px;
+  animation: card-rise 0.5s ease both;
+}
+
+.status-card:nth-child(1) { animation-delay: 0.05s; }
+.status-card:nth-child(2) { animation-delay: 0.1s; }
+.status-card:nth-child(3) { animation-delay: 0.15s; }
+
+.status-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.status-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-card__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: transform 0.15s ease;
+}
+
+.status-card__item:hover {
+  transform: translateX(2px);
+}
+
+.status-card__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-card__value {
+  font-weight: 600;
+  min-width: 1.5rem;
+  text-align: right;
+}
+
+.status-card--overdue .status-card__item {
+  background: var(--overdue-bg);
+  color: var(--overdue-text);
+}
+
+.status-card--today .status-card__item {
+  background: var(--today-bg);
+  color: var(--today-text);
+}
+
+.status-card--upcoming .status-card__item {
+  background: var(--upcoming-bg);
+  color: var(--upcoming-text);
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

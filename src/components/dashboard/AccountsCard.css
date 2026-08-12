@@ -1,0 +1,78 @@
+.accounts-card {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: 18px;
+  animation: card-rise 0.5s ease both;
+}
+
+.accounts-card:nth-child(7) { animation-delay: 0.35s; }
+.accounts-card:nth-child(8) { animation-delay: 0.4s; }
+
+.accounts-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.accounts-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.accounts-card__icon {
+  display: grid;
+  place-items: center;
+}
+
+.accounts-card--payable .accounts-card__icon {
+  color: var(--accent-red);
+}
+
+.accounts-card--receivable .accounts-card__icon {
+  color: var(--accent-teal);
+}
+
+.accounts-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accounts-card__metric {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.accounts-card__label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.accounts-card__value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.accounts-card--payable .accounts-card__value {
+  color: var(--accent-red);
+}
+
+.accounts-card--receivable .accounts-card__value {
+  color: var(--accent-teal);
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
