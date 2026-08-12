@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import {
   Monitor,
   User,
@@ -36,20 +36,48 @@ type SidebarProps = {
   onToggle: () => void
 }
 
+function BrandMark() {
+  return (
+    <>
+      <span className="sidebar__word sidebar__word--social">Social</span>
+      <div className="sidebar__emblem" aria-hidden="true">
+        <span className="sidebar__collar" />
+      </div>
+      <span className="sidebar__word sidebar__word--express">Express</span>
+    </>
+  )
+}
+
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const location = useLocation()
+
+  const handleBrandClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    // Como no Clarial: clicar na logo atualiza / vai para o início
+    if (location.pathname === '/') {
+      window.location.reload()
+    } else {
+      window.location.assign('/')
+    }
+  }
+
   return (
     <aside className={`sidebar ${collapsed ? 'is-collapsed' : ''}`}>
       <div className="sidebar__brand">
-        <div className="sidebar__lockup" aria-label="Social Express">
-          <span className="sidebar__word sidebar__word--social">Social</span>
-
-          <div className="sidebar__emblem" aria-hidden="true">
-            {/* Logo oficial da gola (sempre a marca, sem V bugado) */}
-            <span className="sidebar__collar" />
+        {collapsed ? (
+          <div className="sidebar__lockup" aria-label="Social Express">
+            <BrandMark />
           </div>
-
-          <span className="sidebar__word sidebar__word--express">Express</span>
-        </div>
+        ) : (
+          <a
+            href="/"
+            className="sidebar__lockup sidebar__lockup--home"
+            aria-label="Social Express — atualizar página"
+            onClick={handleBrandClick}
+          >
+            <BrandMark />
+          </a>
+        )}
 
         <button
           type="button"
