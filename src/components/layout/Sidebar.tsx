@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { TieIcon } from '../icons/TieIcon'
 import { NecktieMark } from '../icons/NecktieMark'
-import { CollarMark } from '../icons/CollarMark'
 import './Sidebar.css'
 
 const navItems = [
@@ -45,16 +44,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <span className="sidebar__word sidebar__word--social">Social</span>
 
           <div className="sidebar__emblem" aria-hidden="true">
-            {collapsed ? (
-              <CollarMark className="sidebar__collar sidebar__collar--dock" docked />
-            ) : (
-              <img
-                className="sidebar__collar"
-                src="/brand-mark-white.png"
-                alt=""
-                draggable={false}
-              />
-            )}
+            {/* Logo oficial da gola (sempre a marca, sem V bugado) */}
+            <span className="sidebar__collar" />
           </div>
 
           <span className="sidebar__word sidebar__word--express">Express</span>
