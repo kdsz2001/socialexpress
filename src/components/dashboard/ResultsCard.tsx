@@ -22,10 +22,10 @@ export function ResultsCard({ title, rows }: ResultsCardProps) {
           return (
             <li key={row.label} className="results-card__row">
               <span className="results-card__label">
-                <span className="results-card__icon">
-                  <Icon size={16} strokeWidth={2} />
+                <span className="results-card__icon" aria-hidden="true">
+                  <Icon size={30} strokeWidth={1.75} />
                 </span>
-                {row.label}
+                <span className="results-card__text">{row.label}</span>
               </span>
               <span className="results-card__value">{row.value}</span>
             </li>

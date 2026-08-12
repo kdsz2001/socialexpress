@@ -1,4 +1,4 @@
-import { ClipboardList, Banknote } from 'lucide-react'
+import { ClipboardList, Banknote, ShoppingCart } from 'lucide-react'
 import { HangerIcon } from '../components/icons/HangerIcon'
 import { CurveRightIcon } from '../components/icons/CurveRightIcon'
 import { CurveLeftIcon } from '../components/icons/CurveLeftIcon'
@@ -17,6 +17,7 @@ const statusItems = [
 const resultRows = [
   { label: 'Total de pedidos', value: 'R$ 0,00', icon: ClipboardList },
   { label: 'Total recebido', value: 'R$ 0,00', icon: Banknote },
+  { label: 'Número de pedidos', value: '0', icon: ShoppingCart },
 ]
 
 export function Dashboard() {
