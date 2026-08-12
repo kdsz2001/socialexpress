@@ -126,7 +126,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           onClick={openProfile}
         >
           <span className="topbar__greeting">
-            Olá, <strong>Kelton Djames Schulze</strong>
+            <span className="topbar__greeting-hi">Olá,</span>{' '}
+            <span className="topbar__greeting-name">Kelton Djames Schulze</span>
           </span>
           <span className="topbar__avatar" aria-hidden="true" />
         </button>

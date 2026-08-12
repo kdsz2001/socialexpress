@@ -144,24 +144,33 @@
 }
 
 .topbar__greeting {
+  font-family: 'Poppins', Helvetica, sans-serif;
   font-size: 1rem;
-  font-weight: 400;
-  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
-.topbar__greeting strong {
+/* Clarial: "Olá," cinza claro */
+.topbar__greeting-hi {
+  font-weight: 400;
+  color: #b5b5c3;
+}
+
+/* Clarial: nome em cinza-ardósia mais forte */
+.topbar__greeting-name {
   font-weight: 500;
-  color: var(--text-primary);
+  color: #3f4254;
 }
 
 .topbar__avatar {
   width: 36px;
   height: 36px;
   border-radius: 0.42rem;
-  background:
-    radial-gradient(circle at 50% 38%, #c4c8d0 0 22%, transparent 23%),
-    radial-gradient(circle at 50% 78%, #c4c8d0 0 28%, transparent 29%),
-    #e4e6ef;
+  background-color: #eef0f4;
+  background-image:
+    radial-gradient(circle at 50% 38%, #b5b5c3 0 22%, transparent 23%),
+    radial-gradient(ellipse 55% 40% at 50% 78%, #b5b5c3 0 52%, transparent 53%);
+  background-repeat: no-repeat;
   flex-shrink: 0;
 }
 
