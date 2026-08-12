@@ -206,24 +206,14 @@
   height: auto;
 }
 
-.sidebar__necktie .necktie-mark__lit {
-  opacity: 0;
-  transition: opacity 0.2s ease;
+/* Aberta: ponta azul escuro suave; hover só clareia a ponta (corpo fica escuro) */
+.sidebar:not(.is-collapsed) .sidebar__necktie {
+  --tie-tip: #2a4f8c;
 }
 
-/* Aberta: acende no hover (estilo Clarial) */
-.sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .necktie-mark__lit,
-.sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .necktie-mark__lit {
-  opacity: 1;
-}
-
-.sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .necktie-mark__idle,
-.sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .necktie-mark__idle {
-  opacity: 0;
-}
-
-.sidebar__necktie .necktie-mark__idle {
-  transition: opacity 0.2s ease;
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .sidebar__necktie,
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .sidebar__necktie {
+  --tie-tip: #3a6db0;
 }
 
 .sidebar__nav {
