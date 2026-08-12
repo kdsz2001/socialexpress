@@ -15,43 +15,44 @@
   width: var(--sidebar-collapsed);
 }
 
-/* ——— Brand: gola + gravata (encaixe) ——— */
+/* ——— Brand: gola + gravata/seta (flex — sem absolute bugado) ——— */
 .sidebar__brand {
-  --brand-pad-x: 25px;
-  position: relative;
-  height: var(--topbar-height);
   display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 8px;
-  padding: 0 18px 0 var(--brand-pad-x);
+  height: var(--topbar-height);
+  padding: 0 12px 0 25px;
   flex-shrink: 0;
   background: var(--sidebar-brand-bg);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition:
-    height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    padding 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    padding 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    gap 0.45s ease;
 }
 
+/* Fechado: empilha gola + gravata */
 .sidebar.is-collapsed .sidebar__brand {
+  flex-direction: column;
   justify-content: center;
-  padding: 12px 8px 6px;
-  height: 68px;
+  align-items: center;
+  height: 74px;
+  padding: 10px 6px 6px;
+  gap: 0;
 }
 
 .sidebar__lockup {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   min-width: 0;
   white-space: nowrap;
-  transition: gap 0.45s ease;
 }
 
 .sidebar.is-collapsed .sidebar__lockup {
   justify-content: center;
-  width: 100%;
-  gap: 0;
   pointer-events: none;
 }
 
@@ -67,91 +68,69 @@
   max-width: 9rem;
   opacity: 1;
   transition:
-    opacity 0.28s ease,
-    max-width 0.48s cubic-bezier(0.22, 1, 0.36, 1),
-    letter-spacing 0.4s ease;
+    opacity 0.2s ease,
+    max-width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sidebar.is-collapsed .sidebar__word {
   opacity: 0;
   max-width: 0;
-  letter-spacing: 0;
 }
 
 .sidebar__emblem {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   flex-shrink: 0;
   width: 20px;
-  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sidebar.is-collapsed .sidebar__emblem {
-  width: 30px;
+  width: 28px;
 }
 
 .sidebar__collar {
   width: 100%;
   height: auto;
   display: block;
-  position: relative;
-  z-index: 4; /* gola na frente da gravata no encaixe */
   object-fit: contain;
   user-select: none;
   pointer-events: none;
 }
 
-/* Reserva espaço sob a gola quando a gravata encaixa */
-.sidebar__tie-dock {
-  display: block;
-  width: 100%;
-  height: 0;
-  transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.sidebar.is-collapsed .sidebar__tie-dock {
-  height: 20px;
-}
-
 /*
-  Gravatinha = botão de recolher/expandir.
-  Sempre ancorada em left:50%; o deslocamento horizontal
-  é só via transform — assim o voo não “salta” enquanto a
-  largura da sidebar anima.
+  Gravata/seta em fluxo do flex.
+  Aberta: deitada (-90°) = seta ← à direita do wordmark.
+  Fechada: vertical, puxada para o V da gola.
 */
 .sidebar__tie-toggle {
-  position: absolute;
-  z-index: 3;
-  display: grid;
-  place-items: center;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
   margin: 0;
   padding: 0;
-  border: none;
-  cursor: pointer;
-  color: #e8e8ef;
-  background: transparent;
+  border: 0;
   border-radius: 8px;
-  top: 50%;
-  left: 50%;
-  width: 30px;
-  height: 38px;
-  /* Empurrada para a direita no estado aberto */
-  transform: translate3d(calc(var(--sidebar-width) / 2 - 27px), -50%, 0)
-    rotate(0deg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #ffffff;
+  background: transparent;
+  /* Aberta: gira +90° (horário) → ponta da gravata vira seta ← */
+  transform: rotate(90deg);
   transition:
-    top 0.55s cubic-bezier(0.45, 0.05, 0.2, 1),
-    width 0.5s ease,
-    height 0.5s ease,
-    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.2s ease,
-    background 0.2s ease;
+    transform 0.5s cubic-bezier(0.33, 1, 0.32, 1),
+    margin 0.5s cubic-bezier(0.33, 1, 0.32, 1),
+    width 0.4s ease,
+    height 0.4s ease,
+    background 0.15s ease;
 }
 
 .sidebar__tie-toggle:hover {
-  color: #ffffff;
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -160,29 +139,27 @@
   outline-offset: 2px;
 }
 
-/* Encaixe sob a gola (estado recolhido) */
-.sidebar__tie-toggle.is-docked {
-  top: 38px;
-  width: 42px;
-  height: 34px;
-  transform: translate3d(-50%, -50%, 0) rotate(0deg);
+.sidebar.is-collapsed .sidebar__tie-toggle {
+  width: 34px;
+  height: 26px;
+  margin-top: -10px;
+  transform: rotate(0deg);
   background: transparent;
 }
 
-.sidebar__tie-toggle.is-docked:hover {
+.sidebar.is-collapsed .sidebar__tie-toggle:hover {
   background: rgba(255, 255, 255, 0.04);
 }
 
 .sidebar__necktie {
-  width: 14px;
-  height: auto;
   display: block;
-  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  width: 17px;
+  height: auto;
+  color: #ffffff;
 }
 
-.sidebar__tie-toggle.is-docked .sidebar__necktie {
-  width: 13px;
+.sidebar.is-collapsed .sidebar__necktie {
+  width: 11px;
 }
 
 .sidebar__nav {

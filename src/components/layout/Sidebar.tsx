@@ -43,24 +43,25 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div className="sidebar__lockup" aria-label="Social Express">
           <span className="sidebar__word sidebar__word--social">Social</span>
 
-          <div className="sidebar__emblem">
+          <div className="sidebar__emblem" aria-hidden="true">
             <img
               className="sidebar__collar"
               src="/brand-mark-white.png"
               alt=""
-              aria-hidden="true"
               draggable={false}
             />
-            {/* Alvo visual do encaixe — a gravata anima até aqui */}
-            <span className="sidebar__tie-dock" aria-hidden="true" />
           </div>
 
           <span className="sidebar__word sidebar__word--express">Express</span>
         </div>
 
+        {/*
+          Uma só gravata: aberta = seta à direita (horizontal);
+          fechada = encaixa sob a gola (vertical).
+        */}
         <button
           type="button"
-          className={`sidebar__tie-toggle${collapsed ? ' is-docked' : ''}`}
+          className="sidebar__tie-toggle"
           onClick={onToggle}
           aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
           aria-expanded={!collapsed}
