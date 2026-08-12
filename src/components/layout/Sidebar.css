@@ -46,7 +46,7 @@
 .sidebar__lockup {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   min-width: 0;
   white-space: nowrap;
   text-decoration: none;
@@ -70,14 +70,14 @@
 
 .sidebar__word {
   font-family: 'Montserrat', 'Poppins', sans-serif;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--brand-blue);
   line-height: 1;
   overflow: hidden;
-  max-width: 9rem;
+  max-width: 10.5rem;
   opacity: 1;
   transition:
     opacity 0.2s ease,
@@ -91,8 +91,8 @@
 
 .sidebar__emblem {
   flex-shrink: 0;
-  width: 20px;
-  height: 12px;
+  width: 24px;
+  height: 15px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -104,8 +104,8 @@
 }
 
 .sidebar.is-collapsed .sidebar__emblem {
-  width: 28px;
-  height: 17px;
+  width: 32px;
+  height: 19px;
 }
 
 /* Gola oficial (máscara do brand-mark) no azul Clarial */
