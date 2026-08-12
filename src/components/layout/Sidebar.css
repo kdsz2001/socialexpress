@@ -181,6 +181,14 @@
   width: 13px;
 }
 
+.sidebar__tie-toggle:hover .necktie__chevrons path:nth-child(odd) {
+  stroke: #b8b9c8;
+}
+
+.sidebar__tie-toggle:hover .necktie__chevrons path:nth-child(even) {
+  stroke: #7a85ad;
+}
+
 /* Gola oficial por cima do crescente */
 .sidebar.is-collapsed .sidebar__emblem {
   z-index: 2;
