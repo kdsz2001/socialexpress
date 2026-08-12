@@ -1,11 +1,7 @@
-import {
-  Undo2,
-  Redo2,
-  ClipboardList,
-  Banknote,
-  CircleDollarSign,
-} from 'lucide-react'
+import { ClipboardList, Banknote } from 'lucide-react'
 import { HangerIcon } from '../components/icons/HangerIcon'
+import { CurveRightIcon } from '../components/icons/CurveRightIcon'
+import { CurveLeftIcon } from '../components/icons/CurveLeftIcon'
 import { StatusCard } from '../components/dashboard/StatusCard'
 import { ResultsCard } from '../components/dashboard/ResultsCard'
 import { AccountsCard } from '../components/dashboard/AccountsCard'
@@ -14,8 +10,8 @@ import './Dashboard.css'
 
 const statusItems = [
   { label: 'Provas', value: 0, icon: HangerIcon },
-  { label: 'Retiradas', value: 0, icon: Redo2 },
-  { label: 'Devoluções', value: 0, icon: Undo2 },
+  { label: 'Retiradas', value: 0, icon: CurveRightIcon },
+  { label: 'Devoluções', value: 0, icon: CurveLeftIcon },
 ]
 
 const resultRows = [
@@ -40,14 +36,12 @@ export function Dashboard() {
           total="R$ 0,00"
           quantity={0}
           theme="payable"
-          icon={CircleDollarSign}
         />
         <AccountsCard
           title="Contas a receber"
           total="R$ 0,00"
           quantity={0}
           theme="receivable"
-          icon={CircleDollarSign}
         />
         <AgendaCard />
       </div>

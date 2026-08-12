@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-react'
 import './AccountsCard.css'
 
 type AccountsCardProps = {
@@ -6,7 +5,6 @@ type AccountsCardProps = {
   total: string
   quantity: number
   theme: 'payable' | 'receivable'
-  icon: LucideIcon
 }
 
 export function AccountsCard({
@@ -14,14 +12,13 @@ export function AccountsCard({
   total,
   quantity,
   theme,
-  icon: Icon,
 }: AccountsCardProps) {
   return (
     <section className={`accounts-card accounts-card--${theme}`}>
       <div className="accounts-card__header">
         <h2 className="accounts-card__title">{title}</h2>
-        <span className="accounts-card__icon">
-          <Icon size={20} strokeWidth={2} />
+        <span className="accounts-card__icon" aria-hidden="true">
+          <span className="accounts-card__icon-mark">$</span>
         </span>
       </div>
       <div className="accounts-card__body">

@@ -1,7 +1,7 @@
 import type { SVGProps } from 'react'
 
-/** Cabide em traço fino — estilo dos ícones lineares do Clarial */
-export function HangerIcon({
+/** Seta curva (retirada) — estilo share/reply do Clarial */
+export function CurveRightIcon({
   size = 24,
   strokeWidth = 1.75,
   width,
@@ -22,7 +22,8 @@ export function HangerIcon({
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M12 3.5a1.75 1.75 0 0 1 1.2 3L9.2 11H20l-1 6.2A2.2 2.2 0 0 1 16.85 19H7.15A2.2 2.2 0 0 1 5 17.2L4 11h5.2L10.8 6.5A1.75 1.75 0 0 1 12 3.5Z" />
+      <path d="M15 14l5-5-5-5" />
+      <path d="M4 20v-7a4 4 0 0 1 4-4h12" />
     </svg>
   )
 }
