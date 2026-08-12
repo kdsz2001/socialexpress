@@ -82,6 +82,110 @@
   background: #187de4;
 }
 
+/* Filtro de datas — Aniversariantes */
+.clients__date {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  flex: 0 1 340px;
+  min-width: min(100%, 260px);
+}
+
+.clients__date-field {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 0.9rem;
+  border: 1px solid #e4e6ef;
+  border-right: 0;
+  border-radius: 0.42rem 0 0 0.42rem;
+  background: #ffffff;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.clients__date-cal {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e4e6ef;
+  border-radius: 0 0.42rem 0.42rem 0;
+  background: #f3f6f9;
+  color: #3699ff;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.clients__date-field.is-open,
+.clients__date-cal.is-open,
+.clients__date-field:hover,
+.clients__date-cal:hover {
+  border-color: #3699ff;
+}
+
+.clients__date-field.is-open {
+  box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.12);
+}
+
+.clients__date-cal.is-open {
+  background: #e1f0ff;
+}
+
+.clients__date-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 40px;
+  min-width: 200px;
+  padding: 0.45rem 0;
+  background: #ffffff;
+  border-radius: 0.55rem;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
+  z-index: 40;
+  animation: clients-menu-in 0.16s ease both;
+}
+
+.clients__date-option {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 0.7rem 1.15rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #3f4254;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.clients__date-option:hover {
+  background: #f3f6f9;
+  color: #3699ff;
+}
+
+.clients__date-option.is-active {
+  background: #e1f0ff;
+  color: #3699ff;
+}
+
+.clients__th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.clients__th-sort svg {
+  color: #b5b5c3;
+}
+
 .clients__table-wrap {
   overflow-x: auto;
 }
@@ -129,6 +233,17 @@
   }
 }
 
+@keyframes clients-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 700px) {
   .clients__toolbar {
     flex-direction: column;
@@ -139,7 +254,10 @@
     max-width: none;
   }
 
-  .clients__add {
+  .clients__add,
+  .clients__date {
     width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }
