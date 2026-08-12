@@ -40,8 +40,9 @@ export function NecktieMark({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-          <stop offset="48%" stopColor="#ffffff" stopOpacity="1" />
-          <stop offset="72%" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="35%" stopColor="#ffffff" stopOpacity="1" />
+          <stop offset="58%" stopColor="#ffffff" stopOpacity="0.65" />
+          <stop offset="78%" stopColor="#ffffff" stopOpacity="0.28" />
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
       </defs>
