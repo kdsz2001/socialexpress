@@ -78,7 +78,9 @@ export function ImportClientsModal({ open, onClose }: ImportClientsModalProps) {
             </p>
 
             <label className="import-modal__file">
-              <span className="import-modal__file-name">
+              <span
+                className={`import-modal__file-name${fileName ? ' has-file' : ''}`}
+              >
                 {fileName ?? 'Clique para escolher'}
               </span>
               <span className="import-modal__file-browse">Browse</span>

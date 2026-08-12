@@ -134,7 +134,7 @@
   text-overflow: ellipsis;
 }
 
-.import-modal__file-name:not(:empty) {
+.import-modal__file-name.has-file {
   color: #3f4254;
 }
 
