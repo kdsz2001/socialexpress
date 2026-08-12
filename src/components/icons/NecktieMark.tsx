@@ -11,7 +11,7 @@ const TIE_PATH =
 
 /**
  * Gravata / seta estilo Clarial.
- * Aberta: corpo escuro + azul escuro na ponta; hover clareia ponta (e corpo só um pouco).
+ * Aberta: idle escuro + ponta azul suave; hover com fade suave e azul se espalhando.
  * Fechada: azul com fade na ponta, encaixe sob a gola.
  */
 export function NecktieMark({
@@ -21,7 +21,9 @@ export function NecktieMark({
   ...props
 }: NecktieMarkProps) {
   const reactId = useId().replace(/:/g, '')
-  const gid = `tieFade-${reactId}`
+  const dockGid = `tieDock-${reactId}`
+  const idleGid = `tieIdle-${reactId}`
+  const hoverGid = `tieHover-${reactId}`
 
   return (
     <svg
@@ -37,50 +39,70 @@ export function NecktieMark({
       {title ? <title>{title}</title> : null}
 
       <defs>
-        <linearGradient
-          id={gid}
-          x1="20"
-          y1="4"
-          x2="20"
-          y2="60"
-          gradientUnits="userSpaceOnUse"
-        >
-          {docked ? (
-            <>
-              <stop offset="0%" stopColor={BRAND_BLUE} stopOpacity="1" />
-              <stop offset="42%" stopColor={BRAND_BLUE} stopOpacity="1" />
-              <stop offset="72%" stopColor={BRAND_BLUE} stopOpacity="0.5" />
-              <stop offset="100%" stopColor={BRAND_BLUE} stopOpacity="0" />
-            </>
-          ) : (
-            <>
-              {/* Corpo = --tie-body; ponta = --tie-tip (hover via CSS) */}
-              <stop
-                offset="0%"
-                stopColor="var(--tie-body)"
-                stopOpacity="var(--tie-body-opacity)"
-              />
-              <stop
-                offset="48%"
-                stopColor="var(--tie-body)"
-                stopOpacity="var(--tie-body-mid-opacity)"
-              />
-              <stop
-                offset="70%"
-                stopColor="var(--tie-tip)"
-                stopOpacity="var(--tie-tip-mid-opacity)"
-              />
-              <stop
-                offset="100%"
-                stopColor="var(--tie-tip)"
-                stopOpacity="var(--tie-tip-opacity)"
-              />
-            </>
-          )}
-        </linearGradient>
+        {docked ? (
+          <linearGradient
+            id={dockGid}
+            x1="20"
+            y1="4"
+            x2="20"
+            y2="60"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor={BRAND_BLUE} stopOpacity="1" />
+            <stop offset="42%" stopColor={BRAND_BLUE} stopOpacity="1" />
+            <stop offset="72%" stopColor={BRAND_BLUE} stopOpacity="0.5" />
+            <stop offset="100%" stopColor={BRAND_BLUE} stopOpacity="0" />
+          </linearGradient>
+        ) : (
+          <>
+            {/* Idle: corpo escuro, ponta azul escuro suave */}
+            <linearGradient
+              id={idleGid}
+              x1="20"
+              y1="4"
+              x2="20"
+              y2="60"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0%" stopColor="#3F4254" stopOpacity="0.42" />
+              <stop offset="50%" stopColor="#3F4254" stopOpacity="0.38" />
+              <stop offset="72%" stopColor="#2A4F8C" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#2A4F8C" stopOpacity="0.92" />
+            </linearGradient>
+            {/* Hover: azul mais claro se espalhando pelo corpo */}
+            <linearGradient
+              id={hoverGid}
+              x1="20"
+              y1="4"
+              x2="20"
+              y2="60"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0%" stopColor="#4A5578" stopOpacity="0.55" />
+              <stop offset="35%" stopColor="#3A6DB0" stopOpacity="0.7" />
+              <stop offset="65%" stopColor="#4A90E2" stopOpacity="0.9" />
+              <stop offset="100%" stopColor={BRAND_BLUE} stopOpacity="1" />
+            </linearGradient>
+          </>
+        )}
       </defs>
 
-      <path fill={`url(#${gid})`} d={TIE_PATH} />
+      {docked ? (
+        <path fill={`url(#${dockGid})`} d={TIE_PATH} />
+      ) : (
+        <>
+          <path
+            className="necktie-mark__idle"
+            fill={`url(#${idleGid})`}
+            d={TIE_PATH}
+          />
+          <path
+            className="necktie-mark__hover"
+            fill={`url(#${hoverGid})`}
+            d={TIE_PATH}
+          />
+        </>
+      )}
     </svg>
   )
 }

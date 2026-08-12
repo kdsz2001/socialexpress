@@ -206,24 +206,24 @@
   height: auto;
 }
 
-/* Aberta: ponta azul escuro; hover só clareia a seta (sem fundo) */
-.sidebar:not(.is-collapsed) .sidebar__necktie {
-  --tie-body: #3f4254;
-  --tie-body-opacity: 0.45;
-  --tie-body-mid-opacity: 0.4;
-  --tie-tip: #2a4f8c;
-  --tie-tip-mid-opacity: 0.55;
-  --tie-tip-opacity: 0.95;
+/* Aberta: crossfade suave estilo Clarial (não acende no instante) */
+.sidebar:not(.is-collapsed) .necktie-mark__idle,
+.sidebar:not(.is-collapsed) .necktie-mark__hover {
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .sidebar__necktie,
-.sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .sidebar__necktie {
-  --tie-body: #545872;
-  --tie-body-opacity: 0.55;
-  --tie-body-mid-opacity: 0.5;
-  --tie-tip: #4a90e2;
-  --tie-tip-mid-opacity: 0.85;
-  --tie-tip-opacity: 1;
+.sidebar:not(.is-collapsed) .necktie-mark__hover {
+  opacity: 0;
+}
+
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .necktie-mark__hover,
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .necktie-mark__hover {
+  opacity: 1;
+}
+
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .necktie-mark__idle,
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .necktie-mark__idle {
+  opacity: 0;
 }
 
 .sidebar__nav {
