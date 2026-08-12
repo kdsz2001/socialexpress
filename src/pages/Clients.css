@@ -229,6 +229,17 @@
   border: 0;
 }
 
+.clients__empty-panel {
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+  color: #b5b5c3;
+  font-size: 1rem;
+}
+
+.clients__empty-panel p {
+  margin: 0;
+}
+
 @keyframes clients-in {
   from {
     opacity: 0;
