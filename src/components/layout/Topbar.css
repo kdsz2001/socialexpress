@@ -29,6 +29,39 @@
   flex: 1;
 }
 
+/* Abas Clientes — barra branca do topo (estilo Clarial) */
+.topbar__tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.25rem;
+  min-width: 0;
+}
+
+.topbar__tab {
+  border: 0;
+  background: transparent;
+  color: #7e8299;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 0.55rem 1rem;
+  border-radius: 0.42rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.topbar__tab:hover {
+  color: #3699ff;
+}
+
+.topbar__tab.is-active {
+  color: #3699ff;
+  background: #f3f6f9;
+}
+
 .topbar__actions {
   display: flex;
   align-items: center;
@@ -189,6 +222,15 @@
   .topbar__menu {
     display: grid;
   }
+
+  .topbar__tabs {
+    margin-left: 0.15rem;
+  }
+
+  .topbar__tab {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.95rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -202,5 +244,10 @@
 
   .topbar__search-panel {
     right: -40px;
+  }
+
+  .topbar__tab {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.9rem;
   }
 }

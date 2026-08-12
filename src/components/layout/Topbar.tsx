@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Search, Menu, X } from 'lucide-react'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { ProfileDrawer } from './ProfileDrawer'
 import './Topbar.css'
 
@@ -8,12 +9,18 @@ type TopbarProps = {
 }
 
 export function Topbar({ onMenuClick }: TopbarProps) {
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [query, setQuery] = useState('')
   const panelRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const searchId = useId()
+
+  const isClientsPage = location.pathname === '/clientes'
+  const clientsTab =
+    searchParams.get('tab') === 'aniversariantes' ? 'aniversariantes' : 'todos'
 
   const hasQuery = query.trim().length > 0
   // Futuro: substituir por resultados reais de pedido/produto/cliente
@@ -48,6 +55,14 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     setProfileOpen(true)
   }
 
+  const setClientsTab = (tab: 'todos' | 'aniversariantes') => {
+    if (tab === 'todos') {
+      setSearchParams({}, { replace: true })
+    } else {
+      setSearchParams({ tab }, { replace: true })
+    }
+  }
+
   return (
     <header className="topbar">
       <button
@@ -58,7 +73,32 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       >
         <Menu size={22} strokeWidth={2} />
       </button>
+
+      {isClientsPage && (
+        <div className="topbar__tabs" role="tablist" aria-label="Clientes">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={clientsTab === 'todos'}
+            className={`topbar__tab${clientsTab === 'todos' ? ' is-active' : ''}`}
+            onClick={() => setClientsTab('todos')}
+          >
+            Todos clientes
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={clientsTab === 'aniversariantes'}
+            className={`topbar__tab${clientsTab === 'aniversariantes' ? ' is-active' : ''}`}
+            onClick={() => setClientsTab('aniversariantes')}
+          >
+            Aniversariantes
+          </button>
+        </div>
+      )}
+
       <div className="topbar__spacer" />
+
       <div className="topbar__actions">
         <div className="topbar__search-wrap" ref={panelRef}>
           <button

@@ -3,38 +3,6 @@
   animation: clients-in 0.35s ease both;
 }
 
-.clients__tabs {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin: -8px 0 1.25rem;
-  flex-wrap: wrap;
-}
-
-.clients__tab {
-  border: 0;
-  background: transparent;
-  color: #7e8299;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.5;
-  padding: 0.55rem 1rem;
-  border-radius: 0.42rem;
-  cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
-}
-
-.clients__tab:hover {
-  color: #3699ff;
-  background: #f3f6f9;
-}
-
-.clients__tab.is-active {
-  color: #3699ff;
-  background: #e4e6ef;
-}
-
 .clients__header {
   display: flex;
   align-items: flex-start;

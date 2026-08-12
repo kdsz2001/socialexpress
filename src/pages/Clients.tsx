@@ -1,36 +1,16 @@
 import { useState } from 'react'
 import { Search, CloudUpload, Download, Plus } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import './Clients.css'
 
-type ClientsTab = 'todos' | 'aniversariantes'
-
 export function Clients() {
-  const [tab, setTab] = useState<ClientsTab>('todos')
+  const [searchParams] = useSearchParams()
+  const tab =
+    searchParams.get('tab') === 'aniversariantes' ? 'aniversariantes' : 'todos'
   const [query, setQuery] = useState('')
 
   return (
     <div className="clients">
-      <div className="clients__tabs" role="tablist" aria-label="Clientes">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'todos'}
-          className={`clients__tab${tab === 'todos' ? ' is-active' : ''}`}
-          onClick={() => setTab('todos')}
-        >
-          Todos clientes
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'aniversariantes'}
-          className={`clients__tab${tab === 'aniversariantes' ? ' is-active' : ''}`}
-          onClick={() => setTab('aniversariantes')}
-        >
-          Aniversariantes
-        </button>
-      </div>
-
       <header className="clients__header">
         <div className="clients__heading">
           <h1 className="clients__title">Clientes</h1>
@@ -78,7 +58,9 @@ export function Clients() {
             <tbody>
               <tr>
                 <td colSpan={3} className="clients__empty">
-                  Nenhum resultado encontrado
+                  {tab === 'aniversariantes'
+                    ? 'Nenhum aniversariante encontrado'
+                    : 'Nenhum resultado encontrado'}
                 </td>
               </tr>
             </tbody>
