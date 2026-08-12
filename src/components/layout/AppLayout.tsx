@@ -89,8 +89,8 @@ export function AppLayout() {
           <div className="app-content__inner">
             <Outlet />
           </div>
+          <footer className="app-footer">2016© Social Express</footer>
         </main>
-        <footer className="app-footer">2016© Social Express</footer>
       </div>
 
       <button
