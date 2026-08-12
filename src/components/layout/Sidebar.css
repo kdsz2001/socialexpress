@@ -86,7 +86,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 10px 0 20px;
+  padding: 25px 0 20px;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
