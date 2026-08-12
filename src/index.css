@@ -1,43 +1,40 @@
 :root {
-  --sidebar-bg: #1a1b2e;
-  --sidebar-text: #a0a3b5;
+  --sidebar-bg: #1e1e2d;
+  --sidebar-text: #a2a3b7;
   --sidebar-text-active: #ffffff;
-  --sidebar-hover: rgba(255, 255, 255, 0.06);
-  --sidebar-active-bg: rgba(125, 211, 252, 0.12);
-  --brand-gradient: linear-gradient(135deg, #7dd3fc 0%, #a78bfa 100%);
+  --sidebar-hover: rgba(255, 255, 255, 0.04);
+  --sidebar-active-bg: rgba(55, 125, 255, 0.12);
+  --sidebar-active-color: #3699ff;
+  --sidebar-scroll-thumb: #637099;
 
-  --main-bg: #f4f6fa;
+  --main-bg: #f3f6f9;
   --topbar-bg: #ffffff;
   --card-bg: #ffffff;
-  --card-shadow: 0 1px 8px rgba(26, 27, 46, 0.05);
-  --card-radius: 10px;
+  --card-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
+  --card-radius: 0.75rem;
+  --value-box-bg: #f3f6f9;
 
-  --text-primary: #1a1b2e;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --text-primary: #3f4254;
+  --text-secondary: #7e8299;
+  --text-muted: #b5b5c3;
 
-  --overdue-bg: #fde8e8;
-  --overdue-text: #c53030;
-  --overdue-icon: #e53e3e;
+  --overdue-bg: #ffe2e5;
+  --overdue-text: #f64e60;
+  --today-bg: #e1f0ff;
+  --today-text: #3699ff;
+  --upcoming-bg: #c9f7f5;
+  --upcoming-text: #1bc5bd;
 
-  --today-bg: #e8f0fe;
-  --today-text: #2b6cb0;
-  --today-icon: #3182ce;
+  --accent-teal: #1bc5bd;
+  --accent-red: #f64e60;
 
-  --upcoming-bg: #e6f7f5;
-  --upcoming-text: #0d9488;
-  --upcoming-icon: #14b8a6;
+  --sidebar-width: 265px;
+  --sidebar-collapsed: 70px;
+  --topbar-height: 65px;
 
-  --accent-teal: #0d9488;
-  --accent-red: #e53e3e;
-
-  --sidebar-width: 220px;
-  --sidebar-collapsed: 64px;
-  --topbar-height: 48px;
-
-  font-family: 'Poppins', system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.45;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
   font-weight: 400;
   color: var(--text-primary);
   font-synthesis: none;
@@ -59,6 +56,10 @@ body,
 #root {
   height: 100%;
   min-height: 100%;
+}
+
+html {
+  font-size: 13px !important;
 }
 
 body {
@@ -87,15 +88,15 @@ img {
   display: block;
 }
 
-/* Scrollbars sofisticadas (conteúdo principal) */
+/* Scrollbar principal (fina, estilo Metronic/Clarial) */
 .app-content {
   scrollbar-width: thin;
-  scrollbar-color: #c5cad6 transparent;
+  scrollbar-color: #c4c4d4 transparent;
 }
 
 .app-content::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 .app-content::-webkit-scrollbar-track {
@@ -103,14 +104,10 @@ img {
 }
 
 .app-content::-webkit-scrollbar-thumb {
-  background: #c5cad6;
+  background: #c4c4d4;
   border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 
 .app-content::-webkit-scrollbar-thumb:hover {
-  background: #a8b0c0;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: #a1a5b7;
 }

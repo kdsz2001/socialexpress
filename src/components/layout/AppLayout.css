@@ -21,14 +21,14 @@
 .app-content {
   flex: 1;
   overflow: auto;
-  padding: 14px 16px 22px;
+  padding: 25px 25px 30px;
 }
 
 .app-overlay {
   position: fixed;
   inset: 0;
   z-index: 35;
-  background: rgba(26, 27, 46, 0.45);
+  background: rgba(30, 30, 45, 0.45);
   border: none;
   cursor: pointer;
   animation: overlay-in 0.2s ease both;
@@ -53,6 +53,6 @@
   }
 
   .app-content {
-    padding: 12px;
+    padding: 15px;
   }
 }

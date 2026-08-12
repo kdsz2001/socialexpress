@@ -2,8 +2,8 @@
   background: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  padding: 12px;
-  min-height: 110px;
+  padding: 1.75rem;
+  min-height: 10rem;
   display: flex;
   flex-direction: column;
   animation: card-rise 0.4s ease both;
@@ -14,13 +14,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 1.25rem;
 }
 
 .agenda-card__title {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #181c32;
 }
 
 .agenda-card__icon {
@@ -30,8 +30,8 @@
 }
 
 .agenda-card__icon svg {
-  width: 18px;
-  height: 18px;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .agenda-card__empty {
@@ -40,10 +40,10 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 0.8125rem;
+  font-size: 1rem;
   color: var(--text-muted);
   font-weight: 400;
-  padding: 6px;
+  padding: 0.5rem;
 }
 
 @keyframes card-rise {

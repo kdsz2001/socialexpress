@@ -2,7 +2,7 @@
   background: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  padding: 12px;
+  padding: 1.75rem;
   animation: card-rise 0.4s ease both;
 }
 
@@ -13,13 +13,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 1.25rem;
 }
 
 .accounts-card__title {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #181c32;
 }
 
 .accounts-card__icon {
@@ -28,8 +28,8 @@
 }
 
 .accounts-card__icon svg {
-  width: 18px;
-  height: 18px;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .accounts-card--payable .accounts-card__icon {
@@ -43,7 +43,7 @@
 .accounts-card__body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.85rem;
 }
 
 .accounts-card__metric {
@@ -53,14 +53,19 @@
 }
 
 .accounts-card__label {
-  font-size: 0.8125rem;
+  font-size: 1rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .accounts-card__value {
-  font-size: 0.8125rem;
+  font-size: 1rem;
   font-weight: 600;
+  background: var(--value-box-bg);
+  border-radius: 0.42rem;
+  padding: 0.45rem 0.75rem;
+  min-width: 5.5rem;
+  text-align: center;
 }
 
 .accounts-card--payable .accounts-card__value {
