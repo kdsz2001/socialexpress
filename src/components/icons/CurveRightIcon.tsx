@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 
-/** Seta curva (retirada) — estilo share/reply do Clarial */
+/** Seta curva direita — Retiradas (Clarial) */
 export function CurveRightIcon({
   size = 24,
   strokeWidth = 1.75,
@@ -20,10 +20,11 @@ export function CurveRightIcon({
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
       {...props}
     >
-      <path d="M15 14l5-5-5-5" />
-      <path d="M4 20v-7a4 4 0 0 1 4-4h12" />
+      <path d="M3 12a7 7 0 0 1 7-7h8" />
+      <path d="M14 2l4 3-4 3" />
     </svg>
   )
 }

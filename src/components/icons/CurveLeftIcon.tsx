@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 
-/** Seta curva (devolução) — estilo undo do Clarial */
+/** Seta curva esquerda — Devoluções (Clarial) */
 export function CurveLeftIcon({
   size = 24,
   strokeWidth = 1.75,
@@ -20,10 +20,11 @@ export function CurveLeftIcon({
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
       {...props}
     >
-      <path d="M9 14L4 9l5-5" />
-      <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
+      <path d="M21 12a7 7 0 0 0-7-7H6" />
+      <path d="M10 2L6 5l4 3" />
     </svg>
   )
 }

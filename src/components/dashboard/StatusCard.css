@@ -1,7 +1,9 @@
+/* Medidas iguais ao Clarial/Metronic: p-5, mb-5, rounded, icon-lg */
+
 .status-card {
-  background: var(--card-bg);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
   padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
@@ -14,62 +16,80 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: #181c32;
-  margin: 0 0 1.35rem;
+  margin: 0 0 1.25rem;
   line-height: 1.2;
 }
 
 .status-card__list {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  margin: auto 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Linha colorida = .bg-light-* + .rounded + .p-5 + .mb-5 */
 .status-card__item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 3.6rem;
-  padding: 0.95rem 1.15rem;
-  border-radius: 0.42rem;
-  font-size: 1.05rem;
-  font-weight: 500;
+  padding: 1.25rem; /* .p-5 */
+  border-radius: 0.42rem; /* .rounded */
+  margin-bottom: 1.25rem; /* .mb-5 */
   box-sizing: border-box;
+}
+
+.status-card__item.is-last {
+  margin-bottom: 0;
 }
 
 .status-card__label {
   display: inline-flex;
   align-items: center;
-  gap: 0.9rem;
+  min-width: 0;
 }
 
-.status-card__label svg {
-  width: 1.55rem;
-  height: 1.55rem;
+.status-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1.25rem; /* .mr-5 */
   flex-shrink: 0;
+  line-height: 0;
+}
+
+.status-card__icon svg {
+  width: 1.5rem; /* .icon-lg */
+  height: 1.5rem;
+}
+
+.status-card__text {
+  font-size: 1rem;
+  font-weight: 500; /* .font-weight-bold no Metronic */
+  line-height: 1.2;
 }
 
 .status-card__value {
-  font-weight: 600;
-  font-size: 1.15rem;
-  min-width: 1.5rem;
-  text-align: right;
-  line-height: 1;
+  font-size: 1.08rem; /* .font-size-lg */
+  font-weight: 600; /* .font-weight-bolder */
+  line-height: 1.2;
+  padding: 0.25rem 0; /* .py-1 */
+  margin-left: 0.75rem;
+  flex-shrink: 0;
 }
 
+/* Cores oficiais do tema Clarial/Metronic */
 .status-card--overdue .status-card__item {
-  background: var(--overdue-bg);
-  color: var(--overdue-text);
+  background-color: #ffe2e5;
+  color: #f64e60;
 }
 
 .status-card--today .status-card__item {
-  background: var(--today-bg);
-  color: var(--today-text);
+  background-color: #e1f0ff;
+  color: #3699ff;
 }
 
 .status-card--upcoming .status-card__item {
-  background: var(--upcoming-bg);
-  color: var(--upcoming-text);
+  background-color: #c9f7f5;
+  color: #1bc5bd;
 }

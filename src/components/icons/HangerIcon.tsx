@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 
-/** Cabide em traço fino — estilo dos ícones lineares do Clarial */
+/** Cabide — traço fino estilo ícones do Clarial */
 export function HangerIcon({
   size = 24,
   strokeWidth = 1.75,
@@ -20,9 +20,11 @@ export function HangerIcon({
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
       {...props}
     >
-      <path d="M12 3.5a1.75 1.75 0 0 1 1.2 3L9.2 11H20l-1 6.2A2.2 2.2 0 0 1 16.85 19H7.15A2.2 2.2 0 0 1 5 17.2L4 11h5.2L10.8 6.5A1.75 1.75 0 0 1 12 3.5Z" />
+      <circle cx="12" cy="5" r="1.6" />
+      <path d="M12 6.6L4.5 14.2A1.6 1.6 0 0 0 5.7 17h12.6a1.6 1.6 0 0 0 1.2-2.8L12 6.6Z" />
     </svg>
   )
 }
