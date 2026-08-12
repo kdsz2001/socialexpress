@@ -178,7 +178,7 @@
 }
 
 .sidebar.is-collapsed .sidebar__necktie {
-  width: 12px; /* um pouco menor = ponta sobe mais perto da gola */
+  width: 13px; /* aumento mínimo */
 }
 
 /* Gola oficial por cima do crescente */
