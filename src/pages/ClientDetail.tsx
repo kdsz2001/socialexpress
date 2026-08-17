@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Check,
@@ -7,9 +7,9 @@ import {
   Trash2,
   UserRound,
 } from 'lucide-react'
+import { useClients } from '../hooks/useClients'
 import {
   buildWhatsAppUrl,
-  getClient,
   getClientDisplayName,
   getClientPrimaryPhone,
   updateClient,
@@ -83,21 +83,41 @@ function WhatsAppGlyph() {
   )
 }
 
+function cloneClient(client: Client): Client {
+  return {
+    ...client,
+    phones: client.phones.map((p) => ({ ...p })),
+    measures: client.measures.map((m) => ({ ...m })),
+  }
+}
+
 export function ClientDetail() {
   const { clientId = '' } = useParams()
   const navigate = useNavigate()
-  const stored = useMemo(() => getClient(clientId), [clientId])
+  const clients = useClients()
+  const stored = clients.find((client) => client.id === clientId)
   const [section, setSection] = useState<DetailSection>('pessoais')
   const [draft, setDraft] = useState<Client | null>(null)
+  const [saveState, setSaveState] = useState<'idle' | 'saved' | 'error'>('idle')
+  const saveTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
-    const client = getClient(clientId)
-    if (!client) {
+    if (!stored) {
       navigate('/clientes', { replace: true })
       return
     }
-    setDraft({ ...client, phones: client.phones.map((p) => ({ ...p })), measures: client.measures.map((m) => ({ ...m })) })
-  }, [clientId, navigate])
+    setDraft((current) => {
+      // keep local edits while typing; only hydrate when opening / switching client
+      if (current?.id === stored.id) return current
+      return cloneClient(stored)
+    })
+  }, [stored, navigate])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current)
+    }
+  }, [])
 
   if (!draft || !stored) return null
 
@@ -107,11 +127,17 @@ export function ClientDetail() {
     phone?.whatsapp && phone.number ? buildWhatsAppUrl(phone.number) : null
 
   const patch = <K extends keyof Client>(key: K, value: Client[K]) => {
+    setSaveState('idle')
     setDraft((current) => (current ? { ...current, [key]: value } : current))
   }
 
   const save = () => {
-    updateClient(draft.id, {
+    if (!draft.nome.trim()) {
+      setSaveState('error')
+      return
+    }
+
+    const updated = updateClient(draft.id, {
       cpfCnpj: draft.cpfCnpj,
       rg: draft.rg,
       gender: draft.gender,
@@ -135,12 +161,33 @@ export function ClientDetail() {
       observacoes: draft.observacoes.trim(),
       active: draft.active,
     })
+
+    if (!updated) {
+      setSaveState('error')
+      return
+    }
+
+    setDraft(cloneClient(updated))
+    setSaveState('saved')
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = window.setTimeout(() => setSaveState('idle'), 2200)
   }
 
-  const SaveButton = () => (
-    <button type="button" className="client-detail__save" onClick={save}>
+  const saveLabel =
+    saveState === 'saved'
+      ? 'Alterações salvas'
+      : saveState === 'error'
+        ? 'Não foi possível salvar'
+        : 'Salvar alterações'
+
+  const renderSaveButton = () => (
+    <button
+      type="button"
+      className={`client-detail__save${saveState === 'saved' ? ' is-saved' : ''}${saveState === 'error' ? ' is-error' : ''}`}
+      onClick={save}
+    >
       <Check size={16} strokeWidth={2.5} />
-      Salvar alterações
+      {saveLabel}
     </button>
   )
 
@@ -205,7 +252,7 @@ export function ClientDetail() {
                 : 'Atualize telefone e endereço'}
             </p>
           </div>
-          <SaveButton />
+          {renderSaveButton()}
         </header>
 
         <div className="client-detail__panel-body">
@@ -641,7 +688,7 @@ export function ClientDetail() {
         </div>
 
         <footer className="client-detail__panel-foot">
-          <SaveButton />
+          {renderSaveButton()}
         </footer>
       </section>
     </div>
