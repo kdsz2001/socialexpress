@@ -329,6 +329,12 @@
   color: #7e8299;
 }
 
+.clients__person-inactive {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #f64e60;
+}
+
 .clients__phone {
   display: inline-flex;
   align-items: center;
