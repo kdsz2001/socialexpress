@@ -49,14 +49,11 @@
 .client-detail__email {
   display: block;
   margin: 0 0 18px;
-  color: #3699ff;
+  color: #3f4254;
   font-size: 0.925rem;
-  text-decoration: none;
+  font-weight: 400;
+  line-height: 1.45;
   word-break: break-all;
-}
-
-.client-detail__email:hover {
-  text-decoration: underline;
 }
 
 .client-detail__menu {

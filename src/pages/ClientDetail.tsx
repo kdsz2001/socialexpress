@@ -202,9 +202,7 @@ export function ClientDetail() {
         ) : null}
 
         {draft.email ? (
-          <a className="client-detail__email" href={`mailto:${draft.email}`}>
-            {draft.email}
-          </a>
+          <p className="client-detail__email">{draft.email}</p>
         ) : null}
 
         <nav className="client-detail__menu" aria-label="Seções do cliente">
