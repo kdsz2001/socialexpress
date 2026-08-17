@@ -1,4 +1,5 @@
 import { useEffect, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { User, Wallet, X } from 'lucide-react'
 import './ProfileDrawer.css'
 
@@ -30,20 +31,28 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
       if (event.key === 'Escape') onClose()
     }
 
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', onKeyDown)
+    }
   }, [open, onClose])
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <>
-      {open && (
+      {open ? (
         <button
           type="button"
           className="profile-drawer__overlay"
           aria-label="Fechar perfil"
           onClick={onClose}
         />
-      )}
+      ) : null}
 
       <aside
         className={`profile-drawer${open ? ' is-open' : ''}`}
@@ -92,6 +101,7 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
           })}
         </nav>
       </aside>
-    </>
+    </>,
+    document.body,
   )
 }
