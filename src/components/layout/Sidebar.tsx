@@ -1,4 +1,4 @@
-import { type MouseEvent } from 'react'
+import { useState, type MouseEvent } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   Monitor,
@@ -51,10 +51,13 @@ function BrandMark() {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const location = useLocation()
+  // Clarial: menu fixado fechado abre no hover e fecha ao sair
+  const [hoverOpen, setHoverOpen] = useState(false)
+  const pinnedClosed = collapsed
+  const openOnHover = pinnedClosed && hoverOpen
 
   const handleBrandClick = (e: MouseEvent) => {
     e.preventDefault()
-    // Como no Clarial: clicar na logo atualiza / vai para o início
     if (location.pathname === '/') {
       window.location.reload()
     } else {
@@ -63,9 +66,21 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   }
 
   return (
-    <aside className={`sidebar ${collapsed ? 'is-collapsed' : ''}`}>
+    <aside
+      className={[
+        'sidebar',
+        pinnedClosed ? 'is-collapsed' : '',
+        openOnHover ? 'is-hover-open' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onMouseEnter={() => {
+        if (pinnedClosed) setHoverOpen(true)
+      }}
+      onMouseLeave={() => setHoverOpen(false)}
+    >
       <div className="sidebar__brand">
-        {collapsed ? (
+        {pinnedClosed && !openOnHover ? (
           <button
             type="button"
             className="sidebar__dock"
@@ -97,9 +112,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <button
               type="button"
               className="sidebar__tie-toggle"
-              onClick={onToggle}
-              aria-label="Recolher menu"
-              aria-expanded
+              onClick={() => {
+                setHoverOpen(false)
+                onToggle()
+              }}
+              aria-label={pinnedClosed ? 'Fixar menu aberto' : 'Recolher menu'}
+              aria-expanded={!pinnedClosed}
             >
               <NecktieMark className="sidebar__necktie" docked={false} />
             </button>
