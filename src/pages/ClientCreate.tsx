@@ -133,6 +133,7 @@ type ViaCepResponse = {
   localidade?: string
   uf?: string
   estado?: string
+  cep?: string
 }
 
 type Phone = {
@@ -148,6 +149,61 @@ type Measure = {
 
 type Gender = 'feminino' | 'masculino' | 'outros' | ''
 type CepStatus = 'idle' | 'loading' | 'ok' | 'error'
+
+/** Amostra CEPs da mesma faixa (5 dígitos) e reúne bairros da mesma cidade */
+async function fetchAddressByCep(digits: string, signal: AbortSignal) {
+  const mainResponse = await fetch(`https://viacep.com.br/ws/${digits}/json/`, {
+    signal,
+  })
+  if (!mainResponse.ok) throw new Error('CEP lookup failed')
+  const main = (await mainResponse.json()) as ViaCepResponse
+  if (main.erro) return { main: null, bairros: [] as string[] }
+
+  const city = (main.localidade ?? '').trim()
+  const prefix = digits.slice(0, 5)
+  const suffixes = [
+    0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700,
+    750, 800, 850, 900, 950,
+  ]
+  const exactSuffix = Number(digits.slice(5))
+  if (!suffixes.includes(exactSuffix)) suffixes.push(exactSuffix)
+
+  const settled = await Promise.allSettled(
+    suffixes.map(async (suffix) => {
+      const cep = `${prefix}${String(suffix).padStart(3, '0')}`
+      if (cep === digits) return main
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
+        signal,
+      })
+      if (!response.ok) return null
+      return (await response.json()) as ViaCepResponse
+    }),
+  )
+
+  const seen = new Set<string>()
+  const bairros: string[] = []
+  const addBairro = (name?: string) => {
+    const trimmed = name?.trim()
+    if (!trimmed) return
+    const key = trimmed.toLocaleLowerCase('pt-BR')
+    if (seen.has(key)) return
+    seen.add(key)
+    bairros.push(trimmed)
+  }
+
+  // bairro do CEP digitado primeiro
+  addBairro(main.bairro)
+
+  for (const result of settled) {
+    if (result.status !== 'fulfilled' || !result.value || result.value.erro) continue
+    const item = result.value
+    if ((item.localidade ?? '').trim() !== city) continue
+    addBairro(item.bairro)
+  }
+
+  bairros.sort((a, b) => a.localeCompare(b, 'pt-BR'))
+  return { main, bairros }
+}
 
 export function ClientCreate() {
   const navigate = useNavigate()
@@ -174,50 +230,49 @@ export function ClientCreate() {
 
   useEffect(() => {
     const digits = onlyDigits(cep)
+
+    // ao trocar/apagar CEP, remove bairros do CEP anterior imediatamente
     if (digits.length !== 8) {
       setCepStatus('idle')
+      setBairroOptions([])
+      setBairro('')
       return
     }
 
     const controller = new AbortController()
     setCepStatus('loading')
+    setBairroOptions([])
+    setBairro('')
 
     const timer = window.setTimeout(async () => {
       try {
-        const response = await fetch(
-          `https://viacep.com.br/ws/${digits}/json/`,
-          { signal: controller.signal },
+        const { main, bairros } = await fetchAddressByCep(
+          digits,
+          controller.signal,
         )
-        if (!response.ok) throw new Error('CEP lookup failed')
-        const data = (await response.json()) as ViaCepResponse
-        if (data.erro) {
+        if (!main) {
           setCepStatus('error')
+          setBairroOptions([])
+          setBairro('')
           return
         }
 
-        setLogradouro(data.logradouro ?? '')
-        if (data.complemento) setComplemento(data.complemento)
-        const nextBairro = data.bairro ?? ''
-        setBairro(nextBairro)
-        setCidade(data.localidade ?? '')
-        if (nextBairro) {
-          setBairroOptions((current) => {
-            const key = nextBairro.toLocaleLowerCase('pt-BR')
-            if (current.some((item) => item.toLocaleLowerCase('pt-BR') === key)) {
-              return current
-            }
-            return [...current, nextBairro]
-          })
-        }
+        setLogradouro(main.logradouro ?? '')
+        setComplemento(main.complemento ?? '')
+        setCidade(main.localidade ?? '')
         const stateName =
-          data.estado ||
-          (data.uf ? UF_TO_STATE[data.uf.toUpperCase()] : undefined) ||
+          main.estado ||
+          (main.uf ? UF_TO_STATE[main.uf.toUpperCase()] : undefined) ||
           ''
         setStateUf(stateName)
+        setBairroOptions(bairros)
+        setBairro(main.bairro?.trim() || bairros[0] || '')
         setCepStatus('ok')
       } catch (error) {
         if ((error as Error).name === 'AbortError') return
         setCepStatus('error')
+        setBairroOptions([])
+        setBairro('')
       }
     }, 250)
 
