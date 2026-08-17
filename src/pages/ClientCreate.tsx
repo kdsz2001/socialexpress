@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -7,6 +7,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { NeighborhoodSelect } from '../components/clients/NeighborhoodSelect'
+import { addClient } from '../lib/clientsStore'
 import './ClientCreate.css'
 
 const BRAZIL_STATES = [
@@ -225,8 +226,48 @@ export function ClientCreate() {
   ])
   const [notifyEmail, setNotifyEmail] = useState(true)
   const [stateUf, setStateUf] = useState('')
+  const [rg, setRg] = useState('')
+  const [nome, setNome] = useState('')
+  const [sobrenomes, setSobrenomes] = useState('')
+  const [chamado, setChamado] = useState('')
+  const [email, setEmail] = useState('')
+  const [facebook, setFacebook] = useState('')
+  const [instagram, setInstagram] = useState('')
+  const [numero, setNumero] = useState('')
+  const [observacoes, setObservacoes] = useState('')
 
   const goBack = () => navigate('/clientes')
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!gender) return
+
+    addClient({
+      cpfCnpj,
+      rg,
+      gender,
+      nome: nome.trim(),
+      sobrenomes: sobrenomes.trim(),
+      chamado: chamado.trim(),
+      birthDate,
+      email: email.trim(),
+      phones: phones.filter((phone) => phone.number.trim()),
+      facebook: facebook.trim(),
+      instagram: instagram.trim(),
+      cep,
+      logradouro,
+      numero: numero.trim(),
+      complemento,
+      estado: stateUf,
+      cidade,
+      bairro,
+      notifyEmail,
+      measures: measures.filter((m) => m.type || m.value),
+      observacoes: observacoes.trim(),
+    })
+
+    navigate('/clientes')
+  }
 
   useEffect(() => {
     const digits = onlyDigits(cep)
@@ -297,12 +338,7 @@ export function ClientCreate() {
 
   return (
     <div className="client-create">
-      <form
-        className="client-create__card"
-        onSubmit={(event) => {
-          event.preventDefault()
-        }}
-      >
+      <form className="client-create__card" onSubmit={handleSubmit}>
         <header className="client-create__card-header">
           <h2 className="client-create__card-title">Informações do novo cliente</h2>
           <ActionButtons />
@@ -331,7 +367,12 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="rg">
               RG
             </label>
-            <input id="rg" className="client-create__input" />
+            <input
+              id="rg"
+              className="client-create__input"
+              value={rg}
+              onChange={(event) => setRg(event.target.value)}
+            />
           </div>
 
           <div className="client-create__row">
@@ -365,21 +406,37 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="nome">
               Nome <span className="req">*</span>
             </label>
-            <input id="nome" className="client-create__input" required />
+            <input
+              id="nome"
+              className="client-create__input"
+              required
+              value={nome}
+              onChange={(event) => setNome(event.target.value)}
+            />
           </div>
 
           <div className="client-create__row">
             <label className="client-create__label" htmlFor="sobrenomes">
               Sobrenomes
             </label>
-            <input id="sobrenomes" className="client-create__input" />
+            <input
+              id="sobrenomes"
+              className="client-create__input"
+              value={sobrenomes}
+              onChange={(event) => setSobrenomes(event.target.value)}
+            />
           </div>
 
           <div className="client-create__row">
             <label className="client-create__label" htmlFor="chamado">
               Como quer ser chamado
             </label>
-            <input id="chamado" className="client-create__input" />
+            <input
+              id="chamado"
+              className="client-create__input"
+              value={chamado}
+              onChange={(event) => setChamado(event.target.value)}
+            />
           </div>
 
           <div className="client-create__row">
@@ -400,7 +457,13 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="email">
               Email
             </label>
-            <input id="email" type="email" className="client-create__input" />
+            <input
+              id="email"
+              type="email"
+              className="client-create__input"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
           </div>
 
           {phones.map((phone, index) => (
@@ -485,7 +548,12 @@ export function ClientCreate() {
             </label>
             <div className="client-create__affix">
               <span className="client-create__affix-prefix">facebook.com/</span>
-              <input id="facebook" className="client-create__affix-input" />
+              <input
+                id="facebook"
+                className="client-create__affix-input"
+                value={facebook}
+                onChange={(event) => setFacebook(event.target.value)}
+              />
             </div>
           </div>
 
@@ -495,7 +563,12 @@ export function ClientCreate() {
             </label>
             <div className="client-create__affix">
               <span className="client-create__affix-prefix">instagram.com/</span>
-              <input id="instagram" className="client-create__affix-input" />
+              <input
+                id="instagram"
+                className="client-create__affix-input"
+                value={instagram}
+                onChange={(event) => setInstagram(event.target.value)}
+              />
             </div>
           </div>
 
@@ -545,7 +618,13 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="numero">
               Número <span className="req">*</span>
             </label>
-            <input id="numero" className="client-create__input" required />
+            <input
+              id="numero"
+              className="client-create__input"
+              required
+              value={numero}
+              onChange={(event) => setNumero(event.target.value)}
+            />
           </div>
 
           <div className="client-create__row">
@@ -573,6 +652,7 @@ export function ClientCreate() {
                 setStateUf(event.target.value)
                 setCidade('')
                 setBairro('')
+                setBairroOptions([])
               }}
             >
               <option value="">Selecione um estado</option>
@@ -707,7 +787,13 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="obs">
               Observações
             </label>
-            <textarea id="obs" className="client-create__textarea" rows={5} />
+            <textarea
+              id="obs"
+              className="client-create__textarea"
+              rows={5}
+              value={observacoes}
+              onChange={(event) => setObservacoes(event.target.value)}
+            />
           </div>
         </div>
 

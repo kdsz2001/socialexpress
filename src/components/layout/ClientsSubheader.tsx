@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { CloudUpload, Download } from 'lucide-react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import { ImportClientsModal } from '../clients/ImportClientsModal'
+import { useClients } from '../../hooks/useClients'
 import './ClientsSubheader.css'
 
 export function ClientsSubheader() {
   const location = useLocation()
+  const clients = useClients()
   const [searchParams] = useSearchParams()
   const isCreate = location.pathname === '/clientes/cadastrar'
   const isBirthdays = searchParams.get('tab') === 'aniversariantes'
@@ -21,6 +23,12 @@ export function ClientsSubheader() {
         : 'Clientes'
 
   const showListChrome = !isCreate && !isBirthdays && !isWhatsapp
+  const countLabel =
+    clients.length === 0
+      ? 'Nenhum cliente cadastrado'
+      : clients.length === 1
+        ? '1 cliente cadastrado'
+        : `${clients.length} clientes cadastrados`
 
   return (
     <>
@@ -30,7 +38,7 @@ export function ClientsSubheader() {
           {showListChrome && (
             <>
               <span className="clients-subheader__sep" aria-hidden="true" />
-              <p className="clients-subheader__subtitle">Nenhum cliente cadastrado</p>
+              <p className="clients-subheader__subtitle">{countLabel}</p>
             </>
           )}
         </div>
