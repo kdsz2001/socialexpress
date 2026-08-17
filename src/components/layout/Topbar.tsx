@@ -28,9 +28,10 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     location.pathname !== '/clientes' &&
     location.pathname !== '/clientes/cadastrar'
   const paramTab = searchParams.get('tab')
-  const clientsTab: ClientsTab =
+  // Na visualização/cadastro nenhuma aba fica selecionada (como no Clarial)
+  const clientsTab: ClientsTab | null =
     isClientCreate || isClientDetail
-      ? 'todos'
+      ? null
       : paramTab === 'aniversariantes'
         ? 'aniversariantes'
         : paramTab === 'whatsapp'
