@@ -126,6 +126,31 @@
   margin-left: 2px;
 }
 
+.client-create__field {
+  min-width: 0;
+  max-width: 520px;
+}
+
+.client-create__cep-status {
+  min-height: 1.1rem;
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  color: #7e8299;
+}
+
+.client-create__cep-status:empty {
+  display: none;
+}
+
+.client-create__cep-status.is-ok {
+  color: #1bc5bd;
+}
+
+.client-create__cep-status.is-error {
+  color: #f64e60;
+}
+
 .client-create__input,
 .client-create__select,
 .client-create__textarea {

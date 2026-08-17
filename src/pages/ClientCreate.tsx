@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -36,7 +36,37 @@ const BRAZIL_STATES = [
   'São Paulo',
   'Sergipe',
   'Tocantins',
-]
+] as const
+
+const UF_TO_STATE: Record<string, (typeof BRAZIL_STATES)[number]> = {
+  AC: 'Acre',
+  AL: 'Alagoas',
+  AP: 'Amapá',
+  AM: 'Amazonas',
+  BA: 'Bahia',
+  CE: 'Ceará',
+  DF: 'Distrito Federal',
+  ES: 'Espírito Santo',
+  GO: 'Goiás',
+  MA: 'Maranhão',
+  MT: 'Mato Grosso',
+  MS: 'Mato Grosso do Sul',
+  MG: 'Minas Gerais',
+  PA: 'Pará',
+  PB: 'Paraíba',
+  PR: 'Paraná',
+  PE: 'Pernambuco',
+  PI: 'Piauí',
+  RJ: 'Rio de Janeiro',
+  RN: 'Rio Grande do Norte',
+  RS: 'Rio Grande do Sul',
+  RO: 'Rondônia',
+  RR: 'Roraima',
+  SC: 'Santa Catarina',
+  SP: 'São Paulo',
+  SE: 'Sergipe',
+  TO: 'Tocantins',
+}
 
 const MEASURE_OPTIONS = [
   'Busto',
@@ -94,6 +124,16 @@ function maskBirthDate(value: string) {
     .replace(/^(\d{2})\/(\d{2})(\d)/, '$1/$2/$3')
 }
 
+type ViaCepResponse = {
+  erro?: boolean | string
+  logradouro?: string
+  complemento?: string
+  bairro?: string
+  localidade?: string
+  uf?: string
+  estado?: string
+}
+
 type Phone = {
   number: string
   primary: boolean
@@ -106,12 +146,18 @@ type Measure = {
 }
 
 type Gender = 'feminino' | 'masculino' | 'outros' | ''
+type CepStatus = 'idle' | 'loading' | 'ok' | 'error'
 
 export function ClientCreate() {
   const navigate = useNavigate()
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [birthDate, setBirthDate] = useState('')
   const [cep, setCep] = useState('')
+  const [cepStatus, setCepStatus] = useState<CepStatus>('idle')
+  const [logradouro, setLogradouro] = useState('')
+  const [complemento, setComplemento] = useState('')
+  const [cidade, setCidade] = useState('')
+  const [bairro, setBairro] = useState('')
   const [gender, setGender] = useState<Gender>('')
   const [phones, setPhones] = useState<Phone[]>([
     { number: '', primary: true, whatsapp: true },
@@ -123,6 +169,51 @@ export function ClientCreate() {
   const [stateUf, setStateUf] = useState('')
 
   const goBack = () => navigate('/clientes')
+
+  useEffect(() => {
+    const digits = onlyDigits(cep)
+    if (digits.length !== 8) {
+      setCepStatus('idle')
+      return
+    }
+
+    const controller = new AbortController()
+    setCepStatus('loading')
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://viacep.com.br/ws/${digits}/json/`,
+          { signal: controller.signal },
+        )
+        if (!response.ok) throw new Error('CEP lookup failed')
+        const data = (await response.json()) as ViaCepResponse
+        if (data.erro) {
+          setCepStatus('error')
+          return
+        }
+
+        setLogradouro(data.logradouro ?? '')
+        if (data.complemento) setComplemento(data.complemento)
+        setBairro(data.bairro ?? '')
+        setCidade(data.localidade ?? '')
+        const stateName =
+          data.estado ||
+          (data.uf ? UF_TO_STATE[data.uf.toUpperCase()] : undefined) ||
+          ''
+        setStateUf(stateName)
+        setCepStatus('ok')
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') return
+        setCepStatus('error')
+      }
+    }, 250)
+
+    return () => {
+      controller.abort()
+      window.clearTimeout(timer)
+    }
+  }, [cep])
 
   const ActionButtons = () => (
     <div className="client-create__actions">
@@ -347,21 +438,40 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="cep">
               CEP
             </label>
-            <input
-              id="cep"
-              className="client-create__input"
-              inputMode="numeric"
-              placeholder="99999-999"
-              value={cep}
-              onChange={(event) => setCep(maskCep(event.target.value))}
-            />
+            <div className="client-create__field">
+              <input
+                id="cep"
+                className="client-create__input"
+                inputMode="numeric"
+                placeholder="99999-999"
+                value={cep}
+                onChange={(event) => setCep(maskCep(event.target.value))}
+                aria-describedby="cep-status"
+              />
+              <p
+                id="cep-status"
+                className={`client-create__cep-status${
+                  cepStatus === 'error' ? ' is-error' : ''
+                }${cepStatus === 'ok' ? ' is-ok' : ''}`}
+              >
+                {cepStatus === 'loading' && 'Buscando endereço...'}
+                {cepStatus === 'error' && 'CEP não encontrado'}
+                {cepStatus === 'ok' && 'Endereço preenchido'}
+              </p>
+            </div>
           </div>
 
           <div className="client-create__row">
             <label className="client-create__label" htmlFor="logradouro">
               Logradouro <span className="req">*</span>
             </label>
-            <input id="logradouro" className="client-create__input" required />
+            <input
+              id="logradouro"
+              className="client-create__input"
+              required
+              value={logradouro}
+              onChange={(event) => setLogradouro(event.target.value)}
+            />
           </div>
 
           <div className="client-create__row">
@@ -375,7 +485,12 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="complemento">
               Complemento
             </label>
-            <input id="complemento" className="client-create__input" />
+            <input
+              id="complemento"
+              className="client-create__input"
+              value={complemento}
+              onChange={(event) => setComplemento(event.target.value)}
+            />
           </div>
 
           <div className="client-create__row">
@@ -387,7 +502,11 @@ export function ClientCreate() {
               className="client-create__select"
               required
               value={stateUf}
-              onChange={(event) => setStateUf(event.target.value)}
+              onChange={(event) => {
+                setStateUf(event.target.value)
+                setCidade('')
+                setBairro('')
+              }}
             >
               <option value="">Selecione um estado</option>
               {BRAZIL_STATES.map((uf) => (
@@ -402,8 +521,18 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="cidade">
               Cidade <span className="req">*</span>
             </label>
-            <select id="cidade" className="client-create__select" required>
+            <select
+              id="cidade"
+              className="client-create__select"
+              required
+              value={cidade}
+              onChange={(event) => {
+                setCidade(event.target.value)
+                setBairro('')
+              }}
+            >
               <option value="">Selecione uma cidade</option>
+              {cidade ? <option value={cidade}>{cidade}</option> : null}
             </select>
           </div>
 
@@ -411,8 +540,15 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="bairro">
               Bairro <span className="req">*</span>
             </label>
-            <select id="bairro" className="client-create__select" required>
+            <select
+              id="bairro"
+              className="client-create__select"
+              required
+              value={bairro}
+              onChange={(event) => setBairro(event.target.value)}
+            >
               <option value="">Selecione um bairro</option>
+              {bairro ? <option value={bairro}>{bairro}</option> : null}
             </select>
           </div>
 
