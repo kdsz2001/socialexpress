@@ -6,6 +6,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react'
+import { NeighborhoodSelect } from '../components/clients/NeighborhoodSelect'
 import './ClientCreate.css'
 
 const BRAZIL_STATES = [
@@ -158,6 +159,7 @@ export function ClientCreate() {
   const [complemento, setComplemento] = useState('')
   const [cidade, setCidade] = useState('')
   const [bairro, setBairro] = useState('')
+  const [bairroOptions, setBairroOptions] = useState<string[]>([])
   const [gender, setGender] = useState<Gender>('')
   const [phones, setPhones] = useState<Phone[]>([
     { number: '', primary: true, whatsapp: true },
@@ -195,8 +197,18 @@ export function ClientCreate() {
 
         setLogradouro(data.logradouro ?? '')
         if (data.complemento) setComplemento(data.complemento)
-        setBairro(data.bairro ?? '')
+        const nextBairro = data.bairro ?? ''
+        setBairro(nextBairro)
         setCidade(data.localidade ?? '')
+        if (nextBairro) {
+          setBairroOptions((current) => {
+            const key = nextBairro.toLocaleLowerCase('pt-BR')
+            if (current.some((item) => item.toLocaleLowerCase('pt-BR') === key)) {
+              return current
+            }
+            return [...current, nextBairro]
+          })
+        }
         const stateName =
           data.estado ||
           (data.uf ? UF_TO_STATE[data.uf.toUpperCase()] : undefined) ||
@@ -540,16 +552,23 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="bairro">
               Bairro <span className="req">*</span>
             </label>
-            <select
+            <NeighborhoodSelect
               id="bairro"
-              className="client-create__select"
-              required
               value={bairro}
-              onChange={(event) => setBairro(event.target.value)}
-            >
-              <option value="">Selecione um bairro</option>
-              {bairro ? <option value={bairro}>{bairro}</option> : null}
-            </select>
+              options={bairroOptions}
+              city={cidade}
+              required
+              onChange={setBairro}
+              onRegister={(name) => {
+                setBairroOptions((current) => {
+                  const key = name.toLocaleLowerCase('pt-BR')
+                  if (current.some((item) => item.toLocaleLowerCase('pt-BR') === key)) {
+                    return current
+                  }
+                  return [...current, name]
+                })
+              }}
+            />
           </div>
 
           <h3 className="client-create__section-title">Notificações:</h3>
