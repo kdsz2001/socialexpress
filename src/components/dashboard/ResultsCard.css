@@ -66,15 +66,15 @@
 }
 
 .results-card__value {
-  font-size: 1.08rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
   color: #7e8299;
   white-space: nowrap;
   background: #f3f6f9;
   border-radius: 0.42rem;
-  padding: 0.7rem 1rem;
-  min-width: 6.5rem;
-  min-height: 2.75rem;
+  padding: 0.45rem 0.75rem;
+  min-width: 4.25rem;
+  min-height: 2.25rem;
   text-align: center;
   line-height: 1.2;
   box-sizing: border-box;
