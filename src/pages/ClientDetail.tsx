@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Check,
@@ -7,6 +7,7 @@ import {
   Trash2,
   UserRound,
 } from 'lucide-react'
+import { SaveToast } from '../components/ui/SaveToast'
 import { useClients } from '../hooks/useClients'
 import {
   buildWhatsAppUrl,
@@ -98,8 +99,8 @@ export function ClientDetail() {
   const stored = clients.find((client) => client.id === clientId)
   const [section, setSection] = useState<DetailSection>('pessoais')
   const [draft, setDraft] = useState<Client | null>(null)
-  const [saveState, setSaveState] = useState<'idle' | 'saved' | 'error'>('idle')
-  const saveTimerRef = useRef<number | null>(null)
+  const [toastOpen, setToastOpen] = useState(false)
+  const [saveError, setSaveError] = useState(false)
 
   useEffect(() => {
     if (!stored) {
@@ -113,11 +114,7 @@ export function ClientDetail() {
     })
   }, [stored, navigate])
 
-  useEffect(() => {
-    return () => {
-      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current)
-    }
-  }, [])
+  const closeToast = useCallback(() => setToastOpen(false), [])
 
   if (!draft || !stored) return null
 
@@ -127,13 +124,13 @@ export function ClientDetail() {
     phone?.whatsapp && phone.number ? buildWhatsAppUrl(phone.number) : null
 
   const patch = <K extends keyof Client>(key: K, value: Client[K]) => {
-    setSaveState('idle')
+    setSaveError(false)
     setDraft((current) => (current ? { ...current, [key]: value } : current))
   }
 
   const save = () => {
     if (!draft.nome.trim()) {
-      setSaveState('error')
+      setSaveError(true)
       return
     }
 
@@ -163,36 +160,35 @@ export function ClientDetail() {
     })
 
     if (!updated) {
-      setSaveState('error')
+      setSaveError(true)
       return
     }
 
+    setSaveError(false)
     setDraft(cloneClient(updated))
-    setSaveState('saved')
-    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current)
-    saveTimerRef.current = window.setTimeout(() => setSaveState('idle'), 2200)
-  }
+    setToastOpen(true)
 
-  const saveLabel =
-    saveState === 'saved'
-      ? 'Alterações salvas'
-      : saveState === 'error'
-        ? 'Não foi possível salvar'
-        : 'Salvar alterações'
+    const content = document.querySelector('.app-content')
+    if (content instanceof HTMLElement) {
+      content.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   const renderSaveButton = () => (
     <button
       type="button"
-      className={`client-detail__save${saveState === 'saved' ? ' is-saved' : ''}${saveState === 'error' ? ' is-error' : ''}`}
+      className={`client-detail__save${saveError ? ' is-error' : ''}`}
       onClick={save}
     >
       <Check size={16} strokeWidth={2.5} />
-      {saveLabel}
+      Salvar alterações
     </button>
   )
 
   return (
     <div className="client-detail">
+      <SaveToast open={toastOpen} onClose={closeToast} />
+
       <aside className="client-detail__profile">
         <h2 className="client-detail__name">{displayName}</h2>
 

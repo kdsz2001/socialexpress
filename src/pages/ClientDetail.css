@@ -158,14 +158,6 @@
   background: #187de4;
 }
 
-.client-detail__save.is-saved {
-  background: #1bc5bd;
-}
-
-.client-detail__save.is-saved:hover {
-  background: #0bb7af;
-}
-
 .client-detail__save.is-error {
   background: #f64e60;
 }
