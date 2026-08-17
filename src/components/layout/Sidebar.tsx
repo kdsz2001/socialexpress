@@ -74,9 +74,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       ]
         .filter(Boolean)
         .join(' ')}
-      onMouseEnter={() => {
-        if (pinnedClosed) setHoverOpen(true)
-      }}
       onMouseLeave={() => setHoverOpen(false)}
     >
       <div className="sidebar__brand">
@@ -125,7 +122,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
       </div>
 
-      <nav className="sidebar__nav" aria-label="Menu principal">
+      <nav
+        className="sidebar__nav"
+        aria-label="Menu principal"
+        onMouseEnter={() => {
+          if (pinnedClosed) setHoverOpen(true)
+        }}
+      >
         <ul>
           {navItems.map((item) => {
             const Icon = item.icon
