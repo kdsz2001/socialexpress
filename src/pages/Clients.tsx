@@ -370,7 +370,11 @@ export function Clients() {
                               <span className="clients__person-name">
                                 {getClientDisplayName(client)}
                               </span>
-                              {client.cpfCnpj ? (
+                              {client.active === false ? (
+                                <span className="clients__person-inactive">
+                                  Cliente desativado
+                                </span>
+                              ) : client.cpfCnpj ? (
                                 <span className="clients__person-doc">
                                   {client.cpfCnpj}
                                 </span>
