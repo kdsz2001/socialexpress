@@ -1,4 +1,5 @@
 import { useEffect, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { HelpCircle, Trash2 } from 'lucide-react'
 import './DeleteClientModal.css'
 
@@ -20,17 +21,23 @@ export function DeleteClientModal({
   useEffect(() => {
     if (!open) return
 
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onCancel()
     }
 
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', onKeyDown)
+    }
   }, [open, onCancel])
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="delete-client-modal" role="presentation">
       <button
         type="button"
@@ -46,7 +53,7 @@ export function DeleteClientModal({
         aria-labelledby={titleId}
       >
         <div className="delete-client-modal__icon" aria-hidden="true">
-          <HelpCircle size={36} strokeWidth={1.75} />
+          <HelpCircle size={44} strokeWidth={1.6} />
         </div>
 
         <h2 id={titleId} className="delete-client-modal__title">
@@ -75,11 +82,12 @@ export function DeleteClientModal({
             className="delete-client-modal__btn delete-client-modal__btn--delete"
             onClick={onConfirm}
           >
-            <Trash2 size={16} strokeWidth={2.25} />
+            <Trash2 size={17} strokeWidth={2.25} />
             Excluir
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
