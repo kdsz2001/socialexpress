@@ -289,6 +289,55 @@
   display: none;
 }
 
+/* Flyout lateral só no menu minimizado (estilo Clarial) */
+.sidebar__flyout {
+  position: fixed;
+  left: var(--sidebar-collapsed);
+  z-index: 60;
+  display: none;
+  align-items: center;
+  min-width: 140px;
+  padding: 0 1.25rem;
+  background: #1b1b28;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 400;
+  white-space: nowrap;
+  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  animation: sidebar-flyout-in 0.12s ease;
+}
+
+.sidebar.is-collapsed .sidebar__flyout {
+  display: flex;
+}
+
+.sidebar__flyout.is-active {
+  color: #ffffff;
+}
+
+.sidebar__flyout::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background: #1b1b28;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+@keyframes sidebar-flyout-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .sidebar__link:hover {
   background: #1b1b28;
   color: #ffffff;
@@ -328,5 +377,9 @@
   .sidebar.is-collapsed {
     transform: translateX(-100%);
     width: var(--sidebar-width);
+  }
+
+  .sidebar__flyout {
+    display: none !important;
   }
 }

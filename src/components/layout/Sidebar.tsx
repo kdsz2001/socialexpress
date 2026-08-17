@@ -1,3 +1,4 @@
+import { useEffect, useState, type MouseEvent } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   Monitor,
@@ -36,6 +37,13 @@ type SidebarProps = {
   onToggle: () => void
 }
 
+type FlyoutState = {
+  label: string
+  top: number
+  height: number
+  active: boolean
+}
+
 function BrandMark() {
   return (
     <>
@@ -50,8 +58,13 @@ function BrandMark() {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const location = useLocation()
+  const [flyout, setFlyout] = useState<FlyoutState | null>(null)
 
-  const handleBrandClick = (e: React.MouseEvent) => {
+  useEffect(() => {
+    setFlyout(null)
+  }, [collapsed, location.pathname])
+
+  const handleBrandClick = (e: MouseEvent) => {
     e.preventDefault()
     // Como no Clarial: clicar na logo atualiza / vai para o início
     if (location.pathname === '/') {
@@ -60,6 +73,23 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       window.location.assign('/')
     }
   }
+
+  const showFlyout = (
+    event: { currentTarget: EventTarget & HTMLElement },
+    label: string,
+    active: boolean,
+  ) => {
+    if (!collapsed) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    setFlyout({
+      label,
+      top: rect.top,
+      height: rect.height,
+      active,
+    })
+  }
+
+  const hideFlyout = () => setFlyout(null)
 
   return (
     <aside className={`sidebar ${collapsed ? 'is-collapsed' : ''}`}>
@@ -106,7 +136,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
       </div>
 
-      <nav className="sidebar__nav" aria-label="Menu principal">
+      <nav
+        className="sidebar__nav"
+        aria-label="Menu principal"
+        onScroll={hideFlyout}
+      >
         <ul>
           {navItems.map((item) => {
             const Icon = item.icon
@@ -125,6 +159,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       .filter(Boolean)
                       .join(' ')
                   }
+                  onMouseEnter={(event) => {
+                    const isActive =
+                      isDashboard
+                        ? location.pathname === '/'
+                        : location.pathname === item.to ||
+                          location.pathname.startsWith(`${item.to}/`)
+                    showFlyout(event, item.label, isActive)
+                  }}
+                  onMouseLeave={hideFlyout}
+                  onFocus={(event) => {
+                    const isActive =
+                      isDashboard
+                        ? location.pathname === '/'
+                        : location.pathname === item.to ||
+                          location.pathname.startsWith(`${item.to}/`)
+                    showFlyout(event, item.label, isActive)
+                  }}
+                  onBlur={hideFlyout}
                 >
                   <Icon className="sidebar__icon" size={18} strokeWidth={1.5} />
                   <span className="sidebar__label">{item.label}</span>
@@ -134,6 +186,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           })}
         </ul>
       </nav>
+
+      {collapsed && flyout ? (
+        <div
+          className={`sidebar__flyout${flyout.active ? ' is-active' : ''}`}
+          style={{ top: flyout.top, height: flyout.height }}
+          aria-hidden="true"
+        >
+          {flyout.label}
+        </div>
+      ) : null}
     </aside>
   )
 }
