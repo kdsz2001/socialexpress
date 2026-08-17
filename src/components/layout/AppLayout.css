@@ -3,10 +3,16 @@
   height: 100%;
   min-height: 100vh;
   background: var(--main-bg);
+  /* ao abrir o menu o conteúdo desliza sem reflow — corta a sobra */
+  overflow-x: hidden;
 }
 
 .app-main {
-  flex: 1;
+  /* largura fixa (como se o menu estivesse só nos ícones):
+     ao abrir/fechar só muda a margem — cards não redimensionam */
+  flex: 0 0 auto;
+  width: calc(100vw - var(--sidebar-collapsed));
+  max-width: calc(100vw - var(--sidebar-collapsed));
   min-width: 0;
   min-height: 0;
   height: 100%;
@@ -15,10 +21,16 @@
   margin-left: var(--sidebar-width);
   transition: margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .app-shell.is-collapsed .app-main {
   margin-left: var(--sidebar-collapsed);
+}
+
+/* Hover no menu fechado: empurra o conteúdo, mantém a mesma largura */
+.app-shell.is-collapsed:has(.sidebar.is-hover-open) .app-main {
+  margin-left: var(--sidebar-width);
 }
 
 .app-content {
@@ -108,10 +120,13 @@
 
 @media (max-width: 900px) {
   .app-main {
+    width: 100%;
+    max-width: 100%;
     margin-left: 0;
   }
 
-  .app-shell.is-collapsed .app-main {
+  .app-shell.is-collapsed .app-main,
+  .app-shell.is-collapsed:has(.sidebar.is-hover-open) .app-main {
     margin-left: 0;
   }
 
