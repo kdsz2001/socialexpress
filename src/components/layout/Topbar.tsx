@@ -23,14 +23,19 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
   const isClientsSection = location.pathname.startsWith('/clientes')
   const isClientCreate = location.pathname === '/clientes/cadastrar'
+  const isClientDetail =
+    isClientsSection &&
+    location.pathname !== '/clientes' &&
+    location.pathname !== '/clientes/cadastrar'
   const paramTab = searchParams.get('tab')
-  const clientsTab: ClientsTab = isClientCreate
-    ? 'todos'
-    : paramTab === 'aniversariantes'
-      ? 'aniversariantes'
-      : paramTab === 'whatsapp'
-        ? 'whatsapp'
-        : 'todos'
+  const clientsTab: ClientsTab =
+    isClientCreate || isClientDetail
+      ? 'todos'
+      : paramTab === 'aniversariantes'
+        ? 'aniversariantes'
+        : paramTab === 'whatsapp'
+          ? 'whatsapp'
+          : 'todos'
 
   const hasQuery = query.trim().length > 0
   // Futuro: substituir por resultados reais de pedido/produto/cliente

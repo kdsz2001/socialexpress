@@ -34,6 +34,7 @@ export type Client = {
   notifyEmail: boolean
   measures: ClientMeasure[]
   observacoes: string
+  active: boolean
   createdAt: string
 }
 
@@ -41,6 +42,13 @@ const STORAGE_KEY = 'social-express:clients'
 const CHANGE_EVENT = 'social-express:clients-changed'
 
 let cache: Client[] | null = null
+
+function normalizeClient(client: Client): Client {
+  return {
+    ...client,
+    active: client.active !== false,
+  }
+}
 
 function readAll(): Client[] {
   if (cache) return cache
@@ -51,7 +59,7 @@ function readAll(): Client[] {
       return cache
     }
     const parsed = JSON.parse(raw) as Client[]
-    cache = Array.isArray(parsed) ? parsed : []
+    cache = Array.isArray(parsed) ? parsed.map(normalizeClient) : []
     return cache
   } catch {
     cache = []
@@ -70,16 +78,39 @@ export function getClients(): Client[] {
 }
 
 export function addClient(
-  input: Omit<Client, 'id' | 'createdAt'> & { id?: string; createdAt?: string },
+  input: Omit<Client, 'id' | 'createdAt' | 'active'> & {
+    id?: string
+    createdAt?: string
+    active?: boolean
+  },
 ): Client {
   const client: Client = {
     ...input,
+    active: input.active !== false,
     id: input.id ?? crypto.randomUUID(),
     createdAt: input.createdAt ?? new Date().toISOString(),
   }
   const next = [client, ...readAll()]
   writeAll(next)
   return client
+}
+
+export function getClient(id: string): Client | undefined {
+  return readAll().find((client) => client.id === id)
+}
+
+export function updateClient(
+  id: string,
+  patch: Partial<Omit<Client, 'id' | 'createdAt'>>,
+): Client | null {
+  const current = readAll()
+  const index = current.findIndex((client) => client.id === id)
+  if (index < 0) return null
+  const updated = normalizeClient({ ...current[index], ...patch, id })
+  const next = [...current]
+  next[index] = updated
+  writeAll(next)
+  return updated
 }
 
 export function deleteClient(id: string) {

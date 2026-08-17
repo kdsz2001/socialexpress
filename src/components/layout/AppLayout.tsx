@@ -52,6 +52,10 @@ export function AppLayout() {
   }, [location.pathname, isMobile])
 
   useEffect(() => {
+    if (location.pathname.startsWith('/clientes/') && location.pathname !== '/clientes/cadastrar') {
+      document.title = 'Detalhes do cliente'
+      return
+    }
     document.title = PAGE_TITLES[location.pathname] ?? 'Social Express'
   }, [location.pathname])
 

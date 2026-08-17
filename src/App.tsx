@@ -3,6 +3,7 @@ import { AppLayout } from './components/layout/AppLayout'
 import { Dashboard } from './pages/Dashboard'
 import { Clients } from './pages/Clients'
 import { ClientCreate } from './pages/ClientCreate'
+import { ClientDetail } from './pages/ClientDetail'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
@@ -25,6 +26,7 @@ export default function App() {
         <Route index element={<Dashboard />} />
         <Route path="/clientes" element={<Clients />} />
         <Route path="/clientes/cadastrar" element={<ClientCreate />} />
+        <Route path="/clientes/:clientId" element={<ClientDetail />} />
         {pages.map((page) => (
           <Route
             key={page.path}

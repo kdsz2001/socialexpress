@@ -145,3 +145,26 @@
     display: none;
   }
 }
+
+.clients-subheader__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  background: #e4e6ef;
+  color: #3f4254;
+  font-size: 0.925rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.clients-subheader__back:hover {
+  background: #d7dae7;
+}

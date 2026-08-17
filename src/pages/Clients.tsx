@@ -405,6 +405,7 @@ export function Clients() {
                                 type="button"
                                 className="clients__action clients__action--view"
                                 aria-label="Visualizar cliente"
+                                onClick={() => navigate(`/clientes/${client.id}`)}
                               >
                                 <SquarePen size={16} strokeWidth={2} />
                                 <span
