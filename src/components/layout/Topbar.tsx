@@ -79,13 +79,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       navigate('/clientes?tab=aniversariantes')
       return
     }
-    // WhatsApp em massa — disponível na área de clientes (mesmo fluxo do Clarial)
-    if (isClientCreate) {
-      navigate('/clientes?tab=whatsapp')
-      return
-    }
-    setSearchParams({ tab: 'whatsapp' }, { replace: true })
+    // WhatsApp em massa só a partir do fluxo de cadastrar cliente
+    navigate('/clientes?tab=whatsapp')
   }
+
+  const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
 
   return (
     <header className="topbar">
@@ -118,15 +116,17 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           >
             Aniversariantes
           </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={clientsTab === 'whatsapp'}
-            className={`topbar__tab${clientsTab === 'whatsapp' ? ' is-active' : ''}`}
-            onClick={() => setClientsTab('whatsapp')}
-          >
-            WhatsApp em massa
-          </button>
+          {showWhatsappTab ? (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={clientsTab === 'whatsapp'}
+              className={`topbar__tab${clientsTab === 'whatsapp' ? ' is-active' : ''}`}
+              onClick={() => setClientsTab('whatsapp')}
+            >
+              WhatsApp em massa
+            </button>
+          ) : null}
         </div>
       )}
 
