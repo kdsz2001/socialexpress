@@ -13,6 +13,9 @@
 
 .sidebar.is-collapsed {
   width: var(--sidebar-collapsed);
+  /* precisa deixar o label sair para o lado no hover */
+  overflow: visible;
+  z-index: 55;
 }
 
 /* ——— Brand: gola + gravata/seta (flex — sem absolute bugado) ——— */
@@ -235,6 +238,15 @@
   scrollbar-color: transparent transparent;
 }
 
+.sidebar.is-collapsed .sidebar__nav {
+  overflow: visible;
+}
+
+.sidebar.is-collapsed .sidebar__brand {
+  overflow: hidden;
+  border-radius: 0;
+}
+
 .sidebar__nav:hover {
   scrollbar-color: var(--sidebar-scroll-thumb) transparent;
 }
@@ -266,6 +278,10 @@
   flex-direction: column;
 }
 
+.sidebar.is-collapsed .sidebar__nav ul li {
+  position: relative;
+}
+
 .sidebar__link {
   display: flex;
   align-items: center;
@@ -277,6 +293,7 @@
   color: var(--sidebar-text);
   transition: color 0.15s ease, background 0.15s ease;
   white-space: nowrap;
+  position: relative;
 }
 
 .sidebar.is-collapsed .sidebar__link {
@@ -285,57 +302,45 @@
   width: 70px;
 }
 
+/* Aberto: label inline. Fechado: some até o hover abrir ao lado */
 .sidebar.is-collapsed .sidebar__label {
-  display: none;
-}
-
-/* Flyout lateral só no menu minimizado (estilo Clarial) */
-.sidebar__flyout {
-  position: fixed;
-  left: var(--sidebar-collapsed);
-  z-index: 60;
-  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  bottom: 0;
+  display: flex;
   align-items: center;
-  min-width: 140px;
-  padding: 0 1.25rem;
+  min-width: 120px;
+  padding: 0 1.35rem;
+  margin: 0;
   background: #1b1b28;
   color: #ffffff;
   font-size: 1rem;
   font-weight: 400;
   white-space: nowrap;
-  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.18);
+  box-shadow: 4px 0 18px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
   pointer-events: none;
-  animation: sidebar-flyout-in 0.12s ease;
+  z-index: 70;
+  transition:
+    opacity 0.14s ease,
+    visibility 0.14s ease,
+    transform 0.14s ease;
 }
 
-.sidebar.is-collapsed .sidebar__flyout {
-  display: flex;
-}
-
-.sidebar__flyout.is-active {
+.sidebar.is-collapsed .sidebar__link:hover,
+.sidebar.is-collapsed .sidebar__link:focus-visible {
+  background: #1b1b28;
   color: #ffffff;
 }
 
-.sidebar__flyout::before {
-  content: '';
-  position: absolute;
-  left: -4px;
-  top: 50%;
-  width: 8px;
-  height: 8px;
-  background: #1b1b28;
-  transform: translateY(-50%) rotate(45deg);
-}
-
-@keyframes sidebar-flyout-in {
-  from {
-    opacity: 0;
-    transform: translateX(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.sidebar.is-collapsed .sidebar__link:hover .sidebar__label,
+.sidebar.is-collapsed .sidebar__link:focus-visible .sidebar__label {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
 }
 
 .sidebar__link:hover {
@@ -377,9 +382,10 @@
   .sidebar.is-collapsed {
     transform: translateX(-100%);
     width: var(--sidebar-width);
+    overflow: hidden;
   }
 
-  .sidebar__flyout {
-    display: none !important;
+  .sidebar.is-collapsed .sidebar__label {
+    display: none;
   }
 }
