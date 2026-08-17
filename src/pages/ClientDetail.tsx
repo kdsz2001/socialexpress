@@ -19,6 +19,7 @@ import {
   type ClientMeasure,
   type ClientPhone,
 } from '../lib/clientsStore'
+import { onlyDigits } from '../lib/cpfCnpj'
 import './ClientCreate.css'
 import './ClientDetail.css'
 
@@ -32,27 +33,9 @@ const MEASURE_OPTIONS = [
   'Outra',
 ]
 
+const SAVED_TOAST_KEY = 'social-express:client-saved-toast'
+
 type DetailSection = 'pessoais' | 'contato'
-
-function onlyDigits(value: string, max?: number) {
-  const digits = value.replace(/\D/g, '')
-  return max ? digits.slice(0, max) : digits
-}
-
-function maskCpfCnpj(value: string) {
-  const digits = onlyDigits(value, 14)
-  if (digits.length <= 11) {
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
-  }
-  return digits
-    .replace(/^(\d{2})(\d)/, '$1.$2')
-    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/\.(\d{3})(\d)/, '.$1/$2')
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
-}
 
 function maskPhone(value: string) {
   const digits = onlyDigits(value, 11)
@@ -114,6 +97,17 @@ export function ClientDetail() {
     })
   }, [stored, navigate])
 
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(SAVED_TOAST_KEY) === '1') {
+        sessionStorage.removeItem(SAVED_TOAST_KEY)
+        setToastOpen(true)
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
+
   const closeToast = useCallback(() => setToastOpen(false), [])
 
   if (!draft || !stored) return null
@@ -135,7 +129,7 @@ export function ClientDetail() {
     }
 
     const updated = updateClient(draft.id, {
-      cpfCnpj: draft.cpfCnpj,
+      // CPF/CNPJ não pode ser alterado após o cadastro
       rg: draft.rg,
       gender: draft.gender,
       nome: draft.nome.trim(),
@@ -164,14 +158,13 @@ export function ClientDetail() {
       return
     }
 
-    setSaveError(false)
-    setDraft(cloneClient(updated))
-    setToastOpen(true)
-
-    const content = document.querySelector('.app-content')
-    if (content instanceof HTMLElement) {
-      content.scrollTo({ top: 0, behavior: 'smooth' })
+    try {
+      sessionStorage.setItem(SAVED_TOAST_KEY, '1')
+    } catch {
+      // ignore storage errors
     }
+    // Refresh da mesma aba (como no Clarial) e mostra o toast após o reload
+    window.location.assign(`/clientes/${updated.id}`)
   }
 
   const renderSaveButton = () => (
@@ -280,9 +273,12 @@ export function ClientDetail() {
                 </label>
                 <input
                   id="detail-cpf"
-                  className="client-create__input"
+                  className="client-create__input is-readonly"
                   value={draft.cpfCnpj}
-                  onChange={(e) => patch('cpfCnpj', maskCpfCnpj(e.target.value))}
+                  readOnly
+                  tabIndex={0}
+                  aria-readonly="true"
+                  title="CPF/CNPJ não pode ser alterado"
                 />
               </div>
 

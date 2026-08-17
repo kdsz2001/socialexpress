@@ -8,6 +8,11 @@ import {
 } from 'lucide-react'
 import { NeighborhoodSelect } from '../components/clients/NeighborhoodSelect'
 import { addClient } from '../lib/clientsStore'
+import {
+  isValidCpfCnpj,
+  maskCpfCnpj,
+  onlyDigits,
+} from '../lib/cpfCnpj'
 import './ClientCreate.css'
 
 const BRAZIL_STATES = [
@@ -79,29 +84,6 @@ const MEASURE_OPTIONS = [
   'Manga',
   'Outra',
 ]
-
-function onlyDigits(value: string, max?: number) {
-  const digits = value.replace(/\D/g, '')
-  return max ? digits.slice(0, max) : digits
-}
-
-/** CPF 000.000.000-00 ou CNPJ 00.000.000/0000-00 conforme a quantidade digitada */
-function maskCpfCnpj(value: string) {
-  const digits = onlyDigits(value, 14)
-
-  if (digits.length <= 11) {
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
-  }
-
-  return digits
-    .replace(/^(\d{2})(\d)/, '$1.$2')
-    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/\.(\d{3})(\d)/, '.$1/$2')
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
-}
 
 /** Celular (99) 99999-9999 — com 10 dígitos fica (99) 9999-9999 */
 function maskPhone(value: string) {
@@ -209,6 +191,7 @@ async function fetchAddressByCep(digits: string, signal: AbortSignal) {
 export function ClientCreate() {
   const navigate = useNavigate()
   const [cpfCnpj, setCpfCnpj] = useState('')
+  const [cpfError, setCpfError] = useState('')
   const [birthDate, setBirthDate] = useState('')
   const [cep, setCep] = useState('')
   const [cepStatus, setCepStatus] = useState<CepStatus>('idle')
@@ -241,6 +224,19 @@ export function ClientCreate() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!gender) return
+
+    if (!isValidCpfCnpj(cpfCnpj)) {
+      const digits = onlyDigits(cpfCnpj)
+      setCpfError(
+        digits.length === 14
+          ? 'Informe um CNPJ válido.'
+          : 'Informe um CPF válido.',
+      )
+      document.getElementById('cpfCnpj')?.focus()
+      return
+    }
+
+    setCpfError('')
 
     addClient({
       cpfCnpj,
@@ -351,16 +347,39 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="cpfCnpj">
               CPF ou CNPJ <span className="req">*</span>
             </label>
-            <input
-              id="cpfCnpj"
-              className="client-create__input"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="000.000.000-00"
-              value={cpfCnpj}
-              onChange={(event) => setCpfCnpj(maskCpfCnpj(event.target.value))}
-              required
-            />
+            <div className="client-create__field">
+              <input
+                id="cpfCnpj"
+                className={`client-create__input${cpfError ? ' is-invalid' : ''}`}
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="000.000.000-00"
+                value={cpfCnpj}
+                onChange={(event) => {
+                  setCpfCnpj(maskCpfCnpj(event.target.value))
+                  if (cpfError) setCpfError('')
+                }}
+                onBlur={() => {
+                  if (!cpfCnpj.trim()) return
+                  if (!isValidCpfCnpj(cpfCnpj)) {
+                    const digits = onlyDigits(cpfCnpj)
+                    setCpfError(
+                      digits.length === 14
+                        ? 'Informe um CNPJ válido.'
+                        : 'Informe um CPF válido.',
+                    )
+                  }
+                }}
+                aria-invalid={Boolean(cpfError)}
+                aria-describedby={cpfError ? 'cpfCnpj-error' : undefined}
+                required
+              />
+              {cpfError ? (
+                <p id="cpfCnpj-error" className="client-create__field-error">
+                  {cpfError}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="client-create__row">

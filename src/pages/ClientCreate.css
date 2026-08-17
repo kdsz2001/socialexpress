@@ -199,6 +199,45 @@
   box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.12);
 }
 
+.client-create__input.is-readonly,
+.client-create__input:read-only {
+  background: #f3f6f9;
+  color: #3f4254;
+  cursor: default;
+  box-shadow: none;
+}
+
+.client-create__input.is-readonly:focus,
+.client-create__input:read-only:focus {
+  border-color: #e4e6ef;
+  box-shadow: none;
+}
+
+.client-create__input.is-invalid {
+  border-color: #f64e60;
+}
+
+.client-create__input.is-invalid:focus {
+  border-color: #f64e60;
+  box-shadow: 0 0 0 3px rgba(246, 78, 96, 0.15);
+}
+
+.client-create__field {
+  width: 100%;
+  max-width: 520px;
+}
+
+.client-create__field .client-create__input {
+  max-width: none;
+}
+
+.client-create__field-error {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #f64e60;
+}
+
 .client-create__input::placeholder,
 .client-create__textarea::placeholder {
   color: #b5b5c3;
