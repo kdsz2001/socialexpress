@@ -19,12 +19,14 @@ import {
   rangeForPreset,
   type DatePreset,
 } from '../components/clients/DateRangePicker'
+import { DeleteClientModal } from '../components/clients/DeleteClientModal'
 import { useClients } from '../hooks/useClients'
 import {
   buildWhatsAppUrl,
   deleteClient,
   getClientDisplayName,
   getClientPrimaryPhone,
+  type Client,
 } from '../lib/clientsStore'
 import './Clients.css'
 
@@ -57,6 +59,7 @@ export function Clients() {
   const [query, setQuery] = useState('')
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null)
   const [dateOpen, setDateOpen] = useState(false)
   const [pickerMode, setPickerMode] = useState<PickerMode>('menu')
   const [datePreset, setDatePreset] = useState<DatePreset>('hoje')
@@ -415,15 +418,7 @@ export function Clients() {
                                 type="button"
                                 className="clients__action clients__action--delete"
                                 aria-label="Excluir"
-                                onClick={() => {
-                                  if (
-                                    window.confirm(
-                                      `Excluir ${getClientDisplayName(client)}?`,
-                                    )
-                                  ) {
-                                    deleteClient(client.id)
-                                  }
-                                }}
+                                onClick={() => setClientToDelete(client)}
                               >
                                 <Trash2 size={16} strokeWidth={2} />
                                 <span
@@ -447,6 +442,18 @@ export function Clients() {
           </>
         )}
       </section>
+
+      <DeleteClientModal
+        open={clientToDelete !== null}
+        clientName={
+          clientToDelete ? getClientDisplayName(clientToDelete) : ''
+        }
+        onCancel={() => setClientToDelete(null)}
+        onConfirm={() => {
+          if (clientToDelete) deleteClient(clientToDelete.id)
+          setClientToDelete(null)
+        }}
+      />
     </div>
   )
 }
