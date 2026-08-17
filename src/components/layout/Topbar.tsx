@@ -13,7 +13,7 @@ type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 export function Topbar({ onMenuClick }: TopbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [query, setQuery] = useState('')
