@@ -48,6 +48,52 @@ const MEASURE_OPTIONS = [
   'Outra',
 ]
 
+function onlyDigits(value: string, max?: number) {
+  const digits = value.replace(/\D/g, '')
+  return max ? digits.slice(0, max) : digits
+}
+
+/** CPF 000.000.000-00 ou CNPJ 00.000.000/0000-00 conforme a quantidade digitada */
+function maskCpfCnpj(value: string) {
+  const digits = onlyDigits(value, 14)
+
+  if (digits.length <= 11) {
+    return digits
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+  }
+
+  return digits
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+/** Celular (99) 99999-9999 — com 10 dígitos fica (99) 9999-9999 */
+function maskPhone(value: string) {
+  const digits = onlyDigits(value, 11)
+  if (digits.length <= 10) {
+    return digits
+      .replace(/^(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{4})(\d{1,4})$/, '$1-$2')
+  }
+  return digits
+    .replace(/^(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d{1,4})$/, '$1-$2')
+}
+
+function maskCep(value: string) {
+  return onlyDigits(value, 8).replace(/^(\d{5})(\d{1,3})$/, '$1-$2')
+}
+
+function maskBirthDate(value: string) {
+  return onlyDigits(value, 8)
+    .replace(/^(\d{2})(\d)/, '$1/$2')
+    .replace(/^(\d{2})\/(\d{2})(\d)/, '$1/$2/$3')
+}
+
 type Phone = {
   number: string
   primary: boolean
@@ -63,6 +109,9 @@ type Gender = 'feminino' | 'masculino' | 'outros' | ''
 
 export function ClientCreate() {
   const navigate = useNavigate()
+  const [cpfCnpj, setCpfCnpj] = useState('')
+  const [birthDate, setBirthDate] = useState('')
+  const [cep, setCep] = useState('')
   const [gender, setGender] = useState<Gender>('')
   const [phones, setPhones] = useState<Phone[]>([
     { number: '', primary: true, whatsapp: true },
@@ -108,7 +157,16 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="cpfCnpj">
               CPF ou CNPJ <span className="req">*</span>
             </label>
-            <input id="cpfCnpj" className="client-create__input" />
+            <input
+              id="cpfCnpj"
+              className="client-create__input"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="000.000.000-00"
+              value={cpfCnpj}
+              onChange={(event) => setCpfCnpj(maskCpfCnpj(event.target.value))}
+              required
+            />
           </div>
 
           <div className="client-create__row">
@@ -136,7 +194,9 @@ export function ClientCreate() {
                     name="gender"
                     checked={gender === value}
                     onChange={() => setGender(value)}
+                    required={gender === ''}
                   />
+                  <span className="client-create__radio-ui" aria-hidden="true" />
                   <span>{label}</span>
                 </label>
               ))}
@@ -171,7 +231,10 @@ export function ClientCreate() {
             <input
               id="nascimento"
               className="client-create__input"
+              inputMode="numeric"
               placeholder="dd/mm/aaaa"
+              value={birthDate}
+              onChange={(event) => setBirthDate(maskBirthDate(event.target.value))}
             />
           </div>
 
@@ -191,12 +254,16 @@ export function ClientCreate() {
                 <input
                   id={`phone-${index}`}
                   className="client-create__input"
+                  inputMode="numeric"
                   placeholder="(99) 99999-9999"
                   value={phone.number}
                   required={index === 0}
                   onChange={(event) => {
                     const next = [...phones]
-                    next[index] = { ...phone, number: event.target.value }
+                    next[index] = {
+                      ...phone,
+                      number: maskPhone(event.target.value),
+                    }
                     setPhones(next)
                   }}
                 />
@@ -218,6 +285,7 @@ export function ClientCreate() {
                         )
                       }}
                     />
+                    <span className="client-create__check-ui" aria-hidden="true" />
                     <span>Telefone principal</span>
                   </label>
                   <label className="client-create__check">
@@ -230,6 +298,7 @@ export function ClientCreate() {
                         setPhones(next)
                       }}
                     />
+                    <span className="client-create__check-ui" aria-hidden="true" />
                     <span>Tem WhatsApp</span>
                   </label>
                 </div>
@@ -281,7 +350,10 @@ export function ClientCreate() {
             <input
               id="cep"
               className="client-create__input"
+              inputMode="numeric"
               placeholder="99999-999"
+              value={cep}
+              onChange={(event) => setCep(maskCep(event.target.value))}
             />
           </div>
 
