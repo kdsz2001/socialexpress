@@ -194,6 +194,7 @@ export function Agenda() {
         node.closest('.agenda__create-tip') ||
         node.closest('.agenda__create-wrap') ||
         node.closest('.agenda__create-layer') ||
+        node.closest('.agenda__create-rail') ||
         node.closest('.agenda__month-cell--bookable') ||
         node.closest('.agenda__slot--bookable')
       ) {
