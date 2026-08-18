@@ -6,6 +6,7 @@ import { Topbar } from './Topbar'
 import { ClientsSubheader } from './ClientsSubheader'
 import { ProfileSubheader } from './ProfileSubheader'
 import { AgendaSubheader } from './AgendaSubheader'
+import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
 import './AppLayout.css'
 
 const PAGE_TITLES: Record<string, string> = {
@@ -44,6 +45,7 @@ export function AppLayout() {
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [newAppointmentOpen, setNewAppointmentOpen] = useState(false)
   const contentRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -96,7 +98,9 @@ export function AppLayout() {
         <Topbar onMenuClick={toggle} />
         {location.pathname.startsWith('/clientes') && <ClientsSubheader />}
         {location.pathname === '/meu-perfil' && <ProfileSubheader />}
-        {location.pathname === '/agenda' && <AgendaSubheader />}
+        {location.pathname === '/agenda' && (
+          <AgendaSubheader onNewAppointment={() => setNewAppointmentOpen(true)} />
+        )}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
             <Outlet />
@@ -104,6 +108,13 @@ export function AppLayout() {
           <footer className="app-footer">2016© Social Express</footer>
         </main>
       </div>
+
+      {location.pathname === '/agenda' ? (
+        <NewAppointmentModal
+          open={newAppointmentOpen}
+          onClose={() => setNewAppointmentOpen(false)}
+        />
+      ) : null}
 
       <button
         type="button"

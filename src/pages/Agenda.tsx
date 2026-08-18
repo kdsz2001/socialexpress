@@ -19,6 +19,14 @@ import {
   weekdayShort,
 } from '../lib/agendaCalendar'
 import {
+  type Appointment,
+  appointmentColorHex,
+  getAppointments,
+  parseTimeToMinutes,
+  subscribeAppointments,
+  toDateKey,
+} from '../lib/agendaStore'
+import {
   getUserProfile,
   subscribeUserProfile,
 } from '../lib/userProfileStore'
@@ -32,14 +40,29 @@ const VIEWS: Array<{ id: AgendaView; label: string }> = [
 ]
 
 const WEEKDAY_KEYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'] as const
-/** Claral: grade horária das 07h às 20h */
 const SLOT_START_HOUR = 7
 const SLOT_END_HOUR = 20
 const HOURS = hoursOfDay(SLOT_START_HOUR, SLOT_END_HOUR)
-/** Altura de 1h — espaço generoso como no Claral (meia-hora no meio) */
 const HOUR_HEIGHT = 68
 const ALL_DAY_HEIGHT = 34
 const HEAD_HEIGHT = 40
+const GRID_START_MIN = SLOT_START_HOUR * 60
+const GRID_END_MIN = (SLOT_END_HOUR + 1) * 60
+
+const MONTH_LONG = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+] as const
 
 function preferredView(): AgendaView {
   const pref = getUserProfile().preferences.calendarView
@@ -52,19 +75,41 @@ function titleFor(view: AgendaView, cursor: Date) {
   return formatWeekTitle(cursor)
 }
 
-/** Minutos desde o início da grade (07:00); null se fora do intervalo 07–20. */
 function minutesIntoGrid(date: Date) {
   const total = nowMinutes(date)
-  const start = SLOT_START_HOUR * 60
-  const end = (SLOT_END_HOUR + 1) * 60
-  if (total < start || total >= end) return null
-  return total - start
+  if (total < GRID_START_MIN || total >= GRID_END_MIN) return null
+  return total - GRID_START_MIN
+}
+
+function appointmentLayout(apt: Appointment) {
+  const start = parseTimeToMinutes(apt.startTime)
+  const end = parseTimeToMinutes(apt.endTime)
+  if (start == null) return null
+  const rawEnd = end == null || end <= start ? start + 60 : end
+  const clampedStart = Math.max(start, GRID_START_MIN)
+  const clampedEnd = Math.min(rawEnd, GRID_END_MIN)
+  if (clampedEnd <= clampedStart) return null
+  return {
+    top: ((clampedStart - GRID_START_MIN) / 60) * HOUR_HEIGHT,
+    height: Math.max(22, ((clampedEnd - clampedStart) / 60) * HOUR_HEIGHT - 2),
+  }
+}
+
+function formatListDate(date: Date) {
+  return `${date.getDate()} de ${MONTH_LONG[date.getMonth()]} de ${date.getFullYear()}`
+}
+
+function timeLabel(apt: Appointment) {
+  if (apt.startTime && apt.endTime) return `${apt.startTime} - ${apt.endTime}`
+  if (apt.startTime) return apt.startTime
+  return 'Dia todo'
 }
 
 export function Agenda() {
   const [view, setView] = useState<AgendaView>(() => preferredView())
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
   const [now, setNow] = useState(() => new Date())
+  const [appointments, setAppointments] = useState(() => getAppointments())
   const timeScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -72,6 +117,10 @@ export function Agenda() {
       const next = preferredView()
       setView((current) => (current === 'mes' || current === 'semana' ? next : current))
     })
+  }, [])
+
+  useEffect(() => {
+    return subscribeAppointments(() => setAppointments(getAppointments()))
   }, [])
 
   useEffect(() => {
@@ -88,13 +137,33 @@ export function Agenda() {
       el.scrollTop = 0
       return
     }
-    // Mostra ~1h antes do horário atual, como no Claral
     el.scrollTop = Math.max(0, ALL_DAY_HEIGHT + (into / 60 - 1) * HOUR_HEIGHT)
   }, [view, cursor])
 
   const today = startOfDay(now)
   const monthDays = useMemo(() => getMonthGrid(cursor), [cursor])
   const weekDays = useMemo(() => getWeekDays(cursor), [cursor])
+
+  const appointmentsByDate = useMemo(() => {
+    const map = new Map<string, Appointment[]>()
+    for (const apt of appointments) {
+      const list = map.get(apt.date) ?? []
+      list.push(apt)
+      map.set(apt.date, list)
+    }
+    return map
+  }, [appointments])
+
+  const listGroups = useMemo(
+    () =>
+      weekDays
+        .map((day) => ({
+          date: day,
+          items: appointmentsByDate.get(toDateKey(day)) ?? [],
+        }))
+        .filter((group) => group.items.length > 0),
+    [appointmentsByDate, weekDays],
+  )
 
   const goPrev = () => {
     if (view === 'mes') setCursor((d) => addMonths(d, -1))
@@ -109,6 +178,35 @@ export function Agenda() {
   }
 
   const goToday = () => setCursor(startOfDay(new Date()))
+
+  const renderEventCard = (apt: Appointment, compact: boolean) => {
+    const layout = appointmentLayout(apt)
+    if (!layout) return null
+    const color = appointmentColorHex(apt.color)
+    return (
+      <div
+        key={apt.id}
+        className={`agenda__event${compact ? ' is-compact' : ''}`}
+        style={{
+          top: layout.top,
+          height: layout.height,
+          background: color,
+        }}
+        title={apt.title}
+      >
+        <span className="agenda__event-dot" />
+        <div className="agenda__event-body">
+          {!compact ? (
+            <span className="agenda__event-time">
+              {apt.startTime}
+              {apt.endTime ? ` - ${apt.endTime}` : ''}
+            </span>
+          ) : null}
+          <span className="agenda__event-title">{apt.title}</span>
+        </div>
+      </div>
+    )
+  }
 
   const renderTimeGrid = (days: Date[], singleDay: boolean) => {
     const into = minutesIntoGrid(now)
@@ -151,29 +249,33 @@ export function Agenda() {
             ))}
           </div>
 
-          {days.map((day, dayIndex) => (
-            <div
-              key={day.toISOString()}
-              className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}`}
-              style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
-            >
-              {HOURS.map((hour, hourIndex) => (
-                <div
-                  key={hour}
-                  className={`agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}`}
-                  style={{ height: HOUR_HEIGHT }}
-                >
-                  <span className="agenda__slot-half" />
-                </div>
-              ))}
-              {nowOffset != null && isSameDay(day, today) ? (
-                <div className="agenda__now" style={{ top: nowOffset }} aria-hidden="true">
-                  <span className="agenda__now-arrow" />
-                  <span className="agenda__now-line" />
-                </div>
-              ) : null}
-            </div>
-          ))}
+          {days.map((day, dayIndex) => {
+            const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
+            return (
+              <div
+                key={day.toISOString()}
+                className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}`}
+                style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
+              >
+                {HOURS.map((hour, hourIndex) => (
+                  <div
+                    key={hour}
+                    className={`agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}`}
+                    style={{ height: HOUR_HEIGHT }}
+                  >
+                    <span className="agenda__slot-half" />
+                  </div>
+                ))}
+                {dayApts.map((apt) => renderEventCard(apt, !singleDay))}
+                {nowOffset != null && isSameDay(day, today) ? (
+                  <div className="agenda__now" style={{ top: nowOffset }} aria-hidden="true">
+                    <span className="agenda__now-arrow" />
+                    <span className="agenda__now-line" />
+                  </div>
+                ) : null}
+              </div>
+            )
+          })}
         </div>
       </div>
     )
@@ -228,6 +330,7 @@ export function Agenda() {
               {monthDays.map((day) => {
                 const inMonth = isSameMonth(day, cursor)
                 const isToday = isSameDay(day, today)
+                const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
                 return (
                   <button
                     key={day.toISOString()}
@@ -241,6 +344,19 @@ export function Agenda() {
                     }}
                   >
                     <span className="agenda__month-date">{day.getDate()}</span>
+                    <div className="agenda__month-events">
+                      {dayApts.slice(0, 3).map((apt) => (
+                        <span
+                          key={apt.id}
+                          className="agenda__month-chip"
+                          style={{ background: appointmentColorHex(apt.color) }}
+                        >
+                          <span className="agenda__month-chip-dot" />
+                          {apt.startTime ? `${apt.startTime.slice(0, 2)} ` : ''}
+                          {apt.title}
+                        </span>
+                      ))}
+                    </div>
                   </button>
                 )
               })}
@@ -254,7 +370,35 @@ export function Agenda() {
 
         {view === 'lista' ? (
           <div className="agenda__list">
-            <p className="agenda__list-empty">No events to display</p>
+            {listGroups.length === 0 ? (
+              <p className="agenda__list-empty">No events to display</p>
+            ) : (
+              listGroups.map((group) => (
+                <div key={toDateKey(group.date)} className="agenda__list-group">
+                  <div className="agenda__list-day">
+                    <strong>{weekdayLong(group.date).toUpperCase()}</strong>
+                    <span>{formatListDate(group.date)}</span>
+                  </div>
+                  <ul className="agenda__list-items">
+                    {group.items.map((apt) => (
+                      <li key={apt.id} className="agenda__list-item">
+                        <span
+                          className="agenda__list-time"
+                          style={{ background: appointmentColorHex(apt.color) }}
+                        >
+                          {timeLabel(apt)}
+                        </span>
+                        <span
+                          className="agenda__list-dot"
+                          style={{ background: appointmentColorHex(apt.color) }}
+                        />
+                        <span className="agenda__list-title">{apt.title}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            )}
           </div>
         ) : null}
       </section>
