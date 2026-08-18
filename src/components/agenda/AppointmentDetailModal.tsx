@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo } from 'react'
 import { createPortal } from 'react-dom'
-import { CalendarDays, Check, Pencil, Trash2, X } from 'lucide-react'
+import { CalendarDays, Check, SquarePen, Trash2, X } from 'lucide-react'
 import {
   type Appointment,
   deleteAppointment,
@@ -135,7 +135,7 @@ export function AppointmentDetailModal({
         <header className="apt-detail__header">
           <div className="apt-detail__heading">
             <h2 id={titleId} className="apt-detail__title">
-              {appointment.title}
+              {appointment.title || 'Sem título'}
             </h2>
             <p className="apt-detail__meta">{formatCreatedLine(appointment.createdAt)}</p>
           </div>
@@ -145,7 +145,7 @@ export function AppointmentDetailModal({
             aria-label="Fechar"
             onClick={onClose}
           >
-            <X size={16} strokeWidth={2.25} />
+            <X size={18} strokeWidth={2} />
           </button>
         </header>
 
@@ -156,7 +156,7 @@ export function AppointmentDetailModal({
               <span>{schedule.subLabel}</span>
             </div>
             <span className="apt-detail__schedule-icon" aria-hidden="true">
-              <CalendarDays size={18} strokeWidth={1.75} />
+              <CalendarDays size={22} strokeWidth={1.6} />
             </span>
           </div>
 
@@ -176,37 +176,41 @@ export function AppointmentDetailModal({
         </div>
 
         <footer className="apt-detail__footer">
-          <button
-            type="button"
-            className="apt-detail__btn apt-detail__btn--complete"
-            onClick={onComplete}
-          >
-            <Check size={15} strokeWidth={2.5} />
-            Concluir
-          </button>
-          <button
-            type="button"
-            className="apt-detail__btn apt-detail__btn--delete"
-            onClick={onDelete}
-          >
-            <Trash2 size={15} strokeWidth={2.25} />
-            Excluir
-          </button>
-          <button
-            type="button"
-            className="apt-detail__btn apt-detail__btn--edit"
-            onClick={() => onEdit?.(appointment)}
-          >
-            <Pencil size={15} strokeWidth={2.25} />
-            Editar
-          </button>
-          <button
-            type="button"
-            className="apt-detail__btn apt-detail__btn--close"
-            onClick={onClose}
-          >
-            Fechar
-          </button>
+          <div className="apt-detail__actions apt-detail__actions--start">
+            <button
+              type="button"
+              className="apt-detail__btn apt-detail__btn--complete"
+              onClick={onComplete}
+            >
+              <Check size={14} strokeWidth={2.75} />
+              Concluir
+            </button>
+            <button
+              type="button"
+              className="apt-detail__btn apt-detail__btn--delete"
+              onClick={onDelete}
+            >
+              <Trash2 size={14} strokeWidth={2.25} />
+              Excluir
+            </button>
+          </div>
+          <div className="apt-detail__actions apt-detail__actions--end">
+            <button
+              type="button"
+              className="apt-detail__btn apt-detail__btn--edit"
+              onClick={() => onEdit?.(appointment)}
+            >
+              <SquarePen size={14} strokeWidth={2.25} />
+              Editar
+            </button>
+            <button
+              type="button"
+              className="apt-detail__btn apt-detail__btn--close"
+              onClick={onClose}
+            >
+              Fechar
+            </button>
+          </div>
         </footer>
       </div>
     </div>,
