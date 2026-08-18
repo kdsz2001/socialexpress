@@ -1,3 +1,9 @@
+export type UserPhone = {
+  number: string
+  primary: boolean
+  whatsapp: boolean
+}
+
 export type UserProfile = {
   nome: string
   sobrenomes: string
@@ -7,7 +13,7 @@ export type UserProfile = {
   birthDate: string
   login: string
   password: string
-  phone: string
+  phones: UserPhone[]
   cep: string
   logradouro: string
   numero: string
@@ -31,7 +37,7 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   birthDate: '',
   login: 'djamesz',
   password: '',
-  phone: '',
+  phones: [{ number: '', primary: true, whatsapp: true }],
   cep: '',
   logradouro: '',
   numero: '',
@@ -42,14 +48,33 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   avatarDataUrl: '',
 }
 
+function normalizePhones(raw: Partial<UserProfile> & { phone?: string }): UserPhone[] {
+  if (Array.isArray(raw.phones) && raw.phones.length > 0) {
+    return raw.phones.map((phone, index) => ({
+      number: phone?.number ?? '',
+      primary: Boolean(phone?.primary) || index === 0,
+      whatsapp: Boolean(phone?.whatsapp),
+    }))
+  }
+  if (typeof raw.phone === 'string' && raw.phone.trim()) {
+    return [{ number: raw.phone, primary: true, whatsapp: true }]
+  }
+  return [{ number: '', primary: true, whatsapp: true }]
+}
+
 function readProfile(): UserProfile {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { ...DEFAULT_USER_PROFILE }
-    const parsed = JSON.parse(raw) as Partial<UserProfile>
-    return { ...DEFAULT_USER_PROFILE, ...parsed }
+    if (!raw) return { ...DEFAULT_USER_PROFILE, phones: [...DEFAULT_USER_PROFILE.phones] }
+    const parsed = JSON.parse(raw) as Partial<UserProfile> & { phone?: string }
+    const { phone: _legacyPhone, ...rest } = parsed
+    return {
+      ...DEFAULT_USER_PROFILE,
+      ...rest,
+      phones: normalizePhones(parsed),
+    }
   } catch {
-    return { ...DEFAULT_USER_PROFILE }
+    return { ...DEFAULT_USER_PROFILE, phones: [...DEFAULT_USER_PROFILE.phones] }
   }
 }
 
@@ -64,6 +89,9 @@ export function getUserDisplayName(profile: UserProfile = readProfile()) {
 
 export function updateUserProfile(patch: Partial<UserProfile>): UserProfile {
   const next = { ...readProfile(), ...patch }
+  if (patch.phones) {
+    next.phones = normalizePhones({ phones: patch.phones })
+  }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
   window.dispatchEvent(new Event(CHANGE_EVENT))
   return next

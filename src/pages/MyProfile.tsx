@@ -6,17 +6,26 @@ import {
   Eye,
   EyeOff,
   Pencil,
+  Plus,
   Settings,
   UserRound,
   X,
 } from 'lucide-react'
-import { SaveToast } from '../components/ui/SaveToast'
+import { NeighborhoodSelect } from '../components/clients/NeighborhoodSelect'
 import { AvatarCropModal } from '../components/ui/AvatarCropModal'
+import { SaveToast } from '../components/ui/SaveToast'
+import {
+  BRAZIL_STATES,
+  fetchAddressByCep,
+  maskCep,
+  resolveStateName,
+} from '../lib/brazilAddress'
 import { isValidCpf, maskCpfCnpj, onlyDigits } from '../lib/cpfCnpj'
 import {
   getUserDisplayName,
   getUserProfile,
   updateUserProfile,
+  type UserPhone,
   type UserProfile,
 } from '../lib/userProfileStore'
 import './ClientCreate.css'
@@ -24,6 +33,7 @@ import './ClientDetail.css'
 import './MyProfile.css'
 
 type ProfileSection = 'pessoais' | 'contato' | 'preferencias'
+type CepStatus = 'idle' | 'loading' | 'ok' | 'error'
 
 const SAVED_TOAST_KEY = 'social-express:my-profile-saved-toast'
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024
@@ -47,10 +57,6 @@ function maskPhone(value: string) {
     .replace(/(\d{5})(\d{1,4})$/, '$1-$2')
 }
 
-function maskCep(value: string) {
-  return onlyDigits(value, 8).replace(/^(\d{5})(\d{1,3})$/, '$1-$2')
-}
-
 export function MyProfile() {
   const [section, setSection] = useState<ProfileSection>('pessoais')
   const [draft, setDraft] = useState<UserProfile>(() => getUserProfile())
@@ -60,6 +66,10 @@ export function MyProfile() {
   const [showPassword, setShowPassword] = useState(false)
   const [toastOpen, setToastOpen] = useState(false)
   const [cropSource, setCropSource] = useState<string | null>(null)
+  const [cepStatus, setCepStatus] = useState<CepStatus>('idle')
+  const [bairroOptions, setBairroOptions] = useState<string[]>(() =>
+    getUserProfile().bairro ? [getUserProfile().bairro] : [],
+  )
   const closeToast = useCallback(() => setToastOpen(false), [])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -74,11 +84,70 @@ export function MyProfile() {
     }
   }, [])
 
+  useEffect(() => {
+    const digits = onlyDigits(draft.cep)
+    if (digits.length !== 8) {
+      setCepStatus('idle')
+      return
+    }
+
+    const controller = new AbortController()
+    setCepStatus('loading')
+
+    void (async () => {
+      try {
+        const { main, bairros } = await fetchAddressByCep(digits, controller.signal)
+        if (controller.signal.aborted) return
+        if (!main) {
+          setCepStatus('error')
+          setBairroOptions([])
+          return
+        }
+        const stateName = resolveStateName(main)
+        setDraft((current) => ({
+          ...current,
+          logradouro: main.logradouro?.trim() || current.logradouro,
+          complemento: main.complemento?.trim() || current.complemento,
+          estado: stateName || current.estado,
+          cidade: main.localidade?.trim() || current.cidade,
+          bairro: main.bairro?.trim() || bairros[0] || current.bairro,
+        }))
+        setBairroOptions(bairros)
+        setCepStatus('ok')
+      } catch (error) {
+        if (controller.signal.aborted) return
+        setCepStatus('error')
+      }
+    })()
+
+    return () => controller.abort()
+  }, [draft.cep])
+
   const displayName = getUserDisplayName(draft)
 
   const patch = <K extends keyof UserProfile>(key: K, value: UserProfile[K]) => {
     setDraft((current) => ({ ...current, [key]: value }))
   }
+
+  const setPhones = (phones: UserPhone[]) => {
+    patch('phones', phones)
+  }
+
+  const panelMeta =
+    section === 'pessoais'
+      ? {
+          title: 'Informações pessoais',
+          sub: 'Atualize suas informações pessoais',
+        }
+      : section === 'contato'
+        ? {
+            title: 'Informações de contato e endereço',
+            sub: 'Atualize suas informações de contato e endereço',
+          }
+        : {
+            title: 'Preferências',
+            sub: 'Atualize suas preferências',
+          }
 
   const openFilePicker = () => {
     setAvatarError('')
@@ -217,14 +286,8 @@ export function MyProfile() {
       <section className="client-detail__panel">
         <header className="client-detail__panel-head">
           <div>
-            <h3 className="client-detail__panel-title">Informações essenciais</h3>
-            <p className="client-detail__panel-sub">
-              {section === 'pessoais'
-                ? 'Atualize suas informações pessoais'
-                : section === 'contato'
-                  ? 'Atualize telefone e endereço'
-                  : 'Atualize suas preferências'}
-            </p>
+            <h3 className="client-detail__panel-title">{panelMeta.title}</h3>
+            <p className="client-detail__panel-sub">{panelMeta.sub}</p>
           </div>
           {renderSaveButton()}
         </header>
@@ -461,33 +524,124 @@ export function MyProfile() {
 
           {section === 'contato' ? (
             <>
-              <div className="client-create__row">
-                <label className="client-create__label" htmlFor="profile-phone">
-                  Telefone
-                </label>
-                <input
-                  id="profile-phone"
-                  className="client-create__input"
-                  inputMode="numeric"
-                  value={draft.phone}
-                  onChange={(e) => patch('phone', maskPhone(e.target.value))}
-                />
-              </div>
+              {(draft.phones.length ? draft.phones : [{ number: '', primary: true, whatsapp: true }]).map(
+                (phone, index) => (
+                  <div key={index} className="client-create__row client-create__row--top">
+                    <label className="client-create__label" htmlFor={`profile-phone-${index}`}>
+                      Telefone
+                    </label>
+                    <div className="client-create__phone-block">
+                      <input
+                        id={`profile-phone-${index}`}
+                        className="client-create__input"
+                        inputMode="numeric"
+                        placeholder="(99) 99999-9999"
+                        value={phone.number}
+                        onChange={(event) => {
+                          const next = [...draft.phones]
+                          if (!next[index]) {
+                            next[index] = { number: '', primary: index === 0, whatsapp: false }
+                          }
+                          next[index] = {
+                            ...next[index],
+                            number: maskPhone(event.target.value),
+                          }
+                          setPhones(next)
+                        }}
+                      />
+                      <div className="client-create__checks">
+                        <label className="client-create__check">
+                          <input
+                            type="checkbox"
+                            checked={phone.primary}
+                            onChange={(event) => {
+                              const checked = event.target.checked
+                              setPhones(
+                                draft.phones.map((item, i) =>
+                                  i === index
+                                    ? { ...item, primary: checked }
+                                    : checked
+                                      ? { ...item, primary: false }
+                                      : item,
+                                ),
+                              )
+                            }}
+                          />
+                          <span className="client-create__check-ui" aria-hidden="true" />
+                          <span>Telefone principal</span>
+                        </label>
+                        <label className="client-create__check">
+                          <input
+                            type="checkbox"
+                            checked={phone.whatsapp}
+                            onChange={(event) => {
+                              const next = [...draft.phones]
+                              next[index] = {
+                                ...next[index],
+                                whatsapp: event.target.checked,
+                              }
+                              setPhones(next)
+                            }}
+                          />
+                          <span className="client-create__check-ui" aria-hidden="true" />
+                          <span>Tem WhatsApp</span>
+                        </label>
+                      </div>
+                      {index === draft.phones.length - 1 ? (
+                        <button
+                          type="button"
+                          className="client-create__add-soft"
+                          onClick={() =>
+                            setPhones([
+                              ...draft.phones,
+                              { number: '', primary: false, whatsapp: false },
+                            ])
+                          }
+                        >
+                          <Plus size={14} strokeWidth={2.5} />
+                          Adicionar outro telefone
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                ),
+              )}
+
               <div className="client-create__row">
                 <label className="client-create__label" htmlFor="profile-cep">
                   CEP
                 </label>
-                <input
-                  id="profile-cep"
-                  className="client-create__input"
-                  inputMode="numeric"
-                  value={draft.cep}
-                  onChange={(e) => patch('cep', maskCep(e.target.value))}
-                />
+                <div className="client-create__field">
+                  <input
+                    id="profile-cep"
+                    className="client-create__input"
+                    inputMode="numeric"
+                    placeholder="99999-999"
+                    value={draft.cep}
+                    onChange={(e) => {
+                      patch('cep', maskCep(e.target.value))
+                      if (onlyDigits(e.target.value).length !== 8) {
+                        setBairroOptions([])
+                      }
+                    }}
+                    aria-describedby="profile-cep-status"
+                  />
+                  <p
+                    id="profile-cep-status"
+                    className={`client-create__cep-status${
+                      cepStatus === 'error' ? ' is-error' : ''
+                    }${cepStatus === 'ok' ? ' is-ok' : ''}`}
+                  >
+                    {cepStatus === 'loading' && 'Buscando endereço...'}
+                    {cepStatus === 'error' && 'CEP não encontrado'}
+                    {cepStatus === 'ok' && 'Endereço preenchido'}
+                  </p>
+                </div>
               </div>
+
               <div className="client-create__row">
                 <label className="client-create__label" htmlFor="profile-logradouro">
-                  Logradouro
+                  Logradouro <span className="req">*</span>
                 </label>
                 <input
                   id="profile-logradouro"
@@ -496,9 +650,10 @@ export function MyProfile() {
                   onChange={(e) => patch('logradouro', e.target.value)}
                 />
               </div>
+
               <div className="client-create__row">
                 <label className="client-create__label" htmlFor="profile-numero">
-                  Número
+                  Número <span className="req">*</span>
                 </label>
                 <input
                   id="profile-numero"
@@ -507,6 +662,7 @@ export function MyProfile() {
                   onChange={(e) => patch('numero', e.target.value)}
                 />
               </div>
+
               <div className="client-create__row">
                 <label className="client-create__label" htmlFor="profile-complemento">
                   Complemento
@@ -518,37 +674,73 @@ export function MyProfile() {
                   onChange={(e) => patch('complemento', e.target.value)}
                 />
               </div>
-              <div className="client-create__row">
-                <label className="client-create__label" htmlFor="profile-bairro">
-                  Bairro
-                </label>
-                <input
-                  id="profile-bairro"
-                  className="client-create__input"
-                  value={draft.bairro}
-                  onChange={(e) => patch('bairro', e.target.value)}
-                />
-              </div>
-              <div className="client-create__row">
-                <label className="client-create__label" htmlFor="profile-cidade">
-                  Cidade
-                </label>
-                <input
-                  id="profile-cidade"
-                  className="client-create__input"
-                  value={draft.cidade}
-                  onChange={(e) => patch('cidade', e.target.value)}
-                />
-              </div>
+
               <div className="client-create__row">
                 <label className="client-create__label" htmlFor="profile-estado">
-                  Estado
+                  Estado <span className="req">*</span>
                 </label>
-                <input
+                <select
                   id="profile-estado"
-                  className="client-create__input"
+                  className="client-create__select"
                   value={draft.estado}
-                  onChange={(e) => patch('estado', e.target.value)}
+                  onChange={(e) => {
+                    setDraft((current) => ({
+                      ...current,
+                      estado: e.target.value,
+                      cidade: '',
+                      bairro: '',
+                    }))
+                    setBairroOptions([])
+                  }}
+                >
+                  <option value="">Selecione um estado</option>
+                  {BRAZIL_STATES.map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="client-create__row">
+                <label className="client-create__label" htmlFor="profile-cidade">
+                  Cidade <span className="req">*</span>
+                </label>
+                <select
+                  id="profile-cidade"
+                  className="client-create__select"
+                  value={draft.cidade}
+                  onChange={(e) => {
+                    patch('cidade', e.target.value)
+                    patch('bairro', '')
+                  }}
+                >
+                  <option value="">Selecione uma cidade</option>
+                  {draft.cidade ? (
+                    <option value={draft.cidade}>{draft.cidade}</option>
+                  ) : null}
+                </select>
+              </div>
+
+              <div className="client-create__row">
+                <label className="client-create__label" htmlFor="profile-bairro">
+                  Bairro <span className="req">*</span>
+                </label>
+                <NeighborhoodSelect
+                  id="profile-bairro"
+                  value={draft.bairro}
+                  options={bairroOptions}
+                  city={draft.cidade}
+                  onChange={(value) => patch('bairro', value)}
+                  onRegister={(name) => {
+                    setBairroOptions((current) => {
+                      const key = name.toLocaleLowerCase('pt-BR')
+                      if (current.some((item) => item.toLocaleLowerCase('pt-BR') === key)) {
+                        return current
+                      }
+                      return [...current, name]
+                    })
+                  }}
                 />
               </div>
             </>
