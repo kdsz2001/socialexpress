@@ -34,6 +34,8 @@ const VIEWS: Array<{ id: AgendaView; label: string }> = [
 const WEEKDAY_KEYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'] as const
 const HOURS = hoursOfDay(0, 23)
 const HOUR_HEIGHT = 56
+const ALL_DAY_HEIGHT = 34
+const HEAD_HEIGHT = 40
 
 function preferredView(): AgendaView {
   const pref = getUserProfile().preferences.calendarView
@@ -69,7 +71,7 @@ export function Agenda() {
     const el = timeScrollRef.current
     if (!el) return
     const hour = Math.max(0, now.getHours() - 1)
-    el.scrollTop = hour * HOUR_HEIGHT
+    el.scrollTop = ALL_DAY_HEIGHT + hour * HOUR_HEIGHT
   }, [view, cursor])
 
   const today = startOfDay(now)
@@ -90,56 +92,69 @@ export function Agenda() {
 
   const goToday = () => setCursor(startOfDay(new Date()))
 
-  const renderNowLine = (day: Date) => {
-    if (!isSameDay(day, today)) return null
-    const top = Math.round((nowMinutes(now) / 60) * HOUR_HEIGHT)
-    return <div className="agenda__now" style={{ top }} aria-hidden="true" />
-  }
+  const renderTimeGrid = (days: Date[], singleDay: boolean) => {
+    const nowOffset = Math.round((nowMinutes(now) / 60) * HOUR_HEIGHT)
 
-  const renderTimeGrid = (days: Date[], singleDay: boolean) => (
-    <div className={`agenda__timegrid${singleDay ? ' is-day' : ''}`} ref={timeScrollRef}>
-      <div
-        className="agenda__timegrid-inner"
-        style={{
-          gridTemplateColumns: singleDay
-            ? '64px minmax(0, 1fr)'
-            : `64px repeat(${days.length}, minmax(0, 1fr))`,
-          gridTemplateRows: `auto repeat(${HOURS.length}, ${HOUR_HEIGHT}px)`,
-        }}
-      >
-        <div className="agenda__timegrid-corner">ao longo do dia</div>
-        {days.map((day) => (
-          <div
-            key={`allday-${day.toISOString()}`}
-            className={`agenda__allday${isSameDay(day, today) ? ' is-today' : ''}`}
-          />
-        ))}
+    return (
+      <div className={`agenda__timegrid${singleDay ? ' is-day' : ''}`} ref={timeScrollRef}>
+        <div
+          className="agenda__timegrid-inner"
+          style={{
+            gridTemplateColumns: singleDay
+              ? '64px minmax(0, 1fr)'
+              : `64px repeat(${days.length}, minmax(0, 1fr))`,
+            gridTemplateRows: `${HEAD_HEIGHT}px ${ALL_DAY_HEIGHT}px repeat(${HOURS.length}, ${HOUR_HEIGHT}px)`,
+          }}
+        >
+          <div className="agenda__col-head agenda__col-head--gutter" />
+          {days.map((day) => (
+            <div
+              key={`head-${day.toISOString()}`}
+              className={`agenda__col-head${isSameDay(day, today) ? ' is-today' : ''}`}
+            >
+              {singleDay ? weekdayLong(day) : formatWeekdayDate(day)}
+            </div>
+          ))}
 
-        <div className="agenda__hours" style={{ gridRow: `2 / span ${HOURS.length}` }}>
-          {HOURS.map((hour) => (
-            <div key={hour} className="agenda__hour-label" style={{ height: HOUR_HEIGHT }}>
-              {String(hour).padStart(2, '0')}
+          <div className="agenda__allday-label">ao longo do dia</div>
+          {days.map((day) => (
+            <div
+              key={`allday-${day.toISOString()}`}
+              className={`agenda__allday${isSameDay(day, today) ? ' is-today' : ''}`}
+            />
+          ))}
+
+          <div className="agenda__hours" style={{ gridRow: `3 / span ${HOURS.length}` }}>
+            {HOURS.map((hour) => (
+              <div key={hour} className="agenda__hour-label" style={{ height: HOUR_HEIGHT }}>
+                {String(hour).padStart(2, '0')}
+              </div>
+            ))}
+          </div>
+
+          {days.map((day, dayIndex) => (
+            <div
+              key={day.toISOString()}
+              className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}`}
+              style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
+            >
+              {HOURS.map((hour) => (
+                <div key={hour} className="agenda__slot" style={{ height: HOUR_HEIGHT }}>
+                  <span className="agenda__slot-half" />
+                </div>
+              ))}
+              {isSameDay(day, today) ? (
+                <div className="agenda__now" style={{ top: nowOffset }} aria-hidden="true">
+                  <span className="agenda__now-arrow" />
+                  <span className="agenda__now-line" />
+                </div>
+              ) : null}
             </div>
           ))}
         </div>
-
-        {days.map((day, dayIndex) => (
-          <div
-            key={day.toISOString()}
-            className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}`}
-            style={{ gridColumn: dayIndex + 2, gridRow: `2 / span ${HOURS.length}` }}
-          >
-            {HOURS.map((hour) => (
-              <div key={hour} className="agenda__slot" style={{ height: HOUR_HEIGHT }}>
-                <span className="agenda__slot-half" />
-              </div>
-            ))}
-            {renderNowLine(day)}
-          </div>
-        ))}
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="agenda">
@@ -210,32 +225,9 @@ export function Agenda() {
           </div>
         ) : null}
 
-        {view === 'semana' ? (
-          <div className="agenda__week">
-            <div
-              className="agenda__week-head"
-              style={{ gridTemplateColumns: `64px repeat(7, minmax(0, 1fr))` }}
-            >
-              <div className="agenda__week-head-spacer" />
-              {weekDays.map((day) => (
-                <div
-                  key={day.toISOString()}
-                  className={`agenda__week-head-day${isSameDay(day, today) ? ' is-today' : ''}`}
-                >
-                  {formatWeekdayDate(day)}
-                </div>
-              ))}
-            </div>
-            {renderTimeGrid(weekDays, false)}
-          </div>
-        ) : null}
+        {view === 'semana' ? <div className="agenda__week">{renderTimeGrid(weekDays, false)}</div> : null}
 
-        {view === 'dia' ? (
-          <div className="agenda__day">
-            <div className="agenda__day-head">{weekdayLong(cursor)}</div>
-            {renderTimeGrid([cursor], true)}
-          </div>
-        ) : null}
+        {view === 'dia' ? <div className="agenda__day">{renderTimeGrid([cursor], true)}</div> : null}
 
         {view === 'lista' ? (
           <div className="agenda__list">
