@@ -23,9 +23,8 @@ import { DeleteClientModal } from '../components/clients/DeleteClientModal'
 import { useClients } from '../hooks/useClients'
 import {
   ageTurningOnBirthday,
-  birthdayInRange,
-  birthdayOccurrenceYear,
   formatBirthDateLong,
+  nextBirthdayYear,
   parseBirthDate,
 } from '../lib/birthdays'
 import {
@@ -82,16 +81,12 @@ export function Clients() {
     const q = query.trim().toLocaleLowerCase('pt-BR')
 
     if (tab === 'aniversariantes') {
+      // Clarial: lista todos com data de nascimento, independente do período
       const matches = clients
         .map((client) => {
           const birth = parseBirthDate(client.birthDate)
           if (!birth) return null
-          if (!birthdayInRange(birth, rangeStart, rangeEnd)) return null
-          const occurrenceYear = birthdayOccurrenceYear(
-            birth,
-            rangeStart,
-            rangeEnd,
-          )
+          const occurrenceYear = nextBirthdayYear(birth)
           return {
             client,
             birth,
@@ -125,7 +120,7 @@ export function Clients() {
           return name.includes(q) || cpf.includes(q) || phone.includes(q)
         })
     return list
-  }, [clients, query, tab, rangeStart, rangeEnd])
+  }, [clients, query, tab])
 
   const birthdayRows =
     tab === 'aniversariantes'
@@ -155,7 +150,7 @@ export function Clients() {
 
   useEffect(() => {
     setPage(1)
-  }, [query, pageSize, tab, rangeStart, rangeEnd])
+  }, [query, pageSize, tab])
 
   useEffect(() => {
     if (!dateOpen) return

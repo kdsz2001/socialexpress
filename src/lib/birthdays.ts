@@ -27,6 +27,12 @@ function startOfDay(date: Date) {
   return d
 }
 
+function occurrenceOnYear(birth: ParsedBirthDate, year: number) {
+  const lastDay = new Date(year, birth.month, 0).getDate()
+  const day = Math.min(birth.day, lastDay)
+  return startOfDay(new Date(year, birth.month - 1, day))
+}
+
 /** Parse stored birth date `DD/MM/YYYY`. */
 export function parseBirthDate(value: string): ParsedBirthDate | null {
   const match = value.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
@@ -52,46 +58,20 @@ export function formatBirthDateLong(birth: ParsedBirthDate) {
 }
 
 /**
- * True when the client's month/day birthday falls on any day
- * inside [start, end] (inclusive), across years in the range.
+ * Year of the next birthday on/after `from` (Clarial: Completará X anos).
+ * Ex.: nascido em 11/02/2001, em 18/08/2026 → 2027 (completará 26).
  */
-export function birthdayInRange(
+export function nextBirthdayYear(
   birth: ParsedBirthDate,
-  start: Date,
-  end: Date,
-): boolean {
-  const from = startOfDay(start)
-  const to = startOfDay(end)
-  if (to < from) return false
-
-  for (let year = from.getFullYear(); year <= to.getFullYear(); year += 1) {
-    // Feb 29 → Feb 28 on non-leap years
-    const lastDay = new Date(year, birth.month, 0).getDate()
-    const day = Math.min(birth.day, lastDay)
-    const occurrence = startOfDay(new Date(year, birth.month - 1, day))
-    if (occurrence >= from && occurrence <= to) return true
-  }
-  return false
+  from: Date = new Date(),
+) {
+  const cursor = startOfDay(from)
+  let year = cursor.getFullYear()
+  if (occurrenceOnYear(birth, year) < cursor) year += 1
+  return year
 }
 
-/** Year of the birthday occurrence inside the selected range (first match). */
-export function birthdayOccurrenceYear(
-  birth: ParsedBirthDate,
-  start: Date,
-  end: Date,
-): number {
-  const from = startOfDay(start)
-  const to = startOfDay(end)
-  for (let year = from.getFullYear(); year <= to.getFullYear(); year += 1) {
-    const lastDay = new Date(year, birth.month, 0).getDate()
-    const day = Math.min(birth.day, lastDay)
-    const occurrence = startOfDay(new Date(year, birth.month - 1, day))
-    if (occurrence >= from && occurrence <= to) return year
-  }
-  return from.getFullYear()
-}
-
-/** Age the client will turn on the birthday in range ("Completará X anos"). */
+/** Age the client will turn on that birthday ("Completará X anos"). */
 export function ageTurningOnBirthday(
   birth: ParsedBirthDate,
   occurrenceYear: number,
