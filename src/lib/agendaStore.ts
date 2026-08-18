@@ -72,6 +72,27 @@ export function addAppointment(
   return next
 }
 
+export function updateAppointment(
+  id: string,
+  patch: Partial<Omit<Appointment, 'id' | 'createdAt'>>,
+): Appointment | null {
+  const items = readAll()
+  const index = items.findIndex((item) => item.id === id)
+  if (index < 0) return null
+  const next = { ...items[index], ...patch }
+  items[index] = next
+  writeAll(items)
+  return next
+}
+
+export function deleteAppointment(id: string) {
+  writeAll(readAll().filter((item) => item.id !== id))
+}
+
+export function getAppointmentById(id: string) {
+  return readAll().find((item) => item.id === id) ?? null
+}
+
 export function subscribeAppointments(onChange: () => void) {
   const handler = () => onChange()
   window.addEventListener(CHANGE_EVENT, handler)

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import {
   type AgendaView,
@@ -31,6 +31,7 @@ import {
   getUserProfile,
   subscribeUserProfile,
 } from '../lib/userProfileStore'
+import { AppointmentDetailModal } from '../components/agenda/AppointmentDetailModal'
 import './Agenda.css'
 
 const VIEWS: Array<{ id: AgendaView; label: string }> = [
@@ -152,6 +153,7 @@ export function Agenda() {
   const [now, setNow] = useState(() => new Date())
   const [appointments, setAppointments] = useState(() => getAppointments())
   const [createTarget, setCreateTarget] = useState<CreateTarget | null>(null)
+  const [activeAppointment, setActiveAppointment] = useState<Appointment | null>(null)
   const timeScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -296,20 +298,37 @@ export function Agenda() {
     )
   }
 
+  const openAppointment = (apt: Appointment, event?: ReactMouseEvent) => {
+    event?.stopPropagation()
+    setCreateTarget(null)
+    setActiveAppointment(apt)
+  }
+
+  const renderDetailsTip = (details: string) => {
+    const text = details.trim()
+    if (!text) return null
+    return (
+      <span className="agenda__details-tip" role="tooltip">
+        {text}
+      </span>
+    )
+  }
+
   const renderEventCard = (apt: Appointment, compact: boolean) => {
     const layout = appointmentLayout(apt)
     if (!layout) return null
     const color = appointmentColorHex(apt.color)
     return (
-      <div
+      <button
         key={apt.id}
-        className={`agenda__event${compact ? ' is-compact' : ''}`}
+        type="button"
+        className={`agenda__event${compact ? ' is-compact' : ''}${apt.details.trim() ? ' has-tip' : ''}`}
         style={{
           top: layout.top,
           height: layout.height,
           background: color,
         }}
-        title={apt.title}
+        onClick={(event) => openAppointment(apt, event)}
       >
         <span className="agenda__event-dot" />
         <div className="agenda__event-body">
@@ -321,7 +340,8 @@ export function Agenda() {
           ) : null}
           <span className="agenda__event-title">{apt.title}</span>
         </div>
-      </div>
+        {renderDetailsTip(apt.details)}
+      </button>
     )
   }
 
@@ -514,12 +534,24 @@ export function Agenda() {
                       {dayApts.slice(0, 3).map((apt) => (
                         <span
                           key={apt.id}
-                          className="agenda__month-chip"
+                          role="button"
+                          tabIndex={0}
+                          className={`agenda__month-chip${apt.details.trim() ? ' has-tip' : ''}`}
                           style={{ background: appointmentColorHex(apt.color) }}
+                          onClick={(event) => openAppointment(apt, event)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              setCreateTarget(null)
+                              setActiveAppointment(apt)
+                            }
+                          }}
                         >
                           <span className="agenda__month-chip-dot" />
                           {apt.startTime ? `${apt.startTime.slice(0, 2)} ` : ''}
                           {apt.title}
+                          {renderDetailsTip(apt.details)}
                         </span>
                       ))}
                     </div>
@@ -536,17 +568,24 @@ export function Agenda() {
                 }
 
                 return (
-                  <button
+                  <div
                     key={day.toISOString()}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     className={cellClass}
                     onClick={(event) => {
                       event.stopPropagation()
                       setCreateTarget({ date: startOfDay(day) })
                     }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        setCreateTarget({ date: startOfDay(day) })
+                      }
+                    }}
                   >
                     {body}
-                  </button>
+                  </div>
                 )
               })}
             </div>
@@ -571,17 +610,23 @@ export function Agenda() {
                   <ul className="agenda__list-items">
                     {group.items.map((apt) => (
                       <li key={apt.id} className="agenda__list-item">
-                        <span
-                          className="agenda__list-time"
-                          style={{ background: appointmentColorHex(apt.color) }}
+                        <button
+                          type="button"
+                          className="agenda__list-item-btn"
+                          onClick={() => openAppointment(apt)}
                         >
-                          {timeLabel(apt)}
-                        </span>
-                        <span
-                          className="agenda__list-dot"
-                          style={{ background: appointmentColorHex(apt.color) }}
-                        />
-                        <span className="agenda__list-title">{apt.title}</span>
+                          <span
+                            className="agenda__list-time"
+                            style={{ background: appointmentColorHex(apt.color) }}
+                          >
+                            {timeLabel(apt)}
+                          </span>
+                          <span
+                            className="agenda__list-dot"
+                            style={{ background: appointmentColorHex(apt.color) }}
+                          />
+                          <span className="agenda__list-title">{apt.title}</span>
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -591,6 +636,11 @@ export function Agenda() {
           </div>
         ) : null}
       </section>
+
+      <AppointmentDetailModal
+        appointment={activeAppointment}
+        onClose={() => setActiveAppointment(null)}
+      />
     </div>
   )
 }
