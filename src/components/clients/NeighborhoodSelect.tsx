@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { withBairroOutroOption } from '../../lib/brazilAddress'
 import { RegisterNeighborhoodModal } from './RegisterNeighborhoodModal'
 import './NeighborhoodSelect.css'
 
@@ -30,19 +31,7 @@ export function NeighborhoodSelect({
   const [modalOpen, setModalOpen] = useState(false)
   const [pendingName, setPendingName] = useState('')
 
-  const uniqueOptions = useMemo(() => {
-    const seen = new Set<string>()
-    const list: string[] = []
-    for (const option of options) {
-      const trimmed = option.trim()
-      if (!trimmed) continue
-      const key = trimmed.toLocaleLowerCase('pt-BR')
-      if (seen.has(key)) continue
-      seen.add(key)
-      list.push(trimmed)
-    }
-    return list
-  }, [options])
+  const uniqueOptions = useMemo(() => withBairroOutroOption(options), [options])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('pt-BR')
@@ -129,7 +118,15 @@ export function NeighborhoodSelect({
         </button>
 
         {/* campo oculto para required nativo do form */}
-        <input type="text" tabIndex={-1} required={required} value={value} readOnly aria-hidden="true" className="bairro-select__native" />
+        <input
+          type="text"
+          tabIndex={-1}
+          required={required}
+          value={value}
+          readOnly
+          aria-hidden="true"
+          className="bairro-select__native"
+        />
 
         {open && (
           <div className="bairro-select__panel" id={listId} role="listbox">

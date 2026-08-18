@@ -73,7 +73,7 @@ export type ViaCepResponse = {
   cep?: string
 }
 
-/** Amostra CEPs da mesma faixa e reúne bairros da mesma cidade. */
+/** Amostra CEPs da faixa e busca por logradouros para reunir mais bairros da cidade. */
 export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
   const mainResponse = await fetch(`https://viacep.com.br/ws/${digits}/json/`, {
     signal,
@@ -83,25 +83,42 @@ export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
   if (main.erro) return { main: null, bairros: [] as string[] }
 
   const city = (main.localidade ?? '').trim()
+  const uf = (main.uf ?? '').trim().toUpperCase()
   const prefix = digits.slice(0, 5)
-  const suffixes = [
-    0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700,
-    750, 800, 850, 900, 950,
-  ]
+
+  const suffixes: number[] = []
+  for (let suffix = 0; suffix <= 990; suffix += 20) {
+    suffixes.push(suffix)
+  }
   const exactSuffix = Number(digits.slice(5))
   if (!suffixes.includes(exactSuffix)) suffixes.push(exactSuffix)
 
-  const settled = await Promise.allSettled(
-    suffixes.map(async (suffix) => {
-      const cep = `${prefix}${String(suffix).padStart(3, '0')}`
-      if (cep === digits) return main
-      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
-        signal,
-      })
-      if (!response.ok) return null
-      return (await response.json()) as ViaCepResponse
-    }),
-  )
+  const streetTerms = ['Rua', 'Avenida', 'Travessa', 'Alameda', 'Rodovia', 'Praça']
+
+  const [cepResults, streetResults] = await Promise.all([
+    Promise.allSettled(
+      suffixes.map(async (suffix) => {
+        const cep = `${prefix}${String(suffix).padStart(3, '0')}`
+        if (cep === digits) return main
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
+          signal,
+        })
+        if (!response.ok) return null
+        return (await response.json()) as ViaCepResponse
+      }),
+    ),
+    uf && city
+      ? Promise.allSettled(
+          streetTerms.map(async (term) => {
+            const url = `https://viacep.com.br/ws/${uf}/${encodeURIComponent(city)}/${encodeURIComponent(term)}/json/`
+            const response = await fetch(url, { signal })
+            if (!response.ok) return [] as ViaCepResponse[]
+            const data = (await response.json()) as ViaCepResponse[] | ViaCepResponse
+            return Array.isArray(data) ? data : []
+          }),
+        )
+      : Promise.resolve([] as PromiseSettledResult<ViaCepResponse[]>[]),
+  ])
 
   const seen = new Set<string>()
   const bairros: string[] = []
@@ -109,6 +126,7 @@ export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
     const trimmed = name?.trim()
     if (!trimmed) return
     const key = trimmed.toLocaleLowerCase('pt-BR')
+    if (key === 'outro') return
     if (seen.has(key)) return
     seen.add(key)
     bairros.push(trimmed)
@@ -116,15 +134,43 @@ export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
 
   addBairro(main.bairro)
 
-  for (const result of settled) {
+  for (const result of cepResults) {
     if (result.status !== 'fulfilled' || !result.value || result.value.erro) continue
     const item = result.value
     if ((item.localidade ?? '').trim() !== city) continue
     addBairro(item.bairro)
   }
 
+  for (const result of streetResults) {
+    if (result.status !== 'fulfilled') continue
+    for (const item of result.value) {
+      if (item.erro) continue
+      if ((item.localidade ?? '').trim() && (item.localidade ?? '').trim() !== city) continue
+      addBairro(item.bairro)
+    }
+  }
+
   bairros.sort((a, b) => a.localeCompare(b, 'pt-BR'))
   return { main, bairros }
+}
+
+/** Opção fixa no seletor de bairro (Claral). */
+export const BAIRRO_OUTRO = 'outro'
+
+export function withBairroOutroOption(options: string[]) {
+  const seen = new Set<string>()
+  const list: string[] = []
+  for (const option of options) {
+    const trimmed = option.trim()
+    if (!trimmed) continue
+    const key = trimmed.toLocaleLowerCase('pt-BR')
+    if (key === BAIRRO_OUTRO) continue
+    if (seen.has(key)) continue
+    seen.add(key)
+    list.push(trimmed)
+  }
+  list.push(BAIRRO_OUTRO)
+  return list
 }
 
 export function resolveStateName(main: ViaCepResponse): string {
