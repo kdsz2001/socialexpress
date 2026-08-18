@@ -476,7 +476,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 0 0.75rem 0 0.35rem;
+  padding: 0 0.9rem 0 0.4rem;
   box-sizing: border-box;
   pointer-events: none;
   overflow: visible;
@@ -503,7 +503,7 @@
 }
 
 .agenda__timegrid.is-day .agenda__hour-label {
-  padding-right: 0.85rem;
+  padding-right: 1rem;
 }
 
 .agenda__timegrid.is-day .agenda__hour-label span {
@@ -791,7 +791,7 @@
 
 /* Claral day: red line across cream; triangle lives in the white time gutter */
 .agenda__now-rail.is-day .agenda__now {
-  left: var(--agenda-gutter, 72px);
+  left: var(--agenda-gutter, 80px);
   right: 0;
 }
 
