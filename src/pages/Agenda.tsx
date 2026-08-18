@@ -271,7 +271,7 @@ export function Agenda() {
       <span className={`agenda__create-wrap${hasTime ? ' has-time' : ''}`}>
         {hasTime ? (
           <span className="agenda__create-time" aria-hidden="true" title={`${startLabel} – ${endLabel}`}>
-            <Clock size={11} strokeWidth={2.5} />
+            <Clock size={14} strokeWidth={2.5} />
             <span>
               {startLabel}–{endLabel}
             </span>
