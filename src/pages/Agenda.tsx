@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import {
   type AgendaView,
@@ -369,7 +369,11 @@ export function Agenda() {
     const showNow = nowOffset != null && todayIndex >= 0
 
     return (
-      <div className={`agenda__timegrid${singleDay ? ' is-day' : ''}`} ref={timeScrollRef}>
+      <div
+        className={`agenda__timegrid${singleDay ? ' is-day' : ''}`}
+        ref={timeScrollRef}
+        style={singleDay ? ({ ['--agenda-gutter']: `${TIME_GUTTER}px` } as CSSProperties) : undefined}
+      >
         <div
           className="agenda__timegrid-inner"
           style={{
