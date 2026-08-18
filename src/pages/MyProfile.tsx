@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import {
   BookUser,
   Check,
@@ -51,8 +51,10 @@ export function MyProfile() {
   const [section, setSection] = useState<ProfileSection>('pessoais')
   const [draft, setDraft] = useState<UserProfile>(() => getUserProfile())
   const [cpfError, setCpfError] = useState('')
+  const [avatarError, setAvatarError] = useState('')
   const [toastOpen, setToastOpen] = useState(false)
   const closeToast = useCallback(() => setToastOpen(false), [])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     try {
@@ -69,6 +71,50 @@ export function MyProfile() {
 
   const patch = <K extends keyof UserProfile>(key: K, value: UserProfile[K]) => {
     setDraft((current) => ({ ...current, [key]: value }))
+  }
+
+  const openFilePicker = () => {
+    setAvatarError('')
+    fileInputRef.current?.click()
+  }
+
+  const onAvatarSelected = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    const type = file.type.toLowerCase()
+    const nameOk = /\.jpe?g$/i.test(file.name)
+    if (!ACCEPTED_AVATAR_TYPES.has(type) && !nameOk) {
+      setAvatarError('Somente arquivos JPG ou JPEG são aceitos.')
+      return
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      setAvatarError('A imagem deve ter no máximo 5MB.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      if (!result.startsWith('data:image/jpeg') && !result.startsWith('data:image/jpg')) {
+        // Alguns browsers usam image/jpeg mesmo para .jpg
+        if (!result.startsWith('data:image/')) {
+          setAvatarError('Não foi possível ler a imagem.')
+          return
+        }
+      }
+      setAvatarError('')
+      patch('avatarDataUrl', result)
+    }
+    reader.onerror = () => setAvatarError('Não foi possível ler a imagem.')
+    reader.readAsDataURL(file)
+  }
+
+  const removeAvatar = () => {
+    setAvatarError('')
+    patch('avatarDataUrl', '')
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const save = () => {
@@ -169,25 +215,47 @@ export function MyProfile() {
                 <span className="client-create__label">Imagem de perfil</span>
                 <div className="my-profile__avatar-field">
                   <div className="my-profile__avatar-box">
-                    <span className="my-profile__avatar-placeholder" aria-hidden="true" />
+                    {draft.avatarDataUrl ? (
+                      <img
+                        className="my-profile__avatar-image"
+                        src={draft.avatarDataUrl}
+                        alt="Imagem de perfil"
+                      />
+                    ) : (
+                      <span className="my-profile__avatar-placeholder" aria-hidden="true" />
+                    )}
                     <button
                       type="button"
                       className="my-profile__avatar-edit"
-                      aria-label="Editar imagem"
+                      aria-label="Adicionar ou editar imagem"
+                      onClick={openFilePicker}
                     >
                       <Pencil size={12} strokeWidth={2.5} />
                     </button>
-                    <button
-                      type="button"
-                      className="my-profile__avatar-remove"
-                      aria-label="Remover imagem"
-                    >
-                      <X size={12} strokeWidth={2.5} />
-                    </button>
+                    {draft.avatarDataUrl ? (
+                      <button
+                        type="button"
+                        className="my-profile__avatar-remove"
+                        aria-label="Remover imagem"
+                        onClick={removeAvatar}
+                      >
+                        <X size={12} strokeWidth={2.5} />
+                      </button>
+                    ) : null}
                   </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="my-profile__file-input"
+                    accept=".jpg,.jpeg,image/jpeg"
+                    onChange={onAvatarSelected}
+                  />
                   <p className="my-profile__avatar-hint">
                     Somente arquivos até 5MB e no formato JPG ou JPEG são aceitos.
                   </p>
+                  {avatarError ? (
+                    <p className="client-create__field-error">{avatarError}</p>
+                  ) : null}
                 </div>
               </div>
 
