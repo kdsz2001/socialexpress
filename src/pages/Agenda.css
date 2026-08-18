@@ -430,18 +430,19 @@
 
 .agenda__slot.is-past {
   cursor: default;
+  pointer-events: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.agenda__slot.is-past:hover {
+.agenda__slot.is-past:hover,
+.agenda__slot.is-past:active,
+.agenda__slot.is-past:focus {
   background: transparent;
 }
 
-.agenda__day-col.is-today .agenda__slot.is-past:hover {
+.agenda__day-col.is-today .agenda__slot.is-past:hover,
+.agenda__day-col.is-today .agenda__slot.is-past:active {
   background: transparent;
-}
-
-.agenda__slot:disabled {
-  opacity: 1;
 }
 
 .agenda__slot-half {

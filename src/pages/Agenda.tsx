@@ -355,19 +355,31 @@ export function Agenda() {
                 {HOURS.map((hour, hourIndex) => {
                   const bookable = canCreateOnTimeSlot(day, hour, now)
                   const selected = bookable && isSameCreateTarget(createTarget, day, hour)
+                  const slotClass = `agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}${
+                    selected ? ' is-selected' : ''
+                  }${bookable ? ' agenda__slot--bookable' : ' is-past'}`
+
+                  if (!bookable) {
+                    return (
+                      <div
+                        key={hour}
+                        className={slotClass}
+                        style={{ height: HOUR_HEIGHT }}
+                        aria-hidden="true"
+                      >
+                        <span className="agenda__slot-half" />
+                      </div>
+                    )
+                  }
+
                   return (
                     <button
                       key={hour}
                       type="button"
-                      className={`agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}${
-                        selected ? ' is-selected' : ''
-                      }${bookable ? '' : ' is-past'}`}
+                      className={slotClass}
                       style={{ height: HOUR_HEIGHT }}
-                      disabled={!bookable}
-                      aria-disabled={!bookable}
                       onClick={(event) => {
                         event.stopPropagation()
-                        if (!bookable) return
                         setCreateTarget({ date: startOfDay(day), hour })
                       }}
                     >
@@ -443,21 +455,14 @@ export function Agenda() {
                 const bookable = canCreateOnMonthDay(day, today)
                 const selected = bookable && isSameCreateTarget(createTarget, day)
                 const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
-                return (
-                  <button
-                    key={day.toISOString()}
-                    type="button"
-                    className={`agenda__month-cell${inMonth ? '' : ' is-outside'}${
-                      isToday ? ' is-today' : ''
-                    }${selected ? ' is-selected' : ''}${bookable ? '' : ' is-past'}`}
-                    disabled={!bookable}
-                    aria-disabled={!bookable}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      if (!bookable) return
-                      setCreateTarget({ date: startOfDay(day) })
-                    }}
-                  >
+                const cellClass = `agenda__month-cell${inMonth ? '' : ' is-outside'}${
+                  isToday ? ' is-today' : ''
+                }${selected ? ' is-selected' : ''}${
+                  bookable ? ' agenda__month-cell--bookable' : ' is-past'
+                }`
+
+                const body = (
+                  <>
                     <span className="agenda__month-date">{day.getDate()}</span>
                     <div className="agenda__month-events">
                       {dayApts.slice(0, 3).map((apt) => (
@@ -473,6 +478,28 @@ export function Agenda() {
                       ))}
                     </div>
                     {selected ? renderCreateTip(day) : null}
+                  </>
+                )
+
+                if (!bookable) {
+                  return (
+                    <div key={day.toISOString()} className={cellClass} aria-hidden="true">
+                      {body}
+                    </div>
+                  )
+                }
+
+                return (
+                  <button
+                    key={day.toISOString()}
+                    type="button"
+                    className={cellClass}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setCreateTarget({ date: startOfDay(day) })
+                    }}
+                  >
+                    {body}
                   </button>
                 )
               })}
