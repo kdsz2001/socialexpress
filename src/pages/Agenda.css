@@ -519,14 +519,6 @@
   z-index: 6;
 }
 
-.agenda__now-rail {
-  position: relative;
-  /* Above day columns (including has-create) so the red line is never covered */
-  z-index: 25;
-  pointer-events: none;
-  overflow: visible;
-}
-
 .agenda__day-col:last-child {
   border-right: 0;
 }
@@ -745,6 +737,7 @@
 
 .agenda__now-rail {
   position: relative;
+  /* Above day columns (including has-create) so the red line is never covered */
   z-index: 25;
   pointer-events: none;
   overflow: visible;
