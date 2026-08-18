@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import {
   Search,
   Plus,
@@ -20,6 +20,7 @@ import {
   type DatePreset,
 } from '../components/clients/DateRangePicker'
 import { DeleteClientModal } from '../components/clients/DeleteClientModal'
+import { SaveToast } from '../components/ui/SaveToast'
 import { useClients } from '../hooks/useClients'
 import {
   ageTurningOnBirthday,
