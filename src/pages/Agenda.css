@@ -368,6 +368,7 @@
   min-width: 100%;
   position: relative;
   align-content: start;
+  overflow: visible;
 }
 
 .agenda__col-head {
