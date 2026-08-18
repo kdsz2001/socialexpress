@@ -84,6 +84,17 @@ export function Clients() {
   const dateWrapRef = useRef<HTMLDivElement>(null)
   const dateMenuId = useId()
 
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(REMOVED_TOAST_KEY) === '1') {
+        sessionStorage.removeItem(REMOVED_TOAST_KEY)
+        setToastOpen(true)
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
+
   const dateLabel = `${formatBr(rangeStart)} até ${formatBr(rangeEnd)}`
 
   const filtered = useMemo(() => {
@@ -609,11 +620,21 @@ export function Clients() {
         }
         onCancel={() => setClientToDelete(null)}
         onConfirm={() => {
-          if (clientToDelete) {
-            deleteClient(clientToDelete.id)
-            setToastOpen(true)
+          if (!clientToDelete) {
+            setClientToDelete(null)
+            return
           }
+          deleteClient(clientToDelete.id)
           setClientToDelete(null)
+          try {
+            sessionStorage.setItem(REMOVED_TOAST_KEY, '1')
+          } catch {
+            // ignore storage errors
+          }
+          // Refresh da mesma aba; o toast aparece depois do reload
+          window.location.assign(
+            `${window.location.pathname}${window.location.search}`,
+          )
         }}
       />
 
