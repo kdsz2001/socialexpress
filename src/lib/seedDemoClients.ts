@@ -1,7 +1,7 @@
-import { addClient, getClients, type ClientGender } from './clientsStore'
+import { addClientsBulk, getClients, type ClientGender } from './clientsStore'
 import { maskCpfCnpj } from './cpfCnpj'
 
-const SEED_FLAG = 'social-express:demo-seed-100-v1'
+const SEED_FLAG = 'social-express:demo-seed-1200-v1'
 
 const FIRST_NAMES = [
   'Ana',
@@ -112,54 +112,64 @@ function genderFor(index: number): ClientGender {
   return roll % 2 === 0 ? 'feminino' : 'masculino'
 }
 
+function slugName(nome: string) {
+  return nome
+    .toLocaleLowerCase('pt-BR')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+}
+
 /**
- * Cadastra 100 clientes fictícios (CPF válido + dados BR) uma única vez,
- * para testar paginação e abas com volume.
+ * Cadastra 1200 clientes fictícios (CPF válido + dados BR) uma única vez,
+ * para testar paginação e abas com bastante volume.
  */
-export function seedDemoClients(count = 100) {
+export function seedDemoClients(count = 1200) {
   if (typeof localStorage === 'undefined') return 0
   if (localStorage.getItem(SEED_FLAG) === '1') return 0
 
   const existing = getClients().length
-  let created = 0
+  // Offset alto para não colidir com o seed anterior de 100
+  const indexOffset = 10_000
 
-  for (let i = 0; i < count; i += 1) {
+  const inputs = Array.from({ length: count }, (_, i) => {
+    const index = indexOffset + i
     const nome = FIRST_NAMES[i % FIRST_NAMES.length]
     const sobrenomes = `${LAST_NAMES[i % LAST_NAMES.length]} ${LAST_NAMES[(i * 3) % LAST_NAMES.length]}`
     const place = CITIES[i % CITIES.length]
     const gender = genderFor(i)
-    const phone = formatPhone(i)
+    const phone = formatPhone(index)
+    const slug = slugName(nome)
 
-    const client = addClient({
-      id: `demo-seed-${i + 1}`,
-      cpfCnpj: generateValidCpf(i + 1),
-      rg: pad(1000000 + i, 7),
+    return {
+      id: `demo-seed-1200-${i + 1}`,
+      cpfCnpj: generateValidCpf(index),
+      rg: pad(2000000 + i, 7),
       gender,
       nome,
       sobrenomes,
       chamado: i % 5 === 0 ? nome : '',
       birthDate: formatBirthDate(i),
-      email: `${nome.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/\p{M}/gu, '')}.${i + 1}@email.com`,
+      email: `${slug}.${i + 1}@email.com`,
       phones: [{ number: phone, primary: true, whatsapp: true }],
       facebook: '',
-      instagram: i % 4 === 0 ? `@${nome.toLocaleLowerCase('pt-BR')}${i}` : '',
+      instagram: i % 4 === 0 ? `@${slug}${i}` : '',
       cep: place.cep,
       logradouro: place.logradouro,
       numero: String(10 + (i % 900)),
-      complemento: i % 7 === 0 ? `Apto ${i % 40 + 1}` : '',
+      complemento: i % 7 === 0 ? `Apto ${(i % 40) + 1}` : '',
       estado: place.estado,
       cidade: place.cidade,
       bairro: place.bairro,
       notifyEmail: i % 3 !== 0,
       measures: [],
-      observacoes: i % 11 === 0 ? 'Cliente de demonstração para testes de paginação.' : '',
+      observacoes:
+        i % 11 === 0 ? 'Cliente de demonstração para testes de paginação.' : '',
       active: i % 13 !== 0,
-      createdAt: new Date(Date.now() - i * 36_000_000).toISOString(),
-    })
+      createdAt: new Date(Date.now() - i * 3_600_000).toISOString(),
+    }
+  })
 
-    if (client) created += 1
-  }
-
+  const created = addClientsBulk(inputs)
   localStorage.setItem(SEED_FLAG, '1')
   console.info(
     `[Social Express] Seed: ${created} clientes demo cadastrados (já havia ${existing}).`,

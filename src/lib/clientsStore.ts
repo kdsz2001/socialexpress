@@ -77,13 +77,40 @@ export function getClients(): Client[] {
   return readAll()
 }
 
-export function addClient(
-  input: Omit<Client, 'id' | 'createdAt' | 'active'> & {
-    id?: string
-    createdAt?: string
-    active?: boolean
-  },
-): Client | null {
+type ClientInput = Omit<Client, 'id' | 'createdAt' | 'active'> & {
+  id?: string
+  createdAt?: string
+  active?: boolean
+}
+
+/** Insere vários clientes de uma vez (1 write), ignorando CPF já existente. */
+export function addClientsBulk(inputs: ClientInput[]): number {
+  const current = readAll()
+  const seen = new Set(
+    current.map((client) => client.cpfCnpj.replace(/\D/g, '')),
+  )
+  const created: Client[] = []
+
+  for (const input of inputs) {
+    const digits = input.cpfCnpj.replace(/\D/g, '')
+    if (!digits || seen.has(digits)) continue
+    seen.add(digits)
+    created.push(
+      normalizeClient({
+        ...input,
+        active: input.active !== false,
+        id: input.id ?? crypto.randomUUID(),
+        createdAt: input.createdAt ?? new Date().toISOString(),
+      }),
+    )
+  }
+
+  if (!created.length) return 0
+  writeAll([...created, ...current])
+  return created.length
+}
+
+export function addClient(input: ClientInput): Client | null {
   if (isCpfCnpjRegistered(input.cpfCnpj)) {
     return null
   }
@@ -93,8 +120,7 @@ export function addClient(
     id: input.id ?? crypto.randomUUID(),
     createdAt: input.createdAt ?? new Date().toISOString(),
   }
-  const next = [client, ...readAll()]
-  writeAll(next)
+  writeAll([client, ...readAll()])
   return client
 }
 

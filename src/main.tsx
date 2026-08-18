@@ -5,7 +5,7 @@ import App from './App'
 import { seedDemoClients } from './lib/seedDemoClients'
 import './index.css'
 
-seedDemoClients(100)
+seedDemoClients(1200)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
