@@ -770,14 +770,20 @@
   left: -9px;
 }
 
-/* Week view: red line + triangle only inside today's column */
-.agenda__now-rail.is-week .agenda__now {
+/* Week view: triangle stays in the time gutter; solid line only on today */
+.agenda__now-rail.is-week-arrow .agenda__now {
   left: 0;
   right: 0;
 }
 
-.agenda__now-rail.is-week .agenda__now-arrow {
-  left: -1px;
+.agenda__now-rail.is-week-arrow .agenda__now-arrow {
+  left: auto;
+  right: -1px;
+}
+
+.agenda__now-rail.is-week-line .agenda__now {
+  left: 0;
+  right: 0;
 }
 
 .agenda__now-line {

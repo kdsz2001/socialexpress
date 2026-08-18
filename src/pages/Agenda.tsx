@@ -419,17 +419,10 @@ export function Agenda() {
             ))}
           </div>
 
-          {showNow ? (
+          {showNow && singleDay ? (
             <div
-              className={`agenda__now-rail${singleDay ? ' is-day' : ' is-week'}`}
-              style={
-                singleDay
-                  ? { gridColumn: '1 / -1', gridRow: `3 / span ${HOURS.length}` }
-                  : {
-                      gridColumn: todayIndex + 2,
-                      gridRow: `3 / span ${HOURS.length}`,
-                    }
-              }
+              className="agenda__now-rail is-day"
+              style={{ gridColumn: '1 / -1', gridRow: `3 / span ${HOURS.length}` }}
               aria-hidden="true"
             >
               <div className="agenda__now" style={{ top: nowOffset }}>
@@ -437,6 +430,32 @@ export function Agenda() {
                 <span className="agenda__now-line" />
               </div>
             </div>
+          ) : null}
+
+          {showNow && !singleDay ? (
+            <>
+              <div
+                className="agenda__now-rail is-week is-week-arrow"
+                style={{ gridColumn: 1, gridRow: `3 / span ${HOURS.length}` }}
+                aria-hidden="true"
+              >
+                <div className="agenda__now" style={{ top: nowOffset }}>
+                  <span className="agenda__now-arrow" />
+                </div>
+              </div>
+              <div
+                className="agenda__now-rail is-week is-week-line"
+                style={{
+                  gridColumn: todayIndex + 2,
+                  gridRow: `3 / span ${HOURS.length}`,
+                }}
+                aria-hidden="true"
+              >
+                <div className="agenda__now" style={{ top: nowOffset }}>
+                  <span className="agenda__now-line" />
+                </div>
+              </div>
+            </>
           ) : null}
 
           {days.map((day, dayIndex) => {
