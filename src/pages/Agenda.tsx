@@ -213,12 +213,19 @@ export function Agenda() {
     if (view !== 'semana' && view !== 'dia') return
     const el = timeScrollRef.current
     if (!el) return
+    const scrollParent = el.closest('.app-content') as HTMLElement | null
+    if (!scrollParent) return
+
     const into = minutesIntoGrid(now)
     if (into == null) {
-      el.scrollTop = 0
+      scrollParent.scrollTop = 0
       return
     }
-    el.scrollTop = Math.max(0, ALL_DAY_HEIGHT + (into / 60 - 1) * HOUR_HEIGHT)
+
+    const hourOffset = Math.max(0, HEAD_HEIGHT + ALL_DAY_HEIGHT + (into / 60 - 1) * HOUR_HEIGHT)
+    const elTop = el.getBoundingClientRect().top
+    const parentTop = scrollParent.getBoundingClientRect().top
+    scrollParent.scrollTop = Math.max(0, scrollParent.scrollTop + (elTop - parentTop) + hourOffset)
   }, [view, cursor])
 
   const today = startOfDay(now)
