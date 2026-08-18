@@ -7,7 +7,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { NeighborhoodSelect } from '../components/clients/NeighborhoodSelect'
-import { addClient } from '../lib/clientsStore'
+import { addClient, isCpfCnpjRegistered } from '../lib/clientsStore'
 import {
   isValidCpfCnpj,
   maskCpfCnpj,

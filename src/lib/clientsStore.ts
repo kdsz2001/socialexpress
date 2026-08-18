@@ -99,6 +99,19 @@ export function getClient(id: string): Client | undefined {
   return readAll().find((client) => client.id === id)
 }
 
+/** True if another client already has the same CPF/CNPJ (digits only). */
+export function isCpfCnpjRegistered(
+  cpfCnpj: string,
+  exceptClientId?: string,
+): boolean {
+  const digits = cpfCnpj.replace(/\D/g, '')
+  if (!digits) return false
+  return readAll().some((client) => {
+    if (exceptClientId && client.id === exceptClientId) return false
+    return client.cpfCnpj.replace(/\D/g, '') === digits
+  })
+}
+
 export function updateClient(
   id: string,
   patch: Partial<Omit<Client, 'id' | 'createdAt'>>,
