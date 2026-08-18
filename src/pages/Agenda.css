@@ -208,22 +208,27 @@
 
 .agenda__month-cell.is-past {
   cursor: default;
+  pointer-events: none;
+  transition: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.agenda__month-cell.is-past:hover {
+.agenda__month-cell.is-past:hover,
+.agenda__month-cell.is-past:active,
+.agenda__month-cell.is-past:focus {
   background: #fff;
 }
 
-.agenda__month-cell.is-outside.is-past:hover {
+.agenda__month-cell.is-outside.is-past,
+.agenda__month-cell.is-outside.is-past:hover,
+.agenda__month-cell.is-outside.is-past:active {
   background: #fcfcfd;
 }
 
-.agenda__month-cell.is-today.is-past:hover {
+.agenda__month-cell.is-today.is-past,
+.agenda__month-cell.is-today.is-past:hover,
+.agenda__month-cell.is-today.is-past:active {
   background: #fdf6e3;
-}
-
-.agenda__month-cell:disabled {
-  opacity: 1;
 }
 
 .agenda__month-date {
@@ -421,6 +426,22 @@
 .agenda__slot.is-selected {
   background: #e8f4ff;
   z-index: 2;
+}
+
+.agenda__slot.is-past {
+  cursor: default;
+}
+
+.agenda__slot.is-past:hover {
+  background: transparent;
+}
+
+.agenda__day-col.is-today .agenda__slot.is-past:hover {
+  background: transparent;
+}
+
+.agenda__slot:disabled {
+  opacity: 1;
 }
 
 .agenda__slot-half {

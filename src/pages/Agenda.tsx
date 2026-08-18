@@ -181,7 +181,11 @@ export function Agenda() {
     const onPointer = (event: MouseEvent) => {
       const node = event.target as HTMLElement | null
       if (!node) return
-      if (node.closest('.agenda__create-tip') || node.closest('.agenda__month-cell') || node.closest('.agenda__slot')) {
+      if (
+        node.closest('.agenda__create-tip') ||
+        node.closest('.agenda__month-cell--bookable') ||
+        node.closest('.agenda__slot--bookable')
+      ) {
         return
       }
       setCreateTarget(null)
@@ -207,17 +211,6 @@ export function Agenda() {
   }, [view, cursor])
 
   const today = startOfDay(now)
-
-  useEffect(() => {
-    if (!createTarget) return
-    if (createTarget.hour == null) {
-      if (!canCreateOnMonthDay(createTarget.date, today)) setCreateTarget(null)
-      return
-    }
-    if (!canCreateOnTimeSlot(createTarget.date, createTarget.hour, now)) {
-      setCreateTarget(null)
-    }
-  }, [now, createTarget, today])
   const monthDays = useMemo(() => getMonthGrid(cursor), [cursor])
   const weekDays = useMemo(() => getWeekDays(cursor), [cursor])
 
@@ -360,17 +353,21 @@ export function Agenda() {
                 style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
               >
                 {HOURS.map((hour, hourIndex) => {
-                  const selected = isSameCreateTarget(createTarget, day, hour)
+                  const bookable = canCreateOnTimeSlot(day, hour, now)
+                  const selected = bookable && isSameCreateTarget(createTarget, day, hour)
                   return (
                     <button
                       key={hour}
                       type="button"
                       className={`agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}${
                         selected ? ' is-selected' : ''
-                      }`}
+                      }${bookable ? '' : ' is-past'}`}
                       style={{ height: HOUR_HEIGHT }}
+                      disabled={!bookable}
+                      aria-disabled={!bookable}
                       onClick={(event) => {
                         event.stopPropagation()
+                        if (!bookable) return
                         setCreateTarget({ date: startOfDay(day), hour })
                       }}
                     >
@@ -443,7 +440,8 @@ export function Agenda() {
               {monthDays.map((day) => {
                 const inMonth = isSameMonth(day, cursor)
                 const isToday = isSameDay(day, today)
-                const selected = isSameCreateTarget(createTarget, day)
+                const bookable = canCreateOnMonthDay(day, today)
+                const selected = bookable && isSameCreateTarget(createTarget, day)
                 const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
                 return (
                   <button
@@ -451,9 +449,12 @@ export function Agenda() {
                     type="button"
                     className={`agenda__month-cell${inMonth ? '' : ' is-outside'}${
                       isToday ? ' is-today' : ''
-                    }${selected ? ' is-selected' : ''}`}
+                    }${selected ? ' is-selected' : ''}${bookable ? '' : ' is-past'}`}
+                    disabled={!bookable}
+                    aria-disabled={!bookable}
                     onClick={(event) => {
                       event.stopPropagation()
+                      if (!bookable) return
                       setCreateTarget({ date: startOfDay(day) })
                     }}
                   >
