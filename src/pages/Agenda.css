@@ -743,7 +743,7 @@
 
 .agenda__now-rail {
   position: relative;
-  /* Above day columns (including has-create) so the red line is never covered */
+  /* Above day columns so the red line is never covered by selection */
   z-index: 25;
   pointer-events: none;
   overflow: visible;
@@ -751,7 +751,7 @@
 
 .agenda__now {
   position: absolute;
-  left: var(--agenda-gutter, 92px);
+  left: 0;
   right: 0;
   height: 0;
   margin: 0;
@@ -759,6 +759,25 @@
   z-index: 2;
   pointer-events: none;
   overflow: visible;
+}
+
+/* Day view: triangle in the white time gutter; line across the cream column */
+.agenda__now-rail.is-day .agenda__now {
+  left: var(--agenda-gutter, 92px);
+}
+
+.agenda__now-rail.is-day .agenda__now-arrow {
+  left: -9px;
+}
+
+/* Week view: red line + triangle only inside today's column */
+.agenda__now-rail.is-week .agenda__now {
+  left: 0;
+  right: 0;
+}
+
+.agenda__now-rail.is-week .agenda__now-arrow {
+  left: -1px;
 }
 
 .agenda__now-line {
