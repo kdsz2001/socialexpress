@@ -184,6 +184,7 @@ export function Agenda() {
       if (
         node.closest('.agenda__create-tip') ||
         node.closest('.agenda__create-wrap') ||
+        node.closest('.agenda__create-layer') ||
         node.closest('.agenda__month-cell--bookable') ||
         node.closest('.agenda__slot--bookable')
       ) {
@@ -271,7 +272,7 @@ export function Agenda() {
       <span className={`agenda__create-wrap${hasTime ? ' has-time' : ''}`}>
         {hasTime ? (
           <span className="agenda__create-time" aria-hidden="true" title={`${startLabel} – ${endLabel}`}>
-            <Clock size={14} strokeWidth={2.5} />
+            <Clock size={15} strokeWidth={2.5} />
             <span>
               {startLabel}–{endLabel}
             </span>
@@ -285,7 +286,10 @@ export function Agenda() {
             openCreateFromTarget({ date: day, hour })
           }}
         >
-          Criar agendamento para o dia <strong>{formatCreateDayLabel(day)}</strong>
+          <span className="agenda__create-tip-line">Criar agendamento para</span>
+          <span className="agenda__create-tip-line">
+            o dia <strong>{formatCreateDayLabel(day)}</strong>
+          </span>
         </button>
       </span>
     )
@@ -363,12 +367,28 @@ export function Agenda() {
 
           {days.map((day, dayIndex) => {
             const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
+            const selectedHour =
+              createTarget &&
+              isSameDay(createTarget.date, day) &&
+              createTarget.hour != null &&
+              canCreateOnTimeSlot(day, createTarget.hour, now)
+                ? createTarget.hour
+                : null
+
             return (
               <div
                 key={day.toISOString()}
-                className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}`}
+                className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}${
+                  selectedHour != null ? ' has-create' : ''
+                }`}
                 style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
               >
+                {nowOffset != null && isSameDay(day, today) ? (
+                  <div className="agenda__now" style={{ top: nowOffset }} aria-hidden="true">
+                    <span className="agenda__now-arrow" />
+                    <span className="agenda__now-line" />
+                  </div>
+                ) : null}
                 {HOURS.map((hour, hourIndex) => {
                   const bookable = canCreateOnTimeSlot(day, hour, now)
                   const selected = bookable && isSameCreateTarget(createTarget, day, hour)
@@ -401,15 +421,18 @@ export function Agenda() {
                       }}
                     >
                       <span className="agenda__slot-half" />
-                      {selected ? renderCreateTip(day, hour) : null}
                     </button>
                   )
                 })}
                 {dayApts.map((apt) => renderEventCard(apt, !singleDay))}
-                {nowOffset != null && isSameDay(day, today) ? (
-                  <div className="agenda__now" style={{ top: nowOffset }} aria-hidden="true">
-                    <span className="agenda__now-arrow" />
-                    <span className="agenda__now-line" />
+                {selectedHour != null ? (
+                  <div
+                    className="agenda__create-layer"
+                    style={{
+                      top: (selectedHour - SLOT_START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2,
+                    }}
+                  >
+                    {renderCreateTip(day, selectedHour)}
                   </div>
                 ) : null}
               </div>

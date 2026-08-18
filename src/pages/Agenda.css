@@ -202,7 +202,7 @@
 .agenda__month-cell.is-selected,
 .agenda__month-cell.is-today.is-selected {
   background: #e8f4ff;
-  z-index: 2;
+  z-index: 5;
   overflow: visible;
 }
 
@@ -397,6 +397,11 @@
   border-right: 1px solid #eef0f4;
   background: #fff;
   overflow: visible;
+  z-index: 0;
+}
+
+.agenda__day-col.has-create {
+  z-index: 6;
 }
 
 .agenda__day-col:last-child {
@@ -425,7 +430,7 @@
 
 .agenda__slot.is-selected {
   background: #e8f4ff;
-  z-index: 12;
+  z-index: 1;
   overflow: visible;
 }
 
@@ -458,6 +463,22 @@
   pointer-events: none;
 }
 
+.agenda__create-layer {
+  position: absolute;
+  left: 50%;
+  z-index: 30;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.agenda__create-layer .agenda__create-wrap {
+  position: static;
+  left: auto;
+  top: auto;
+  transform: none;
+  max-width: none;
+}
+
 .agenda__create-wrap {
   position: absolute;
   left: 50%;
@@ -482,13 +503,13 @@
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  margin-bottom: -0.65rem;
-  padding: 0.32rem 0.7rem 0.4rem;
+  margin-bottom: -0.7rem;
+  padding: 0.35rem 0.75rem 0.42rem;
   border: 2px solid #fff;
   border-radius: 999px;
   background: #187de4;
   color: #fff;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.01em;
@@ -507,23 +528,32 @@
   left: auto;
   top: auto;
   transform: none;
-  display: block;
-  min-width: min(240px, calc(100% - 4px));
-  max-width: 100%;
-  padding: 0.55rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.05rem;
+  width: max-content;
+  min-width: 13.5rem;
+  max-width: none;
+  padding: 0.7rem 1.05rem;
   border: 0;
   border-radius: 0.4rem;
   background: #3699ff;
   color: #fff;
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 400;
   line-height: 1.35;
   text-align: center;
-  white-space: normal;
+  white-space: nowrap;
   box-shadow: 0 4px 16px rgba(54, 153, 255, 0.35);
   cursor: pointer;
   pointer-events: auto;
+}
+
+.agenda__create-tip-line {
+  display: block;
 }
 
 .agenda__create-tip strong {
@@ -538,6 +568,7 @@
   top: auto;
   bottom: 0.45rem;
   transform: translateX(-50%);
+  max-width: none;
 }
 
 .agenda__now {
@@ -547,7 +578,7 @@
   height: 0;
   margin: 0;
   padding: 0;
-  z-index: 4;
+  z-index: 2;
   pointer-events: none;
   overflow: visible;
 }
