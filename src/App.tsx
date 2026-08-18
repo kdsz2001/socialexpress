@@ -5,10 +5,10 @@ import { Clients } from './pages/Clients'
 import { ClientCreate } from './pages/ClientCreate'
 import { ClientDetail } from './pages/ClientDetail'
 import { MyProfile } from './pages/MyProfile'
+import { Agenda } from './pages/Agenda'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
-  { path: '/agenda', title: 'Agenda' },
   { path: '/eventos', title: 'Eventos' },
   { path: '/produtos', title: 'Produtos' },
   { path: '/funcionarios', title: 'Funcionários' },
@@ -29,6 +29,7 @@ export default function App() {
         <Route path="/clientes/cadastrar" element={<ClientCreate />} />
         <Route path="/clientes/:clientId" element={<ClientDetail />} />
         <Route path="/meu-perfil" element={<MyProfile />} />
+        <Route path="/agenda" element={<Agenda />} />
         {pages.map((page) => (
           <Route
             key={page.path}

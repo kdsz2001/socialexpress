@@ -168,3 +168,27 @@
 .clients-subheader__back:hover {
   background: #d7dae7;
 }
+
+.clients-subheader__primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  background: #3699ff;
+  color: #fff;
+  font-size: 0.925rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.clients-subheader__primary:hover {
+  background: #187de4;
+}

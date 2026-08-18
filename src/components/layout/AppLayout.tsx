@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import { ClientsSubheader } from './ClientsSubheader'
 import { ProfileSubheader } from './ProfileSubheader'
+import { AgendaSubheader } from './AgendaSubheader'
 import './AppLayout.css'
 
 const PAGE_TITLES: Record<string, string> = {
@@ -95,6 +96,7 @@ export function AppLayout() {
         <Topbar onMenuClick={toggle} />
         {location.pathname.startsWith('/clientes') && <ClientsSubheader />}
         {location.pathname === '/meu-perfil' && <ProfileSubheader />}
+        {location.pathname === '/agenda' && <AgendaSubheader />}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
             <Outlet />
