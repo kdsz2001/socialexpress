@@ -339,35 +339,29 @@
 }
 
 .agenda__allday-label {
-  position: sticky;
-  top: 40px;
-  z-index: 16;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0.35rem 0.65rem 0.35rem 0.4rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.3rem;
   border-right: 1px solid #ebedf3;
-  border-bottom: 2px solid #d7dae3;
+  border-bottom: 1px solid #d7dae3;
   background: #fff;
   box-sizing: border-box;
 }
 
 .agenda__allday-label span {
   display: block;
-  max-width: 4.4rem;
-  font-size: 0.78rem;
+  max-width: 3.9rem;
+  font-size: 0.72rem;
   font-weight: 500;
   color: #a1a5b7;
   text-align: right;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .agenda__allday {
-  position: sticky;
-  top: 40px;
-  z-index: 15;
   border-right: 1px solid #eef0f4;
-  border-bottom: 2px solid #d7dae3;
+  border-bottom: 1px solid #d7dae3;
   background: #fff;
   box-sizing: border-box;
 }
@@ -401,7 +395,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 0 0.65rem 0 0;
+  padding: 0 0.55rem 0 0;
   box-sizing: border-box;
   pointer-events: none;
 }
@@ -409,7 +403,7 @@
 .agenda__hour-label span {
   display: block;
   transform: translateY(-50%);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #a1a5b7;
   line-height: 1;
