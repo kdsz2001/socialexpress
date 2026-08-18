@@ -10,8 +10,10 @@ type NeighborhoodSelectProps = {
   options: string[]
   city: string
   required?: boolean
+  invalid?: boolean
   onChange: (value: string) => void
   onRegister: (value: string) => void
+  onBlur?: () => void
 }
 
 export function NeighborhoodSelect({
@@ -20,8 +22,10 @@ export function NeighborhoodSelect({
   options,
   city,
   required,
+  invalid,
   onChange,
   onRegister,
+  onBlur,
 }: NeighborhoodSelectProps) {
   const listId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
@@ -62,6 +66,7 @@ export function NeighborhoodSelect({
       if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false)
         setQuery('')
+        onBlur?.()
       }
     }
 
@@ -69,6 +74,7 @@ export function NeighborhoodSelect({
       if (event.key === 'Escape') {
         setOpen(false)
         setQuery('')
+        onBlur?.()
       }
     }
 
@@ -79,7 +85,7 @@ export function NeighborhoodSelect({
       document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [open])
+  }, [open, onBlur])
 
   const openMenu = () => {
     setQuery('')
@@ -107,11 +113,20 @@ export function NeighborhoodSelect({
           id={id}
           className={`bairro-select__trigger${open ? ' is-open' : ''}${
             value ? '' : ' is-placeholder'
-          }`}
+          }${invalid ? ' is-invalid' : ''}`}
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={listId}
-          onClick={() => (open ? setOpen(false) : openMenu())}
+          aria-invalid={invalid || undefined}
+          onClick={() => {
+            if (open) {
+              setOpen(false)
+              setQuery('')
+              onBlur?.()
+            } else {
+              openMenu()
+            }
+          }}
         >
           <span>{value || 'Selecione um bairro'}</span>
           <ChevronDown size={14} strokeWidth={2.25} aria-hidden="true" />

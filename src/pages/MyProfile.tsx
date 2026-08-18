@@ -65,12 +65,22 @@ function maskPhone(value: string) {
     .replace(/(\d{5})(\d{1,4})$/, '$1-$2')
 }
 
+function blankFieldError(label: string) {
+  return `"${label}" não pode ficar em branco.`
+}
+
 export function MyProfile() {
   const [searchParams, setSearchParams] = useSearchParams()
   const section = parseProfileSection(searchParams.get('tab'))
   const [draft, setDraft] = useState<UserProfile>(() => getUserProfile())
   const [cpfError, setCpfError] = useState('')
   const [sobrenomesError, setSobrenomesError] = useState('')
+  const [phoneError, setPhoneError] = useState('')
+  const [logradouroError, setLogradouroError] = useState('')
+  const [numeroError, setNumeroError] = useState('')
+  const [estadoError, setEstadoError] = useState('')
+  const [cidadeError, setCidadeError] = useState('')
+  const [bairroError, setBairroError] = useState('')
   const [avatarError, setAvatarError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [toastOpen, setToastOpen] = useState(false)
@@ -82,6 +92,8 @@ export function MyProfile() {
   })
   const closeToast = useCallback(() => setToastOpen(false), [])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const draftRef = useRef(draft)
+  draftRef.current = draft
 
   const setSection = (next: ProfileSection) => {
     setSearchParams({ tab: next }, { replace: true })
@@ -552,24 +564,58 @@ export function MyProfile() {
                       Telefone
                     </label>
                     <div className="client-create__phone-block">
-                      <input
-                        id={`profile-phone-${index}`}
-                        className="client-create__input"
-                        inputMode="numeric"
-                        placeholder="(99) 99999-9999"
-                        value={phone.number}
-                        onChange={(event) => {
-                          const next = [...draft.phones]
-                          if (!next[index]) {
-                            next[index] = { number: '', primary: index === 0, whatsapp: false }
-                          }
-                          next[index] = {
-                            ...next[index],
-                            number: maskPhone(event.target.value),
-                          }
-                          setPhones(next)
-                        }}
-                      />
+                      <div className="client-create__field">
+                        <div
+                          className={`client-create__input-wrap${
+                            index === 0 && phoneError ? ' is-invalid' : ''
+                          }`}
+                        >
+                          <input
+                            id={`profile-phone-${index}`}
+                            className={`client-create__input${
+                              index === 0 && phoneError ? ' is-invalid' : ''
+                            }`}
+                            inputMode="numeric"
+                            placeholder="(99) 99999-9999"
+                            value={phone.number}
+                            onChange={(event) => {
+                              const next = [...draft.phones]
+                              if (!next[index]) {
+                                next[index] = {
+                                  number: '',
+                                  primary: index === 0,
+                                  whatsapp: false,
+                                }
+                              }
+                              next[index] = {
+                                ...next[index],
+                                number: maskPhone(event.target.value),
+                              }
+                              setPhones(next)
+                              if (index === 0 && phoneError) setPhoneError('')
+                            }}
+                            onBlur={(event) => {
+                              if (index !== 0) return
+                              if (!event.currentTarget.value.trim()) {
+                                setPhoneError(blankFieldError('Telefone'))
+                              } else {
+                                setPhoneError('')
+                              }
+                            }}
+                          />
+                          {index === 0 && phoneError ? (
+                            <CircleAlert
+                              className="client-create__input-error-icon"
+                              size={18}
+                              strokeWidth={2.25}
+                              aria-hidden="true"
+                            />
+                          ) : null}
+                        </div>
+                        {index === 0 && phoneError ? (
+                          <p className="client-create__field-error">{phoneError}</p>
+                        ) : null}
+                      </div>
                       <div className="client-create__checks">
                         <label className="client-create__check">
                           <input
@@ -664,24 +710,76 @@ export function MyProfile() {
                 <label className="client-create__label" htmlFor="profile-logradouro">
                   Logradouro <span className="req">*</span>
                 </label>
-                <input
-                  id="profile-logradouro"
-                  className="client-create__input"
-                  value={draft.logradouro}
-                  onChange={(e) => patch('logradouro', e.target.value)}
-                />
+                <div className="client-create__field">
+                  <div
+                    className={`client-create__input-wrap${logradouroError ? ' is-invalid' : ''}`}
+                  >
+                    <input
+                      id="profile-logradouro"
+                      className={`client-create__input${logradouroError ? ' is-invalid' : ''}`}
+                      value={draft.logradouro}
+                      onChange={(e) => {
+                        patch('logradouro', e.target.value)
+                        if (logradouroError) setLogradouroError('')
+                      }}
+                      onBlur={(e) => {
+                        if (!e.currentTarget.value.trim()) {
+                          setLogradouroError(blankFieldError('Logradouro'))
+                        } else {
+                          setLogradouroError('')
+                        }
+                      }}
+                    />
+                    {logradouroError ? (
+                      <CircleAlert
+                        className="client-create__input-error-icon"
+                        size={18}
+                        strokeWidth={2.25}
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </div>
+                  {logradouroError ? (
+                    <p className="client-create__field-error">{logradouroError}</p>
+                  ) : null}
+                </div>
               </div>
 
               <div className="client-create__row">
                 <label className="client-create__label" htmlFor="profile-numero">
                   Número <span className="req">*</span>
                 </label>
-                <input
-                  id="profile-numero"
-                  className="client-create__input"
-                  value={draft.numero}
-                  onChange={(e) => patch('numero', e.target.value)}
-                />
+                <div className="client-create__field">
+                  <div className={`client-create__input-wrap${numeroError ? ' is-invalid' : ''}`}>
+                    <input
+                      id="profile-numero"
+                      className={`client-create__input${numeroError ? ' is-invalid' : ''}`}
+                      value={draft.numero}
+                      onChange={(e) => {
+                        patch('numero', e.target.value)
+                        if (numeroError) setNumeroError('')
+                      }}
+                      onBlur={(e) => {
+                        if (!e.currentTarget.value.trim()) {
+                          setNumeroError(blankFieldError('Número'))
+                        } else {
+                          setNumeroError('')
+                        }
+                      }}
+                    />
+                    {numeroError ? (
+                      <CircleAlert
+                        className="client-create__input-error-icon"
+                        size={18}
+                        strokeWidth={2.25}
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </div>
+                  {numeroError ? (
+                    <p className="client-create__field-error">{numeroError}</p>
+                  ) : null}
+                </div>
               </div>
 
               <div className="client-create__row">
@@ -700,69 +798,118 @@ export function MyProfile() {
                 <label className="client-create__label" htmlFor="profile-estado">
                   Estado <span className="req">*</span>
                 </label>
-                <select
-                  id="profile-estado"
-                  className="client-create__select"
-                  value={draft.estado}
-                  onChange={(e) => {
-                    setDraft((current) => ({
-                      ...current,
-                      estado: e.target.value,
-                      cidade: '',
-                      bairro: '',
-                    }))
-                    setBairroOptions([])
-                  }}
-                >
-                  <option value="">Selecione um estado</option>
-                  {BRAZIL_STATES.map((state) => (
-                    <option key={state} value={state}>
-                      {state}
-                    </option>
-                  ))}
-                </select>
+                <div className="client-create__field">
+                  <select
+                    id="profile-estado"
+                    className={`client-create__select${estadoError ? ' is-invalid' : ''}`}
+                    value={draft.estado}
+                    onChange={(e) => {
+                      setDraft((current) => ({
+                        ...current,
+                        estado: e.target.value,
+                        cidade: '',
+                        bairro: '',
+                      }))
+                      setBairroOptions([])
+                      if (estadoError) setEstadoError('')
+                      setCidadeError('')
+                      setBairroError('')
+                    }}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.value.trim()) {
+                        setEstadoError(blankFieldError('Estado'))
+                      } else {
+                        setEstadoError('')
+                      }
+                    }}
+                  >
+                    <option value="">Selecione um estado</option>
+                    {BRAZIL_STATES.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                  {estadoError ? (
+                    <p className="client-create__field-error">{estadoError}</p>
+                  ) : null}
+                </div>
               </div>
 
               <div className="client-create__row">
                 <label className="client-create__label" htmlFor="profile-cidade">
                   Cidade <span className="req">*</span>
                 </label>
-                <select
-                  id="profile-cidade"
-                  className="client-create__select"
-                  value={draft.cidade}
-                  onChange={(e) => {
-                    patch('cidade', e.target.value)
-                    patch('bairro', '')
-                  }}
-                >
-                  <option value="">Selecione uma cidade</option>
-                  {draft.cidade ? (
-                    <option value={draft.cidade}>{draft.cidade}</option>
+                <div className="client-create__field">
+                  <select
+                    id="profile-cidade"
+                    className={`client-create__select${cidadeError ? ' is-invalid' : ''}`}
+                    value={draft.cidade}
+                    onChange={(e) => {
+                      setDraft((current) => ({
+                        ...current,
+                        cidade: e.target.value,
+                        bairro: '',
+                      }))
+                      if (cidadeError) setCidadeError('')
+                      setBairroError('')
+                    }}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.value.trim()) {
+                        setCidadeError(blankFieldError('Cidade'))
+                      } else {
+                        setCidadeError('')
+                      }
+                    }}
+                  >
+                    <option value="">Selecione uma cidade</option>
+                    {draft.cidade ? (
+                      <option value={draft.cidade}>{draft.cidade}</option>
+                    ) : null}
+                  </select>
+                  {cidadeError ? (
+                    <p className="client-create__field-error">{cidadeError}</p>
                   ) : null}
-                </select>
+                </div>
               </div>
 
               <div className="client-create__row">
                 <label className="client-create__label" htmlFor="profile-bairro">
                   Bairro <span className="req">*</span>
                 </label>
-                <NeighborhoodSelect
-                  id="profile-bairro"
-                  value={draft.bairro}
-                  options={bairroOptions}
-                  city={draft.cidade}
-                  onChange={(value) => patch('bairro', value)}
-                  onRegister={(name) => {
-                    setBairroOptions((current) => {
-                      const key = name.toLocaleLowerCase('pt-BR')
-                      if (current.some((item) => item.toLocaleLowerCase('pt-BR') === key)) {
-                        return current
+                <div className="client-create__field">
+                  <NeighborhoodSelect
+                    id="profile-bairro"
+                    value={draft.bairro}
+                    options={bairroOptions}
+                    city={draft.cidade}
+                    invalid={Boolean(bairroError)}
+                    onChange={(value) => {
+                      patch('bairro', value)
+                      draftRef.current = { ...draftRef.current, bairro: value }
+                      setBairroError(value.trim() ? '' : blankFieldError('Bairro'))
+                    }}
+                    onBlur={() => {
+                      if (!draftRef.current.bairro.trim()) {
+                        setBairroError(blankFieldError('Bairro'))
+                      } else {
+                        setBairroError('')
                       }
-                      return [...current, name]
-                    })
-                  }}
-                />
+                    }}
+                    onRegister={(name) => {
+                      setBairroOptions((current) => {
+                        const key = name.toLocaleLowerCase('pt-BR')
+                        if (current.some((item) => item.toLocaleLowerCase('pt-BR') === key)) {
+                          return current
+                        }
+                        return [...current, name]
+                      })
+                    }}
+                  />
+                  {bairroError ? (
+                    <p className="client-create__field-error">{bairroError}</p>
+                  ) : null}
+                </div>
               </div>
             </>
           ) : null}

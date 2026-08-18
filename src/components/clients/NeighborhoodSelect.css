@@ -34,6 +34,17 @@
   box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.12);
 }
 
+.bairro-select__trigger.is-invalid {
+  border-color: #f64e60;
+  background: #fff5f8;
+}
+
+.bairro-select__trigger.is-invalid.is-open,
+.bairro-select__trigger.is-invalid:focus-visible {
+  border-color: #f64e60;
+  box-shadow: 0 0 0 3px rgba(246, 78, 96, 0.15);
+}
+
 .bairro-select__trigger span {
   overflow: hidden;
   text-overflow: ellipsis;

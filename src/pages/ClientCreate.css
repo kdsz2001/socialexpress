@@ -224,6 +224,17 @@
   box-shadow: 0 0 0 3px rgba(246, 78, 96, 0.15);
 }
 
+.client-create__select.is-invalid {
+  border-color: #f64e60;
+  background: #fff5f8;
+}
+
+.client-create__select.is-invalid:focus {
+  border-color: #f64e60;
+  background: #fff5f8;
+  box-shadow: 0 0 0 3px rgba(246, 78, 96, 0.15);
+}
+
 .client-create__field {
   width: 100%;
   max-width: 520px;
