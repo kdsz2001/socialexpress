@@ -41,6 +41,8 @@ import './Clients.css'
 
 type PickerMode = 'menu' | 'calendar'
 
+const REMOVED_TOAST_KEY = 'social-express:client-removed-toast'
+
 function WhatsAppGlyph() {
   return (
     <svg
