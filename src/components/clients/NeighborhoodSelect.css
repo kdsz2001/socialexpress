@@ -79,7 +79,10 @@
 
 .bairro-select__panel--portal {
   position: fixed;
+  top: auto;
   right: auto;
+  bottom: auto;
+  left: auto;
   z-index: 12050;
 }
 

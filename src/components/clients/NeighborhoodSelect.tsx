@@ -20,10 +20,40 @@ type NeighborhoodSelectProps = {
 type PanelPos = {
   left: number
   width: number
-  top?: number
-  bottom?: number
+  top: number | 'auto'
+  bottom: number | 'auto'
   maxHeight: number
   placement: 'top' | 'bottom'
+}
+
+function measurePanelPos(trigger: HTMLElement): PanelPos {
+  const rect = trigger.getBoundingClientRect()
+  const gap = 4
+  const preferredHeight = 280
+  const spaceBelow = window.innerHeight - rect.bottom - 12
+  const spaceAbove = rect.top - 12
+  const openUp = spaceBelow < Math.min(preferredHeight, 220) && spaceAbove > spaceBelow
+  const available = Math.max(180, openUp ? spaceAbove : spaceBelow)
+
+  if (openUp) {
+    return {
+      left: rect.left,
+      width: rect.width,
+      top: 'auto',
+      bottom: window.innerHeight - rect.top + gap,
+      maxHeight: Math.min(preferredHeight, available),
+      placement: 'top',
+    }
+  }
+
+  return {
+    left: rect.left,
+    width: rect.width,
+    top: rect.bottom + gap,
+    bottom: 'auto',
+    maxHeight: Math.min(preferredHeight, available),
+    placement: 'bottom',
+  }
 }
 
 export function NeighborhoodSelect({
@@ -39,8 +69,12 @@ export function NeighborhoodSelect({
 }: NeighborhoodSelectProps) {
   const listId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
+  const onBlurRef = useRef(onBlur)
+  onBlurRef.current = onBlur
+
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -71,92 +105,80 @@ export function NeighborhoodSelect({
   const showCreate = query.trim().length > 0 && !exactMatch
 
   const updatePanelPosition = () => {
-    const root = rootRef.current
-    if (!root) return
-    const trigger = root.querySelector('.bairro-select__trigger') as HTMLElement | null
+    const trigger = triggerRef.current
     if (!trigger) return
+    setPanelPos(measurePanelPos(trigger))
+  }
 
-    const rect = trigger.getBoundingClientRect()
-    const gap = 4
-    const preferredHeight = 280
-    const spaceBelow = window.innerHeight - rect.bottom - 12
-    const spaceAbove = rect.top - 12
-    const openUp = spaceBelow < preferredHeight && spaceAbove > spaceBelow
-    const available = Math.max(160, openUp ? spaceAbove : spaceBelow)
+  const closeMenu = (notifyBlur = true) => {
+    setOpen(false)
+    setQuery('')
+    setPanelPos(null)
+    if (notifyBlur) onBlurRef.current?.()
+  }
 
-    setPanelPos({
-      left: rect.left,
-      width: rect.width,
-      maxHeight: Math.min(preferredHeight, available),
-      placement: openUp ? 'top' : 'bottom',
-      ...(openUp
-        ? { bottom: window.innerHeight - rect.top + gap }
-        : { top: rect.bottom + gap }),
-    })
+  const openMenu = () => {
+    const trigger = triggerRef.current
+    if (!trigger) return
+    setQuery('')
+    setPanelPos(measurePanelPos(trigger))
+    setOpen(true)
   }
 
   useLayoutEffect(() => {
-    if (!open) {
-      setPanelPos(null)
-      return
-    }
+    if (!open) return
     updatePanelPosition()
   }, [open, filtered.length])
 
   useEffect(() => {
     if (!open) return
 
-    const frame = window.requestAnimationFrame(() => {
+    const focusFrame = window.requestAnimationFrame(() => {
       searchRef.current?.focus()
     })
 
+    // Evita fechar no mesmo clique que abriu o menu
+    let attached = false
     const onPointerDown = (event: MouseEvent) => {
       const target = event.target as Node
       if (rootRef.current?.contains(target)) return
       if (panelRef.current?.contains(target)) return
-      setOpen(false)
-      setQuery('')
-      onBlur?.()
+      closeMenu(true)
     }
 
+    const attachTimer = window.setTimeout(() => {
+      document.addEventListener('mousedown', onPointerDown)
+      attached = true
+    }, 0)
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setOpen(false)
-        setQuery('')
-        onBlur?.()
-      }
+      if (event.key === 'Escape') closeMenu(true)
     }
 
     const onReposition = () => updatePanelPosition()
 
-    document.addEventListener('mousedown', onPointerDown)
     document.addEventListener('keydown', onKeyDown)
     window.addEventListener('resize', onReposition)
     window.addEventListener('scroll', onReposition, true)
+
     return () => {
-      window.cancelAnimationFrame(frame)
-      document.removeEventListener('mousedown', onPointerDown)
+      window.cancelAnimationFrame(focusFrame)
+      window.clearTimeout(attachTimer)
+      if (attached) document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('resize', onReposition)
       window.removeEventListener('scroll', onReposition, true)
     }
-  }, [open, onBlur])
-
-  const openMenu = () => {
-    setQuery('')
-    setOpen(true)
-  }
+  }, [open])
 
   const selectOption = (option: string) => {
     onChange(option)
-    setOpen(false)
-    setQuery('')
+    closeMenu(false)
   }
 
   const startCreate = (name: string) => {
     setPendingName(name.trim())
-    setOpen(false)
-    setQuery('')
+    closeMenu(false)
     setModalOpen(true)
   }
 
@@ -246,6 +268,7 @@ export function NeighborhoodSelect({
     <>
       <div className="bairro-select" ref={rootRef}>
         <button
+          ref={triggerRef}
           type="button"
           id={id}
           className={`bairro-select__trigger${open ? ' is-open' : ''}${
@@ -256,13 +279,8 @@ export function NeighborhoodSelect({
           aria-controls={listId}
           aria-invalid={invalid || undefined}
           onClick={() => {
-            if (open) {
-              setOpen(false)
-              setQuery('')
-              onBlur?.()
-            } else {
-              openMenu()
-            }
+            if (open) closeMenu(true)
+            else openMenu()
           }}
         >
           <span>{value || 'Selecione um bairro'}</span>
