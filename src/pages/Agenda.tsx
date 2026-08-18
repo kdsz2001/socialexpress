@@ -485,18 +485,36 @@ export function Agenda() {
                   )
                 })}
                 {dayApts.map((apt) => renderEventCard(apt, !singleDay))}
-                {selectedHour != null ? (
-                  <div
-                    className={`agenda__create-layer${
-                      days.length > 1 && dayIndex === 0 ? ' is-edge-start' : ''
-                    }${days.length > 1 && dayIndex === days.length - 1 ? ' is-edge-end' : ''}`}
-                    style={{
-                      top: (selectedHour - SLOT_START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2,
-                    }}
-                  >
-                    {renderCreateTip(day, selectedHour)}
-                  </div>
-                ) : null}
+              </div>
+            )
+          })}
+
+          {days.map((day, dayIndex) => {
+            const selectedHour =
+              createTarget &&
+              isSameDay(createTarget.date, day) &&
+              createTarget.hour != null &&
+              canCreateOnTimeSlot(day, createTarget.hour, now)
+                ? createTarget.hour
+                : null
+            if (selectedHour == null) return null
+
+            return (
+              <div
+                key={`create-${day.toISOString()}`}
+                className="agenda__create-rail"
+                style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
+              >
+                <div
+                  className={`agenda__create-layer${
+                    days.length > 1 && dayIndex === 0 ? ' is-edge-start' : ''
+                  }${days.length > 1 && dayIndex === days.length - 1 ? ' is-edge-end' : ''}`}
+                  style={{
+                    top: (selectedHour - SLOT_START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2,
+                  }}
+                >
+                  {renderCreateTip(day, selectedHour)}
+                </div>
               </div>
             )
           })}

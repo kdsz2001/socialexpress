@@ -515,8 +515,7 @@
 }
 
 .agenda__day-col.has-create {
-  /* Above neighboring columns so the create tip can overflow */
-  z-index: 6;
+  z-index: 0;
 }
 
 .agenda__day-col:last-child {
@@ -589,10 +588,17 @@
   z-index: 0;
 }
 
+.agenda__create-rail {
+  position: relative;
+  z-index: 40;
+  pointer-events: none;
+  overflow: visible;
+}
+
 .agenda__create-layer {
   position: absolute;
   left: 50%;
-  z-index: 30;
+  z-index: 1;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
