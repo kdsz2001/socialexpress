@@ -89,15 +89,12 @@
 }
 
 .topbar__search-panel {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  width: min(420px, calc(100vw - 40px));
+  position: fixed;
+  z-index: 1300;
   background: #ffffff;
   border-radius: 0.65rem;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
   padding: 1rem 0 0.65rem;
-  z-index: 50;
   animation: search-in 0.16s ease both;
 }
 

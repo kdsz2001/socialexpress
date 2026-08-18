@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Search, Menu, UserRound, X } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useClients } from '../../hooks/useClients'
@@ -13,6 +14,7 @@ type TopbarProps = {
 type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 
 const SEARCH_LIMIT = 8
+const PANEL_WIDTH = 420
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   const location = useLocation()
@@ -22,6 +24,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [panelPos, setPanelPos] = useState({ top: 0, left: 0, width: PANEL_WIDTH })
+  const buttonRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const searchId = useId()
@@ -33,7 +37,6 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     location.pathname !== '/clientes' &&
     location.pathname !== '/clientes/cadastrar'
   const paramTab = searchParams.get('tab')
-  // Na visualização/cadastro nenhuma aba fica selecionada (como no Clarial)
   const clientsTab: ClientsTab | null =
     isClientCreate || isClientDetail
       ? null
@@ -70,30 +73,55 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const showEmptyState = hasQuery && clientResults.length === 0
   const panelExpanded = showResults || showEmptyState
 
+  const updatePanelPosition = () => {
+    const button = buttonRef.current
+    if (!button) return
+    const rect = button.getBoundingClientRect()
+    const width = Math.min(PANEL_WIDTH, window.innerWidth - 24)
+    let left = rect.right - width
+    left = Math.max(12, Math.min(left, window.innerWidth - width - 12))
+    setPanelPos({
+      top: rect.bottom + 10,
+      left,
+      width,
+    })
+  }
+
+  useLayoutEffect(() => {
+    if (!searchOpen) return
+    updatePanelPosition()
+  }, [searchOpen, panelExpanded])
+
   useEffect(() => {
     if (!searchOpen) return
 
     inputRef.current?.focus()
 
     const onPointerDown = (event: MouseEvent) => {
-      if (!panelRef.current?.contains(event.target as Node)) {
-        setSearchOpen(false)
-      }
+      const target = event.target as Node
+      if (buttonRef.current?.contains(target)) return
+      if (panelRef.current?.contains(target)) return
+      setSearchOpen(false)
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setSearchOpen(false)
     }
 
+    const onReposition = () => updatePanelPosition()
+
     document.addEventListener('mousedown', onPointerDown)
     document.addEventListener('keydown', onKeyDown)
+    window.addEventListener('resize', onReposition)
+    window.addEventListener('scroll', onReposition, true)
     return () => {
       document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('resize', onReposition)
+      window.removeEventListener('scroll', onReposition, true)
     }
   }, [searchOpen])
 
-  // Fecha a busca ao mudar de rota
   useEffect(() => {
     setSearchOpen(false)
     setQuery('')
@@ -123,6 +151,86 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   }
 
   const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
+
+  const searchPanel =
+    searchOpen && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            ref={panelRef}
+            className={`topbar__search-panel${panelExpanded ? ' has-result' : ''}`}
+            id={searchId}
+            role="search"
+            style={{
+              top: panelPos.top,
+              left: panelPos.left,
+              width: panelPos.width,
+            }}
+          >
+            <div className="topbar__search-form">
+              <Search
+                size={16}
+                strokeWidth={2}
+                className="topbar__search-panel-icon"
+              />
+              <input
+                ref={inputRef}
+                type="text"
+                className="topbar__search-input"
+                placeholder="Busque por pedido, produto ou cliente..."
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                autoComplete="off"
+                spellCheck={false}
+              />
+              {hasQuery ? (
+                <button
+                  type="button"
+                  className="topbar__search-clear"
+                  aria-label="Limpar busca"
+                  onClick={() => {
+                    setQuery('')
+                    inputRef.current?.focus()
+                  }}
+                >
+                  <X size={16} strokeWidth={1.75} />
+                </button>
+              ) : null}
+            </div>
+
+            {showResults ? (
+              <div className="topbar__search-results">
+                <p className="topbar__search-group">Clientes</p>
+                <ul className="topbar__search-list" role="listbox">
+                  {clientResults.map((client) => (
+                    <li key={client.id}>
+                      <button
+                        type="button"
+                        className="topbar__search-item"
+                        role="option"
+                        onClick={() => openClient(client.id)}
+                      >
+                        <span className="topbar__search-avatar" aria-hidden="true">
+                          <UserRound size={18} strokeWidth={2} />
+                        </span>
+                        <span className="topbar__search-name">
+                          {getClientDisplayName(client)}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {showEmptyState ? (
+              <div className="topbar__search-empty">
+                Nenhum resultado encontrado
+              </div>
+            ) : null}
+          </div>,
+          document.body,
+        )
+      : null
 
   return (
     <header className="topbar">
@@ -172,8 +280,9 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       <div className="topbar__spacer" />
 
       <div className="topbar__actions">
-        <div className="topbar__search-wrap" ref={panelRef}>
+        <div className="topbar__search-wrap">
           <button
+            ref={buttonRef}
             type="button"
             className={`topbar__search ${searchOpen ? 'is-open' : ''}`}
             aria-label="Buscar"
@@ -183,76 +292,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           >
             <Search size={18} strokeWidth={2} />
           </button>
-
-          {searchOpen && (
-            <div
-              className={`topbar__search-panel${panelExpanded ? ' has-result' : ''}`}
-              id={searchId}
-              role="search"
-            >
-              <div className="topbar__search-form">
-                <Search
-                  size={16}
-                  strokeWidth={2}
-                  className="topbar__search-panel-icon"
-                />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  className="topbar__search-input"
-                  placeholder="Busque por pedido, produto ou cliente..."
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                {hasQuery && (
-                  <button
-                    type="button"
-                    className="topbar__search-clear"
-                    aria-label="Limpar busca"
-                    onClick={() => {
-                      setQuery('')
-                      inputRef.current?.focus()
-                    }}
-                  >
-                    <X size={16} strokeWidth={1.75} />
-                  </button>
-                )}
-              </div>
-
-              {showResults ? (
-                <div className="topbar__search-results">
-                  <p className="topbar__search-group">Clientes</p>
-                  <ul className="topbar__search-list" role="listbox">
-                    {clientResults.map((client) => (
-                      <li key={client.id}>
-                        <button
-                          type="button"
-                          className="topbar__search-item"
-                          role="option"
-                          onClick={() => openClient(client.id)}
-                        >
-                          <span className="topbar__search-avatar" aria-hidden="true">
-                            <UserRound size={18} strokeWidth={2} />
-                          </span>
-                          <span className="topbar__search-name">
-                            {getClientDisplayName(client)}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {showEmptyState ? (
-                <div className="topbar__search-empty">
-                  Nenhum resultado encontrado
-                </div>
-              ) : null}
-            </div>
-          )}
+          {searchPanel}
         </div>
 
         <button
