@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { CalendarDays, Check, ChevronDown, X } from 'lucide-react'
 import {
@@ -75,6 +75,7 @@ export function NewAppointmentModal({
     emptyForm(defaultDate, defaultStartTime, defaultEndTime),
   )
   const [peopleOpen, setPeopleOpen] = useState(false)
+  const [peopleMenuStyle, setPeopleMenuStyle] = useState<CSSProperties>({})
   const [touched, setTouched] = useState(false)
 
   useEffect(() => {
@@ -112,6 +113,30 @@ export function NewAppointmentModal({
     return () => document.removeEventListener('mousedown', onPointer)
   }, [peopleOpen])
 
+  useEffect(() => {
+    if (!peopleOpen) return
+    const updateMenuPosition = () => {
+      const field = peopleRef.current?.querySelector('.new-apt__people-field')
+      if (!(field instanceof HTMLElement)) return
+      const rect = field.getBoundingClientRect()
+      setPeopleMenuStyle({
+        position: 'fixed',
+        left: rect.left,
+        width: rect.width,
+        bottom: window.innerHeight - rect.top + 4,
+        top: 'auto',
+        zIndex: 240,
+      })
+    }
+    updateMenuPosition()
+    window.addEventListener('resize', updateMenuPosition)
+    document.addEventListener('scroll', updateMenuPosition, true)
+    return () => {
+      window.removeEventListener('resize', updateMenuPosition)
+      document.removeEventListener('scroll', updateMenuPosition, true)
+    }
+  }, [peopleOpen])
+
   if (!open) return null
 
   const missingDate = !form.date
@@ -119,25 +144,30 @@ export function NewAppointmentModal({
   const missingPeople = form.responsibleIds.length === 0
   const invalid = missingDate || missingTitle || missingPeople
 
-  const selectedPeopleLabel = options
-    .filter((person) => form.responsibleIds.includes(person.id))
-    .map((person) => person.name)
-    .join(', ')
+  const selectedPeople = options.filter((person) =>
+    form.responsibleIds.includes(person.id),
+  )
 
   const patch = (partial: Partial<FormState>) => {
     setForm((current) => ({ ...current, ...partial }))
   }
 
-  const toggleResponsible = (id: string) => {
+  const selectResponsible = (id: string) => {
     setForm((current) => {
-      const has = current.responsibleIds.includes(id)
+      if (current.responsibleIds.includes(id)) return current
       return {
         ...current,
-        responsibleIds: has
-          ? current.responsibleIds.filter((item) => item !== id)
-          : [...current.responsibleIds, id],
+        responsibleIds: [...current.responsibleIds, id],
       }
     })
+    setPeopleOpen(false)
+  }
+
+  const removeResponsible = (id: string) => {
+    setForm((current) => ({
+      ...current,
+      responsibleIds: current.responsibleIds.filter((item) => item !== id),
+    }))
   }
 
   const onSave = () => {
@@ -287,20 +317,51 @@ export function NewAppointmentModal({
               className={`new-apt__control new-apt__people${touched && missingPeople ? ' is-invalid' : ''}${peopleOpen ? ' is-open' : ''}`}
               ref={peopleRef}
             >
-              <button
-                type="button"
-                className={`new-apt__people-trigger${selectedPeopleLabel ? '' : ' is-placeholder'}`}
+              <div
+                className={`new-apt__people-field${selectedPeople.length === 0 ? ' is-placeholder' : ''}`}
+                role="combobox"
                 aria-expanded={peopleOpen}
                 aria-haspopup="listbox"
+                tabIndex={0}
                 onClick={() => setPeopleOpen((value) => !value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    setPeopleOpen((value) => !value)
+                  }
+                }}
               >
-                <span>
-                  {selectedPeopleLabel || 'Selecione uma ou mais pessoas'}
-                </span>
-                <ChevronDown size={15} strokeWidth={2} />
-              </button>
+                <div className="new-apt__people-chips">
+                  {selectedPeople.map((person) => (
+                    <span key={person.id} className="new-apt__people-chip">
+                      <button
+                        type="button"
+                        className="new-apt__people-chip-remove"
+                        aria-label={`Remover ${person.name}`}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          removeResponsible(person.id)
+                        }}
+                      >
+                        <X size={11} strokeWidth={2.5} />
+                      </button>
+                      {person.name}
+                    </span>
+                  ))}
+                  {selectedPeople.length === 0 ? (
+                    <span className="new-apt__people-placeholder">
+                      Selecione uma ou mais pessoas
+                    </span>
+                  ) : null}
+                </div>
+                <ChevronDown size={15} strokeWidth={2} aria-hidden="true" />
+              </div>
               {peopleOpen ? (
-                <div className="new-apt__people-menu" role="listbox" aria-multiselectable="true">
+                <div
+                  className="new-apt__people-menu"
+                  role="listbox"
+                  style={peopleMenuStyle}
+                >
                   {options.map((person) => {
                     const selected = form.responsibleIds.includes(person.id)
                     return (
@@ -310,7 +371,7 @@ export function NewAppointmentModal({
                         role="option"
                         aria-selected={selected}
                         className={`new-apt__people-option${selected ? ' is-selected' : ''}`}
-                        onClick={() => toggleResponsible(person.id)}
+                        onClick={() => selectResponsible(person.id)}
                       >
                         {person.name}
                       </button>
