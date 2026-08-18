@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'reac
 import {
   BookUser,
   Check,
+  CircleAlert,
   Pencil,
   Settings,
   UserRound,
@@ -51,6 +52,7 @@ export function MyProfile() {
   const [section, setSection] = useState<ProfileSection>('pessoais')
   const [draft, setDraft] = useState<UserProfile>(() => getUserProfile())
   const [cpfError, setCpfError] = useState('')
+  const [sobrenomesError, setSobrenomesError] = useState('')
   const [avatarError, setAvatarError] = useState('')
   const [toastOpen, setToastOpen] = useState(false)
   const closeToast = useCallback(() => setToastOpen(false), [])
@@ -129,6 +131,7 @@ export function MyProfile() {
     if (!canSave) return
 
     setCpfError('')
+    setSobrenomesError('')
     updateUserProfile({
       ...draft,
       nome: draft.nome.trim(),
@@ -267,24 +270,40 @@ export function MyProfile() {
                   CPF <span className="req">*</span>
                 </label>
                 <div className="client-create__field">
-                  <input
-                    id="profile-cpf"
-                    className={`client-create__input${cpfError ? ' is-invalid' : ''}`}
-                    inputMode="numeric"
-                    autoComplete="off"
-                    placeholder="000.000.000-00"
-                    value={draft.cpf}
-                    onChange={(e) => {
-                      patch('cpf', maskCpfCnpj(e.target.value).slice(0, 14))
-                      if (cpfError) setCpfError('')
-                    }}
-                    onBlur={() => {
-                      if (!draft.cpf.trim()) return
-                      if (!isValidCpf(draft.cpf)) {
-                        setCpfError('Informe um CPF válido.')
-                      }
-                    }}
-                  />
+                  <div className={`client-create__input-wrap${cpfError ? ' is-invalid' : ''}`}>
+                    <input
+                      id="profile-cpf"
+                      className={`client-create__input${cpfError ? ' is-invalid' : ''}`}
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="000.000.000-00"
+                      value={draft.cpf}
+                      onChange={(e) => {
+                        patch('cpf', maskCpfCnpj(e.target.value).slice(0, 14))
+                        if (cpfError) setCpfError('')
+                      }}
+                      onBlur={(e) => {
+                        const value = e.currentTarget.value.trim()
+                        if (!value) {
+                          setCpfError('"CPF" não pode ficar em branco.')
+                          return
+                        }
+                        if (!isValidCpf(value)) {
+                          setCpfError('Informe um CPF válido.')
+                          return
+                        }
+                        setCpfError('')
+                      }}
+                    />
+                    {cpfError ? (
+                      <CircleAlert
+                        className="client-create__input-error-icon"
+                        size={18}
+                        strokeWidth={2.25}
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </div>
                   {cpfError ? (
                     <p className="client-create__field-error">{cpfError}</p>
                   ) : null}
@@ -307,12 +326,39 @@ export function MyProfile() {
                 <label className="client-create__label" htmlFor="profile-sobrenomes">
                   Sobrenomes <span className="req">*</span>
                 </label>
-                <input
-                  id="profile-sobrenomes"
-                  className="client-create__input"
-                  value={draft.sobrenomes}
-                  onChange={(e) => patch('sobrenomes', e.target.value)}
-                />
+                <div className="client-create__field">
+                  <div
+                    className={`client-create__input-wrap${sobrenomesError ? ' is-invalid' : ''}`}
+                  >
+                    <input
+                      id="profile-sobrenomes"
+                      className={`client-create__input${sobrenomesError ? ' is-invalid' : ''}`}
+                      value={draft.sobrenomes}
+                      onChange={(e) => {
+                        patch('sobrenomes', e.target.value)
+                        if (sobrenomesError) setSobrenomesError('')
+                      }}
+                      onBlur={(e) => {
+                        if (!e.currentTarget.value.trim()) {
+                          setSobrenomesError('"Sobrenomes" não pode ficar em branco.')
+                          return
+                        }
+                        setSobrenomesError('')
+                      }}
+                    />
+                    {sobrenomesError ? (
+                      <CircleAlert
+                        className="client-create__input-error-icon"
+                        size={18}
+                        strokeWidth={2.25}
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </div>
+                  {sobrenomesError ? (
+                    <p className="client-create__field-error">{sobrenomesError}</p>
+                  ) : null}
+                </div>
               </div>
 
               <div className="client-create__row">

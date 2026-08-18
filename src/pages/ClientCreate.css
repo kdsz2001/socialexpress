@@ -233,6 +233,28 @@
   max-width: none;
 }
 
+.client-create__input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.client-create__input-wrap .client-create__input {
+  width: 100%;
+}
+
+.client-create__input-wrap.is-invalid .client-create__input {
+  padding-right: 2.5rem;
+}
+
+.client-create__input-error-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #f64e60;
+  pointer-events: none;
+}
+
 .client-create__field-error {
   margin: 6px 0 0;
   font-size: 0.85rem;
