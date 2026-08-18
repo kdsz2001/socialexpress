@@ -26,6 +26,7 @@ import {
   subscribeAppointments,
   toDateKey,
 } from '../lib/agendaStore'
+import { requestNewAppointment } from '../lib/agendaUi'
 import {
   getUserProfile,
   subscribeUserProfile,
@@ -64,6 +65,11 @@ const MONTH_LONG = [
   'dezembro',
 ] as const
 
+type CreateTarget = {
+  date: Date
+  hour?: number
+}
+
 function preferredView(): AgendaView {
   const pref = getUserProfile().preferences.calendarView
   return pref === 'semana' ? 'semana' : 'mes'
@@ -99,10 +105,25 @@ function formatListDate(date: Date) {
   return `${date.getDate()} de ${MONTH_LONG[date.getMonth()]} de ${date.getFullYear()}`
 }
 
+function formatCreateDayLabel(date: Date) {
+  return `${date.getDate()} de ${MONTH_LONG[date.getMonth()]}`
+}
+
+function padTime(hour: number) {
+  return `${String(hour).padStart(2, '0')}:00`
+}
+
 function timeLabel(apt: Appointment) {
   if (apt.startTime && apt.endTime) return `${apt.startTime} - ${apt.endTime}`
   if (apt.startTime) return apt.startTime
   return 'Dia todo'
+}
+
+function isSameCreateTarget(a: CreateTarget | null, day: Date, hour?: number) {
+  if (!a) return false
+  if (!isSameDay(a.date, day)) return false
+  if (hour == null) return a.hour == null
+  return a.hour === hour
 }
 
 export function Agenda() {
@@ -110,6 +131,7 @@ export function Agenda() {
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
   const [now, setNow] = useState(() => new Date())
   const [appointments, setAppointments] = useState(() => getAppointments())
+  const [createTarget, setCreateTarget] = useState<CreateTarget | null>(null)
   const timeScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -127,6 +149,31 @@ export function Agenda() {
     const timer = window.setInterval(() => setNow(new Date()), 30_000)
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    setCreateTarget(null)
+  }, [view, cursor])
+
+  useEffect(() => {
+    if (!createTarget) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setCreateTarget(null)
+    }
+    const onPointer = (event: MouseEvent) => {
+      const node = event.target as HTMLElement | null
+      if (!node) return
+      if (node.closest('.agenda__create-tip') || node.closest('.agenda__month-cell') || node.closest('.agenda__slot')) {
+        return
+      }
+      setCreateTarget(null)
+    }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onPointer)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onPointer)
+    }
+  }, [createTarget])
 
   useEffect(() => {
     if (view !== 'semana' && view !== 'dia') return
@@ -178,6 +225,31 @@ export function Agenda() {
   }
 
   const goToday = () => setCursor(startOfDay(new Date()))
+
+  const openCreateFromTarget = (target: CreateTarget) => {
+    const defaults: { date: string; startTime?: string; endTime?: string } = {
+      date: toDateKey(target.date),
+    }
+    if (target.hour != null) {
+      defaults.startTime = padTime(target.hour)
+      defaults.endTime = padTime(Math.min(target.hour + 1, 23))
+    }
+    setCreateTarget(null)
+    requestNewAppointment(defaults)
+  }
+
+  const renderCreateTip = (day: Date, hour?: number) => (
+    <button
+      type="button"
+      className="agenda__create-tip"
+      onClick={(event) => {
+        event.stopPropagation()
+        openCreateFromTarget({ date: day, hour })
+      }}
+    >
+      Criar agendamento para o dia <strong>{formatCreateDayLabel(day)}</strong>
+    </button>
+  )
 
   const renderEventCard = (apt: Appointment, compact: boolean) => {
     const layout = appointmentLayout(apt)
@@ -257,15 +329,26 @@ export function Agenda() {
                 className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}`}
                 style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
               >
-                {HOURS.map((hour, hourIndex) => (
-                  <div
-                    key={hour}
-                    className={`agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}`}
-                    style={{ height: HOUR_HEIGHT }}
-                  >
-                    <span className="agenda__slot-half" />
-                  </div>
-                ))}
+                {HOURS.map((hour, hourIndex) => {
+                  const selected = isSameCreateTarget(createTarget, day, hour)
+                  return (
+                    <button
+                      key={hour}
+                      type="button"
+                      className={`agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}${
+                        selected ? ' is-selected' : ''
+                      }`}
+                      style={{ height: HOUR_HEIGHT }}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        setCreateTarget({ date: startOfDay(day), hour })
+                      }}
+                    >
+                      <span className="agenda__slot-half" />
+                      {selected ? renderCreateTip(day, hour) : null}
+                    </button>
+                  )
+                })}
                 {dayApts.map((apt) => renderEventCard(apt, !singleDay))}
                 {nowOffset != null && isSameDay(day, today) ? (
                   <div className="agenda__now" style={{ top: nowOffset }} aria-hidden="true">
@@ -330,6 +413,7 @@ export function Agenda() {
               {monthDays.map((day) => {
                 const inMonth = isSameMonth(day, cursor)
                 const isToday = isSameDay(day, today)
+                const selected = isSameCreateTarget(createTarget, day)
                 const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
                 return (
                   <button
@@ -337,10 +421,10 @@ export function Agenda() {
                     type="button"
                     className={`agenda__month-cell${inMonth ? '' : ' is-outside'}${
                       isToday ? ' is-today' : ''
-                    }`}
-                    onClick={() => {
-                      setCursor(startOfDay(day))
-                      setView('dia')
+                    }${selected ? ' is-selected' : ''}`}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setCreateTarget({ date: startOfDay(day) })
                     }}
                   >
                     <span className="agenda__month-date">{day.getDate()}</span>
@@ -357,6 +441,7 @@ export function Agenda() {
                         </span>
                       ))}
                     </div>
+                    {selected ? renderCreateTip(day) : null}
                   </button>
                 )
               })}

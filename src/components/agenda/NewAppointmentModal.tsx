@@ -17,6 +17,8 @@ type NewAppointmentModalProps = {
   open: boolean
   onClose: () => void
   defaultDate?: Date
+  defaultStartTime?: string
+  defaultEndTime?: string
 }
 
 type FormState = {
@@ -42,11 +44,15 @@ function buildResponsibleOptions() {
   ]
 }
 
-function emptyForm(defaultDate?: Date): FormState {
+function emptyForm(
+  defaultDate?: Date,
+  defaultStartTime = '',
+  defaultEndTime = '',
+): FormState {
   return {
     date: toDateKey(defaultDate ?? new Date()),
-    startTime: '',
-    endTime: '',
+    startTime: defaultStartTime,
+    endTime: defaultEndTime,
     title: '',
     details: '',
     color: 'coral',
@@ -59,20 +65,24 @@ export function NewAppointmentModal({
   open,
   onClose,
   defaultDate,
+  defaultStartTime = '',
+  defaultEndTime = '',
 }: NewAppointmentModalProps) {
   const titleId = useId()
   const peopleRef = useRef<HTMLDivElement>(null)
   const options = useMemo(() => buildResponsibleOptions(), [open])
-  const [form, setForm] = useState<FormState>(() => emptyForm(defaultDate))
+  const [form, setForm] = useState<FormState>(() =>
+    emptyForm(defaultDate, defaultStartTime, defaultEndTime),
+  )
   const [peopleOpen, setPeopleOpen] = useState(false)
   const [touched, setTouched] = useState(false)
 
   useEffect(() => {
     if (!open) return
-    setForm(emptyForm(defaultDate))
+    setForm(emptyForm(defaultDate, defaultStartTime, defaultEndTime))
     setPeopleOpen(false)
     setTouched(false)
-  }, [open, defaultDate])
+  }, [open, defaultDate, defaultStartTime, defaultEndTime])
 
   useEffect(() => {
     if (!open) return

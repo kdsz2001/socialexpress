@@ -7,6 +7,10 @@ import { ClientsSubheader } from './ClientsSubheader'
 import { ProfileSubheader } from './ProfileSubheader'
 import { AgendaSubheader } from './AgendaSubheader'
 import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
+import {
+  type NewAppointmentDefaults,
+  subscribeNewAppointmentRequest,
+} from '../lib/agendaUi'
 import './AppLayout.css'
 
 const PAGE_TITLES: Record<string, string> = {
@@ -46,7 +50,25 @@ export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [newAppointmentOpen, setNewAppointmentOpen] = useState(false)
+  const [appointmentDefaults, setAppointmentDefaults] = useState<NewAppointmentDefaults>({})
   const contentRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    return subscribeNewAppointmentRequest((defaults) => {
+      setAppointmentDefaults(defaults)
+      setNewAppointmentOpen(true)
+    })
+  }, [])
+
+  const openNewAppointment = (defaults: NewAppointmentDefaults = {}) => {
+    setAppointmentDefaults(defaults)
+    setNewAppointmentOpen(true)
+  }
+
+  const closeNewAppointment = () => {
+    setNewAppointmentOpen(false)
+    setAppointmentDefaults({})
+  }
 
   useEffect(() => {
     setCollapsed(isMobile)
@@ -99,7 +121,7 @@ export function AppLayout() {
         {location.pathname.startsWith('/clientes') && <ClientsSubheader />}
         {location.pathname === '/meu-perfil' && <ProfileSubheader />}
         {location.pathname === '/agenda' && (
-          <AgendaSubheader onNewAppointment={() => setNewAppointmentOpen(true)} />
+          <AgendaSubheader onNewAppointment={() => openNewAppointment()} />
         )}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
@@ -112,7 +134,14 @@ export function AppLayout() {
       {location.pathname === '/agenda' ? (
         <NewAppointmentModal
           open={newAppointmentOpen}
-          onClose={() => setNewAppointmentOpen(false)}
+          onClose={closeNewAppointment}
+          defaultDate={
+            appointmentDefaults.date
+              ? new Date(`${appointmentDefaults.date}T12:00:00`)
+              : undefined
+          }
+          defaultStartTime={appointmentDefaults.startTime}
+          defaultEndTime={appointmentDefaults.endTime}
         />
       ) : null}
 
