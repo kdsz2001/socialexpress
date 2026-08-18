@@ -78,6 +78,21 @@ function formFromAppointment(appointment: Appointment): FormState {
   }
 }
 
+/** Digita só números; formata automaticamente como hh:mm */
+function maskTime(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 4)
+  if (!digits) return ''
+
+  let hours = digits.slice(0, 2)
+  let minutes = digits.slice(2)
+
+  if (hours.length === 2 && Number(hours) > 23) hours = '23'
+  if (minutes.length === 2 && Number(minutes) > 59) minutes = '59'
+
+  if (!minutes) return hours
+  return `${hours}:${minutes}`
+}
+
 export function NewAppointmentModal({
   open,
   onClose,
@@ -295,8 +310,10 @@ export function NewAppointmentModal({
                 className="new-apt__input new-apt__input--time"
                 placeholder="hh:mm"
                 inputMode="numeric"
+                autoComplete="off"
+                maxLength={5}
                 value={form.startTime}
-                onChange={(event) => patch({ startTime: event.target.value })}
+                onChange={(event) => patch({ startTime: maskTime(event.target.value) })}
                 aria-label="Horário inicial"
               />
               <span className="new-apt__time-sep">até</span>
@@ -305,8 +322,10 @@ export function NewAppointmentModal({
                 className="new-apt__input new-apt__input--time"
                 placeholder="hh:mm"
                 inputMode="numeric"
+                autoComplete="off"
+                maxLength={5}
                 value={form.endTime}
-                onChange={(event) => patch({ endTime: event.target.value })}
+                onChange={(event) => patch({ endTime: maskTime(event.target.value) })}
                 aria-label="Horário final"
               />
             </div>
