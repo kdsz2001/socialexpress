@@ -302,10 +302,6 @@
     display: none;
   }
 
-  .topbar__search-panel {
-    right: -40px;
-  }
-
   .topbar__tab {
     padding: 0.4rem 0.55rem;
     font-size: 0.9rem;
