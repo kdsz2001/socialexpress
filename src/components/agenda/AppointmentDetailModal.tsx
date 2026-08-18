@@ -133,6 +133,7 @@ export function AppointmentDetailModal({
   const onConfirmDelete = () => {
     deleteAppointment(appointment.id)
     setConfirmDeleteOpen(false)
+    notifyAgendaToast('Okay. Agendamento excluído.')
     onClose()
   }
 
