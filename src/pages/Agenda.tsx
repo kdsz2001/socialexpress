@@ -46,10 +46,10 @@ const WEEKDAY_KEYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'] as const
 const SLOT_START_HOUR = 7
 const SLOT_END_HOUR = 20
 const HOURS = hoursOfDay(SLOT_START_HOUR, SLOT_END_HOUR)
-const HOUR_HEIGHT = 58
+const HOUR_HEIGHT = 64
 const ALL_DAY_HEIGHT = 40
 const HEAD_HEIGHT = 40
-const TIME_GUTTER = 70
+const TIME_GUTTER = 64
 const GRID_START_MIN = SLOT_START_HOUR * 60
 const GRID_END_MIN = (SLOT_END_HOUR + 1) * 60
 
@@ -365,6 +365,8 @@ export function Agenda() {
   const renderTimeGrid = (days: Date[], singleDay: boolean) => {
     const into = minutesIntoGrid(now)
     const nowOffset = into == null ? null : Math.round((into / 60) * HOUR_HEIGHT)
+    const todayIndex = days.findIndex((day) => isSameDay(day, today))
+    const showNow = nowOffset != null && todayIndex >= 0
 
     return (
       <div className={`agenda__timegrid${singleDay ? ' is-day' : ''}`} ref={timeScrollRef}>
@@ -405,6 +407,26 @@ export function Agenda() {
             ))}
           </div>
 
+          {showNow ? (
+            <div
+              className={`agenda__now-rail${singleDay ? ' is-day' : ''}`}
+              style={
+                singleDay
+                  ? { gridColumn: '1 / -1', gridRow: `3 / span ${HOURS.length}` }
+                  : {
+                      gridColumn: todayIndex + 2,
+                      gridRow: `3 / span ${HOURS.length}`,
+                    }
+              }
+              aria-hidden="true"
+            >
+              <div className="agenda__now" style={{ top: nowOffset }}>
+                <span className="agenda__now-arrow" />
+                <span className="agenda__now-line" />
+              </div>
+            </div>
+          ) : null}
+
           {days.map((day, dayIndex) => {
             const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
             const selectedHour =
@@ -423,12 +445,6 @@ export function Agenda() {
                 }`}
                 style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
               >
-                {nowOffset != null && isSameDay(day, today) ? (
-                  <div className="agenda__now" style={{ top: nowOffset }} aria-hidden="true">
-                    <span className="agenda__now-arrow" />
-                    <span className="agenda__now-line" />
-                  </div>
-                ) : null}
                 {HOURS.map((hour, hourIndex) => {
                   const bookable = canCreateOnTimeSlot(day, hour, now)
                   const selected = bookable && isSameCreateTarget(createTarget, day, hour)

@@ -405,14 +405,17 @@
 
 .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head--gutter) {
   background: #fdf6e3;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #5e6278;
+  min-height: 40px;
 }
 
 .agenda__allday-label {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0.25rem 0.6rem 0.25rem 0.35rem;
+  padding: 0.25rem 0.55rem 0.25rem 0.3rem;
   border-right: 1px solid #ebedf3;
   border-bottom: 1px solid #d7dae3;
   background: #fff;
@@ -422,8 +425,8 @@
 
 .agenda__allday-label span {
   display: block;
-  max-width: 4rem;
-  font-size: 0.74rem;
+  max-width: 3.75rem;
+  font-size: 0.72rem;
   font-weight: 500;
   color: #a1a5b7;
   text-align: right;
@@ -452,6 +455,10 @@
   background: #fdf6e3;
 }
 
+.agenda__timegrid.is-day .agenda__day-col {
+  border-right: 0;
+}
+
 .agenda__hours {
   display: flex;
   flex-direction: column;
@@ -468,7 +475,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 0 0.6rem 0 0;
+  padding: 0 0.55rem 0 0;
   box-sizing: border-box;
   pointer-events: none;
   overflow: visible;
@@ -476,10 +483,10 @@
 
 .agenda__hour-label span {
   display: block;
-  margin-top: -0.5em;
-  padding: 0 0.15rem;
+  transform: translateY(-50%);
+  padding: 0 0.12rem;
   background: #fff;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 500;
   color: #a1a5b7;
   line-height: 1;
@@ -489,7 +496,12 @@
 }
 
 .agenda__hour-label:first-child span {
-  margin-top: 0.15rem;
+  transform: none;
+  margin-top: 0.2rem;
+}
+
+.agenda__timegrid.is-day .agenda__hour-label span {
+  font-size: 0.84rem;
 }
 
 .agenda__day-col {
@@ -561,6 +573,14 @@
   border: 0;
   border-top: 1px dotted #d7dae3;
   pointer-events: none;
+}
+
+.agenda__timegrid.is-day .agenda__slot {
+  border-bottom-color: #e0e3ea;
+}
+
+.agenda__timegrid.is-day .agenda__slot-half {
+  border-top-color: #d7dae3;
 }
 
 .agenda__create-layer {
@@ -709,6 +729,13 @@
   align-items: flex-start;
 }
 
+.agenda__now-rail {
+  position: relative;
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+}
+
 .agenda__now {
   position: absolute;
   left: 0;
@@ -730,13 +757,17 @@
 
 .agenda__now-arrow {
   position: absolute;
-  left: -6px;
+  left: -1px;
   top: -5px;
   width: 0;
   height: 0;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
-  border-left: 6px solid #f64e60;
+  border-left: 7px solid #f64e60;
+}
+
+.agenda__now-rail.is-day .agenda__now-arrow {
+  left: 2px;
 }
 
 .agenda__event {
