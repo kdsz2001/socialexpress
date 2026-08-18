@@ -428,8 +428,8 @@ export function Agenda() {
                 {selectedHour != null ? (
                   <div
                     className={`agenda__create-layer${
-                      dayIndex === 0 ? ' is-edge-start' : ''
-                    }${dayIndex === days.length - 1 ? ' is-edge-end' : ''}`}
+                      days.length > 1 && dayIndex === 0 ? ' is-edge-start' : ''
+                    }${days.length > 1 && dayIndex === days.length - 1 ? ' is-edge-end' : ''}`}
                     style={{
                       top: (selectedHour - SLOT_START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2,
                     }}
@@ -491,17 +491,18 @@ export function Agenda() {
               ))}
             </div>
             <div className="agenda__month-grid">
-              {monthDays.map((day) => {
+              {monthDays.map((day, index) => {
                 const inMonth = isSameMonth(day, cursor)
                 const isToday = isSameDay(day, today)
                 const bookable = canCreateOnMonthDay(day, today)
                 const selected = bookable && isSameCreateTarget(createTarget, day)
                 const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
+                const col = index % 7
                 const cellClass = `agenda__month-cell${inMonth ? '' : ' is-outside'}${
                   isToday ? ' is-today' : ''
                 }${selected ? ' is-selected' : ''}${
                   bookable ? ' agenda__month-cell--bookable' : ' is-past'
-                }`
+                }${col === 0 ? ' is-edge-start' : ''}${col === 6 ? ' is-edge-end' : ''}`
 
                 const body = (
                   <>

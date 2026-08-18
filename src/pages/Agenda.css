@@ -132,6 +132,7 @@
   flex-direction: column;
   flex: 1;
   min-height: 30rem;
+  overflow-x: hidden;
 }
 
 .agenda__month-head {
@@ -588,8 +589,26 @@
 .agenda__month-cell .agenda__create-wrap {
   top: auto;
   bottom: 0.45rem;
+  left: 50%;
+  right: auto;
   transform: translateX(-50%);
   max-width: none;
+}
+
+.agenda__month-cell.is-edge-end.is-selected .agenda__create-wrap,
+.agenda__month-cell.is-edge-end .agenda__create-wrap {
+  left: auto;
+  right: 4px;
+  transform: none;
+  align-items: flex-end;
+}
+
+.agenda__month-cell.is-edge-start.is-selected .agenda__create-wrap,
+.agenda__month-cell.is-edge-start .agenda__create-wrap {
+  left: 4px;
+  right: auto;
+  transform: none;
+  align-items: flex-start;
 }
 
 .agenda__now {
