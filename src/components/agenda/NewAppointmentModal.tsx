@@ -70,6 +70,7 @@ export function NewAppointmentModal({
 }: NewAppointmentModalProps) {
   const titleId = useId()
   const peopleRef = useRef<HTMLDivElement>(null)
+  const peopleMenuRef = useRef<HTMLDivElement>(null)
   const options = useMemo(() => buildResponsibleOptions(), [open])
   const [form, setForm] = useState<FormState>(() =>
     emptyForm(defaultDate, defaultStartTime, defaultEndTime),
@@ -105,9 +106,11 @@ export function NewAppointmentModal({
   useEffect(() => {
     if (!peopleOpen) return
     const onPointer = (event: MouseEvent) => {
-      if (!peopleRef.current?.contains(event.target as Node)) {
-        setPeopleOpen(false)
+      const target = event.target as Node
+      if (peopleRef.current?.contains(target) || peopleMenuRef.current?.contains(target)) {
+        return
       }
+      setPeopleOpen(false)
     }
     document.addEventListener('mousedown', onPointer)
     return () => document.removeEventListener('mousedown', onPointer)
@@ -119,14 +122,30 @@ export function NewAppointmentModal({
       const field = peopleRef.current?.querySelector('.new-apt__people-field')
       if (!(field instanceof HTMLElement)) return
       const rect = field.getBoundingClientRect()
-      setPeopleMenuStyle({
-        position: 'fixed',
-        left: rect.left,
-        width: rect.width,
-        bottom: window.innerHeight - rect.top + 4,
-        top: 'auto',
-        zIndex: 240,
-      })
+      const gap = 4
+      const spaceAbove = rect.top
+      const spaceBelow = window.innerHeight - rect.bottom
+      const openUp = spaceAbove >= 120 || spaceAbove > spaceBelow
+
+      setPeopleMenuStyle(
+        openUp
+          ? {
+              position: 'fixed',
+              left: rect.left,
+              width: rect.width,
+              bottom: window.innerHeight - rect.top + gap,
+              top: 'auto',
+              zIndex: 320,
+            }
+          : {
+              position: 'fixed',
+              left: rect.left,
+              width: rect.width,
+              top: rect.bottom + gap,
+              bottom: 'auto',
+              zIndex: 320,
+            },
+      )
     }
     updateMenuPosition()
     window.addEventListener('resize', updateMenuPosition)
@@ -356,29 +375,6 @@ export function NewAppointmentModal({
                 </div>
                 <ChevronDown size={15} strokeWidth={2} aria-hidden="true" />
               </div>
-              {peopleOpen ? (
-                <div
-                  className="new-apt__people-menu"
-                  role="listbox"
-                  style={peopleMenuStyle}
-                >
-                  {options.map((person) => {
-                    const selected = form.responsibleIds.includes(person.id)
-                    return (
-                      <button
-                        key={person.id}
-                        type="button"
-                        role="option"
-                        aria-selected={selected}
-                        className={`new-apt__people-option${selected ? ' is-selected' : ''}`}
-                        onClick={() => selectResponsible(person.id)}
-                      >
-                        {person.name}
-                      </button>
-                    )
-                  })}
-                </div>
-              ) : null}
             </div>
           </div>
 
@@ -410,6 +406,34 @@ export function NewAppointmentModal({
           </button>
         </footer>
       </div>
+
+      {peopleOpen
+        ? createPortal(
+            <div
+              ref={peopleMenuRef}
+              className="new-apt__people-menu"
+              role="listbox"
+              style={peopleMenuStyle}
+            >
+              {options.map((person) => {
+                const selected = form.responsibleIds.includes(person.id)
+                return (
+                  <button
+                    key={person.id}
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    className={`new-apt__people-option${selected ? ' is-selected' : ''}`}
+                    onClick={() => selectResponsible(person.id)}
+                  >
+                    {person.name}
+                  </button>
+                )
+              })}
+            </div>,
+            document.body,
+          )
+        : null}
     </div>,
     document.body,
   )
