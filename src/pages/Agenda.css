@@ -222,7 +222,7 @@
 .agenda__timegrid {
   flex: 1;
   overflow: auto;
-  max-height: min(62vh, 42rem);
+  max-height: min(68vh, 48rem);
   background: #fff;
   position: relative;
 }
@@ -315,11 +315,13 @@
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 0.2rem 0.5rem 0 0;
+  padding: 0.1rem 0.55rem 0 0;
   font-size: 0.78rem;
   font-weight: 500;
   color: #a1a5b7;
   box-sizing: border-box;
+  line-height: 1;
+  transform: translateY(-0.35rem);
 }
 
 .agenda__day-col {
@@ -339,6 +341,10 @@
   border-bottom: 1px solid #e4e6ef;
 }
 
+.agenda__slot.is-last {
+  border-bottom: 2px solid #d7dae3;
+}
+
 .agenda__slot-half {
   position: absolute;
   left: 0;
@@ -347,7 +353,7 @@
   height: 0;
   margin: 0;
   border: 0;
-  border-top: 1px dashed #d7dae3;
+  border-top: 1px dotted #d7dae3;
   pointer-events: none;
 }
 

@@ -32,8 +32,12 @@ const VIEWS: Array<{ id: AgendaView; label: string }> = [
 ]
 
 const WEEKDAY_KEYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'] as const
-const HOURS = hoursOfDay(0, 23)
-const HOUR_HEIGHT = 56
+/** Claral: grade horária das 07h às 20h */
+const SLOT_START_HOUR = 7
+const SLOT_END_HOUR = 20
+const HOURS = hoursOfDay(SLOT_START_HOUR, SLOT_END_HOUR)
+/** Altura de 1h — espaço generoso como no Claral (meia-hora no meio) */
+const HOUR_HEIGHT = 68
 const ALL_DAY_HEIGHT = 34
 const HEAD_HEIGHT = 40
 
@@ -46,6 +50,15 @@ function titleFor(view: AgendaView, cursor: Date) {
   if (view === 'mes') return formatMonthTitle(cursor)
   if (view === 'dia') return formatDayTitle(cursor)
   return formatWeekTitle(cursor)
+}
+
+/** Minutos desde o início da grade (07:00); null se fora do intervalo 07–20. */
+function minutesIntoGrid(date: Date) {
+  const total = nowMinutes(date)
+  const start = SLOT_START_HOUR * 60
+  const end = (SLOT_END_HOUR + 1) * 60
+  if (total < start || total >= end) return null
+  return total - start
 }
 
 export function Agenda() {
@@ -70,8 +83,13 @@ export function Agenda() {
     if (view !== 'semana' && view !== 'dia') return
     const el = timeScrollRef.current
     if (!el) return
-    const hour = Math.max(0, now.getHours() - 1)
-    el.scrollTop = ALL_DAY_HEIGHT + hour * HOUR_HEIGHT
+    const into = minutesIntoGrid(now)
+    if (into == null) {
+      el.scrollTop = 0
+      return
+    }
+    // Mostra ~1h antes do horário atual, como no Claral
+    el.scrollTop = Math.max(0, ALL_DAY_HEIGHT + (into / 60 - 1) * HOUR_HEIGHT)
   }, [view, cursor])
 
   const today = startOfDay(now)
@@ -93,7 +111,8 @@ export function Agenda() {
   const goToday = () => setCursor(startOfDay(new Date()))
 
   const renderTimeGrid = (days: Date[], singleDay: boolean) => {
-    const nowOffset = Math.round((nowMinutes(now) / 60) * HOUR_HEIGHT)
+    const into = minutesIntoGrid(now)
+    const nowOffset = into == null ? null : Math.round((into / 60) * HOUR_HEIGHT)
 
     return (
       <div className={`agenda__timegrid${singleDay ? ' is-day' : ''}`} ref={timeScrollRef}>
@@ -138,12 +157,16 @@ export function Agenda() {
               className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}`}
               style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
             >
-              {HOURS.map((hour) => (
-                <div key={hour} className="agenda__slot" style={{ height: HOUR_HEIGHT }}>
+              {HOURS.map((hour, hourIndex) => (
+                <div
+                  key={hour}
+                  className={`agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}`}
+                  style={{ height: HOUR_HEIGHT }}
+                >
                   <span className="agenda__slot-half" />
                 </div>
               ))}
-              {isSameDay(day, today) ? (
+              {nowOffset != null && isSameDay(day, today) ? (
                 <div className="agenda__now" style={{ top: nowOffset }} aria-hidden="true">
                   <span className="agenda__now-arrow" />
                   <span className="agenda__now-line" />
