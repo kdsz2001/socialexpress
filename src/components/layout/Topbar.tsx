@@ -4,6 +4,12 @@ import { Search, Menu, UserRound, X } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useClients } from '../../hooks/useClients'
 import { getClientDisplayName } from '../../lib/clientsStore'
+import {
+  getUserDisplayName,
+  getUserProfile,
+  subscribeUserProfile,
+  type UserProfile,
+} from '../../lib/userProfileStore'
 import { ProfileDrawer } from './ProfileDrawer'
 import './Topbar.css'
 
@@ -23,6 +29,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const clients = useClients()
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => getUserProfile())
   const [query, setQuery] = useState('')
   const [panelPos, setPanelPos] = useState({ top: 0, left: 0, width: PANEL_WIDTH })
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -126,6 +133,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     setSearchOpen(false)
     setQuery('')
   }, [location.pathname])
+
+  useEffect(() => {
+    setUserProfile(getUserProfile())
+    return subscribeUserProfile(() => setUserProfile(getUserProfile()))
+  }, [])
+
+  const displayName = getUserDisplayName(userProfile)
 
   const openProfile = () => {
     setSearchOpen(false)
@@ -304,9 +318,17 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         >
           <span className="topbar__greeting">
             <span className="topbar__greeting-hi">Olá,</span>{' '}
-            <span className="topbar__greeting-name">Kelton Djames Schulze</span>
+            <span className="topbar__greeting-name">{displayName}</span>
           </span>
-          <span className="topbar__avatar" aria-hidden="true" />
+          <span className="topbar__avatar" aria-hidden="true">
+            {userProfile.avatarDataUrl ? (
+              <img
+                className="topbar__avatar-image"
+                src={userProfile.avatarDataUrl}
+                alt=""
+              />
+            ) : null}
+          </span>
         </button>
       </div>
 

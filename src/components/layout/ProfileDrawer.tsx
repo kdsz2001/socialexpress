@@ -1,8 +1,13 @@
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { User, Wallet, X } from 'lucide-react'
-import { getUserDisplayName, getUserProfile } from '../../lib/userProfileStore'
+import {
+  getUserDisplayName,
+  getUserProfile,
+  subscribeUserProfile,
+  type UserProfile,
+} from '../../lib/userProfileStore'
 import './ProfileDrawer.css'
 
 type ProfileDrawerProps = {
@@ -28,8 +33,13 @@ const menuItems = [
 export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
   const titleId = useId()
   const navigate = useNavigate()
-  const profile = getUserProfile()
+  const [profile, setProfile] = useState<UserProfile>(() => getUserProfile())
   const displayName = getUserDisplayName(profile)
+
+  useEffect(() => {
+    setProfile(getUserProfile())
+    return subscribeUserProfile(() => setProfile(getUserProfile()))
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -88,7 +98,15 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
         </header>
 
         <div className="profile-drawer__user">
-          <div className="profile-drawer__avatar" aria-hidden="true" />
+          <div className="profile-drawer__avatar" aria-hidden="true">
+            {profile.avatarDataUrl ? (
+              <img
+                className="profile-drawer__avatar-image"
+                src={profile.avatarDataUrl}
+                alt=""
+              />
+            ) : null}
+          </div>
           <div className="profile-drawer__meta">
             <p className="profile-drawer__name">{displayName}</p>
             <p className="profile-drawer__role">Master</p>
