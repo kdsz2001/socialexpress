@@ -151,8 +151,15 @@
   white-space: nowrap;
 }
 
-.client-detail__save:hover {
+.client-detail__save:hover:not(:disabled) {
   background: #187de4;
+}
+
+.client-detail__save:disabled {
+  background: #e1f0ff;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .client-detail__save.is-error {

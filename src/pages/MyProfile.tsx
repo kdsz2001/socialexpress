@@ -117,20 +117,18 @@ export function MyProfile() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  const canSave =
+    Boolean(draft.cpf.trim()) &&
+    isValidCpf(draft.cpf) &&
+    Boolean(draft.nome.trim()) &&
+    Boolean(draft.sobrenomes.trim()) &&
+    Boolean(draft.email.trim()) &&
+    Boolean(draft.login.trim())
+
   const save = () => {
-    if (!draft.nome.trim()) return
-    if (!draft.email.trim()) return
-    if (!draft.login.trim()) return
+    if (!canSave) return
 
-    if (draft.cpf.trim()) {
-      if (!isValidCpf(draft.cpf)) {
-        setCpfError('Informe um CPF válido.')
-        setSection('pessoais')
-        return
-      }
-      setCpfError('')
-    }
-
+    setCpfError('')
     updateUserProfile({
       ...draft,
       nome: draft.nome.trim(),
@@ -149,7 +147,12 @@ export function MyProfile() {
   }
 
   const renderSaveButton = () => (
-    <button type="button" className="client-detail__save" onClick={save}>
+    <button
+      type="button"
+      className="client-detail__save"
+      onClick={save}
+      disabled={!canSave}
+    >
       <Check size={16} strokeWidth={2.5} />
       Salvar alterações
     </button>
@@ -297,7 +300,6 @@ export function MyProfile() {
                   className="client-create__input"
                   value={draft.nome}
                   onChange={(e) => patch('nome', e.target.value)}
-                  required
                 />
               </div>
 
@@ -335,7 +337,6 @@ export function MyProfile() {
                   className="client-create__input"
                   value={draft.email}
                   onChange={(e) => patch('email', e.target.value)}
-                  required
                 />
               </div>
 
@@ -362,7 +363,6 @@ export function MyProfile() {
                   className="client-create__input"
                   value={draft.login}
                   onChange={(e) => patch('login', e.target.value)}
-                  required
                 />
               </div>
 
