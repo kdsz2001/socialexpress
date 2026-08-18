@@ -67,9 +67,10 @@ export function MyProfile() {
   const [toastOpen, setToastOpen] = useState(false)
   const [cropSource, setCropSource] = useState<string | null>(null)
   const [cepStatus, setCepStatus] = useState<CepStatus>('idle')
-  const [bairroOptions, setBairroOptions] = useState<string[]>(() =>
-    getUserProfile().bairro ? [getUserProfile().bairro] : [],
-  )
+  const [bairroOptions, setBairroOptions] = useState<string[]>(() => {
+    const profile = getUserProfile()
+    return profile.bairro ? [profile.bairro] : []
+  })
   const closeToast = useCallback(() => setToastOpen(false), [])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
