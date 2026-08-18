@@ -27,7 +27,7 @@ import {
   subscribeAppointments,
   toDateKey,
 } from '../lib/agendaStore'
-import { requestNewAppointment } from '../lib/agendaUi'
+import { requestEditAppointment, requestNewAppointment } from '../lib/agendaUi'
 import {
   getUserProfile,
   subscribeUserProfile,
@@ -666,6 +666,10 @@ export function Agenda() {
       <AppointmentDetailModal
         appointment={activeAppointment}
         onClose={() => setActiveAppointment(null)}
+        onEdit={(appointment) => {
+          setActiveAppointment(null)
+          requestEditAppointment(appointment)
+        }}
       />
     </div>
   )

@@ -8,6 +8,7 @@ import { ProfileSubheader } from './ProfileSubheader'
 import { AgendaSubheader } from './AgendaSubheader'
 import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
 import { SaveToast } from '../ui/SaveToast'
+import type { Appointment } from '../../lib/agendaStore'
 import {
   type NewAppointmentDefaults,
   subscribeAgendaToast,
@@ -53,13 +54,21 @@ export function AppLayout() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [newAppointmentOpen, setNewAppointmentOpen] = useState(false)
   const [appointmentDefaults, setAppointmentDefaults] = useState<NewAppointmentDefaults>({})
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
   const [agendaToastOpen, setAgendaToastOpen] = useState(false)
   const [agendaToastMessage, setAgendaToastMessage] = useState('')
   const contentRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    return subscribeNewAppointmentRequest((defaults) => {
-      setAppointmentDefaults(defaults)
+    return subscribeNewAppointmentRequest((request) => {
+      if (request.mode === 'edit' && request.appointment) {
+        setEditingAppointment(request.appointment)
+        setAppointmentDefaults({})
+        setNewAppointmentOpen(true)
+        return
+      }
+      setEditingAppointment(null)
+      setAppointmentDefaults(request.defaults ?? {})
       setNewAppointmentOpen(true)
     })
   }, [])
@@ -72,6 +81,7 @@ export function AppLayout() {
   }, [])
 
   const openNewAppointment = (defaults: NewAppointmentDefaults = {}) => {
+    setEditingAppointment(null)
     setAppointmentDefaults(defaults)
     setNewAppointmentOpen(true)
   }
@@ -79,6 +89,7 @@ export function AppLayout() {
   const closeNewAppointment = () => {
     setNewAppointmentOpen(false)
     setAppointmentDefaults({})
+    setEditingAppointment(null)
   }
 
   useEffect(() => {
@@ -154,6 +165,7 @@ export function AppLayout() {
             }
             defaultStartTime={appointmentDefaults.startTime}
             defaultEndTime={appointmentDefaults.endTime}
+            editingAppointment={editingAppointment}
           />
           <SaveToast
             open={agendaToastOpen}

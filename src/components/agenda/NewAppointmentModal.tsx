@@ -3,9 +3,11 @@ import { createPortal } from 'react-dom'
 import { CalendarDays, Check, ChevronDown, X } from 'lucide-react'
 import {
   APPOINTMENT_COLORS,
+  type Appointment,
   type AppointmentColor,
   addAppointment,
   toDateKey,
+  updateAppointment,
 } from '../../lib/agendaStore'
 import { notifyAgendaToast } from '../../lib/agendaUi'
 import {
@@ -20,6 +22,7 @@ type NewAppointmentModalProps = {
   defaultDate?: Date
   defaultStartTime?: string
   defaultEndTime?: string
+  editingAppointment?: Appointment | null
 }
 
 type FormState = {
@@ -62,19 +65,36 @@ function emptyForm(
   }
 }
 
+function formFromAppointment(appointment: Appointment): FormState {
+  return {
+    date: appointment.date,
+    startTime: appointment.startTime,
+    endTime: appointment.endTime,
+    title: appointment.title,
+    details: appointment.details,
+    color: appointment.color,
+    responsibleIds: [...appointment.responsibleIds],
+    orderLabel: appointment.orderLabel,
+  }
+}
+
 export function NewAppointmentModal({
   open,
   onClose,
   defaultDate,
   defaultStartTime = '',
   defaultEndTime = '',
+  editingAppointment = null,
 }: NewAppointmentModalProps) {
   const titleId = useId()
   const peopleRef = useRef<HTMLDivElement>(null)
   const peopleMenuRef = useRef<HTMLDivElement>(null)
   const options = useMemo(() => buildResponsibleOptions(), [open])
+  const isEditing = Boolean(editingAppointment)
   const [form, setForm] = useState<FormState>(() =>
-    emptyForm(defaultDate, defaultStartTime, defaultEndTime),
+    editingAppointment
+      ? formFromAppointment(editingAppointment)
+      : emptyForm(defaultDate, defaultStartTime, defaultEndTime),
   )
   const [peopleOpen, setPeopleOpen] = useState(false)
   const [peopleMenuStyle, setPeopleMenuStyle] = useState<CSSProperties>({})
@@ -82,10 +102,14 @@ export function NewAppointmentModal({
 
   useEffect(() => {
     if (!open) return
-    setForm(emptyForm(defaultDate, defaultStartTime, defaultEndTime))
+    setForm(
+      editingAppointment
+        ? formFromAppointment(editingAppointment)
+        : emptyForm(defaultDate, defaultStartTime, defaultEndTime),
+    )
     setPeopleOpen(false)
     setTouched(false)
-  }, [open, defaultDate, defaultStartTime, defaultEndTime])
+  }, [open, defaultDate, defaultStartTime, defaultEndTime, editingAppointment])
 
   useEffect(() => {
     if (!open) return
@@ -193,7 +217,7 @@ export function NewAppointmentModal({
   const onSave = () => {
     setTouched(true)
     if (invalid) return
-    addAppointment({
+    const payload = {
       date: form.date,
       startTime: form.startTime.trim(),
       endTime: form.endTime.trim(),
@@ -202,8 +226,14 @@ export function NewAppointmentModal({
       color: form.color,
       responsibleIds: form.responsibleIds,
       orderLabel: form.orderLabel.trim(),
-    })
-    notifyAgendaToast('Agendamento cadastrado.')
+    }
+    if (editingAppointment) {
+      updateAppointment(editingAppointment.id, payload)
+      notifyAgendaToast('Agendamento atualizado.')
+    } else {
+      addAppointment(payload)
+      notifyAgendaToast('Agendamento cadastrado.')
+    }
     onClose()
   }
 
@@ -224,7 +254,7 @@ export function NewAppointmentModal({
       >
         <header className="new-apt__header">
           <h2 id={titleId} className="new-apt__title">
-            Novo agendamento
+            {isEditing ? 'Atualizando agendamento' : 'Novo agendamento'}
           </h2>
           <button
             type="button"
