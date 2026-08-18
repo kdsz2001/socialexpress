@@ -45,8 +45,9 @@ const SLOT_START_HOUR = 7
 const SLOT_END_HOUR = 20
 const HOURS = hoursOfDay(SLOT_START_HOUR, SLOT_END_HOUR)
 const HOUR_HEIGHT = 68
-const ALL_DAY_HEIGHT = 34
+const ALL_DAY_HEIGHT = 54
 const HEAD_HEIGHT = 40
+const TIME_GUTTER = 72
 const GRID_START_MIN = SLOT_START_HOUR * 60
 const GRID_END_MIN = (SLOT_END_HOUR + 1) * 60
 
@@ -334,8 +335,8 @@ export function Agenda() {
           className="agenda__timegrid-inner"
           style={{
             gridTemplateColumns: singleDay
-              ? '64px minmax(0, 1fr)'
-              : `64px repeat(${days.length}, minmax(0, 1fr))`,
+              ? `${TIME_GUTTER}px minmax(0, 1fr)`
+              : `${TIME_GUTTER}px repeat(${days.length}, minmax(0, 1fr))`,
             gridTemplateRows: `${HEAD_HEIGHT}px ${ALL_DAY_HEIGHT}px repeat(${HOURS.length}, ${HOUR_HEIGHT}px)`,
           }}
         >
@@ -349,7 +350,9 @@ export function Agenda() {
             </div>
           ))}
 
-          <div className="agenda__allday-label">ao longo do dia</div>
+          <div className="agenda__allday-label">
+            <span>ao longo do dia</span>
+          </div>
           {days.map((day) => (
             <div
               key={`allday-${day.toISOString()}`}
@@ -360,7 +363,7 @@ export function Agenda() {
           <div className="agenda__hours" style={{ gridRow: `3 / span ${HOURS.length}` }}>
             {HOURS.map((hour) => (
               <div key={hour} className="agenda__hour-label" style={{ height: HOUR_HEIGHT }}>
-                {String(hour).padStart(2, '0')}
+                <span>{String(hour).padStart(2, '0')}</span>
               </div>
             ))}
           </div>
