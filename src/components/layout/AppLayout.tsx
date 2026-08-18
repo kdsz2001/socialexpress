@@ -7,8 +7,10 @@ import { ClientsSubheader } from './ClientsSubheader'
 import { ProfileSubheader } from './ProfileSubheader'
 import { AgendaSubheader } from './AgendaSubheader'
 import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
+import { SaveToast } from '../ui/SaveToast'
 import {
   type NewAppointmentDefaults,
+  subscribeAgendaToast,
   subscribeNewAppointmentRequest,
 } from '../../lib/agendaUi'
 import './AppLayout.css'
@@ -51,12 +53,21 @@ export function AppLayout() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [newAppointmentOpen, setNewAppointmentOpen] = useState(false)
   const [appointmentDefaults, setAppointmentDefaults] = useState<NewAppointmentDefaults>({})
+  const [agendaToastOpen, setAgendaToastOpen] = useState(false)
+  const [agendaToastMessage, setAgendaToastMessage] = useState('')
   const contentRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     return subscribeNewAppointmentRequest((defaults) => {
       setAppointmentDefaults(defaults)
       setNewAppointmentOpen(true)
+    })
+  }, [])
+
+  useEffect(() => {
+    return subscribeAgendaToast((message) => {
+      setAgendaToastMessage(message)
+      setAgendaToastOpen(true)
     })
   }, [])
 
@@ -132,17 +143,24 @@ export function AppLayout() {
       </div>
 
       {location.pathname === '/agenda' ? (
-        <NewAppointmentModal
-          open={newAppointmentOpen}
-          onClose={closeNewAppointment}
-          defaultDate={
-            appointmentDefaults.date
-              ? new Date(`${appointmentDefaults.date}T12:00:00`)
-              : undefined
-          }
-          defaultStartTime={appointmentDefaults.startTime}
-          defaultEndTime={appointmentDefaults.endTime}
-        />
+        <>
+          <NewAppointmentModal
+            open={newAppointmentOpen}
+            onClose={closeNewAppointment}
+            defaultDate={
+              appointmentDefaults.date
+                ? new Date(`${appointmentDefaults.date}T12:00:00`)
+                : undefined
+            }
+            defaultStartTime={appointmentDefaults.startTime}
+            defaultEndTime={appointmentDefaults.endTime}
+          />
+          <SaveToast
+            open={agendaToastOpen}
+            message={agendaToastMessage}
+            onClose={() => setAgendaToastOpen(false)}
+          />
+        </>
       ) : null}
 
       <button

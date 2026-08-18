@@ -7,6 +7,7 @@ import {
   addAppointment,
   toDateKey,
 } from '../../lib/agendaStore'
+import { notifyAgendaToast } from '../../lib/agendaUi'
 import {
   getUserDisplayName,
   getUserProfile,
@@ -202,6 +203,7 @@ export function NewAppointmentModal({
       responsibleIds: form.responsibleIds,
       orderLabel: form.orderLabel.trim(),
     })
+    notifyAgendaToast('Agendamento cadastrado.')
     onClose()
   }
 

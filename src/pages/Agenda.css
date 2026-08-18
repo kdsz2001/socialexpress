@@ -290,6 +290,15 @@
   z-index: 8;
 }
 
+.agenda__month-chip.is-completed {
+  background: #e8fff3;
+  color: #3f4254;
+}
+
+.agenda__month-chip.is-completed .agenda__month-chip-dot {
+  background: #1bc5bd;
+}
+
 .agenda__month-chip-dot {
   width: 0.35rem;
   height: 0.35rem;
@@ -747,6 +756,16 @@
 
 .agenda__event.has-tip:hover {
   z-index: 12;
+}
+
+.agenda__event.is-completed {
+  background: #e8fff3;
+  color: #3f4254;
+  box-shadow: none;
+}
+
+.agenda__event.is-completed .agenda__event-dot {
+  background: #1bc5bd;
 }
 
 .agenda__event.is-compact {

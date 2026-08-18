@@ -159,6 +159,16 @@
   white-space: pre-wrap;
 }
 
+.apt-detail__completed-banner {
+  padding: 0.85rem 1rem;
+  border-radius: 0.35rem;
+  background: #1bc5bd;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 .apt-detail__footer {
   display: flex;
   align-items: center;
@@ -210,6 +220,15 @@
 
 .apt-detail__btn--complete:hover {
   background: #0bb7af;
+}
+
+.apt-detail__btn--pending {
+  background: #ffe2e5;
+  color: #f64e60;
+}
+
+.apt-detail__btn--pending:hover {
+  background: #ffc5cb;
 }
 
 .apt-detail__btn--delete {

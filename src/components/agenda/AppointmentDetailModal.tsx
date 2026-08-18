@@ -3,8 +3,11 @@ import { createPortal } from 'react-dom'
 import { CalendarDays, Check, SquarePen, Trash2, X } from 'lucide-react'
 import {
   type Appointment,
+  completeAppointment,
   deleteAppointment,
+  reopenAppointment,
 } from '../../lib/agendaStore'
+import { notifyAgendaToast } from '../../lib/agendaUi'
 import {
   getUserDisplayName,
   getUserProfile,
@@ -47,10 +50,10 @@ function parseDateKey(dateKey: string) {
   return new Date(y, m - 1, d)
 }
 
-function formatCreatedLine(createdAt: number) {
-  const date = new Date(createdAt)
+function formatPersonDateLine(prefix: string, at: number) {
+  const date = new Date(at)
   const name = getUserDisplayName(getUserProfile()) || 'Você'
-  return `Agendado por ${name} em ${date.getDate()} de ${MONTH_LONG[date.getMonth()]} de ${date.getFullYear()}`
+  return `${prefix} ${name} em ${date.getDate()} de ${MONTH_LONG[date.getMonth()]} de ${date.getFullYear()}`
 }
 
 function formatScheduleBox(apt: Appointment) {
@@ -58,9 +61,7 @@ function formatScheduleBox(apt: Appointment) {
   const dayLabel = `${date.getDate()} de ${MONTH_LONG[date.getMonth()]}`
   const weekday = WEEKDAY_LONG[date.getDay()]
   const hasTime = Boolean(apt.startTime.trim())
-  const timePart = hasTime
-    ? `${apt.startTime}${apt.endTime ? ` – ${apt.endTime}` : ''}`
-    : 'o dia inteiro'
+  const timePart = hasTime ? `às ${apt.startTime}` : 'o dia inteiro'
   return {
     dayLabel,
     subLabel: `${weekday} ${timePart}`,
@@ -106,10 +107,17 @@ export function AppointmentDetailModal({
   if (!appointment || !schedule) return null
 
   const people = responsibleNames(appointment.responsibleIds)
+  const isCompleted = appointment.completed
 
   const onComplete = () => {
-    deleteAppointment(appointment.id)
+    completeAppointment(appointment.id)
+    notifyAgendaToast('Okay. Agendamento concluído.')
     onClose()
+  }
+
+  const onReopen = () => {
+    reopenAppointment(appointment.id)
+    notifyAgendaToast('Agendamento atualizado.')
   }
 
   const onDelete = () => {
@@ -137,7 +145,9 @@ export function AppointmentDetailModal({
             <h2 id={titleId} className="apt-detail__title">
               {appointment.title || 'Sem título'}
             </h2>
-            <p className="apt-detail__meta">{formatCreatedLine(appointment.createdAt)}</p>
+            <p className="apt-detail__meta">
+              {formatPersonDateLine('Agendado por', appointment.createdAt)}
+            </p>
           </div>
           <button
             type="button"
@@ -160,6 +170,16 @@ export function AppointmentDetailModal({
             </span>
           </div>
 
+          {isCompleted ? (
+            <div className="apt-detail__completed-banner">
+              {formatPersonDateLine(
+                'Marcado como concluído por',
+                appointment.completedAt ?? appointment.createdAt,
+              )}
+              .
+            </div>
+          ) : null}
+
           <section className="apt-detail__section">
             <h3 className="apt-detail__section-title">Detalhes</h3>
             <p className="apt-detail__section-text">
@@ -176,41 +196,74 @@ export function AppointmentDetailModal({
         </div>
 
         <footer className="apt-detail__footer">
-          <div className="apt-detail__actions apt-detail__actions--start">
-            <button
-              type="button"
-              className="apt-detail__btn apt-detail__btn--complete"
-              onClick={onComplete}
-            >
-              <Check size={14} strokeWidth={2.75} />
-              Concluir
-            </button>
-            <button
-              type="button"
-              className="apt-detail__btn apt-detail__btn--delete"
-              onClick={onDelete}
-            >
-              <Trash2 size={14} strokeWidth={2.25} />
-              Excluir
-            </button>
-          </div>
-          <div className="apt-detail__actions apt-detail__actions--end">
-            <button
-              type="button"
-              className="apt-detail__btn apt-detail__btn--edit"
-              onClick={() => onEdit?.(appointment)}
-            >
-              <SquarePen size={14} strokeWidth={2.25} />
-              Editar
-            </button>
-            <button
-              type="button"
-              className="apt-detail__btn apt-detail__btn--close"
-              onClick={onClose}
-            >
-              Fechar
-            </button>
-          </div>
+          {isCompleted ? (
+            <>
+              <div className="apt-detail__actions apt-detail__actions--start">
+                <button
+                  type="button"
+                  className="apt-detail__btn apt-detail__btn--pending"
+                  onClick={onReopen}
+                >
+                  Marcar como pendente
+                </button>
+              </div>
+              <div className="apt-detail__actions apt-detail__actions--end">
+                <button
+                  type="button"
+                  className="apt-detail__btn apt-detail__btn--edit"
+                  onClick={() => onEdit?.(appointment)}
+                >
+                  <SquarePen size={14} strokeWidth={2.25} />
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  className="apt-detail__btn apt-detail__btn--close"
+                  onClick={onClose}
+                >
+                  Fechar
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="apt-detail__actions apt-detail__actions--start">
+                <button
+                  type="button"
+                  className="apt-detail__btn apt-detail__btn--complete"
+                  onClick={onComplete}
+                >
+                  <Check size={14} strokeWidth={2.75} />
+                  Concluir
+                </button>
+                <button
+                  type="button"
+                  className="apt-detail__btn apt-detail__btn--delete"
+                  onClick={onDelete}
+                >
+                  <Trash2 size={14} strokeWidth={2.25} />
+                  Excluir
+                </button>
+              </div>
+              <div className="apt-detail__actions apt-detail__actions--end">
+                <button
+                  type="button"
+                  className="apt-detail__btn apt-detail__btn--edit"
+                  onClick={() => onEdit?.(appointment)}
+                >
+                  <SquarePen size={14} strokeWidth={2.25} />
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  className="apt-detail__btn apt-detail__btn--close"
+                  onClick={onClose}
+                >
+                  Fechar
+                </button>
+              </div>
+            </>
+          )}
         </footer>
       </div>
     </div>,

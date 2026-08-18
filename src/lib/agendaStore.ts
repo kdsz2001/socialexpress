@@ -11,6 +11,8 @@ export type Appointment = {
   responsibleIds: string[]
   orderLabel: string
   createdAt: number
+  completed: boolean
+  completedAt?: number
 }
 
 export const APPOINTMENT_COLORS: Array<{
@@ -32,12 +34,30 @@ export function appointmentColorHex(color: AppointmentColor) {
 const STORAGE_KEY = 'social-express:appointments'
 const CHANGE_EVENT = 'social-express:appointments-change'
 
+function normalizeAppointment(raw: Partial<Appointment> & Pick<Appointment, 'id' | 'date' | 'title'>): Appointment {
+  return {
+    id: raw.id,
+    date: raw.date,
+    startTime: raw.startTime ?? '',
+    endTime: raw.endTime ?? '',
+    title: raw.title,
+    details: raw.details ?? '',
+    color: raw.color ?? 'blue',
+    responsibleIds: Array.isArray(raw.responsibleIds) ? raw.responsibleIds : [],
+    orderLabel: raw.orderLabel ?? '',
+    createdAt: raw.createdAt ?? Date.now(),
+    completed: Boolean(raw.completed),
+    completedAt: raw.completedAt,
+  }
+}
+
 function readAll(): Appointment[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
-    const parsed = JSON.parse(raw) as Appointment[]
-    return Array.isArray(parsed) ? parsed : []
+    const parsed = JSON.parse(raw) as Array<Partial<Appointment> & Pick<Appointment, 'id' | 'date' | 'title'>>
+    if (!Array.isArray(parsed)) return []
+    return parsed.map(normalizeAppointment)
   } catch {
     return []
   }
@@ -61,12 +81,17 @@ export function getAppointmentsOnDate(date: string) {
 }
 
 export function addAppointment(
-  input: Omit<Appointment, 'id' | 'createdAt'>,
+  input: Omit<Appointment, 'id' | 'createdAt' | 'completed' | 'completedAt'> & {
+    completed?: boolean
+    completedAt?: number
+  },
 ): Appointment {
   const next: Appointment = {
     ...input,
     id: `apt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     createdAt: Date.now(),
+    completed: Boolean(input.completed),
+    completedAt: input.completedAt,
   }
   writeAll([...readAll(), next])
   return next
@@ -83,6 +108,20 @@ export function updateAppointment(
   items[index] = next
   writeAll(items)
   return next
+}
+
+export function completeAppointment(id: string) {
+  return updateAppointment(id, {
+    completed: true,
+    completedAt: Date.now(),
+  })
+}
+
+export function reopenAppointment(id: string) {
+  return updateAppointment(id, {
+    completed: false,
+    completedAt: undefined,
+  })
 }
 
 export function deleteAppointment(id: string) {

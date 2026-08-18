@@ -21,6 +21,7 @@ import {
 import {
   type Appointment,
   appointmentColorHex,
+  getAppointmentById,
   getAppointments,
   parseTimeToMinutes,
   subscribeAppointments,
@@ -164,7 +165,12 @@ export function Agenda() {
   }, [])
 
   useEffect(() => {
-    return subscribeAppointments(() => setAppointments(getAppointments()))
+    return subscribeAppointments(() => {
+      setAppointments(getAppointments())
+      setActiveAppointment((current) =>
+        current ? getAppointmentById(current.id) : null,
+      )
+    })
   }, [])
 
   useEffect(() => {
@@ -318,19 +324,30 @@ export function Agenda() {
     const layout = appointmentLayout(apt)
     if (!layout) return null
     const color = appointmentColorHex(apt.color)
+    const completed = apt.completed
     return (
       <button
         key={apt.id}
         type="button"
-        className={`agenda__event${compact ? ' is-compact' : ''}${apt.details.trim() ? ' has-tip' : ''}`}
-        style={{
-          top: layout.top,
-          height: layout.height,
-          background: color,
-        }}
+        className={`agenda__event${compact ? ' is-compact' : ''}${apt.details.trim() ? ' has-tip' : ''}${completed ? ' is-completed' : ''}`}
+        style={
+          completed
+            ? {
+                top: layout.top,
+                height: layout.height,
+              }
+            : {
+                top: layout.top,
+                height: layout.height,
+                background: color,
+              }
+        }
         onClick={(event) => openAppointment(apt, event)}
       >
-        <span className="agenda__event-dot" />
+        <span
+          className="agenda__event-dot"
+          style={completed ? { background: '#1bc5bd' } : undefined}
+        />
         <div className="agenda__event-body">
           {!compact ? (
             <span className="agenda__event-time">
@@ -536,8 +553,12 @@ export function Agenda() {
                           key={apt.id}
                           role="button"
                           tabIndex={0}
-                          className={`agenda__month-chip${apt.details.trim() ? ' has-tip' : ''}`}
-                          style={{ background: appointmentColorHex(apt.color) }}
+                          className={`agenda__month-chip${apt.details.trim() ? ' has-tip' : ''}${apt.completed ? ' is-completed' : ''}`}
+                          style={
+                            apt.completed
+                              ? undefined
+                              : { background: appointmentColorHex(apt.color) }
+                          }
                           onClick={(event) => openAppointment(apt, event)}
                           onKeyDown={(event) => {
                             if (event.key === 'Enter' || event.key === ' ') {
@@ -548,7 +569,12 @@ export function Agenda() {
                             }
                           }}
                         >
-                          <span className="agenda__month-chip-dot" />
+                          <span
+                            className="agenda__month-chip-dot"
+                            style={
+                              apt.completed ? { background: '#1bc5bd' } : undefined
+                            }
+                          />
                           {apt.startTime ? `${apt.startTime.slice(0, 2)} ` : ''}
                           {apt.title}
                           {renderDetailsTip(apt.details)}
