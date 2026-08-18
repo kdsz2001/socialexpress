@@ -418,8 +418,8 @@
   border-bottom: 1px solid #d7dae3;
   background: #fff;
   box-sizing: border-box;
-  z-index: 2;
-  overflow: hidden;
+  z-index: 1;
+  overflow: visible;
 }
 
 .agenda__allday-label span {
@@ -437,7 +437,8 @@
   border-bottom: 1px solid #d7dae3;
   background: #fff;
   box-sizing: border-box;
-  z-index: 2;
+  z-index: 1;
+  overflow: visible;
 }
 
 .agenda__allday:last-of-type {
@@ -465,7 +466,7 @@
   background: #fff;
   grid-column: 1;
   position: relative;
-  z-index: 4;
+  z-index: 6;
   overflow: visible;
 }
 
@@ -483,8 +484,8 @@
 .agenda__hour-label span {
   display: block;
   transform: translateY(-50%);
-  padding: 0;
-  background: transparent;
+  padding: 0 0.12rem;
+  background: #fff;
   font-size: 0.88rem;
   font-weight: 500;
   color: #5e6278;
@@ -495,9 +496,13 @@
   white-space: nowrap;
 }
 
+/* 07 sits just under the all-day divider so it is never clipped */
+.agenda__hour-label:first-child {
+  padding-top: 0.28rem;
+}
+
 .agenda__hour-label:first-child span {
-  /* keep 07 on the all-day divider without clipping into sticky header */
-  transform: translateY(-35%);
+  transform: none;
 }
 
 .agenda__day-col {
