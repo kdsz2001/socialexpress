@@ -427,7 +427,9 @@ export function Agenda() {
                 {dayApts.map((apt) => renderEventCard(apt, !singleDay))}
                 {selectedHour != null ? (
                   <div
-                    className="agenda__create-layer"
+                    className={`agenda__create-layer${
+                      dayIndex === 0 ? ' is-edge-start' : ''
+                    }${dayIndex === days.length - 1 ? ' is-edge-end' : ''}`}
                     style={{
                       top: (selectedHour - SLOT_START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2,
                     }}

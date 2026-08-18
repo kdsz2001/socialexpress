@@ -289,7 +289,8 @@
 
 .agenda__timegrid {
   flex: 1;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   max-height: min(68vh, 48rem);
   background: #fff;
   position: relative;
@@ -471,12 +472,32 @@
   pointer-events: none;
 }
 
+.agenda__create-layer.is-edge-start {
+  left: 4px;
+  transform: translateY(-50%);
+}
+
+.agenda__create-layer.is-edge-end {
+  left: auto;
+  right: 4px;
+  transform: translateY(-50%);
+}
+
 .agenda__create-layer .agenda__create-wrap {
   position: static;
   left: auto;
   top: auto;
   transform: none;
   max-width: none;
+  align-items: center;
+}
+
+.agenda__create-layer.is-edge-start .agenda__create-wrap {
+  align-items: flex-start;
+}
+
+.agenda__create-layer.is-edge-end .agenda__create-wrap {
+  align-items: flex-end;
 }
 
 .agenda__create-wrap {
