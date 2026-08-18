@@ -20,9 +20,9 @@
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem 0.75rem;
-  border-bottom: 1px solid #ebedf3;
+  gap: 0.65rem;
+  padding: 0.7rem 1rem 0.65rem;
+  border-bottom: 1px solid #eef0f4;
   background: #fff;
 }
 
@@ -36,54 +36,55 @@
 .agenda__nav-arrows {
   display: inline-flex;
   overflow: hidden;
-  border-radius: 0.4rem;
-  background: #f3f6f9;
+  border-radius: 0.35rem;
+  background: #f9f9fc;
 }
 
 .agenda__nav-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.15rem;
-  height: 2.15rem;
+  width: 1.95rem;
+  height: 1.95rem;
   border: 0;
   background: transparent;
-  color: #7e8299;
+  color: #a1a5b7;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .agenda__nav-btn + .agenda__nav-btn {
-  border-left: 1px solid #e4e6ef;
+  border-left: 1px solid #eef0f4;
 }
 
 .agenda__nav-btn:hover {
-  background: #eef1f5;
-  color: #3f4254;
+  background: #f3f6f9;
+  color: #5e6278;
 }
 
 .agenda__today {
-  height: 2.15rem;
-  padding: 0 0.95rem;
+  height: 1.95rem;
+  padding: 0 0.8rem;
   border: 0;
-  border-radius: 0.4rem;
-  background: #f3f6f9;
-  color: #3f4254;
-  font-size: 0.9rem;
+  border-radius: 0.35rem;
+  background: #f9f9fc;
+  color: #5e6278;
+  font-size: 0.82rem;
   font-weight: 500;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .agenda__today:hover {
-  background: #eef1f5;
+  background: #f3f6f9;
+  color: #3f4254;
 }
 
 .agenda__range {
   margin: 0;
   text-align: center;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: #3f4254;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #5e6278;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -92,18 +93,18 @@
   display: inline-flex;
   justify-self: end;
   overflow: hidden;
-  border-radius: 0.4rem;
-  background: #f3f6f9;
+  border-radius: 0.35rem;
+  background: #f9f9fc;
 }
 
 .agenda__view-btn {
-  min-width: 4.35rem;
-  height: 2.15rem;
-  padding: 0 0.85rem;
+  min-width: 3.85rem;
+  height: 1.95rem;
+  padding: 0 0.7rem;
   border: 0;
   background: transparent;
-  color: #5e6278;
-  font-size: 0.86rem;
+  color: #7e8299;
+  font-size: 0.8rem;
   font-weight: 500;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -114,20 +115,22 @@
 }
 
 .agenda__view-btn + .agenda__view-btn {
-  border-left: 1px solid #e4e6ef;
+  border-left: 1px solid #eef0f4;
 }
 
 .agenda__view-btn:hover {
-  background: #eef1f5;
+  background: #f3f6f9;
+  color: #5e6278;
 }
 
 .agenda__view-btn.is-active {
-  background: var(--brand-blue);
+  background: #3699ff;
   color: #fff;
+  font-weight: 500;
 }
 
 .agenda__view-btn.is-active:hover {
-  background: var(--brand-blue);
+  background: #3699ff;
   color: #fff;
 }
 
@@ -529,7 +532,7 @@
   padding: 0;
   margin: 0;
   border: 0;
-  border-bottom: 1px solid #d7dae3;
+  border-bottom: 1px solid #eef0f4;
   background: transparent;
   box-sizing: border-box;
   cursor: pointer;
@@ -540,7 +543,7 @@
 }
 
 .agenda__slot.is-last {
-  border-bottom: 2px solid #d7dae3;
+  border-bottom: 1px solid #e4e6ef;
 }
 
 .agenda__slot.is-selected {
@@ -574,18 +577,19 @@
   height: 1px;
   margin: 0;
   border: 0;
-  /* Claral-style faint half-hour rule — dotted via gradient on cream and white */
+  /* Lighter half-hour rule — short soft dashes */
   background-image: linear-gradient(
     to right,
-    #b8bdc9 0 3px,
-    transparent 3px 7px
+    #e4e6ef 0 2px,
+    transparent 2px 8px
   );
-  background-size: 7px 1px;
+  background-size: 8px 1px;
   background-repeat: repeat-x;
   background-position: left center;
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 0;
+  opacity: 0.85;
 }
 
 .agenda__create-rail {
