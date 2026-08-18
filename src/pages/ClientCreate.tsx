@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   Check,
+  CircleAlert,
   Plus,
   Trash2,
 } from 'lucide-react'
@@ -192,6 +193,8 @@ export function ClientCreate() {
   const navigate = useNavigate()
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [cpfError, setCpfError] = useState('')
+  const [nomeError, setNomeError] = useState('')
+  const [phoneError, setPhoneError] = useState('')
   const [birthDate, setBirthDate] = useState('')
   const [cep, setCep] = useState('')
   const [cepStatus, setCepStatus] = useState<CepStatus>('idle')
@@ -221,9 +224,13 @@ export function ClientCreate() {
 
   const goBack = () => navigate('/clientes')
 
-  const validateCpfField = (value = cpfCnpj) => {
+  const validateCpfField = (value = cpfCnpj, { requireFilled = false } = {}) => {
     const trimmed = value.trim()
     if (!trimmed) {
+      if (requireFilled) {
+        setCpfError('"CPF ou CNPJ" não pode ficar em branco.')
+        return false
+      }
       setCpfError('')
       return false
     }
@@ -244,12 +251,42 @@ export function ClientCreate() {
     return true
   }
 
+  const validateNomeField = (value = nome) => {
+    if (!value.trim()) {
+      setNomeError('"Nome" não pode ficar em branco.')
+      return false
+    }
+    setNomeError('')
+    return true
+  }
+
+  const validatePhoneField = (value = phones[0]?.number ?? '') => {
+    if (!value.trim()) {
+      setPhoneError('"Telefone" não pode ficar em branco.')
+      return false
+    }
+    setPhoneError('')
+    return true
+  }
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!gender) return
 
-    if (!validateCpfField(cpfCnpj)) {
+    const cpfOk = validateCpfField(cpfCnpj, { requireFilled: true })
+    const nomeOk = validateNomeField(nome)
+    const phoneOk = validatePhoneField(phones[0]?.number ?? '')
+
+    if (!cpfOk) {
       document.getElementById('cpfCnpj')?.focus()
+      return
+    }
+    if (!nomeOk) {
+      document.getElementById('nome')?.focus()
+      return
+    }
+    if (!phoneOk) {
+      document.getElementById('phone-0')?.focus()
       return
     }
 
@@ -369,31 +406,39 @@ export function ClientCreate() {
               CPF ou CNPJ <span className="req">*</span>
             </label>
             <div className="client-create__field">
-              <input
-                id="cpfCnpj"
-                className={`client-create__input${cpfError ? ' is-invalid' : ''}`}
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="000.000.000-00"
-                value={cpfCnpj}
-                onChange={(event) => {
-                  const next = maskCpfCnpj(event.target.value)
-                  setCpfCnpj(next)
-                  const digits = onlyDigits(next)
-                  if (digits.length === 11 || digits.length === 14) {
-                    validateCpfField(next)
-                  } else if (cpfError) {
-                    setCpfError('')
-                  }
-                }}
-                onBlur={() => {
-                  if (!cpfCnpj.trim()) return
-                  validateCpfField(cpfCnpj)
-                }}
-                aria-invalid={Boolean(cpfError)}
-                aria-describedby={cpfError ? 'cpfCnpj-error' : undefined}
-                required
-              />
+              <div className={`client-create__input-wrap${cpfError ? ' is-invalid' : ''}`}>
+                <input
+                  id="cpfCnpj"
+                  className={`client-create__input${cpfError ? ' is-invalid' : ''}`}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="000.000.000-00"
+                  value={cpfCnpj}
+                  onChange={(event) => {
+                    const next = maskCpfCnpj(event.target.value)
+                    setCpfCnpj(next)
+                    const digits = onlyDigits(next)
+                    if (digits.length === 11 || digits.length === 14) {
+                      validateCpfField(next)
+                    } else if (cpfError) {
+                      setCpfError('')
+                    }
+                  }}
+                  onBlur={(event) => {
+                    validateCpfField(event.currentTarget.value, { requireFilled: true })
+                  }}
+                  aria-invalid={Boolean(cpfError)}
+                  aria-describedby={cpfError ? 'cpfCnpj-error' : undefined}
+                />
+                {cpfError ? (
+                  <CircleAlert
+                    className="client-create__input-error-icon"
+                    size={18}
+                    strokeWidth={2.25}
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </div>
               {cpfError ? (
                 <p id="cpfCnpj-error" className="client-create__field-error">
                   {cpfError}
@@ -445,13 +490,37 @@ export function ClientCreate() {
             <label className="client-create__label" htmlFor="nome">
               Nome <span className="req">*</span>
             </label>
-            <input
-              id="nome"
-              className="client-create__input"
-              required
-              value={nome}
-              onChange={(event) => setNome(event.target.value)}
-            />
+            <div className="client-create__field">
+              <div className={`client-create__input-wrap${nomeError ? ' is-invalid' : ''}`}>
+                <input
+                  id="nome"
+                  className={`client-create__input${nomeError ? ' is-invalid' : ''}`}
+                  value={nome}
+                  onChange={(event) => {
+                    setNome(event.target.value)
+                    if (nomeError) setNomeError('')
+                  }}
+                  onBlur={(event) => {
+                    validateNomeField(event.currentTarget.value)
+                  }}
+                  aria-invalid={Boolean(nomeError)}
+                  aria-describedby={nomeError ? 'nome-error' : undefined}
+                />
+                {nomeError ? (
+                  <CircleAlert
+                    className="client-create__input-error-icon"
+                    size={18}
+                    strokeWidth={2.25}
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </div>
+              {nomeError ? (
+                <p id="nome-error" className="client-create__field-error">
+                  {nomeError}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="client-create__row">
@@ -511,22 +580,53 @@ export function ClientCreate() {
                 Telefone {index === 0 && <span className="req">*</span>}
               </label>
               <div className="client-create__phone-block">
-                <input
-                  id={`phone-${index}`}
-                  className="client-create__input"
-                  inputMode="numeric"
-                  placeholder="(99) 99999-9999"
-                  value={phone.number}
-                  required={index === 0}
-                  onChange={(event) => {
-                    const next = [...phones]
-                    next[index] = {
-                      ...phone,
-                      number: maskPhone(event.target.value),
-                    }
-                    setPhones(next)
-                  }}
-                />
+                <div className="client-create__field">
+                  <div
+                    className={`client-create__input-wrap${
+                      index === 0 && phoneError ? ' is-invalid' : ''
+                    }`}
+                  >
+                    <input
+                      id={`phone-${index}`}
+                      className={`client-create__input${
+                        index === 0 && phoneError ? ' is-invalid' : ''
+                      }`}
+                      inputMode="numeric"
+                      placeholder="(99) 99999-9999"
+                      value={phone.number}
+                      onChange={(event) => {
+                        const next = [...phones]
+                        next[index] = {
+                          ...phone,
+                          number: maskPhone(event.target.value),
+                        }
+                        setPhones(next)
+                        if (index === 0 && phoneError) setPhoneError('')
+                      }}
+                      onBlur={(event) => {
+                        if (index !== 0) return
+                        validatePhoneField(event.currentTarget.value)
+                      }}
+                      aria-invalid={index === 0 && Boolean(phoneError)}
+                      aria-describedby={
+                        index === 0 && phoneError ? 'phone-error' : undefined
+                      }
+                    />
+                    {index === 0 && phoneError ? (
+                      <CircleAlert
+                        className="client-create__input-error-icon"
+                        size={18}
+                        strokeWidth={2.25}
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </div>
+                  {index === 0 && phoneError ? (
+                    <p id="phone-error" className="client-create__field-error">
+                      {phoneError}
+                    </p>
+                  ) : null}
+                </div>
                 <div className="client-create__checks">
                   <label className="client-create__check">
                     <input
