@@ -344,6 +344,7 @@
   position: relative;
   border-right: 1px solid #eef0f4;
   background: #fff;
+  overflow: visible;
 }
 
 .agenda__day-col:last-child {
@@ -374,26 +375,21 @@
   right: 0;
   height: 2px;
   background: #f64e60;
-  z-index: 4;
+  z-index: 5;
   pointer-events: none;
 }
 
-.agenda__now.has-triangle::before {
+/* Triângulo alinhado ao centro vertical da linha (2px → centro em 1px) */
+.agenda__now::before {
   content: '';
   position: absolute;
-  left: -0.05rem;
-  top: 50%;
-  transform: translate(-100%, -50%);
+  left: -7px;
+  top: -4px;
   width: 0;
   height: 0;
-  border-top: 0.35rem solid transparent;
-  border-bottom: 0.35rem solid transparent;
-  border-left: 0.45rem solid #f64e60;
-}
-
-.agenda__timegrid.is-day .agenda__now.has-triangle::before {
-  left: 0;
-  transform: translate(-100%, -50%);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid #f64e60;
 }
 
 /* ——— Lista ——— */

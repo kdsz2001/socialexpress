@@ -92,8 +92,8 @@ export function Agenda() {
 
   const renderNowLine = (day: Date) => {
     if (!isSameDay(day, today)) return null
-    const top = (nowMinutes(now) / 60) * HOUR_HEIGHT
-    return <div className="agenda__now has-triangle" style={{ top }} aria-hidden="true" />
+    const top = Math.round((nowMinutes(now) / 60) * HOUR_HEIGHT)
+    return <div className="agenda__now" style={{ top }} aria-hidden="true" />
   }
 
   const renderTimeGrid = (days: Date[], singleDay: boolean) => (
