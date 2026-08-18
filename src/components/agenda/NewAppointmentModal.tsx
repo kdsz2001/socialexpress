@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CalendarDays, Check, ChevronDown, X } from 'lucide-react'
 import {
@@ -30,15 +30,15 @@ type FormState = {
   orderLabel: string
 }
 
-function buildPeople() {
+const ALL_ID = 'all'
+const SELF_ID = 'self'
+
+function buildResponsibleOptions() {
   const profile = getUserProfile()
-  const selfId = 'self'
-  const selfName = getUserDisplayName(profile)
+  const selfName = getUserDisplayName(profile) || 'Eu'
   return [
-    { id: selfId, name: selfName || 'Eu' },
-    { id: 'ana', name: 'Ana Souza' },
-    { id: 'bruno', name: 'Bruno Lima' },
-    { id: 'carla', name: 'Carla Mendes' },
+    { id: ALL_ID, name: 'Todos' },
+    { id: SELF_ID, name: selfName },
   ]
 }
 
@@ -49,8 +49,8 @@ function emptyForm(defaultDate?: Date): FormState {
     endTime: '',
     title: '',
     details: '',
-    color: 'blue',
-    responsibleIds: ['self'],
+    color: 'coral',
+    responsibleIds: [],
     orderLabel: '',
   }
 }
@@ -61,7 +61,8 @@ export function NewAppointmentModal({
   defaultDate,
 }: NewAppointmentModalProps) {
   const titleId = useId()
-  const people = useMemo(() => buildPeople(), [open])
+  const peopleRef = useRef<HTMLDivElement>(null)
+  const options = useMemo(() => buildResponsibleOptions(), [open])
   const [form, setForm] = useState<FormState>(() => emptyForm(defaultDate))
   const [peopleOpen, setPeopleOpen] = useState(false)
   const [touched, setTouched] = useState(false)
@@ -78,14 +79,28 @@ export function NewAppointmentModal({
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') {
+        if (peopleOpen) setPeopleOpen(false)
+        else onClose()
+      }
     }
     document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = previous
       document.removeEventListener('keydown', onKey)
     }
-  }, [open, onClose])
+  }, [open, onClose, peopleOpen])
+
+  useEffect(() => {
+    if (!peopleOpen) return
+    const onPointer = (event: MouseEvent) => {
+      if (!peopleRef.current?.contains(event.target as Node)) {
+        setPeopleOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onPointer)
+    return () => document.removeEventListener('mousedown', onPointer)
+  }, [peopleOpen])
 
   if (!open) return null
 
@@ -94,7 +109,7 @@ export function NewAppointmentModal({
   const missingPeople = form.responsibleIds.length === 0
   const invalid = missingDate || missingTitle || missingPeople
 
-  const selectedPeopleLabel = people
+  const selectedPeopleLabel = options
     .filter((person) => form.responsibleIds.includes(person.id))
     .map((person) => person.name)
     .join(', ')
@@ -103,7 +118,7 @@ export function NewAppointmentModal({
     setForm((current) => ({ ...current, ...partial }))
   }
 
-  const togglePerson = (id: string) => {
+  const toggleResponsible = (id: string) => {
     setForm((current) => {
       const has = current.responsibleIds.includes(id)
       return {
@@ -156,7 +171,7 @@ export function NewAppointmentModal({
             aria-label="Fechar"
             onClick={onClose}
           >
-            <X size={18} strokeWidth={2} />
+            <X size={16} strokeWidth={2.25} />
           </button>
         </header>
 
@@ -166,7 +181,7 @@ export function NewAppointmentModal({
               Data <span className="new-apt__req">*</span>
             </label>
             <div
-              className={`new-apt__date${touched && missingDate ? ' is-invalid' : ''}`}
+              className={`new-apt__control new-apt__date${touched && missingDate ? ' is-invalid' : ''}`}
             >
               <input
                 id="new-apt-date"
@@ -176,7 +191,7 @@ export function NewAppointmentModal({
                 onChange={(event) => patch({ date: event.target.value })}
               />
               <span className="new-apt__date-icon" aria-hidden="true">
-                <CalendarDays size={16} strokeWidth={2} />
+                <CalendarDays size={15} strokeWidth={2} />
               </span>
             </div>
           </div>
@@ -210,26 +225,30 @@ export function NewAppointmentModal({
             <label className="new-apt__label" htmlFor="new-apt-title">
               Título do agendamento <span className="new-apt__req">*</span>
             </label>
-            <input
-              id="new-apt-title"
-              type="text"
-              className={`new-apt__input${touched && missingTitle ? ' is-invalid' : ''}`}
-              value={form.title}
-              onChange={(event) => patch({ title: event.target.value })}
-            />
+            <div className="new-apt__control">
+              <input
+                id="new-apt-title"
+                type="text"
+                className={`new-apt__input${touched && missingTitle ? ' is-invalid' : ''}`}
+                value={form.title}
+                onChange={(event) => patch({ title: event.target.value })}
+              />
+            </div>
           </div>
 
           <div className="new-apt__row new-apt__row--top">
             <label className="new-apt__label" htmlFor="new-apt-details">
               Detalhes
             </label>
-            <textarea
-              id="new-apt-details"
-              className="new-apt__textarea"
-              rows={4}
-              value={form.details}
-              onChange={(event) => patch({ details: event.target.value })}
-            />
+            <div className="new-apt__control">
+              <textarea
+                id="new-apt-details"
+                className="new-apt__textarea"
+                rows={3}
+                value={form.details}
+                onChange={(event) => patch({ details: event.target.value })}
+              />
+            </div>
           </div>
 
           <div className="new-apt__row">
@@ -255,32 +274,36 @@ export function NewAppointmentModal({
               Responsáveis <span className="new-apt__req">*</span>
             </span>
             <div
-              className={`new-apt__people${touched && missingPeople ? ' is-invalid' : ''}`}
+              className={`new-apt__control new-apt__people${touched && missingPeople ? ' is-invalid' : ''}${peopleOpen ? ' is-open' : ''}`}
+              ref={peopleRef}
             >
               <button
                 type="button"
                 className={`new-apt__people-trigger${selectedPeopleLabel ? '' : ' is-placeholder'}`}
                 aria-expanded={peopleOpen}
+                aria-haspopup="listbox"
                 onClick={() => setPeopleOpen((value) => !value)}
               >
                 <span>
                   {selectedPeopleLabel || 'Selecione uma ou mais pessoas'}
                 </span>
-                <ChevronDown size={16} strokeWidth={2} />
+                <ChevronDown size={15} strokeWidth={2} />
               </button>
               {peopleOpen ? (
                 <div className="new-apt__people-menu" role="listbox" aria-multiselectable="true">
-                  {people.map((person) => {
-                    const checked = form.responsibleIds.includes(person.id)
+                  {options.map((person) => {
+                    const selected = form.responsibleIds.includes(person.id)
                     return (
-                      <label key={person.id} className="new-apt__people-option">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => togglePerson(person.id)}
-                        />
-                        <span>{person.name}</span>
-                      </label>
+                      <button
+                        key={person.id}
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        className={`new-apt__people-option${selected ? ' is-selected' : ''}`}
+                        onClick={() => toggleResponsible(person.id)}
+                      >
+                        {person.name}
+                      </button>
                     )
                   })}
                 </div>
@@ -292,7 +315,7 @@ export function NewAppointmentModal({
             <label className="new-apt__label" htmlFor="new-apt-order">
               Vincular a um pedido?
             </label>
-            <div className="new-apt__select-wrap">
+            <div className="new-apt__control new-apt__select-wrap">
               <input
                 id="new-apt-order"
                 type="text"
@@ -300,14 +323,8 @@ export function NewAppointmentModal({
                 placeholder="Nome de cliente ou código do pedido"
                 value={form.orderLabel}
                 onChange={(event) => patch({ orderLabel: event.target.value })}
-                list="new-apt-order-suggestions"
               />
-              <ChevronDown size={16} className="new-apt__select-caret" aria-hidden="true" />
-              <datalist id="new-apt-order-suggestions">
-                <option value="Pedido #1001" />
-                <option value="Pedido #1002" />
-                <option value="Cliente — Exemplo" />
-              </datalist>
+              <ChevronDown size={15} className="new-apt__select-caret" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -317,7 +334,7 @@ export function NewAppointmentModal({
             Cancelar
           </button>
           <button type="button" className="new-apt__btn new-apt__btn--save" onClick={onSave}>
-            <Check size={16} strokeWidth={2.5} />
+            <Check size={15} strokeWidth={2.5} />
             Salvar
           </button>
         </footer>
