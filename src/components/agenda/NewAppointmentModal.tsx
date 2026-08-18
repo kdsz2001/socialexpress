@@ -295,6 +295,14 @@ export function NewAppointmentModal({
                 className="new-apt__input"
                 value={form.date}
                 onChange={(event) => patch({ date: event.target.value })}
+                onClick={(event) => {
+                  const input = event.currentTarget
+                  try {
+                    input.showPicker?.()
+                  } catch {
+                    /* unsupported or blocked by the browser */
+                  }
+                }}
               />
               <span className="new-apt__date-icon" aria-hidden="true">
                 <CalendarDays size={15} strokeWidth={2} />
