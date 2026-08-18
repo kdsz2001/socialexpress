@@ -255,6 +255,32 @@
   pointer-events: none;
 }
 
+.client-create__input-wrap--password .client-create__input {
+  padding-right: 2.75rem;
+}
+
+.client-create__password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #a1a5b7;
+  cursor: pointer;
+  padding: 0;
+}
+
+.client-create__password-toggle:hover {
+  color: #7e8299;
+  background: #f3f6f9;
+}
+
 .client-create__field-error {
   margin: 6px 0 0;
   font-size: 0.85rem;

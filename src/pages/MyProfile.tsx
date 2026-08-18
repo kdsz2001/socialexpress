@@ -3,6 +3,8 @@ import {
   BookUser,
   Check,
   CircleAlert,
+  Eye,
+  EyeOff,
   Pencil,
   Settings,
   UserRound,
@@ -54,6 +56,7 @@ export function MyProfile() {
   const [cpfError, setCpfError] = useState('')
   const [sobrenomesError, setSobrenomesError] = useState('')
   const [avatarError, setAvatarError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [toastOpen, setToastOpen] = useState(false)
   const closeToast = useCallback(() => setToastOpen(false), [])
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -416,14 +419,30 @@ export function MyProfile() {
                 <label className="client-create__label" htmlFor="profile-password">
                   Senha
                 </label>
-                <input
-                  id="profile-password"
-                  type="password"
-                  className="client-create__input"
-                  value={draft.password}
-                  onChange={(e) => patch('password', e.target.value)}
-                  autoComplete="new-password"
-                />
+                <div className="client-create__field">
+                  <div className="client-create__input-wrap client-create__input-wrap--password">
+                    <input
+                      id="profile-password"
+                      type={showPassword ? 'text' : 'password'}
+                      className="client-create__input"
+                      value={draft.password}
+                      onChange={(e) => patch('password', e.target.value)}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      className="client-create__password-toggle"
+                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      onClick={() => setShowPassword((open) => !open)}
+                    >
+                      {showPassword ? (
+                        <EyeOff size={18} strokeWidth={2} />
+                      ) : (
+                        <Eye size={18} strokeWidth={2} />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             </>
           ) : null}
