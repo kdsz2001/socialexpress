@@ -346,7 +346,7 @@
 }
 
 .clients__row td {
-  padding: 1rem 0.75rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid #ebedf3;
   vertical-align: middle;
 }
@@ -356,6 +356,7 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .clients__person-name {
@@ -405,9 +406,7 @@
 .clients__phone {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  max-width: 100%;
   padding: 6px 12px;
   border-radius: 999px;
   background: #c9f7f5;
@@ -431,14 +430,12 @@
   color: #b5b5c3;
 }
 
-.clients__actions-cell {
-  text-align: right;
-  width: 108px;
+.clients__phone-cell {
+  /* largura já definida em .clients__col-phone */
 }
 
-.clients__phone-cell {
-  width: 200px;
-  vertical-align: middle;
+.clients__actions-cell {
+  text-align: right;
 }
 
 .clients__actions {
