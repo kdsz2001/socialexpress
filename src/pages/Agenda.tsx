@@ -261,18 +261,31 @@ export function Agenda() {
     requestNewAppointment(defaults)
   }
 
-  const renderCreateTip = (day: Date, hour?: number) => (
-    <button
-      type="button"
-      className="agenda__create-tip"
-      onClick={(event) => {
-        event.stopPropagation()
-        openCreateFromTarget({ date: day, hour })
-      }}
-    >
-      Criar agendamento para o dia <strong>{formatCreateDayLabel(day)}</strong>
-    </button>
-  )
+  const renderCreateTip = (day: Date, hour?: number) => {
+    const hasTime = hour != null
+    const startLabel = hasTime ? padTime(hour) : ''
+    const endLabel = hasTime ? padTime(Math.min(hour + 1, 23)) : ''
+
+    return (
+      <button
+        type="button"
+        className={`agenda__create-tip${hasTime ? ' agenda__create-tip--timed' : ''}`}
+        onClick={(event) => {
+          event.stopPropagation()
+          openCreateFromTarget({ date: day, hour })
+        }}
+      >
+        <span className="agenda__create-tip-line">
+          Criar agendamento para o dia <strong>{formatCreateDayLabel(day)}</strong>
+        </span>
+        {hasTime ? (
+          <span className="agenda__create-tip-line agenda__create-tip-time">
+            entre <strong>{startLabel}</strong> até <strong>{endLabel}</strong>
+          </span>
+        ) : null}
+      </button>
+    )
+  }
 
   const renderEventCard = (apt: Appointment, compact: boolean) => {
     const layout = appointmentLayout(apt)
