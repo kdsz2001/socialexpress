@@ -49,7 +49,7 @@ const HOURS = hoursOfDay(SLOT_START_HOUR, SLOT_END_HOUR)
 const HOUR_HEIGHT = 64
 const ALL_DAY_HEIGHT = 36
 const HEAD_HEIGHT = 40
-const TIME_GUTTER = 80
+const TIME_GUTTER = 92
 const GRID_START_MIN = SLOT_START_HOUR * 60
 const GRID_END_MIN = (SLOT_END_HOUR + 1) * 60
 
@@ -413,7 +413,7 @@ export function Agenda() {
           <div className="agenda__hours" style={{ gridRow: `3 / span ${HOURS.length}` }}>
             {HOURS.map((hour) => (
               <div key={hour} className="agenda__hour-label" style={{ height: HOUR_HEIGHT }}>
-                <span>{String(hour).padStart(2, '0')}</span>
+                <span>{padTime(hour)}</span>
               </div>
             ))}
           </div>

@@ -743,7 +743,7 @@
 
 .agenda__now {
   position: absolute;
-  left: var(--agenda-gutter, 80px);
+  left: var(--agenda-gutter, 92px);
   right: 0;
   height: 0;
   margin: 0;
