@@ -430,14 +430,6 @@
   color: #b5b5c3;
 }
 
-.clients__phone-cell {
-  /* largura já definida em .clients__col-phone */
-}
-
-.clients__actions-cell {
-  text-align: right;
-}
-
 .clients__actions {
   display: inline-flex;
   align-items: center;

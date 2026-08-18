@@ -69,6 +69,8 @@ export function Clients() {
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null)
+  const [toastOpen, setToastOpen] = useState(false)
+  const closeToast = useCallback(() => setToastOpen(false), [])
   const [dateOpen, setDateOpen] = useState(false)
   const [pickerMode, setPickerMode] = useState<PickerMode>('menu')
   const [datePreset, setDatePreset] = useState<DatePreset>('hoje')
@@ -605,9 +607,18 @@ export function Clients() {
         }
         onCancel={() => setClientToDelete(null)}
         onConfirm={() => {
-          if (clientToDelete) deleteClient(clientToDelete.id)
+          if (clientToDelete) {
+            deleteClient(clientToDelete.id)
+            setToastOpen(true)
+          }
           setClientToDelete(null)
         }}
+      />
+
+      <SaveToast
+        open={toastOpen}
+        message="Cliente removido."
+        onClose={closeToast}
       />
     </div>
   )
