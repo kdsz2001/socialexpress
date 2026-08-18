@@ -256,8 +256,8 @@
 }
 
 .topbar__avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 0.42rem;
   background-color: #eef0f4;
   background-image:
@@ -268,11 +268,21 @@
   overflow: hidden;
 }
 
+.topbar__avatar:has(.topbar__avatar-image) {
+  background-image: none;
+}
+
 .topbar__avatar-image {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  image-rendering: auto;
+  image-rendering: high-quality;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 @keyframes search-in {

@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import { SaveToast } from '../components/ui/SaveToast'
+import { prepareAvatarDataUrl } from '../lib/avatarImage'
 import { isValidCpf, maskCpfCnpj, onlyDigits } from '../lib/cpfCnpj'
 import {
   getUserDisplayName,
@@ -100,17 +101,19 @@ export function MyProfile() {
     }
 
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = async () => {
       const result = typeof reader.result === 'string' ? reader.result : ''
-      if (!result.startsWith('data:image/jpeg') && !result.startsWith('data:image/jpg')) {
-        // Alguns browsers usam image/jpeg mesmo para .jpg
-        if (!result.startsWith('data:image/')) {
-          setAvatarError('Não foi possível ler a imagem.')
-          return
-        }
+      if (!result.startsWith('data:image/')) {
+        setAvatarError('Não foi possível ler a imagem.')
+        return
       }
-      setAvatarError('')
-      patch('avatarDataUrl', result)
+      try {
+        const prepared = await prepareAvatarDataUrl(result)
+        setAvatarError('')
+        patch('avatarDataUrl', prepared)
+      } catch {
+        setAvatarError('Não foi possível processar a imagem.')
+      }
     }
     reader.onerror = () => setAvatarError('Não foi possível ler a imagem.')
     reader.readAsDataURL(file)
