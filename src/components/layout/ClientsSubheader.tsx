@@ -43,7 +43,9 @@ export function ClientsSubheader() {
       )
     : ''
 
-  const showListChrome = !isCreate && !isDetail && !isBirthdays && !isWhatsapp
+  const showListActions = !isCreate && !isDetail && !isBirthdays && !isWhatsapp
+  const showCount =
+    !isCreate && !isDetail && !isWhatsapp
   const countLabel =
     clients.length === 0
       ? 'Nenhum cliente cadastrado'
@@ -56,7 +58,7 @@ export function ClientsSubheader() {
       <header className="clients-subheader">
         <div className="clients-subheader__heading">
           <h1 className="clients-subheader__title">{title}</h1>
-          {showListChrome && (
+          {showCount && (
             <>
               <span className="clients-subheader__sep" aria-hidden="true" />
               <p className="clients-subheader__subtitle">{countLabel}</p>
@@ -70,7 +72,7 @@ export function ClientsSubheader() {
           ) : null}
         </div>
 
-        {showListChrome && (
+        {showListActions && (
           <div className="clients-subheader__actions">
             <button
               type="button"

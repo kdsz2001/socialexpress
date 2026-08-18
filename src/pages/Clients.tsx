@@ -22,6 +22,13 @@ import {
 import { DeleteClientModal } from '../components/clients/DeleteClientModal'
 import { useClients } from '../hooks/useClients'
 import {
+  ageTurningOnBirthday,
+  birthdayInRange,
+  birthdayOccurrenceYear,
+  formatBirthDateLong,
+  parseBirthDate,
+} from '../lib/birthdays'
+import {
   buildWhatsAppUrl,
   deleteClient,
   getClientDisplayName,
@@ -73,27 +80,82 @@ export function Clients() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('pt-BR')
-    if (!q) return clients
-    return clients.filter((client) => {
-      const name = getClientDisplayName(client).toLocaleLowerCase('pt-BR')
-      const cpf = client.cpfCnpj.toLocaleLowerCase('pt-BR')
-      const phone = client.phones.map((p) => p.number).join(' ')
-      return name.includes(q) || cpf.includes(q) || phone.includes(q)
-    })
-  }, [clients, query])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize) || 1)
+    if (tab === 'aniversariantes') {
+      const matches = clients
+        .map((client) => {
+          const birth = parseBirthDate(client.birthDate)
+          if (!birth) return null
+          if (!birthdayInRange(birth, rangeStart, rangeEnd)) return null
+          const occurrenceYear = birthdayOccurrenceYear(
+            birth,
+            rangeStart,
+            rangeEnd,
+          )
+          return {
+            client,
+            birth,
+            occurrenceYear,
+            turningAge: ageTurningOnBirthday(birth, occurrenceYear),
+          }
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null)
+        .filter(({ client }) => {
+          if (!q) return true
+          const name = getClientDisplayName(client).toLocaleLowerCase('pt-BR')
+          const phone = client.phones.map((p) => p.number).join(' ')
+          return name.includes(q) || phone.includes(q)
+        })
+        .sort((a, b) =>
+          getClientDisplayName(a.client).localeCompare(
+            getClientDisplayName(b.client),
+            'pt-BR',
+            { sensitivity: 'base' },
+          ),
+        )
+      return matches
+    }
+
+    const list = !q
+      ? clients
+      : clients.filter((client) => {
+          const name = getClientDisplayName(client).toLocaleLowerCase('pt-BR')
+          const cpf = client.cpfCnpj.toLocaleLowerCase('pt-BR')
+          const phone = client.phones.map((p) => p.number).join(' ')
+          return name.includes(q) || cpf.includes(q) || phone.includes(q)
+        })
+    return list
+  }, [clients, query, tab, rangeStart, rangeEnd])
+
+  const birthdayRows =
+    tab === 'aniversariantes'
+      ? (filtered as {
+          client: Client
+          birth: NonNullable<ReturnType<typeof parseBirthDate>>
+          occurrenceYear: number
+          turningAge: number
+        }[])
+      : []
+  const listClients = tab === 'aniversariantes' ? [] : (filtered as Client[])
+
+  const resultCount =
+    tab === 'aniversariantes' ? birthdayRows.length : listClients.length
+  const totalPages = Math.max(1, Math.ceil(resultCount / pageSize) || 1)
   const currentPage = Math.min(page, totalPages)
-  const pageStart = filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1
-  const pageEnd = Math.min(currentPage * pageSize, filtered.length)
-  const pageItems = filtered.slice(
+  const pageStart = resultCount === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const pageEnd = Math.min(currentPage * pageSize, resultCount)
+  const pageBirthdayRows = birthdayRows.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  )
+  const pageItems = listClients.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   )
 
   useEffect(() => {
     setPage(1)
-  }, [query, pageSize, tab])
+  }, [query, pageSize, tab, rangeStart, rangeEnd])
 
   useEffect(() => {
     if (!dateOpen) return
@@ -148,8 +210,8 @@ export function Clients() {
     applyPreset(preset)
   }
 
-  const Pagination = () => (
-    <div className="clients__pager">
+  const Pagination = ({ flip = false }: { flip?: boolean }) => (
+    <div className={`clients__pager${flip ? ' is-flip' : ''}`}>
       <div className="clients__pager-left">
         <select
           className="clients__pager-size"
@@ -164,9 +226,9 @@ export function Clients() {
           ))}
         </select>
         <span className="clients__pager-info">
-          {filtered.length === 0
+          {resultCount === 0
             ? 'Mostrando 0 - 0 do total de 0'
-            : `Mostrando ${pageStart} - ${pageEnd} do total de ${filtered.length}`}
+            : `Mostrando ${pageStart} - ${pageEnd} do total de ${resultCount}`}
         </span>
       </div>
 
@@ -344,11 +406,68 @@ export function Clients() {
                 </thead>
                 <tbody>
                   {tab === 'aniversariantes' ? (
-                    <tr>
-                      <td colSpan={3} className="clients__empty">
-                        Nenhum resultado encontrado
-                      </td>
-                    </tr>
+                    pageBirthdayRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={3} className="clients__empty">
+                          Nenhum resultado encontrado
+                        </td>
+                      </tr>
+                    ) : (
+                      pageBirthdayRows.map(
+                        ({ client, birth, turningAge }) => {
+                          const phone = getClientPrimaryPhone(client)
+                          const waUrl =
+                            phone?.whatsapp && phone.number
+                              ? buildWhatsAppUrl(phone.number)
+                              : null
+
+                          return (
+                            <tr key={client.id} className="clients__row">
+                              <td>
+                                <div className="clients__person">
+                                  <span className="clients__person-name">
+                                    {getClientDisplayName(client)}
+                                  </span>
+                                </div>
+                              </td>
+                              <td>
+                                <div className="clients__birthday">
+                                  <span className="clients__birthday-date">
+                                    {formatBirthDateLong(birth)}
+                                  </span>
+                                  <span className="clients__birthday-age">
+                                    Completará {turningAge}{' '}
+                                    {turningAge === 1 ? 'ano' : 'anos'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td>
+                                {phone?.number ? (
+                                  waUrl ? (
+                                    <a
+                                      className="clients__phone is-whatsapp"
+                                      href={waUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      title="Abrir conversa no WhatsApp"
+                                    >
+                                      <span>{phone.number}</span>
+                                      <WhatsAppGlyph />
+                                    </a>
+                                  ) : (
+                                    <span className="clients__phone">
+                                      {phone.number}
+                                    </span>
+                                  )
+                                ) : (
+                                  <span className="clients__phone-empty">—</span>
+                                )}
+                              </td>
+                            </tr>
+                          )
+                        },
+                      )
+                    )
                   ) : pageItems.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="clients__empty">
@@ -444,6 +563,7 @@ export function Clients() {
             </div>
 
             {tab === 'todos' && <Pagination />}
+            {tab === 'aniversariantes' && <Pagination flip />}
           </>
         )}
       </section>

@@ -249,6 +249,10 @@
   padding: 0.85rem 0;
 }
 
+.clients__pager.is-flip {
+  flex-direction: row-reverse;
+}
+
 .clients__pager-left {
   display: flex;
   align-items: center;
@@ -333,6 +337,27 @@
   font-size: 0.875rem;
   font-weight: 400;
   color: #f64e60;
+}
+
+.clients__birthday {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.clients__birthday-date {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #3f4254;
+  line-height: 1.4;
+}
+
+.clients__birthday-age {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #b5b5c3;
+  line-height: 1.35;
 }
 
 .clients__phone {
