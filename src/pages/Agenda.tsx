@@ -44,10 +44,10 @@ const WEEKDAY_KEYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'] as const
 const SLOT_START_HOUR = 7
 const SLOT_END_HOUR = 20
 const HOURS = hoursOfDay(SLOT_START_HOUR, SLOT_END_HOUR)
-const HOUR_HEIGHT = 68
-const ALL_DAY_HEIGHT = 38
+const HOUR_HEIGHT = 58
+const ALL_DAY_HEIGHT = 40
 const HEAD_HEIGHT = 40
-const TIME_GUTTER = 68
+const TIME_GUTTER = 70
 const GRID_START_MIN = SLOT_START_HOUR * 60
 const GRID_END_MIN = (SLOT_END_HOUR + 1) * 60
 
