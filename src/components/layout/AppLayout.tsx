@@ -10,7 +10,7 @@ import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
 import {
   type NewAppointmentDefaults,
   subscribeNewAppointmentRequest,
-} from '../lib/agendaUi'
+} from '../../lib/agendaUi'
 import './AppLayout.css'
 
 const PAGE_TITLES: Record<string, string> = {
