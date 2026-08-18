@@ -199,6 +199,7 @@
 
 .clients__table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   margin-top: 0.35rem;
 }
@@ -215,9 +216,29 @@
   white-space: nowrap;
 }
 
+.clients__col-client {
+  width: auto;
+}
+
+.clients__col-birth {
+  width: 34%;
+}
+
+.clients__col-phone {
+  width: 200px;
+}
+
+.clients__col-actions {
+  width: 108px;
+}
+
+.clients__th-phone,
+.clients__phone-cell {
+  text-align: center;
+}
+
 .clients__th-actions {
   text-align: right;
-  width: 7rem;
 }
 
 .clients__empty {
@@ -326,11 +347,17 @@
   font-size: 1rem;
   font-weight: 600;
   color: #3f4254;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .clients__person-doc {
   font-size: 0.875rem;
   color: #7e8299;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .clients__person-inactive {
@@ -363,6 +390,7 @@
 .clients__phone {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   max-width: 100%;
   padding: 6px 12px;
@@ -390,6 +418,12 @@
 
 .clients__actions-cell {
   text-align: right;
+  width: 108px;
+}
+
+.clients__phone-cell {
+  width: 200px;
+  vertical-align: middle;
 }
 
 .clients__actions {

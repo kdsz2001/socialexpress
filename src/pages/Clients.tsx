@@ -410,20 +410,26 @@ export function Clients() {
                 <thead>
                   {tab === 'aniversariantes' ? (
                     <tr>
-                      <th>
+                      <th className="clients__col-client">
                         <span className="clients__th-sort">
                           Cliente
                           <ArrowUp size={12} strokeWidth={2.5} />
                         </span>
                       </th>
-                      <th>Data de nascimento</th>
-                      <th>Telefone</th>
+                      <th className="clients__col-birth">Data de nascimento</th>
+                      <th className="clients__col-phone clients__th-phone">
+                        Telefone
+                      </th>
                     </tr>
                   ) : (
                     <tr>
-                      <th>Cliente</th>
-                      <th>Telefone</th>
-                      <th className="clients__th-actions">Ações</th>
+                      <th className="clients__col-client">Cliente</th>
+                      <th className="clients__col-phone clients__th-phone">
+                        Telefone
+                      </th>
+                      <th className="clients__col-actions clients__th-actions">
+                        Ações
+                      </th>
                     </tr>
                   )}
                 </thead>
@@ -446,7 +452,7 @@ export function Clients() {
 
                           return (
                             <tr key={client.id} className="clients__row">
-                              <td>
+                              <td className="clients__client-cell">
                                 <div className="clients__person">
                                   <span className="clients__person-name">
                                     {getClientDisplayName(client)}
@@ -464,7 +470,7 @@ export function Clients() {
                                   </span>
                                 </div>
                               </td>
-                              <td>
+                              <td className="clients__phone-cell">
                                 {phone?.number ? (
                                   waUrl ? (
                                     <a
@@ -507,7 +513,7 @@ export function Clients() {
 
                       return (
                         <tr key={client.id} className="clients__row">
-                          <td>
+                          <td className="clients__client-cell">
                             <div className="clients__person">
                               <span className="clients__person-name">
                                 {getClientDisplayName(client)}
@@ -523,7 +529,7 @@ export function Clients() {
                               ) : null}
                             </div>
                           </td>
-                          <td>
+                          <td className="clients__phone-cell">
                             {phone?.number ? (
                               waUrl ? (
                                 <a
