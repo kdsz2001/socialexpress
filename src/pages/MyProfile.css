@@ -98,3 +98,16 @@
 .my-profile__empty p {
   margin: 0;
 }
+
+.my-profile__phone-pill {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 10px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: #f3f6f9;
+  color: #3f4254;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+}

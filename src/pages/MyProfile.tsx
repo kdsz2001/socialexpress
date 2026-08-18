@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   BookUser,
   Check,
@@ -39,6 +40,13 @@ const SAVED_TOAST_KEY = 'social-express:my-profile-saved-toast'
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024
 const ACCEPTED_AVATAR_TYPES = new Set(['image/jpeg', 'image/jpg'])
 
+function parseProfileSection(value: string | null): ProfileSection {
+  if (value === 'contato' || value === 'preferencias' || value === 'pessoais') {
+    return value
+  }
+  return 'pessoais'
+}
+
 function maskBirthDate(value: string) {
   return onlyDigits(value, 8)
     .replace(/^(\d{2})(\d)/, '$1/$2')
@@ -58,7 +66,8 @@ function maskPhone(value: string) {
 }
 
 export function MyProfile() {
-  const [section, setSection] = useState<ProfileSection>('pessoais')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const section = parseProfileSection(searchParams.get('tab'))
   const [draft, setDraft] = useState<UserProfile>(() => getUserProfile())
   const [cpfError, setCpfError] = useState('')
   const [sobrenomesError, setSobrenomesError] = useState('')
@@ -73,6 +82,10 @@ export function MyProfile() {
   })
   const closeToast = useCallback(() => setToastOpen(false), [])
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const setSection = (next: ProfileSection) => {
+    setSearchParams({ tab: next }, { replace: true })
+  }
 
   useEffect(() => {
     try {
@@ -125,6 +138,10 @@ export function MyProfile() {
   }, [draft.cep])
 
   const displayName = getUserDisplayName(draft)
+  const primaryPhone =
+    draft.phones.find((phone) => phone.primary && phone.number.trim())?.number ||
+    draft.phones.find((phone) => phone.number.trim())?.number ||
+    ''
 
   const patch = <K extends keyof UserProfile>(key: K, value: UserProfile[K]) => {
     setDraft((current) => ({ ...current, [key]: value }))
@@ -225,7 +242,7 @@ export function MyProfile() {
     } catch {
       // ignore
     }
-    window.location.assign('/meu-perfil')
+    window.location.assign(`/meu-perfil?tab=${section}`)
   }
 
   const renderSaveButton = () => (
@@ -252,6 +269,9 @@ export function MyProfile() {
 
       <aside className="client-detail__profile">
         <h2 className="client-detail__name">{displayName}</h2>
+        {primaryPhone ? (
+          <span className="my-profile__phone-pill">{primaryPhone}</span>
+        ) : null}
         {draft.email ? (
           <p className="client-detail__email">{draft.email}</p>
         ) : null}
