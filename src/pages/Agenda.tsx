@@ -370,9 +370,9 @@ export function Agenda() {
 
     return (
       <div
-        className={`agenda__timegrid${singleDay ? ' is-day' : ''}`}
+        className={`agenda__timegrid${singleDay ? ' is-day' : ' is-week'}`}
         ref={timeScrollRef}
-        style={singleDay ? ({ ['--agenda-gutter']: `${TIME_GUTTER}px` } as CSSProperties) : undefined}
+        style={{ ['--agenda-gutter']: `${TIME_GUTTER}px` } as CSSProperties}
       >
         <div
           className="agenda__timegrid-inner"
@@ -413,15 +413,8 @@ export function Agenda() {
 
           {showNow ? (
             <div
-              className={`agenda__now-rail${singleDay ? ' is-day' : ''}`}
-              style={
-                singleDay
-                  ? { gridColumn: '1 / -1', gridRow: `3 / span ${HOURS.length}` }
-                  : {
-                      gridColumn: todayIndex + 2,
-                      gridRow: `3 / span ${HOURS.length}`,
-                    }
-              }
+              className="agenda__now-rail"
+              style={{ gridColumn: '1 / -1', gridRow: `3 / span ${HOURS.length}` }}
               aria-hidden="true"
             >
               <div className="agenda__now" style={{ top: nowOffset }}>
