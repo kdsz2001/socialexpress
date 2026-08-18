@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import {
   type AgendaView,
   addDays,
@@ -183,6 +183,7 @@ export function Agenda() {
       if (!node) return
       if (
         node.closest('.agenda__create-tip') ||
+        node.closest('.agenda__create-wrap') ||
         node.closest('.agenda__month-cell--bookable') ||
         node.closest('.agenda__slot--bookable')
       ) {
@@ -269,10 +270,10 @@ export function Agenda() {
     return (
       <span className={`agenda__create-wrap${hasTime ? ' has-time' : ''}`}>
         {hasTime ? (
-          <span className="agenda__create-time" aria-hidden="true">
-            <Clock size={12} strokeWidth={2.25} />
+          <span className="agenda__create-time" aria-hidden="true" title={`${startLabel} – ${endLabel}`}>
+            <Clock size={11} strokeWidth={2.5} />
             <span>
-              {startLabel} – {endLabel}
+              {startLabel}–{endLabel}
             </span>
           </span>
         ) : null}
