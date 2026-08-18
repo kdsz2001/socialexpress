@@ -23,6 +23,8 @@ import { DeleteClientModal } from '../components/clients/DeleteClientModal'
 import { useClients } from '../hooks/useClients'
 import {
   ageTurningOnBirthday,
+  birthdayInRange,
+  birthdayOccurrenceYear,
   formatBirthDateLong,
   nextBirthdayYear,
   parseBirthDate,
@@ -72,6 +74,8 @@ export function Clients() {
   const initial = rangeForPreset('hoje')
   const [rangeStart, setRangeStart] = useState(initial.start)
   const [rangeEnd, setRangeEnd] = useState(initial.end)
+  // false = acabou de abrir a aba (mostra todos); true = usuário escolheu um período
+  const [birthdayFilterActive, setBirthdayFilterActive] = useState(false)
   const dateWrapRef = useRef<HTMLDivElement>(null)
   const dateMenuId = useId()
 
@@ -81,12 +85,19 @@ export function Clients() {
     const q = query.trim().toLocaleLowerCase('pt-BR')
 
     if (tab === 'aniversariantes') {
-      // Clarial: lista todos com data de nascimento, independente do período
       const matches = clients
         .map((client) => {
           const birth = parseBirthDate(client.birthDate)
           if (!birth) return null
-          const occurrenceYear = nextBirthdayYear(birth)
+          if (
+            birthdayFilterActive &&
+            !birthdayInRange(birth, rangeStart, rangeEnd)
+          ) {
+            return null
+          }
+          const occurrenceYear = birthdayFilterActive
+            ? birthdayOccurrenceYear(birth, rangeStart, rangeEnd)
+            : nextBirthdayYear(birth)
           return {
             client,
             birth,
@@ -120,7 +131,14 @@ export function Clients() {
           return name.includes(q) || cpf.includes(q) || phone.includes(q)
         })
     return list
-  }, [clients, query, tab])
+  }, [
+    clients,
+    query,
+    tab,
+    birthdayFilterActive,
+    rangeStart,
+    rangeEnd,
+  ])
 
   const birthdayRows =
     tab === 'aniversariantes'
@@ -150,7 +168,7 @@ export function Clients() {
 
   useEffect(() => {
     setPage(1)
-  }, [query, pageSize, tab])
+  }, [query, pageSize, tab, birthdayFilterActive, rangeStart, rangeEnd])
 
   useEffect(() => {
     if (!dateOpen) return
@@ -180,6 +198,14 @@ export function Clients() {
   useEffect(() => {
     setDateOpen(false)
     setPickerMode('menu')
+    // Ao entrar em Aniversariantes, mostra todos até escolher um período
+    if (tab === 'aniversariantes') {
+      setBirthdayFilterActive(false)
+      const today = rangeForPreset('hoje')
+      setDatePreset('hoje')
+      setRangeStart(today.start)
+      setRangeEnd(today.end)
+    }
   }, [tab])
 
   const openDate = () => {
@@ -192,6 +218,7 @@ export function Clients() {
     setDatePreset(preset)
     setRangeStart(range.start)
     setRangeEnd(range.end)
+    setBirthdayFilterActive(true)
     setDateOpen(false)
     setPickerMode('menu')
   }
@@ -350,6 +377,7 @@ export function Clients() {
                       setRangeStart(start)
                       setRangeEnd(end)
                       setDatePreset(nextPreset)
+                      setBirthdayFilterActive(true)
                       setDateOpen(false)
                       setPickerMode('menu')
                     }}

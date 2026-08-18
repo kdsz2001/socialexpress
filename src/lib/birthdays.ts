@@ -58,7 +58,42 @@ export function formatBirthDateLong(birth: ParsedBirthDate) {
 }
 
 /**
- * Year of the next birthday on/after `from` (Clarial: Completará X anos).
+ * True when the client's month/day birthday falls on any day
+ * inside [start, end] (inclusive).
+ */
+export function birthdayInRange(
+  birth: ParsedBirthDate,
+  start: Date,
+  end: Date,
+): boolean {
+  const from = startOfDay(start)
+  const to = startOfDay(end)
+  if (to < from) return false
+
+  for (let year = from.getFullYear(); year <= to.getFullYear(); year += 1) {
+    const occurrence = occurrenceOnYear(birth, year)
+    if (occurrence >= from && occurrence <= to) return true
+  }
+  return false
+}
+
+/** Year of the birthday occurrence inside the selected range (first match). */
+export function birthdayOccurrenceYear(
+  birth: ParsedBirthDate,
+  start: Date,
+  end: Date,
+): number {
+  const from = startOfDay(start)
+  const to = startOfDay(end)
+  for (let year = from.getFullYear(); year <= to.getFullYear(); year += 1) {
+    const occurrence = occurrenceOnYear(birth, year)
+    if (occurrence >= from && occurrence <= to) return year
+  }
+  return from.getFullYear()
+}
+
+/**
+ * Year of the next birthday on/after `from`.
  * Ex.: nascido em 11/02/2001, em 18/08/2026 → 2027 (completará 26).
  */
 export function nextBirthdayYear(
