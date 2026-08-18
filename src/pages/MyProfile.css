@@ -111,3 +111,24 @@
   font-weight: 500;
   line-height: 1.3;
 }
+
+.my-profile__shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.my-profile__shortcut {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.my-profile__shortcut-label {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #3f4254;
+  line-height: 1.35;
+}

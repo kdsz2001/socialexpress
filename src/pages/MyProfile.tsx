@@ -26,7 +26,9 @@ import { isValidCpf, maskCpfCnpj, onlyDigits } from '../lib/cpfCnpj'
 import {
   getUserDisplayName,
   getUserProfile,
+  QUICK_SHORTCUTS,
   updateUserProfile,
+  type QuickShortcutId,
   type UserPhone,
   type UserProfile,
 } from '../lib/userProfileStore'
@@ -177,7 +179,7 @@ export function MyProfile() {
           }
         : {
             title: 'Preferências',
-            sub: 'Atualize suas preferências',
+            sub: 'Gerencie suas preferências',
           }
 
   const openFilePicker = () => {
@@ -935,9 +937,77 @@ export function MyProfile() {
           ) : null}
 
           {section === 'preferencias' ? (
-            <div className="my-profile__empty">
-              <p>Preferências em breve.</p>
-            </div>
+            <>
+              <div className="client-create__row client-create__row--center">
+                <span className="client-create__label">
+                  Visualização inicial do calendário
+                </span>
+                <div className="client-create__radios" role="radiogroup">
+                  {(
+                    [
+                      ['mes', 'Mês'],
+                      ['semana', 'Semana'],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <label key={value} className="client-create__radio">
+                      <input
+                        type="radio"
+                        name="calendar-view"
+                        checked={draft.preferences.calendarView === value}
+                        onChange={() =>
+                          setDraft((current) => ({
+                            ...current,
+                            preferences: {
+                              ...current.preferences,
+                              calendarView: value,
+                            },
+                          }))
+                        }
+                      />
+                      <span className="client-create__radio-ui" aria-hidden="true" />
+                      <span>{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="client-create__row client-create__row--top">
+                <span className="client-create__label">Atalhos rápidos</span>
+                <div className="my-profile__shortcuts">
+                  {QUICK_SHORTCUTS.map((item) => {
+                    const enabled = Boolean(draft.preferences.shortcuts[item.id])
+                    return (
+                      <div key={item.id} className="my-profile__shortcut">
+                        <button
+                          type="button"
+                          className={`client-create__switch${enabled ? ' is-on' : ''}`}
+                          aria-pressed={enabled}
+                          aria-label={item.label}
+                          onClick={() => {
+                            const id = item.id as QuickShortcutId
+                            setDraft((current) => ({
+                              ...current,
+                              preferences: {
+                                ...current.preferences,
+                                shortcuts: {
+                                  ...current.preferences.shortcuts,
+                                  [id]: !current.preferences.shortcuts[id],
+                                },
+                              },
+                            }))
+                          }}
+                        >
+                          <span className="client-create__switch-knob">
+                            {enabled ? <Check size={10} strokeWidth={3} /> : null}
+                          </span>
+                        </button>
+                        <span className="my-profile__shortcut-label">{item.label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </>
           ) : null}
         </div>
 
