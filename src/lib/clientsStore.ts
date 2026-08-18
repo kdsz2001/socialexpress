@@ -83,7 +83,10 @@ export function addClient(
     createdAt?: string
     active?: boolean
   },
-): Client {
+): Client | null {
+  if (isCpfCnpjRegistered(input.cpfCnpj)) {
+    return null
+  }
   const client: Client = {
     ...input,
     active: input.active !== false,

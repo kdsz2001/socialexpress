@@ -221,24 +221,39 @@ export function ClientCreate() {
 
   const goBack = () => navigate('/clientes')
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!gender) return
-
-    if (!isValidCpfCnpj(cpfCnpj)) {
-      const digits = onlyDigits(cpfCnpj)
+  const validateCpfField = (value = cpfCnpj) => {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      setCpfError('')
+      return false
+    }
+    if (!isValidCpfCnpj(trimmed)) {
+      const digits = onlyDigits(trimmed)
       setCpfError(
         digits.length === 14
           ? 'Informe um CNPJ válido.'
           : 'Informe um CPF válido.',
       )
+      return false
+    }
+    if (isCpfCnpjRegistered(trimmed)) {
+      setCpfError('Esse documento já está cadastrado')
+      return false
+    }
+    setCpfError('')
+    return true
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!gender) return
+
+    if (!validateCpfField(cpfCnpj)) {
       document.getElementById('cpfCnpj')?.focus()
       return
     }
 
-    setCpfError('')
-
-    addClient({
+    const created = addClient({
       cpfCnpj,
       rg,
       gender,
@@ -261,6 +276,12 @@ export function ClientCreate() {
       measures: measures.filter((m) => m.type || m.value),
       observacoes: observacoes.trim(),
     })
+
+    if (!created) {
+      setCpfError('Esse documento já está cadastrado')
+      document.getElementById('cpfCnpj')?.focus()
+      return
+    }
 
     navigate('/clientes')
   }
@@ -356,19 +377,18 @@ export function ClientCreate() {
                 placeholder="000.000.000-00"
                 value={cpfCnpj}
                 onChange={(event) => {
-                  setCpfCnpj(maskCpfCnpj(event.target.value))
-                  if (cpfError) setCpfError('')
+                  const next = maskCpfCnpj(event.target.value)
+                  setCpfCnpj(next)
+                  const digits = onlyDigits(next)
+                  if (digits.length === 11 || digits.length === 14) {
+                    validateCpfField(next)
+                  } else if (cpfError) {
+                    setCpfError('')
+                  }
                 }}
                 onBlur={() => {
                   if (!cpfCnpj.trim()) return
-                  if (!isValidCpfCnpj(cpfCnpj)) {
-                    const digits = onlyDigits(cpfCnpj)
-                    setCpfError(
-                      digits.length === 14
-                        ? 'Informe um CNPJ válido.'
-                        : 'Informe um CPF válido.',
-                    )
-                  }
+                  validateCpfField(cpfCnpj)
                 }}
                 aria-invalid={Boolean(cpfError)}
                 aria-describedby={cpfError ? 'cpfCnpj-error' : undefined}
