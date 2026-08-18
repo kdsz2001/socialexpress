@@ -15,6 +15,8 @@ export type UserProfile = {
   estado: string
   cidade: string
   bairro: string
+  /** Data URL da imagem de perfil (JPG/JPEG). */
+  avatarDataUrl: string
 }
 
 const STORAGE_KEY = 'social-express:user-profile'
@@ -37,6 +39,7 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   estado: '',
   cidade: '',
   bairro: '',
+  avatarDataUrl: '',
 }
 
 function readProfile(): UserProfile {

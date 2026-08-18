@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   BookUser,
   Check,
@@ -22,6 +22,8 @@ import './MyProfile.css'
 type ProfileSection = 'pessoais' | 'contato' | 'preferencias'
 
 const SAVED_TOAST_KEY = 'social-express:my-profile-saved-toast'
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024
+const ACCEPTED_AVATAR_TYPES = new Set(['image/jpeg', 'image/jpg'])
 
 function maskBirthDate(value: string) {
   return onlyDigits(value, 8)

@@ -25,6 +25,25 @@
     #eef0f4;
 }
 
+.my-profile__avatar-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.my-profile__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .my-profile__avatar-edit,
 .my-profile__avatar-remove {
   position: absolute;
