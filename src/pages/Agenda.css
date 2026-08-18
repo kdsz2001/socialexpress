@@ -415,22 +415,23 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0.25rem 0.55rem 0.25rem 0.3rem;
+  padding: 0.2rem 0.7rem 0.2rem 0.25rem;
   border-right: 1px solid #ebedf3;
   border-bottom: 1px solid #d7dae3;
   background: #fff;
   box-sizing: border-box;
   z-index: 2;
+  overflow: hidden;
 }
 
 .agenda__allday-label span {
   display: block;
-  max-width: 3.75rem;
-  font-size: 0.72rem;
+  max-width: 4.1rem;
+  font-size: 0.68rem;
   font-weight: 500;
   color: #a1a5b7;
   text-align: right;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .agenda__allday {
@@ -475,7 +476,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 0 0.55rem 0 0;
+  padding: 0 0.75rem 0 0.35rem;
   box-sizing: border-box;
   pointer-events: none;
   overflow: visible;
@@ -484,29 +485,31 @@
 .agenda__hour-label span {
   display: block;
   transform: translateY(-50%);
-  padding: 0 0.2rem;
-  background: #fff;
+  padding: 0;
+  background: transparent;
   font-size: 0.84rem;
   font-weight: 500;
-  color: #7e8299;
+  color: #5e6278;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   position: relative;
   z-index: 1;
+  white-space: nowrap;
 }
 
 .agenda__hour-label:first-child span {
-  /* keeps 07 on the all-day divider without clipping */
-  transform: translateY(-50%);
+  /* keep 07 on the all-day divider without clipping into sticky header */
+  transform: translateY(-35%);
 }
 
 .agenda__timegrid.is-day .agenda__hour-label {
-  padding-right: 0.65rem;
+  padding-right: 0.85rem;
 }
 
 .agenda__timegrid.is-day .agenda__hour-label span {
-  font-size: 0.86rem;
-  color: #7e8299;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #5e6278;
 }
 
 .agenda__day-col {
@@ -532,13 +535,14 @@
   padding: 0;
   margin: 0;
   border: 0;
-  border-bottom: 1px solid #e4e6ef;
+  border-bottom: 1px solid #e1e3ea;
   background: transparent;
   box-sizing: border-box;
   cursor: pointer;
   font: inherit;
   color: inherit;
   text-align: left;
+  overflow: visible;
 }
 
 .agenda__slot.is-last {
@@ -573,19 +577,33 @@
   left: 0;
   right: 0;
   top: 50%;
-  height: 0;
+  height: 1px;
   margin: 0;
   border: 0;
-  border-top: 1px dotted #d7dae3;
+  /* Claral-style faint half-hour rule — dotted via gradient so it stays visible on cream */
+  background-image: linear-gradient(
+    to right,
+    #c5c9d4 0 3px,
+    transparent 3px 7px
+  );
+  background-size: 7px 1px;
+  background-repeat: repeat-x;
+  background-position: left center;
+  transform: translateY(-50%);
   pointer-events: none;
+  z-index: 0;
 }
 
 .agenda__timegrid.is-day .agenda__slot {
-  border-bottom-color: #e0e3ea;
+  border-bottom-color: #d7dae3;
 }
 
 .agenda__timegrid.is-day .agenda__slot-half {
-  border-top-color: #d7dae3;
+  background-image: linear-gradient(
+    to right,
+    #b8bdc9 0 3px,
+    transparent 3px 7px
+  );
 }
 
 .agenda__create-layer {
@@ -771,15 +789,18 @@
   border-left: 7px solid #f64e60;
 }
 
-/* Claral day: triangle sits on the gutter/content edge; line runs across cream */
+/* Claral day: red line across cream; triangle lives in the white time gutter */
 .agenda__now-rail.is-day .agenda__now {
-  left: var(--agenda-gutter, 64px);
+  left: var(--agenda-gutter, 72px);
   right: 0;
 }
 
 .agenda__now-rail.is-day .agenda__now-arrow {
-  left: -7px;
+  left: -9px;
   top: -5px;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  border-left-width: 8px;
 }
 
 .agenda__event {
