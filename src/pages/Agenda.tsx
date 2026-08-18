@@ -126,6 +126,25 @@ function isSameCreateTarget(a: CreateTarget | null, day: Date, hour?: number) {
   return a.hour === hour
 }
 
+/** Mês: só hoje e dias futuros. */
+function canCreateOnMonthDay(day: Date, today: Date) {
+  return startOfDay(day).getTime() >= today.getTime()
+}
+
+/**
+ * Semana/dia: só no futuro (abaixo da linha vermelha).
+ * - dias passados: bloqueado
+ * - hoje: a partir da hora atual (inclusive)
+ * - dias futuros: liberado
+ */
+function canCreateOnTimeSlot(day: Date, hour: number, now: Date) {
+  const dayStart = startOfDay(day).getTime()
+  const todayStart = startOfDay(now).getTime()
+  if (dayStart < todayStart) return false
+  if (dayStart > todayStart) return true
+  return hour >= now.getHours()
+}
+
 export function Agenda() {
   const [view, setView] = useState<AgendaView>(() => preferredView())
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
@@ -188,6 +207,17 @@ export function Agenda() {
   }, [view, cursor])
 
   const today = startOfDay(now)
+
+  useEffect(() => {
+    if (!createTarget) return
+    if (createTarget.hour == null) {
+      if (!canCreateOnMonthDay(createTarget.date, today)) setCreateTarget(null)
+      return
+    }
+    if (!canCreateOnTimeSlot(createTarget.date, createTarget.hour, now)) {
+      setCreateTarget(null)
+    }
+  }, [now, createTarget, today])
   const monthDays = useMemo(() => getMonthGrid(cursor), [cursor])
   const weekDays = useMemo(() => getWeekDays(cursor), [cursor])
 

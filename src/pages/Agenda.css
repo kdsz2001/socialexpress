@@ -206,9 +206,24 @@
   overflow: visible;
 }
 
-.agenda__month-cell.is-selected:hover,
-.agenda__month-cell.is-today.is-selected:hover {
-  background: #dff0ff;
+.agenda__month-cell.is-past {
+  cursor: default;
+}
+
+.agenda__month-cell.is-past:hover {
+  background: #fff;
+}
+
+.agenda__month-cell.is-outside.is-past:hover {
+  background: #fcfcfd;
+}
+
+.agenda__month-cell.is-today.is-past:hover {
+  background: #fdf6e3;
+}
+
+.agenda__month-cell:disabled {
+  opacity: 1;
 }
 
 .agenda__month-date {
