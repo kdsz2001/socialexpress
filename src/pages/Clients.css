@@ -206,7 +206,7 @@
 
 .clients__table th {
   text-align: left;
-  padding: 1rem 0.75rem;
+  padding: 1rem 1.25rem;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -216,29 +216,44 @@
   white-space: nowrap;
 }
 
+.clients__table th:first-child,
+.clients__table td:first-child {
+  padding-left: 0.75rem;
+}
+
+.clients__table th:last-child,
+.clients__table td:last-child {
+  padding-right: 0.75rem;
+}
+
+/* Proporções próximas ao Clarial: nome | telefone | ações */
 .clients__col-client {
-  width: auto;
+  width: 46%;
 }
 
 .clients__col-birth {
-  width: 34%;
+  width: 32%;
 }
 
 .clients__col-phone {
-  width: 200px;
+  width: 34%;
 }
 
 .clients__col-actions {
-  width: 108px;
+  width: 120px;
 }
 
 .clients__th-phone,
 .clients__phone-cell {
-  text-align: center;
+  text-align: left;
+  vertical-align: middle;
 }
 
-.clients__th-actions {
+.clients__th-actions,
+.clients__actions-cell {
   text-align: right;
+  vertical-align: middle;
+  width: 120px;
 }
 
 .clients__empty {
