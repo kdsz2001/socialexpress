@@ -1,6 +1,8 @@
-import { useEffect, useId, useRef, useState } from 'react'
-import { Search, Menu, X } from 'lucide-react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { Search, Menu, UserRound, X } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useClients } from '../../hooks/useClients'
+import { getClientDisplayName } from '../../lib/clientsStore'
 import { ProfileDrawer } from './ProfileDrawer'
 import './Topbar.css'
 
@@ -10,10 +12,13 @@ type TopbarProps = {
 
 type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 
+const SEARCH_LIMIT = 8
+
 export function Topbar({ onMenuClick }: TopbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const clients = useClients()
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -38,10 +43,32 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           ? 'whatsapp'
           : 'todos'
 
-  const hasQuery = query.trim().length > 0
-  // Futuro: substituir por resultados reais de pedido/produto/cliente
-  const results: unknown[] = []
-  const showEmptyState = hasQuery && results.length === 0
+  const trimmedQuery = query.trim()
+  const hasQuery = trimmedQuery.length > 0
+
+  const clientResults = useMemo(() => {
+    if (!hasQuery) return []
+    const q = trimmedQuery.toLocaleLowerCase('pt-BR')
+    return clients
+      .filter((client) => {
+        const name = getClientDisplayName(client).toLocaleLowerCase('pt-BR')
+        const full = `${client.nome} ${client.sobrenomes} ${client.chamado}`
+          .toLocaleLowerCase('pt-BR')
+          .trim()
+        const cpf = client.cpfCnpj.replace(/\D/g, '')
+        const qDigits = q.replace(/\D/g, '')
+        return (
+          name.includes(q) ||
+          full.includes(q) ||
+          (qDigits.length >= 3 && cpf.includes(qDigits))
+        )
+      })
+      .slice(0, SEARCH_LIMIT)
+  }, [clients, hasQuery, trimmedQuery])
+
+  const showResults = hasQuery && clientResults.length > 0
+  const showEmptyState = hasQuery && clientResults.length === 0
+  const panelExpanded = showResults || showEmptyState
 
   useEffect(() => {
     if (!searchOpen) return
@@ -66,9 +93,21 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     }
   }, [searchOpen])
 
+  // Fecha a busca ao mudar de rota
+  useEffect(() => {
+    setSearchOpen(false)
+    setQuery('')
+  }, [location.pathname])
+
   const openProfile = () => {
     setSearchOpen(false)
     setProfileOpen(true)
+  }
+
+  const openClient = (clientId: string) => {
+    setSearchOpen(false)
+    setQuery('')
+    navigate(`/clientes/${clientId}`)
   }
 
   const setClientsTab = (tab: ClientsTab) => {
@@ -80,7 +119,6 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       navigate('/clientes?tab=aniversariantes')
       return
     }
-    // WhatsApp em massa só a partir do fluxo de cadastrar cliente
     navigate('/clientes?tab=whatsapp')
   }
 
@@ -148,7 +186,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
           {searchOpen && (
             <div
-              className={`topbar__search-panel ${showEmptyState ? 'has-result' : ''}`}
+              className={`topbar__search-panel${panelExpanded ? ' has-result' : ''}`}
               id={searchId}
               role="search"
             >
@@ -183,11 +221,36 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                 )}
               </div>
 
-              {showEmptyState && (
+              {showResults ? (
+                <div className="topbar__search-results">
+                  <p className="topbar__search-group">Clientes</p>
+                  <ul className="topbar__search-list" role="listbox">
+                    {clientResults.map((client) => (
+                      <li key={client.id}>
+                        <button
+                          type="button"
+                          className="topbar__search-item"
+                          role="option"
+                          onClick={() => openClient(client.id)}
+                        >
+                          <span className="topbar__search-avatar" aria-hidden="true">
+                            <UserRound size={18} strokeWidth={2} />
+                          </span>
+                          <span className="topbar__search-name">
+                            {getClientDisplayName(client)}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {showEmptyState ? (
                 <div className="topbar__search-empty">
                   Nenhum resultado encontrado
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>
