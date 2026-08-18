@@ -155,6 +155,18 @@
 
 .new-apt__date .new-apt__input {
   padding-right: 2.35rem;
+  position: relative;
+}
+
+/* Keep only the custom calendar icon — hide the browser’s native one */
+.new-apt__date .new-apt__input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 2.5rem;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
 }
 
 .new-apt__date-icon {
@@ -166,6 +178,7 @@
   pointer-events: none;
   display: grid;
   place-items: center;
+  z-index: 1;
 }
 
 .new-apt__time {
