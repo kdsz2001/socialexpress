@@ -1,0 +1,116 @@
+.apt-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.apt-confirm__overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: rgba(24, 28, 50, 0.45);
+  cursor: pointer;
+}
+
+.apt-confirm__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  padding: 2rem 1.75rem 1.5rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.2);
+  text-align: center;
+  animation: apt-confirm-in 0.16s ease both;
+}
+
+.apt-confirm__icon {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0 auto 1.15rem;
+  border: 3px solid #ffa800;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #ffa800;
+}
+
+.apt-confirm__icon span {
+  font-size: 2.6rem;
+  font-weight: 600;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.apt-confirm__title {
+  margin: 0 0 0.65rem;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: #181c32;
+  line-height: 1.25;
+}
+
+.apt-confirm__message {
+  margin: 0 auto 1.5rem;
+  max-width: 22rem;
+  font-size: 0.98rem;
+  font-weight: 400;
+  color: #7e8299;
+  line-height: 1.45;
+}
+
+.apt-confirm__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.apt-confirm__btn {
+  min-width: 7.5rem;
+  height: 2.45rem;
+  padding: 0 1.1rem;
+  border: 0;
+  border-radius: 0.35rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, filter 0.15s ease;
+}
+
+.apt-confirm__btn--cancel {
+  background: #e4e6ef;
+  color: #3f4254;
+}
+
+.apt-confirm__btn--cancel:hover {
+  background: #d7dae7;
+}
+
+.apt-confirm__btn--confirm {
+  background: #f64e60;
+  color: #fff;
+}
+
+.apt-confirm__btn--confirm:hover {
+  background: #ee2d41;
+}
+
+@keyframes apt-confirm-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

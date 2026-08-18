@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CalendarDays, Check, SquarePen, Trash2, X } from 'lucide-react'
 import {
@@ -12,6 +12,7 @@ import {
   getUserDisplayName,
   getUserProfile,
 } from '../../lib/userProfileStore'
+import { ConfirmDeleteModal } from './ConfirmDeleteModal'
 import './AppointmentDetailModal.css'
 
 type AppointmentDetailModalProps = {
@@ -84,20 +85,29 @@ export function AppointmentDetailModal({
 }: AppointmentDetailModalProps) {
   const titleId = useId()
   const open = Boolean(appointment)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setConfirmDeleteOpen(false)
+      return
+    }
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key !== 'Escape') return
+      if (confirmDeleteOpen) {
+        setConfirmDeleteOpen(false)
+        return
+      }
+      onClose()
     }
     document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = previous
       document.removeEventListener('keydown', onKey)
     }
-  }, [open, onClose])
+  }, [open, onClose, confirmDeleteOpen])
 
   const schedule = useMemo(
     () => (appointment ? formatScheduleBox(appointment) : null),
@@ -120,153 +130,164 @@ export function AppointmentDetailModal({
     notifyAgendaToast('Agendamento atualizado.')
   }
 
-  const onDelete = () => {
+  const onConfirmDelete = () => {
     deleteAppointment(appointment.id)
+    setConfirmDeleteOpen(false)
     onClose()
   }
 
-  return createPortal(
-    <div className="apt-detail" role="presentation">
-      <button
-        type="button"
-        className="apt-detail__overlay"
-        aria-label="Fechar"
-        onClick={onClose}
-      />
-
-      <div
-        className="apt-detail__dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-      >
-        <header className="apt-detail__header">
-          <div className="apt-detail__heading">
-            <h2 id={titleId} className="apt-detail__title">
-              {appointment.title || 'Sem título'}
-            </h2>
-            <p className="apt-detail__meta">
-              {formatPersonDateLine('Agendado por', appointment.createdAt)}
-            </p>
-          </div>
+  return (
+    <>
+      {createPortal(
+        <div className="apt-detail" role="presentation">
           <button
             type="button"
-            className="apt-detail__close"
+            className="apt-detail__overlay"
             aria-label="Fechar"
             onClick={onClose}
+          />
+
+          <div
+            className="apt-detail__dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
           >
-            <X size={18} strokeWidth={2} />
-          </button>
-        </header>
+            <header className="apt-detail__header">
+              <div className="apt-detail__heading">
+                <h2 id={titleId} className="apt-detail__title">
+                  {appointment.title || 'Sem título'}
+                </h2>
+                <p className="apt-detail__meta">
+                  {formatPersonDateLine('Agendado por', appointment.createdAt)}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="apt-detail__close"
+                aria-label="Fechar"
+                onClick={onClose}
+              >
+                <X size={18} strokeWidth={2} />
+              </button>
+            </header>
 
-        <div className="apt-detail__body">
-          <div className="apt-detail__schedule">
-            <div className="apt-detail__schedule-text">
-              <strong>{schedule.dayLabel}</strong>
-              <span>{schedule.subLabel}</span>
+            <div className="apt-detail__body">
+              <div className="apt-detail__schedule">
+                <div className="apt-detail__schedule-text">
+                  <strong>{schedule.dayLabel}</strong>
+                  <span>{schedule.subLabel}</span>
+                </div>
+                <span className="apt-detail__schedule-icon" aria-hidden="true">
+                  <CalendarDays size={22} strokeWidth={1.6} />
+                </span>
+              </div>
+
+              {isCompleted ? (
+                <div className="apt-detail__completed-banner">
+                  {formatPersonDateLine(
+                    'Marcado como concluído por',
+                    appointment.completedAt ?? appointment.createdAt,
+                  )}
+                  .
+                </div>
+              ) : null}
+
+              <section className="apt-detail__section">
+                <h3 className="apt-detail__section-title">Detalhes</h3>
+                <p className="apt-detail__section-text">
+                  {appointment.details.trim() || '—'}
+                </p>
+              </section>
+
+              <section className="apt-detail__section">
+                <h3 className="apt-detail__section-title">Responsáveis</h3>
+                <p className="apt-detail__section-text">
+                  {people.length > 0 ? people.join(', ') : '—'}
+                </p>
+              </section>
             </div>
-            <span className="apt-detail__schedule-icon" aria-hidden="true">
-              <CalendarDays size={22} strokeWidth={1.6} />
-            </span>
-          </div>
 
-          {isCompleted ? (
-            <div className="apt-detail__completed-banner">
-              {formatPersonDateLine(
-                'Marcado como concluído por',
-                appointment.completedAt ?? appointment.createdAt,
+            <footer className="apt-detail__footer">
+              {isCompleted ? (
+                <>
+                  <div className="apt-detail__actions apt-detail__actions--start">
+                    <button
+                      type="button"
+                      className="apt-detail__btn apt-detail__btn--pending"
+                      onClick={onReopen}
+                    >
+                      Marcar como pendente
+                    </button>
+                  </div>
+                  <div className="apt-detail__actions apt-detail__actions--end">
+                    <button
+                      type="button"
+                      className="apt-detail__btn apt-detail__btn--edit"
+                      onClick={() => onEdit?.(appointment)}
+                    >
+                      <SquarePen size={14} strokeWidth={2.25} />
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      className="apt-detail__btn apt-detail__btn--close"
+                      onClick={onClose}
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="apt-detail__actions apt-detail__actions--start">
+                    <button
+                      type="button"
+                      className="apt-detail__btn apt-detail__btn--complete"
+                      onClick={onComplete}
+                    >
+                      <Check size={14} strokeWidth={2.75} />
+                      Concluir
+                    </button>
+                    <button
+                      type="button"
+                      className="apt-detail__btn apt-detail__btn--delete"
+                      onClick={() => setConfirmDeleteOpen(true)}
+                    >
+                      <Trash2 size={14} strokeWidth={2.25} />
+                      Excluir
+                    </button>
+                  </div>
+                  <div className="apt-detail__actions apt-detail__actions--end">
+                    <button
+                      type="button"
+                      className="apt-detail__btn apt-detail__btn--edit"
+                      onClick={() => onEdit?.(appointment)}
+                    >
+                      <SquarePen size={14} strokeWidth={2.25} />
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      className="apt-detail__btn apt-detail__btn--close"
+                      onClick={onClose}
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                </>
               )}
-              .
-            </div>
-          ) : null}
+            </footer>
+          </div>
+        </div>,
+        document.body,
+      )}
 
-          <section className="apt-detail__section">
-            <h3 className="apt-detail__section-title">Detalhes</h3>
-            <p className="apt-detail__section-text">
-              {appointment.details.trim() || '—'}
-            </p>
-          </section>
-
-          <section className="apt-detail__section">
-            <h3 className="apt-detail__section-title">Responsáveis</h3>
-            <p className="apt-detail__section-text">
-              {people.length > 0 ? people.join(', ') : '—'}
-            </p>
-          </section>
-        </div>
-
-        <footer className="apt-detail__footer">
-          {isCompleted ? (
-            <>
-              <div className="apt-detail__actions apt-detail__actions--start">
-                <button
-                  type="button"
-                  className="apt-detail__btn apt-detail__btn--pending"
-                  onClick={onReopen}
-                >
-                  Marcar como pendente
-                </button>
-              </div>
-              <div className="apt-detail__actions apt-detail__actions--end">
-                <button
-                  type="button"
-                  className="apt-detail__btn apt-detail__btn--edit"
-                  onClick={() => onEdit?.(appointment)}
-                >
-                  <SquarePen size={14} strokeWidth={2.25} />
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  className="apt-detail__btn apt-detail__btn--close"
-                  onClick={onClose}
-                >
-                  Fechar
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="apt-detail__actions apt-detail__actions--start">
-                <button
-                  type="button"
-                  className="apt-detail__btn apt-detail__btn--complete"
-                  onClick={onComplete}
-                >
-                  <Check size={14} strokeWidth={2.75} />
-                  Concluir
-                </button>
-                <button
-                  type="button"
-                  className="apt-detail__btn apt-detail__btn--delete"
-                  onClick={onDelete}
-                >
-                  <Trash2 size={14} strokeWidth={2.25} />
-                  Excluir
-                </button>
-              </div>
-              <div className="apt-detail__actions apt-detail__actions--end">
-                <button
-                  type="button"
-                  className="apt-detail__btn apt-detail__btn--edit"
-                  onClick={() => onEdit?.(appointment)}
-                >
-                  <SquarePen size={14} strokeWidth={2.25} />
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  className="apt-detail__btn apt-detail__btn--close"
-                  onClick={onClose}
-                >
-                  Fechar
-                </button>
-              </div>
-            </>
-          )}
-        </footer>
-      </div>
-    </div>,
-    document.body,
+      <ConfirmDeleteModal
+        open={confirmDeleteOpen}
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={onConfirmDelete}
+      />
+    </>
   )
 }
