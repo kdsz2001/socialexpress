@@ -267,23 +267,26 @@ export function Agenda() {
     const endLabel = hasTime ? padTime(Math.min(hour + 1, 23)) : ''
 
     return (
-      <button
-        type="button"
-        className={`agenda__create-tip${hasTime ? ' agenda__create-tip--timed' : ''}`}
-        onClick={(event) => {
-          event.stopPropagation()
-          openCreateFromTarget({ date: day, hour })
-        }}
-      >
-        <span className="agenda__create-tip-line">
-          Criar agendamento para o dia <strong>{formatCreateDayLabel(day)}</strong>
-        </span>
+      <span className={`agenda__create-wrap${hasTime ? ' has-time' : ''}`}>
         {hasTime ? (
-          <span className="agenda__create-tip-line agenda__create-tip-time">
-            entre <strong>{startLabel}</strong> até <strong>{endLabel}</strong>
+          <span className="agenda__create-time" aria-hidden="true">
+            <Clock size={12} strokeWidth={2.25} />
+            <span>
+              {startLabel} – {endLabel}
+            </span>
           </span>
         ) : null}
-      </button>
+        <button
+          type="button"
+          className="agenda__create-tip"
+          onClick={(event) => {
+            event.stopPropagation()
+            openCreateFromTarget({ date: day, hour })
+          }}
+        >
+          Criar agendamento para o dia <strong>{formatCreateDayLabel(day)}</strong>
+        </button>
+      </span>
     )
   }
 

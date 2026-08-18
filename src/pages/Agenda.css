@@ -457,7 +457,7 @@
   pointer-events: none;
 }
 
-.agenda__create-tip {
+.agenda__create-wrap {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -466,10 +466,45 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.15rem;
-  min-width: min(240px, calc(100% - 12px));
   max-width: calc(100% - 8px);
+  pointer-events: none;
+}
+
+.agenda__create-wrap.has-time {
+  gap: 0;
+}
+
+.agenda__create-time {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  margin-bottom: -0.2rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  background: #187de4;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(24, 125, 228, 0.35);
+  pointer-events: none;
+}
+
+.agenda__create-time svg {
+  flex-shrink: 0;
+}
+
+.agenda__create-tip {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  z-index: 12;
+  display: block;
+  min-width: min(240px, calc(100% - 4px));
+  max-width: 100%;
   padding: 0.55rem 0.85rem;
   border: 0;
   border-radius: 0.4rem;
@@ -483,21 +518,7 @@
   white-space: normal;
   box-shadow: 0 4px 16px rgba(54, 153, 255, 0.35);
   cursor: pointer;
-}
-
-.agenda__create-tip--timed {
-  min-width: min(200px, calc(100% - 8px));
-  font-size: 0.74rem;
-  line-height: 1.35;
-  padding: 0.45rem 0.55rem;
-}
-
-.agenda__create-tip-line {
-  display: block;
-}
-
-.agenda__create-tip-time {
-  font-weight: 500;
+  pointer-events: auto;
 }
 
 .agenda__create-tip strong {
@@ -508,16 +529,16 @@
   background: #187de4;
 }
 
+.agenda__month-cell .agenda__create-wrap {
+  top: auto;
+  bottom: 0.45rem;
+  transform: translateX(-50%);
+}
+
 .agenda__slot.is-selected {
   background: #e8f4ff;
   z-index: 2;
   overflow: visible;
-}
-
-.agenda__month-cell .agenda__create-tip {
-  top: auto;
-  bottom: 0.45rem;
-  transform: translateX(-50%);
 }
 
 .agenda__now {
