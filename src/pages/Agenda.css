@@ -515,7 +515,16 @@
 }
 
 .agenda__day-col.has-create {
+  /* Above neighboring columns so the create tip can overflow */
   z-index: 6;
+}
+
+.agenda__now-rail {
+  position: relative;
+  /* Above day columns (including has-create) so the red line is never covered */
+  z-index: 25;
+  pointer-events: none;
+  overflow: visible;
 }
 
 .agenda__day-col:last-child {
@@ -736,7 +745,7 @@
 
 .agenda__now-rail {
   position: relative;
-  z-index: 5;
+  z-index: 25;
   pointer-events: none;
   overflow: visible;
 }
