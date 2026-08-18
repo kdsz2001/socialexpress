@@ -72,12 +72,25 @@
   border-radius: 4px;
   box-shadow: 0 8px 24px rgba(24, 28, 50, 0.12);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   animation: bairro-select-in 0.14s ease;
+}
+
+.bairro-select__panel--portal {
+  position: fixed;
+  right: auto;
+  z-index: 12050;
+}
+
+.bairro-select__panel--portal.is-top {
+  animation: bairro-select-in-up 0.14s ease;
 }
 
 .bairro-select__search-wrap {
   padding: 10px 10px 8px;
   border-bottom: 1px solid #ebedf3;
+  flex-shrink: 0;
 }
 
 .bairro-select__search {
@@ -100,7 +113,8 @@
 }
 
 .bairro-select__options {
-  max-height: 220px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
   padding: 4px 0;
 }
@@ -150,6 +164,17 @@
   from {
     opacity: 0;
     transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bairro-select-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
   }
   to {
     opacity: 1;

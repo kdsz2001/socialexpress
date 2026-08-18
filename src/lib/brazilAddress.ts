@@ -73,6 +73,29 @@ export type ViaCepResponse = {
   cep?: string
 }
 
+function extractBairroSearchTerms(bairro?: string) {
+  if (!bairro?.trim()) return [] as string[]
+  const terms: string[] = []
+  const paren = bairro.match(/\(([^)]+)\)/)
+  if (paren?.[1]?.trim()) terms.push(paren[1].trim())
+  const withoutParen = bairro.replace(/\([^)]*\)/g, '').trim()
+  if (withoutParen) terms.push(withoutParen)
+  return terms
+}
+
+async function fetchViaCepList(
+  uf: string,
+  city: string,
+  term: string,
+  signal: AbortSignal,
+) {
+  const url = `https://viacep.com.br/ws/${uf}/${encodeURIComponent(city)}/${encodeURIComponent(term)}/json/`
+  const response = await fetch(url, { signal })
+  if (!response.ok) return [] as ViaCepResponse[]
+  const data = (await response.json()) as ViaCepResponse[] | ViaCepResponse
+  return Array.isArray(data) ? data : []
+}
+
 /** Amostra CEPs da faixa e busca por logradouros para reunir mais bairros da cidade. */
 export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
   const mainResponse = await fetch(`https://viacep.com.br/ws/${digits}/json/`, {
@@ -84,38 +107,54 @@ export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
 
   const city = (main.localidade ?? '').trim()
   const uf = (main.uf ?? '').trim().toUpperCase()
-  const prefix = digits.slice(0, 5)
+  const primaryPrefix = digits.slice(0, 5)
+  const prefixNum = Number(primaryPrefix)
 
-  const suffixes: number[] = []
-  for (let suffix = 0; suffix <= 990; suffix += 20) {
-    suffixes.push(suffix)
+  const cepJobs: Array<Promise<ViaCepResponse | null>> = []
+  const enqueueCep = (prefix: string, step: number) => {
+    for (let suffix = 0; suffix <= 990; suffix += step) {
+      const cep = `${prefix}${String(suffix).padStart(3, '0')}`
+      if (cep === digits) {
+        cepJobs.push(Promise.resolve(main))
+        continue
+      }
+      cepJobs.push(
+        (async () => {
+          const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
+            signal,
+          })
+          if (!response.ok) return null
+          return (await response.json()) as ViaCepResponse
+        })(),
+      )
+    }
   }
-  const exactSuffix = Number(digits.slice(5))
-  if (!suffixes.includes(exactSuffix)) suffixes.push(exactSuffix)
 
-  const streetTerms = ['Rua', 'Avenida', 'Travessa', 'Alameda', 'Rodovia', 'Praça']
+  enqueueCep(primaryPrefix, 10)
+  for (const delta of [-1, 1]) {
+    const next = prefixNum + delta
+    if (next >= 0 && next <= 99999) {
+      enqueueCep(String(next).padStart(5, '0'), 50)
+    }
+  }
+
+  const streetTerms = [
+    'Rua',
+    'Avenida',
+    'Travessa',
+    'Alameda',
+    'Rodovia',
+    'Praça',
+    'Estrada',
+    'Servidão',
+    ...extractBairroSearchTerms(main.bairro),
+  ]
 
   const [cepResults, streetResults] = await Promise.all([
-    Promise.allSettled(
-      suffixes.map(async (suffix) => {
-        const cep = `${prefix}${String(suffix).padStart(3, '0')}`
-        if (cep === digits) return main
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
-          signal,
-        })
-        if (!response.ok) return null
-        return (await response.json()) as ViaCepResponse
-      }),
-    ),
+    Promise.allSettled(cepJobs),
     uf && city
       ? Promise.allSettled(
-          streetTerms.map(async (term) => {
-            const url = `https://viacep.com.br/ws/${uf}/${encodeURIComponent(city)}/${encodeURIComponent(term)}/json/`
-            const response = await fetch(url, { signal })
-            if (!response.ok) return [] as ViaCepResponse[]
-            const data = (await response.json()) as ViaCepResponse[] | ViaCepResponse
-            return Array.isArray(data) ? data : []
-          }),
+          streetTerms.map((term) => fetchViaCepList(uf, city, term, signal)),
         )
       : Promise.resolve([] as PromiseSettledResult<ViaCepResponse[]>[]),
   ])
@@ -145,7 +184,9 @@ export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
     if (result.status !== 'fulfilled') continue
     for (const item of result.value) {
       if (item.erro) continue
-      if ((item.localidade ?? '').trim() && (item.localidade ?? '').trim() !== city) continue
+      if ((item.localidade ?? '').trim() && (item.localidade ?? '').trim() !== city) {
+        continue
+      }
       addBairro(item.bairro)
     }
   }

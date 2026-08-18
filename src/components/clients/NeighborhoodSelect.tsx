@@ -1,6 +1,7 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown } from 'lucide-react'
-import { withBairroOutroOption } from '../../lib/brazilAddress'
+import { BAIRRO_OUTRO, withBairroOutroOption } from '../../lib/brazilAddress'
 import { RegisterNeighborhoodModal } from './RegisterNeighborhoodModal'
 import './NeighborhoodSelect.css'
 
@@ -16,6 +17,15 @@ type NeighborhoodSelectProps = {
   onBlur?: () => void
 }
 
+type PanelPos = {
+  left: number
+  width: number
+  top?: number
+  bottom?: number
+  maxHeight: number
+  placement: 'top' | 'bottom'
+}
+
 export function NeighborhoodSelect({
   id,
   value,
@@ -29,20 +39,25 @@ export function NeighborhoodSelect({
 }: NeighborhoodSelectProps) {
   const listId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [pendingName, setPendingName] = useState('')
+  const [panelPos, setPanelPos] = useState<PanelPos | null>(null)
 
   const uniqueOptions = useMemo(() => withBairroOutroOption(options), [options])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('pt-BR')
-    if (!q) return uniqueOptions
-    return uniqueOptions.filter((option) =>
-      option.toLocaleLowerCase('pt-BR').includes(q),
+    const base = uniqueOptions.filter(
+      (option) => option.toLocaleLowerCase('pt-BR') !== BAIRRO_OUTRO,
     )
+    const matched = !q
+      ? base
+      : base.filter((option) => option.toLocaleLowerCase('pt-BR').includes(q))
+    return [...matched, BAIRRO_OUTRO]
   }, [uniqueOptions, query])
 
   const exactMatch = useMemo(() => {
@@ -55,6 +70,39 @@ export function NeighborhoodSelect({
 
   const showCreate = query.trim().length > 0 && !exactMatch
 
+  const updatePanelPosition = () => {
+    const root = rootRef.current
+    if (!root) return
+    const trigger = root.querySelector('.bairro-select__trigger') as HTMLElement | null
+    if (!trigger) return
+
+    const rect = trigger.getBoundingClientRect()
+    const gap = 4
+    const preferredHeight = 280
+    const spaceBelow = window.innerHeight - rect.bottom - 12
+    const spaceAbove = rect.top - 12
+    const openUp = spaceBelow < preferredHeight && spaceAbove > spaceBelow
+    const available = Math.max(160, openUp ? spaceAbove : spaceBelow)
+
+    setPanelPos({
+      left: rect.left,
+      width: rect.width,
+      maxHeight: Math.min(preferredHeight, available),
+      placement: openUp ? 'top' : 'bottom',
+      ...(openUp
+        ? { bottom: window.innerHeight - rect.top + gap }
+        : { top: rect.bottom + gap }),
+    })
+  }
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setPanelPos(null)
+      return
+    }
+    updatePanelPosition()
+  }, [open, filtered.length])
+
   useEffect(() => {
     if (!open) return
 
@@ -63,11 +111,12 @@ export function NeighborhoodSelect({
     })
 
     const onPointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false)
-        setQuery('')
-        onBlur?.()
-      }
+      const target = event.target as Node
+      if (rootRef.current?.contains(target)) return
+      if (panelRef.current?.contains(target)) return
+      setOpen(false)
+      setQuery('')
+      onBlur?.()
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -78,12 +127,18 @@ export function NeighborhoodSelect({
       }
     }
 
+    const onReposition = () => updatePanelPosition()
+
     document.addEventListener('mousedown', onPointerDown)
     document.addEventListener('keydown', onKeyDown)
+    window.addEventListener('resize', onReposition)
+    window.addEventListener('scroll', onReposition, true)
     return () => {
       window.cancelAnimationFrame(frame)
       document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('resize', onReposition)
+      window.removeEventListener('scroll', onReposition, true)
     }
   }, [open, onBlur])
 
@@ -105,46 +160,22 @@ export function NeighborhoodSelect({
     setModalOpen(true)
   }
 
-  return (
-    <>
-      <div className="bairro-select" ref={rootRef}>
-        <button
-          type="button"
-          id={id}
-          className={`bairro-select__trigger${open ? ' is-open' : ''}${
-            value ? '' : ' is-placeholder'
-          }${invalid ? ' is-invalid' : ''}`}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-controls={listId}
-          aria-invalid={invalid || undefined}
-          onClick={() => {
-            if (open) {
-              setOpen(false)
-              setQuery('')
-              onBlur?.()
-            } else {
-              openMenu()
-            }
-          }}
-        >
-          <span>{value || 'Selecione um bairro'}</span>
-          <ChevronDown size={14} strokeWidth={2.25} aria-hidden="true" />
-        </button>
-
-        {/* campo oculto para required nativo do form */}
-        <input
-          type="text"
-          tabIndex={-1}
-          required={required}
-          value={value}
-          readOnly
-          aria-hidden="true"
-          className="bairro-select__native"
-        />
-
-        {open && (
-          <div className="bairro-select__panel" id={listId} role="listbox">
+  const panel =
+    open && panelPos && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            ref={panelRef}
+            className={`bairro-select__panel bairro-select__panel--portal is-${panelPos.placement}`}
+            id={listId}
+            role="listbox"
+            style={{
+              left: panelPos.left,
+              width: panelPos.width,
+              top: panelPos.top,
+              bottom: panelPos.bottom,
+              maxHeight: panelPos.maxHeight,
+            }}
+          >
             <div className="bairro-select__search-wrap">
               <input
                 ref={searchRef}
@@ -206,9 +237,50 @@ export function NeighborhoodSelect({
                 <p className="bairro-select__empty">Nenhum bairro encontrado</p>
               )}
             </div>
-          </div>
-        )}
+          </div>,
+          document.body,
+        )
+      : null
+
+  return (
+    <>
+      <div className="bairro-select" ref={rootRef}>
+        <button
+          type="button"
+          id={id}
+          className={`bairro-select__trigger${open ? ' is-open' : ''}${
+            value ? '' : ' is-placeholder'
+          }${invalid ? ' is-invalid' : ''}`}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={listId}
+          aria-invalid={invalid || undefined}
+          onClick={() => {
+            if (open) {
+              setOpen(false)
+              setQuery('')
+              onBlur?.()
+            } else {
+              openMenu()
+            }
+          }}
+        >
+          <span>{value || 'Selecione um bairro'}</span>
+          <ChevronDown size={14} strokeWidth={2.25} aria-hidden="true" />
+        </button>
+
+        <input
+          type="text"
+          tabIndex={-1}
+          required={required}
+          value={value}
+          readOnly
+          aria-hidden="true"
+          className="bairro-select__native"
+        />
       </div>
+
+      {panel}
 
       <RegisterNeighborhoodModal
         open={modalOpen}
