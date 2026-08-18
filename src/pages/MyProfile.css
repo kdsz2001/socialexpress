@@ -1,0 +1,78 @@
+.my-profile__avatar-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.my-profile__avatar-box {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 6px;
+  background: #f3f6f9;
+  border: 1px solid #ebedf3;
+  overflow: hidden;
+}
+
+.my-profile__avatar-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 50% 38%, #b5b5c3 0 18%, transparent 19%),
+    radial-gradient(ellipse 55% 42% at 50% 78%, #b5b5c3 0 48%, transparent 49%),
+    #eef0f4;
+}
+
+.my-profile__avatar-edit,
+.my-profile__avatar-remove {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #fff;
+}
+
+.my-profile__avatar-edit {
+  top: 6px;
+  right: 6px;
+  background: #3699ff;
+}
+
+.my-profile__avatar-edit:hover {
+  background: #187de4;
+}
+
+.my-profile__avatar-remove {
+  right: 6px;
+  bottom: 6px;
+  background: #f64e60;
+}
+
+.my-profile__avatar-remove:hover {
+  background: #ee2d41;
+}
+
+.my-profile__avatar-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #b5b5c3;
+  line-height: 1.45;
+  max-width: 320px;
+}
+
+.my-profile__empty {
+  padding: 2rem 0;
+  color: #b5b5c3;
+  font-size: 0.95rem;
+}
+
+.my-profile__empty p {
+  margin: 0;
+}

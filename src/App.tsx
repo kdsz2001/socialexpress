@@ -4,6 +4,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Clients } from './pages/Clients'
 import { ClientCreate } from './pages/ClientCreate'
 import { ClientDetail } from './pages/ClientDetail'
+import { MyProfile } from './pages/MyProfile'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/clientes" element={<Clients />} />
         <Route path="/clientes/cadastrar" element={<ClientCreate />} />
         <Route path="/clientes/:clientId" element={<ClientDetail />} />
+        <Route path="/meu-perfil" element={<MyProfile />} />
         {pages.map((page) => (
           <Route
             key={page.path}

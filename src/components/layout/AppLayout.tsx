@@ -4,12 +4,14 @@ import { ChevronUp } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import { ClientsSubheader } from './ClientsSubheader'
+import { ProfileSubheader } from './ProfileSubheader'
 import './AppLayout.css'
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
   '/clientes': 'Clientes',
   '/clientes/cadastrar': 'Cadastro de clientes',
+  '/meu-perfil': 'Meu perfil',
   '/agenda': 'Agenda',
   '/eventos': 'Eventos',
   '/produtos': 'Produtos',
@@ -92,6 +94,7 @@ export function AppLayout() {
       <div className="app-main">
         <Topbar onMenuClick={toggle} />
         {location.pathname.startsWith('/clientes') && <ClientsSubheader />}
+        {location.pathname === '/meu-perfil' && <ProfileSubheader />}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
             <Outlet />

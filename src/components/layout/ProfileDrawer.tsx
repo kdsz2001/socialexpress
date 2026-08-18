@@ -1,6 +1,8 @@
 import { useEffect, useId } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import { User, Wallet, X } from 'lucide-react'
+import { getUserDisplayName, getUserProfile } from '../../lib/userProfileStore'
 import './ProfileDrawer.css'
 
 type ProfileDrawerProps = {
@@ -10,19 +12,24 @@ type ProfileDrawerProps = {
 
 const menuItems = [
   {
+    id: 'meu-perfil' as const,
     label: 'Meu perfil',
     description: 'Informações da sua conta',
     icon: User,
   },
   {
+    id: 'assinatura' as const,
     label: 'Assinatura',
     description: 'Informações da sua assinatura',
     icon: Wallet,
   },
-] as const
+]
 
 export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
   const titleId = useId()
+  const navigate = useNavigate()
+  const profile = getUserProfile()
+  const displayName = getUserDisplayName(profile)
 
   useEffect(() => {
     if (!open) return
@@ -40,6 +47,13 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [open, onClose])
+
+  const onItemClick = (id: (typeof menuItems)[number]['id']) => {
+    onClose()
+    if (id === 'meu-perfil') {
+      navigate('/meu-perfil')
+    }
+  }
 
   if (typeof document === 'undefined') return null
 
@@ -76,7 +90,7 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
         <div className="profile-drawer__user">
           <div className="profile-drawer__avatar" aria-hidden="true" />
           <div className="profile-drawer__meta">
-            <p className="profile-drawer__name">Kelton Djames Schulze</p>
+            <p className="profile-drawer__name">{displayName}</p>
             <p className="profile-drawer__role">Master</p>
             <button type="button" className="profile-drawer__logout">
               Sair
@@ -88,7 +102,12 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
           {menuItems.map((item) => {
             const Icon = item.icon
             return (
-              <button key={item.label} type="button" className="profile-drawer__item">
+              <button
+                key={item.id}
+                type="button"
+                className="profile-drawer__item"
+                onClick={() => onItemClick(item.id)}
+              >
                 <span className="profile-drawer__item-icon" aria-hidden="true">
                   <Icon size={18} strokeWidth={2} />
                 </span>
