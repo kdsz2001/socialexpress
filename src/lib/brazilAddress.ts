@@ -73,14 +73,9 @@ export type ViaCepResponse = {
   cep?: string
 }
 
-function extractBairroSearchTerms(bairro?: string) {
-  if (!bairro?.trim()) return [] as string[]
-  const terms: string[] = []
-  const paren = bairro.match(/\(([^)]+)\)/)
-  if (paren?.[1]?.trim()) terms.push(paren[1].trim())
-  const withoutParen = bairro.replace(/\([^)]*\)/g, '').trim()
-  if (withoutParen) terms.push(withoutParen)
-  return terms
+function extractDistrictTerm(bairro?: string) {
+  const paren = bairro?.match(/\(([^)]+)\)/)
+  return paren?.[1]?.trim() || ''
 }
 
 async function fetchViaCepList(
@@ -96,7 +91,10 @@ async function fetchViaCepList(
   return Array.isArray(data) ? data : []
 }
 
-/** Amostra CEPs da faixa e busca por logradouros para reunir mais bairros da cidade. */
+/**
+ * Reúne bairros próximos ao CEP informado (mesma faixa + distrito,
+ * quando o nome vier entre parênteses), sem listar a cidade inteira.
+ */
 export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
   const mainResponse = await fetch(`https://viacep.com.br/ws/${digits}/json/`, {
     signal,
@@ -107,56 +105,31 @@ export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
 
   const city = (main.localidade ?? '').trim()
   const uf = (main.uf ?? '').trim().toUpperCase()
-  const primaryPrefix = digits.slice(0, 5)
-  const prefixNum = Number(primaryPrefix)
+  const prefix = digits.slice(0, 5)
+  const district = extractDistrictTerm(main.bairro)
 
-  const cepJobs: Array<Promise<ViaCepResponse | null>> = []
-  const enqueueCep = (prefix: string, step: number) => {
-    for (let suffix = 0; suffix <= 990; suffix += step) {
-      const cep = `${prefix}${String(suffix).padStart(3, '0')}`
-      if (cep === digits) {
-        cepJobs.push(Promise.resolve(main))
-        continue
-      }
-      cepJobs.push(
-        (async () => {
-          const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
-            signal,
-          })
-          if (!response.ok) return null
-          return (await response.json()) as ViaCepResponse
-        })(),
-      )
-    }
-  }
-
-  enqueueCep(primaryPrefix, 10)
-  for (const delta of [-1, 1]) {
-    const next = prefixNum + delta
-    if (next >= 0 && next <= 99999) {
-      enqueueCep(String(next).padStart(5, '0'), 50)
-    }
-  }
-
-  const streetTerms = [
-    'Rua',
-    'Avenida',
-    'Travessa',
-    'Alameda',
-    'Rodovia',
-    'Praça',
-    'Estrada',
-    'Servidão',
-    ...extractBairroSearchTerms(main.bairro),
+  const suffixes = [
+    0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700,
+    750, 800, 850, 900, 950,
   ]
+  const exactSuffix = Number(digits.slice(5))
+  if (!suffixes.includes(exactSuffix)) suffixes.push(exactSuffix)
 
-  const [cepResults, streetResults] = await Promise.all([
-    Promise.allSettled(cepJobs),
-    uf && city
-      ? Promise.allSettled(
-          streetTerms.map((term) => fetchViaCepList(uf, city, term, signal)),
-        )
-      : Promise.resolve([] as PromiseSettledResult<ViaCepResponse[]>[]),
+  const [cepResults, districtResults] = await Promise.all([
+    Promise.allSettled(
+      suffixes.map(async (suffix) => {
+        const cep = `${prefix}${String(suffix).padStart(3, '0')}`
+        if (cep === digits) return main
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
+          signal,
+        })
+        if (!response.ok) return null
+        return (await response.json()) as ViaCepResponse
+      }),
+    ),
+    uf && city && district
+      ? fetchViaCepList(uf, city, district, signal)
+      : Promise.resolve([] as ViaCepResponse[]),
   ])
 
   const seen = new Set<string>()
@@ -171,24 +144,30 @@ export async function fetchAddressByCep(digits: string, signal: AbortSignal) {
     bairros.push(trimmed)
   }
 
+  const isRelatedToDistrict = (name?: string) => {
+    if (!district) return true
+    if (!name?.trim()) return false
+    return name.toLocaleLowerCase('pt-BR').includes(district.toLocaleLowerCase('pt-BR'))
+  }
+
   addBairro(main.bairro)
 
   for (const result of cepResults) {
     if (result.status !== 'fulfilled' || !result.value || result.value.erro) continue
     const item = result.value
     if ((item.localidade ?? '').trim() !== city) continue
+    // Na mesma faixa do CEP: só mantém se compartilhar o distrito (quando houver)
+    if (district && !isRelatedToDistrict(item.bairro)) continue
     addBairro(item.bairro)
   }
 
-  for (const result of streetResults) {
-    if (result.status !== 'fulfilled') continue
-    for (const item of result.value) {
-      if (item.erro) continue
-      if ((item.localidade ?? '').trim() && (item.localidade ?? '').trim() !== city) {
-        continue
-      }
-      addBairro(item.bairro)
+  for (const item of districtResults) {
+    if (item.erro) continue
+    if ((item.localidade ?? '').trim() && (item.localidade ?? '').trim() !== city) {
+      continue
     }
+    if (!isRelatedToDistrict(item.bairro)) continue
+    addBairro(item.bairro)
   }
 
   bairros.sort((a, b) => a.localeCompare(b, 'pt-BR'))
