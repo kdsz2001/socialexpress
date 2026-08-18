@@ -11,7 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import { SaveToast } from '../components/ui/SaveToast'
-import { prepareAvatarDataUrl } from '../lib/avatarImage'
+import { AvatarCropModal } from '../components/ui/AvatarCropModal'
 import { isValidCpf, maskCpfCnpj, onlyDigits } from '../lib/cpfCnpj'
 import {
   getUserDisplayName,
@@ -59,6 +59,7 @@ export function MyProfile() {
   const [avatarError, setAvatarError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [toastOpen, setToastOpen] = useState(false)
+  const [cropSource, setCropSource] = useState<string | null>(null)
   const closeToast = useCallback(() => setToastOpen(false), [])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -101,22 +102,24 @@ export function MyProfile() {
     }
 
     const reader = new FileReader()
-    reader.onload = async () => {
+    reader.onload = () => {
       const result = typeof reader.result === 'string' ? reader.result : ''
       if (!result.startsWith('data:image/')) {
         setAvatarError('Não foi possível ler a imagem.')
         return
       }
-      try {
-        const prepared = await prepareAvatarDataUrl(result)
-        setAvatarError('')
-        patch('avatarDataUrl', prepared)
-      } catch {
-        setAvatarError('Não foi possível processar a imagem.')
-      }
+      setAvatarError('')
+      setCropSource(result)
     }
     reader.onerror = () => setAvatarError('Não foi possível ler a imagem.')
     reader.readAsDataURL(file)
+  }
+
+  const cancelCrop = () => setCropSource(null)
+
+  const confirmCrop = (dataUrl: string) => {
+    patch('avatarDataUrl', dataUrl)
+    setCropSource(null)
   }
 
   const removeAvatar = () => {
@@ -170,6 +173,12 @@ export function MyProfile() {
   return (
     <div className="client-detail my-profile">
       <SaveToast open={toastOpen} onClose={closeToast} />
+      <AvatarCropModal
+        open={Boolean(cropSource)}
+        imageSrc={cropSource ?? ''}
+        onCancel={cancelCrop}
+        onConfirm={confirmCrop}
+      />
 
       <aside className="client-detail__profile">
         <h2 className="client-detail__name">{displayName}</h2>
