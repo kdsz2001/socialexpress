@@ -179,6 +179,14 @@
   cursor: pointer;
   transition: background 0.12s ease;
   overflow: hidden;
+  font: inherit;
+  color: inherit;
+}
+
+.agenda__month-cell:has(.agenda__month-chip:hover),
+.agenda__month-cell:has(.agenda__month-chip:focus-visible) {
+  overflow: visible;
+  z-index: 6;
 }
 
 .agenda__month-cell:nth-child(7n) {
