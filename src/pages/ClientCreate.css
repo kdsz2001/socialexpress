@@ -376,6 +376,20 @@
   align-items: flex-start;
   gap: 10px;
   max-width: 520px;
+  width: 100%;
+}
+
+.client-create__phone-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.client-create__phone-line .client-create__field {
+  flex: 1;
+  max-width: none;
+  min-width: 0;
 }
 
 .client-create__checks {

@@ -452,51 +452,72 @@ export function ClientCreate() {
                 Telefone {index === 0 && <span className="req">*</span>}
               </label>
               <div className="client-create__phone-block">
-                <div className="client-create__field">
-                  <div
-                    className={`client-create__input-wrap${
-                      index === 0 && phoneError ? ' is-invalid' : ''
-                    }`}
-                  >
-                    <input
-                      id={`phone-${index}`}
-                      className={`client-create__input${
+                <div className="client-create__phone-line">
+                  <div className="client-create__field">
+                    <div
+                      className={`client-create__input-wrap${
                         index === 0 && phoneError ? ' is-invalid' : ''
                       }`}
-                      inputMode="numeric"
-                      placeholder="(99) 99999-9999"
-                      value={phone.number}
-                      onChange={(event) => {
-                        const next = [...phones]
-                        next[index] = {
-                          ...phone,
-                          number: maskPhone(event.target.value),
+                    >
+                      <input
+                        id={`phone-${index}`}
+                        className={`client-create__input${
+                          index === 0 && phoneError ? ' is-invalid' : ''
+                        }`}
+                        inputMode="numeric"
+                        placeholder="(99) 99999-9999"
+                        value={phone.number}
+                        onChange={(event) => {
+                          const next = [...phones]
+                          next[index] = {
+                            ...phone,
+                            number: maskPhone(event.target.value),
+                          }
+                          setPhones(next)
+                          if (index === 0 && phoneError) setPhoneError('')
+                        }}
+                        onBlur={(event) => {
+                          if (index !== 0) return
+                          validatePhoneField(event.currentTarget.value)
+                        }}
+                        aria-invalid={index === 0 && Boolean(phoneError)}
+                        aria-describedby={
+                          index === 0 && phoneError ? 'phone-error' : undefined
                         }
-                        setPhones(next)
-                        if (index === 0 && phoneError) setPhoneError('')
-                      }}
-                      onBlur={(event) => {
-                        if (index !== 0) return
-                        validatePhoneField(event.currentTarget.value)
-                      }}
-                      aria-invalid={index === 0 && Boolean(phoneError)}
-                      aria-describedby={
-                        index === 0 && phoneError ? 'phone-error' : undefined
-                      }
-                    />
-                    {index === 0 && phoneError ? (
-                      <CircleAlert
-                        className="client-create__input-error-icon"
-                        size={18}
-                        strokeWidth={2.25}
-                        aria-hidden="true"
                       />
+                      {index === 0 && phoneError ? (
+                        <CircleAlert
+                          className="client-create__input-error-icon"
+                          size={18}
+                          strokeWidth={2.25}
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                    </div>
+                    {index === 0 && phoneError ? (
+                      <p id="phone-error" className="client-create__field-error">
+                        {phoneError}
+                      </p>
                     ) : null}
                   </div>
-                  {index === 0 && phoneError ? (
-                    <p id="phone-error" className="client-create__field-error">
-                      {phoneError}
-                    </p>
+                  {phones.length > 1 ? (
+                    <button
+                      type="button"
+                      className="client-create__trash"
+                      aria-label="Remover telefone"
+                      onClick={() => {
+                        setPhones((current) => {
+                          const next = current.filter((_, i) => i !== index)
+                          if (!next.some((item) => item.primary) && next[0]) {
+                            next[0] = { ...next[0], primary: true }
+                          }
+                          return next
+                        })
+                        if (index === 0) setPhoneError('')
+                      }}
+                    >
+                      <Trash2 size={16} strokeWidth={2} />
+                    </button>
                   ) : null}
                 </div>
                 <div className="client-create__checks">

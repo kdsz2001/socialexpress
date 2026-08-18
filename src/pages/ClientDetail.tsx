@@ -515,16 +515,34 @@ export function ClientDetail() {
                     Telefone {index === 0 && <span className="req">*</span>}
                   </label>
                   <div className="client-create__phone-block">
-                    <input
-                      id={`detail-phone-${index}`}
-                      className="client-create__input"
-                      value={item.number}
-                      onChange={(e) => {
-                        const next = [...draft.phones]
-                        next[index] = { ...item, number: maskPhone(e.target.value) }
-                        patch('phones', next)
-                      }}
-                    />
+                    <div className="client-create__phone-line">
+                      <input
+                        id={`detail-phone-${index}`}
+                        className="client-create__input"
+                        value={item.number}
+                        onChange={(e) => {
+                          const next = [...draft.phones]
+                          next[index] = { ...item, number: maskPhone(e.target.value) }
+                          patch('phones', next)
+                        }}
+                      />
+                      {draft.phones.length > 1 ? (
+                        <button
+                          type="button"
+                          className="client-create__trash"
+                          aria-label="Remover telefone"
+                          onClick={() => {
+                            const next = draft.phones.filter((_, i) => i !== index)
+                            if (!next.some((phoneItem) => phoneItem.primary) && next[0]) {
+                              next[0] = { ...next[0], primary: true }
+                            }
+                            patch('phones', next)
+                          }}
+                        >
+                          <Trash2 size={16} strokeWidth={2} />
+                        </button>
+                      ) : null}
+                    </div>
                     <div className="client-create__checks">
                       <label className="client-create__check">
                         <input

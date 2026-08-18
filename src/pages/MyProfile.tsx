@@ -9,6 +9,7 @@ import {
   Pencil,
   Plus,
   Settings,
+  Trash2,
   UserRound,
   X,
 } from 'lucide-react'
@@ -564,56 +565,75 @@ export function MyProfile() {
                       Telefone
                     </label>
                     <div className="client-create__phone-block">
-                      <div className="client-create__field">
-                        <div
-                          className={`client-create__input-wrap${
-                            index === 0 && phoneError ? ' is-invalid' : ''
-                          }`}
-                        >
-                          <input
-                            id={`profile-phone-${index}`}
-                            className={`client-create__input${
+                      <div className="client-create__phone-line">
+                        <div className="client-create__field">
+                          <div
+                            className={`client-create__input-wrap${
                               index === 0 && phoneError ? ' is-invalid' : ''
                             }`}
-                            inputMode="numeric"
-                            placeholder="(99) 99999-9999"
-                            value={phone.number}
-                            onChange={(event) => {
-                              const next = [...draft.phones]
-                              if (!next[index]) {
-                                next[index] = {
-                                  number: '',
-                                  primary: index === 0,
-                                  whatsapp: false,
+                          >
+                            <input
+                              id={`profile-phone-${index}`}
+                              className={`client-create__input${
+                                index === 0 && phoneError ? ' is-invalid' : ''
+                              }`}
+                              inputMode="numeric"
+                              placeholder="(99) 99999-9999"
+                              value={phone.number}
+                              onChange={(event) => {
+                                const next = [...draft.phones]
+                                if (!next[index]) {
+                                  next[index] = {
+                                    number: '',
+                                    primary: index === 0,
+                                    whatsapp: false,
+                                  }
                                 }
-                              }
-                              next[index] = {
-                                ...next[index],
-                                number: maskPhone(event.target.value),
-                              }
-                              setPhones(next)
-                              if (index === 0 && phoneError) setPhoneError('')
-                            }}
-                            onBlur={(event) => {
-                              if (index !== 0) return
-                              if (!event.currentTarget.value.trim()) {
-                                setPhoneError(blankFieldError('Telefone'))
-                              } else {
-                                setPhoneError('')
-                              }
-                            }}
-                          />
-                          {index === 0 && phoneError ? (
-                            <CircleAlert
-                              className="client-create__input-error-icon"
-                              size={18}
-                              strokeWidth={2.25}
-                              aria-hidden="true"
+                                next[index] = {
+                                  ...next[index],
+                                  number: maskPhone(event.target.value),
+                                }
+                                setPhones(next)
+                                if (index === 0 && phoneError) setPhoneError('')
+                              }}
+                              onBlur={(event) => {
+                                if (index !== 0) return
+                                if (!event.currentTarget.value.trim()) {
+                                  setPhoneError(blankFieldError('Telefone'))
+                                } else {
+                                  setPhoneError('')
+                                }
+                              }}
                             />
+                            {index === 0 && phoneError ? (
+                              <CircleAlert
+                                className="client-create__input-error-icon"
+                                size={18}
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                              />
+                            ) : null}
+                          </div>
+                          {index === 0 && phoneError ? (
+                            <p className="client-create__field-error">{phoneError}</p>
                           ) : null}
                         </div>
-                        {index === 0 && phoneError ? (
-                          <p className="client-create__field-error">{phoneError}</p>
+                        {draft.phones.length > 1 ? (
+                          <button
+                            type="button"
+                            className="client-create__trash"
+                            aria-label="Remover telefone"
+                            onClick={() => {
+                              const next = draft.phones.filter((_, i) => i !== index)
+                              if (!next.some((item) => item.primary) && next[0]) {
+                                next[0] = { ...next[0], primary: true }
+                              }
+                              setPhones(next)
+                              if (index === 0) setPhoneError('')
+                            }}
+                          >
+                            <Trash2 size={16} strokeWidth={2} />
+                          </button>
                         ) : null}
                       </div>
                       <div className="client-create__checks">
