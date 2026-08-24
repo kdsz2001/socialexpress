@@ -2,19 +2,14 @@
   height: var(--topbar-height);
   background: var(--topbar-bg);
   border-bottom: 1px solid #ebedf3;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 var(--app-content-pad-x, 30px);
   flex-shrink: 0;
   position: sticky;
   top: 0;
   z-index: 20;
-}
-
-.topbar__inner {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  height: 100%;
-  padding: 0 var(--app-content-pad-x, 30px);
 }
 
 .topbar__menu {
@@ -317,7 +312,7 @@
 }
 
 @media (max-width: 640px) {
-  .topbar__inner {
+  .topbar {
     padding: 0 15px;
   }
 

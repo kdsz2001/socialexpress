@@ -1,18 +1,15 @@
 .clients-subheader {
   position: relative;
   z-index: 25; /* acima da topbar (20) para o tooltip não ficar por baixo */
-  flex-shrink: 0;
-  background: #ffffff;
-  border-bottom: 1px solid #ebedf3;
-  overflow: visible;
-}
-
-.clients-subheader__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-shrink: 0;
+  background: #ffffff;
   padding: 18px var(--app-content-pad-x, 30px);
+  border-bottom: 1px solid #ebedf3;
+  overflow: visible;
 }
 
 .clients-subheader__heading {
@@ -136,7 +133,7 @@
 }
 
 @media (max-width: 900px) {
-  .clients-subheader__inner {
+  .clients-subheader {
     padding: 14px 15px;
   }
 

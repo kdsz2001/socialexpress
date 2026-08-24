@@ -38,8 +38,6 @@
   --app-panel-max: calc(
     100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x))
   );
-  /* Barras superiores: inclui o padding lateral para alinhar com o card */
-  --app-header-max: calc(100vw - var(--sidebar-width));
 
   font-family: 'Poppins', Helvetica, sans-serif;
   font-size: 13px;
