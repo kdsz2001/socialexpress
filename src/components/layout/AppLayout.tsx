@@ -30,6 +30,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/produtos': 'Produtos',
   '/funcionarios': 'Funcionários',
   '/pedidos': 'Pedidos',
+  '/orcamentos': 'Orçamentos',
   '/financeiro': 'Financeiro',
   '/fornecedores': 'Fornecedores',
   '/relatorios': 'Relatórios',

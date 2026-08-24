@@ -20,7 +20,6 @@ type TopbarProps = {
 type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
 type EmployeesTab = 'lista' | 'permissoes'
-type OrdersTab = 'orcamentos'
 
 const SEARCH_LIMIT = 8
 const PANEL_WIDTH = 420
@@ -84,7 +83,6 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     : paramTab === 'permissoes'
       ? 'permissoes'
       : 'lista'
-  const ordersTab: OrdersTab | null = isOrdersSection ? 'orcamentos' : null
 
   const trimmedQuery = query.trim()
   const hasQuery = trimmedQuery.length > 0
@@ -364,14 +362,12 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </div>
       ) : null}
 
-      {isOrdersSection && ordersTab ? (
-        <div className="topbar__tabs" role="tablist" aria-label="Pedidos">
+      {isOrdersSection ? (
+        <div className="topbar__tabs" aria-label="Pedidos">
           <button
             type="button"
-            role="tab"
-            aria-selected={ordersTab === 'orcamentos'}
-            className={`topbar__tab${ordersTab === 'orcamentos' ? ' is-active' : ''}`}
-            onClick={() => navigate('/pedidos')}
+            className="topbar__tab"
+            onClick={() => navigate('/orcamentos')}
           >
             Orçamentos
           </button>

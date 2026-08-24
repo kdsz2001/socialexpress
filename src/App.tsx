@@ -13,6 +13,7 @@ import { Orders } from './pages/Orders'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
+  { path: '/orcamentos', title: 'Orçamentos' },
   { path: '/financeiro', title: 'Financeiro' },
   { path: '/fornecedores', title: 'Fornecedores' },
   { path: '/relatorios', title: 'Relatórios' },
