@@ -3,7 +3,7 @@ import {
   ArrowUpDown,
   CalendarDays,
   ChevronDown,
-  ChevronUp,
+  ChevronsUp,
   Search,
   SquarePen,
   Trash2,
@@ -560,8 +560,8 @@ export function Financeiro() {
             aria-expanded="false"
             onClick={() => setOverviewOpen(true)}
           >
-            <ChevronUp size={16} strokeWidth={2.5} />
-            Visão geral
+            <ChevronsUp size={18} strokeWidth={2.25} />
+            <span className="financeiro-overview__trigger-label">Visão geral</span>
           </button>
         )}
       </div>

@@ -134,7 +134,15 @@ export function AppLayout() {
   }
 
   return (
-    <div className={`app-shell ${collapsed ? 'is-collapsed' : ''}`}>
+    <div
+      className={[
+        'app-shell',
+        collapsed ? 'is-collapsed' : '',
+        location.pathname === '/financeiro' ? 'is-finance' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <Sidebar collapsed={collapsed} onToggle={toggle} />
       {!collapsed && isMobile && (
         <button

@@ -250,6 +250,10 @@
   scrollbar-color: transparent transparent;
 }
 
+.app-shell.is-finance .sidebar__nav {
+  padding-bottom: 56px;
+}
+
 .sidebar__nav:hover {
   scrollbar-color: var(--sidebar-scroll-thumb) transparent;
 }
