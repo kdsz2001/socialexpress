@@ -6,6 +6,7 @@ import { Topbar } from './Topbar'
 import { ClientsSubheader } from './ClientsSubheader'
 import { ProfileSubheader } from './ProfileSubheader'
 import { AgendaSubheader } from './AgendaSubheader'
+import { EventsSubheader } from './EventsSubheader'
 import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
 import { SaveToast } from '../ui/SaveToast'
 import type { Appointment } from '../../lib/agendaStore'
@@ -167,6 +168,7 @@ export function AppLayout() {
         {location.pathname === '/agenda' && (
           <AgendaSubheader onNewAppointment={() => openNewAppointment()} />
         )}
+        {location.pathname === '/eventos' && <EventsSubheader />}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
             <Outlet />
