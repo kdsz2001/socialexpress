@@ -75,7 +75,8 @@
 .app-content__inner > .events,
 .app-content__inner > .agenda,
 .app-content__inner > .products,
-.app-content__inner > .employees {
+.app-content__inner > .employees,
+.app-content__inner > .orders {
   width: 100%;
   max-width: var(--app-panel-max);
   margin-inline: 0;
@@ -87,7 +88,8 @@
 .app-shell.is-collapsed .app-content__inner > .events,
 .app-shell.is-collapsed .app-content__inner > .agenda,
 .app-shell.is-collapsed .app-content__inner > .products,
-.app-shell.is-collapsed .app-content__inner > .employees {
+.app-shell.is-collapsed .app-content__inner > .employees,
+.app-shell.is-collapsed .app-content__inner > .orders {
   margin-inline: auto;
 }
 
@@ -191,6 +193,7 @@
   .app-content__inner > .agenda,
   .app-content__inner > .products,
   .app-content__inner > .employees,
+  .app-content__inner > .orders,
   .app-panel-align {
     max-width: none;
     margin-inline: 0;
@@ -202,6 +205,7 @@
   .app-shell.is-collapsed .app-content__inner > .agenda,
   .app-shell.is-collapsed .app-content__inner > .products,
   .app-shell.is-collapsed .app-content__inner > .employees,
+  .app-shell.is-collapsed .app-content__inner > .orders,
   .app-shell.is-collapsed .app-panel-align {
     margin-inline: 0;
   }

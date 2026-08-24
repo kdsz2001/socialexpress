@@ -9,10 +9,10 @@ import { Agenda } from './pages/Agenda'
 import { Events } from './pages/Events'
 import { Products } from './pages/Products'
 import { Employees } from './pages/Employees'
+import { Orders } from './pages/Orders'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
-  { path: '/pedidos', title: 'Pedidos' },
   { path: '/financeiro', title: 'Financeiro' },
   { path: '/fornecedores', title: 'Fornecedores' },
   { path: '/relatorios', title: 'Relatórios' },
@@ -33,6 +33,7 @@ export default function App() {
         <Route path="/eventos" element={<Events />} />
         <Route path="/produtos" element={<Products />} />
         <Route path="/funcionarios" element={<Employees />} />
+        <Route path="/pedidos" element={<Orders />} />
         {pages.map((page) => (
           <Route
             key={page.path}
