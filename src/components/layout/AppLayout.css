@@ -41,43 +41,40 @@
   overflow: auto;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  /* flex-start: não estica o miolo quando o aside abre/fecha */
+  align-items: flex-start;
   padding: 25px var(--app-content-pad-x, 30px) 0;
   box-sizing: border-box;
 }
 
 /*
-  Locked content width (Claral container):
-  Always sized as if the sidebar were expanded, so collapsing only
-  shifts this block left and leaves empty space on the right.
+  Tamanho FIXO do conteúdo (Claral):
+  a largura não muda com o menu — só a posição (via padding-left do .app-main).
 */
 .app-content__inner {
   flex: 1 0 auto;
-  flex-grow: 1;
   flex-shrink: 0;
   padding-bottom: 20px;
   box-sizing: border-box;
-  width: min(
-    var(--app-container-max, 1320px),
-    calc(100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x, 30px)))
+  width: var(--app-content-width, 1320px);
+  max-width: calc(
+    100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x, 30px))
   );
-  max-width: 100%;
   margin-left: 0;
-  margin-right: auto;
+  margin-right: 0;
 }
 
 .app-footer {
   flex-shrink: 0;
-  width: min(
-    var(--app-container-max, 1320px),
-    calc(100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x, 30px)))
+  width: var(--app-content-width, 1320px);
+  max-width: calc(
+    100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x, 30px))
   );
-  max-width: 100%;
   margin-top: auto;
   margin-left: 0;
-  margin-right: auto;
+  margin-right: 0;
   background: #ffffff;
-  padding: 14px var(--app-content-pad-x, 30px);
+  padding: 14px 0;
   font-size: 0.95rem;
   font-weight: 400;
   color: #b5b5c3;
