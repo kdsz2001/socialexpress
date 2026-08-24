@@ -54,6 +54,29 @@
   box-sizing: border-box;
 }
 
+/*
+  Clientes / Agenda / Eventos:
+  - largura trava no espaço do menu ABERTO (não estica ao fechar)
+  - com menu fechado, o painel só centraliza no miolo
+*/
+.app-content__inner > .clients,
+.app-content__inner > .events,
+.app-content__inner > .agenda {
+  width: 100%;
+  max-width: calc(
+    100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x, 30px))
+  );
+  margin-inline: 0;
+  box-sizing: border-box;
+  transition: margin-inline 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-shell.is-collapsed .app-content__inner > .clients,
+.app-shell.is-collapsed .app-content__inner > .events,
+.app-shell.is-collapsed .app-content__inner > .agenda {
+  margin-inline: auto;
+}
+
 .app-footer {
   flex-shrink: 0;
   width: 100%;
@@ -147,6 +170,20 @@
   .app-footer {
     width: 100%;
     max-width: none;
+  }
+
+  .app-content__inner > .clients,
+  .app-content__inner > .events,
+  .app-content__inner > .agenda {
+    max-width: none;
+    margin-inline: 0;
+    transition: none;
+  }
+
+  .app-shell.is-collapsed .app-content__inner > .clients,
+  .app-shell.is-collapsed .app-content__inner > .events,
+  .app-shell.is-collapsed .app-content__inner > .agenda {
+    margin-inline: 0;
   }
 
   .app-footer {
