@@ -563,7 +563,7 @@ export function Financeiro() {
                   aria-expanded="false"
                   onClick={() => setOverviewOpen(true)}
                 >
-                  <ChevronsUp size={18} strokeWidth={2.25} />
+                  <ChevronsUp size={16} strokeWidth={2.5} />
                   <span className="financeiro-overview__trigger-label">Visão geral</span>
                 </button>
               )}

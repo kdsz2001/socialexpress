@@ -1,11 +1,11 @@
 .financeiro {
   width: 100%;
-  padding-bottom: 4.5rem;
+  padding-bottom: 3rem;
   animation: financeiro-in 0.35s ease both;
 }
 
 .financeiro.has-overview {
-  padding-bottom: 5.75rem;
+  padding-bottom: 4.5rem;
 }
 
 .financeiro__card {
@@ -357,18 +357,19 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.55rem;
+  gap: 0.5rem;
   width: var(--sidebar-width);
-  height: 48px;
+  height: 40px;
   margin: 0;
-  padding: 0 1.35rem;
+  padding: 0 25px;
   border: 0;
   border-radius: 0;
   background: #e1f0ff;
   color: #3699ff;
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 0.925rem;
   font-weight: 500;
+  line-height: 1.2;
   box-shadow: none;
   cursor: pointer;
   transition:
@@ -379,6 +380,10 @@
 
 .financeiro-overview__trigger:hover {
   background: #c9e4ff;
+}
+
+.financeiro-overview__trigger svg {
+  flex-shrink: 0;
 }
 
 .app-shell.is-collapsed .financeiro-overview__trigger {
@@ -402,20 +407,20 @@
 .financeiro-overview__panel {
   pointer-events: auto;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
-  min-height: 64px;
+  min-height: 56px;
   width: 100%;
   padding: 0;
   background: #ffffff;
   border-top: 1px solid #ebedf3;
-  box-shadow: 0 -6px 24px rgba(76, 87, 125, 0.08);
+  box-shadow: 0 -4px 20px rgba(76, 87, 125, 0.08);
   animation: financeiro-overview-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .financeiro-overview__toggle {
   width: var(--sidebar-width);
-  height: 64px;
+  min-height: 56px;
   display: grid;
   place-items: center;
   border: 0;
@@ -437,12 +442,12 @@
 
 .financeiro-overview__metrics {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: 2.5rem;
   flex-wrap: wrap;
   min-width: 0;
   flex: 1;
-  padding: 0.85rem var(--app-content-pad-x, 30px);
+  padding: 0.65rem var(--app-content-pad-x, 30px);
 }
 
 .financeiro-overview__metric {

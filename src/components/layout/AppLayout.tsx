@@ -168,7 +168,9 @@ export function AppLayout() {
           <div className="app-content__inner">
             <Outlet />
           </div>
-          <footer className="app-footer">2016© Social Express</footer>
+          {location.pathname === '/financeiro' ? null : (
+            <footer className="app-footer">2016© Social Express</footer>
+          )}
         </main>
       </div>
 
