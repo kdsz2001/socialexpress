@@ -5,14 +5,11 @@ import {
   Tag,
 } from 'lucide-react'
 import { useProducts } from '../../hooks/useProducts'
-import { countActiveProducts } from '../../lib/productsStore'
 import './ClientsSubheader.css'
 
 export function ProductsSubheader() {
   const products = useProducts()
-  const activeCount = countActiveProducts()
-  // re-read when products list identity changes
-  void products
+  const activeCount = products.filter((item) => item.status === 'ativo').length
 
   const statusLabel =
     activeCount === 0
