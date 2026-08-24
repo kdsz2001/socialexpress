@@ -33,9 +33,6 @@
   --sidebar-width: 265px;
   --sidebar-collapsed: 70px;
   --topbar-height: 65px;
-  /* Largura fixa do miolo (Claral container-xxl) — só desloca com o menu */
-  --app-content-width: 1320px;
-  --app-container-max: 1320px;
   --app-content-pad-x: 30px;
 
   font-family: 'Poppins', Helvetica, sans-serif;

@@ -8,31 +8,28 @@
 
 /*
   Claral behavior:
-  - app-main width is locked (via --app-main-width) to the expanded-aside size
-  - toggling the sidebar only changes translateX
-  - quadrants never grow/shrink with the menu
+  - sidebar is fixed; app-main clears it with margin-left
+  - collapsing the menu only changes that margin (content fills the rest)
+  - dashboard cards keep fixed px widths so they never stretch
 */
 .app-main {
-  --app-main-shift: var(--sidebar-width);
-  flex: 0 0 auto;
-  width: var(--app-main-width, calc(100vw - var(--sidebar-width)));
-  min-width: var(--app-main-width, calc(100vw - var(--sidebar-width)));
-  max-width: var(--app-main-width, calc(100vw - var(--sidebar-width)));
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  max-width: none;
   min-height: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
-  margin: 0;
+  margin: 0 0 0 var(--sidebar-width);
   padding: 0;
   box-sizing: border-box;
-  transform: translate3d(var(--app-main-shift), 0, 0);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
-  will-change: transform;
 }
 
 .app-shell.is-collapsed .app-main {
-  --app-main-shift: var(--sidebar-collapsed);
+  margin-left: var(--sidebar-collapsed);
 }
 
 .app-content {
@@ -131,12 +128,12 @@
     width: 100%;
     min-width: 0;
     max-width: none;
-    transform: none;
+    margin-left: 0;
     transition: none;
   }
 
   .app-shell.is-collapsed .app-main {
-    --app-main-shift: 0px;
+    margin-left: 0;
   }
 
   .app-content {

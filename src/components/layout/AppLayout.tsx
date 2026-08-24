@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { ChevronUp } from 'lucide-react'
 import { Sidebar } from './Sidebar'
@@ -120,28 +120,6 @@ export function AppLayout() {
     onScroll()
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
-  }, [])
-
-  /* Largura do miolo trava no tamanho com menu ABERTO; no toggle só desloca */
-  useLayoutEffect(() => {
-    const SIDEBAR_EXPANDED = 265
-    const MOBILE_MAX = 900
-
-    const lockMainWidth = () => {
-      const root = document.documentElement
-      if (window.innerWidth <= MOBILE_MAX) {
-        root.style.removeProperty('--app-main-width')
-        return
-      }
-      root.style.setProperty('--app-main-width', `${window.innerWidth - SIDEBAR_EXPANDED}px`)
-    }
-
-    lockMainWidth()
-    window.addEventListener('resize', lockMainWidth)
-    return () => {
-      window.removeEventListener('resize', lockMainWidth)
-      document.documentElement.style.removeProperty('--app-main-width')
-    }
   }, [])
 
   const toggle = () => setCollapsed((v) => !v)
