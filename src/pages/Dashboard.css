@@ -1,13 +1,27 @@
 .dashboard {
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
   animation: dashboard-in 0.35s ease both;
 }
 
+/*
+  Quadrantes com largura FIXA em px (estilo Claral):
+  ao abrir/fechar o menu eles só mudam de lugar — nunca esticam.
+*/
 .dashboard__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 350px 350px 350px;
   gap: 25px;
   align-items: start;
+  width: max-content;
+  justify-content: start;
+}
+
+.dashboard__grid > * {
+  width: 350px;
+  max-width: 350px;
+  min-width: 350px;
+  box-sizing: border-box;
 }
 
 @keyframes dashboard-in {
@@ -21,15 +35,25 @@
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .dashboard__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 350px 350px;
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
+  .dashboard {
+    width: 100%;
+  }
+
   .dashboard__grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    width: 100%;
+  }
+
+  .dashboard__grid > * {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
   }
 }
