@@ -6,21 +6,28 @@
   overflow-x: hidden;
 }
 
+/*
+  Claral/Metronic aside behavior:
+  padding-left reserves space for the fixed sidebar. Toggling only changes
+  that padding — the page body keeps a locked width and slides with it.
+*/
 .app-main {
   flex: 1;
   min-width: 0;
   min-height: 0;
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  padding-left: var(--sidebar-width);
+  margin-left: 0;
+  transition: padding-left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
   box-sizing: border-box;
 }
 
 .app-shell.is-collapsed .app-main {
-  margin-left: var(--sidebar-collapsed);
+  padding-left: var(--sidebar-collapsed);
 }
 
 /*
@@ -34,39 +41,48 @@
   overflow: auto;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   padding: 25px var(--app-content-pad-x, 30px) 0;
+  box-sizing: border-box;
 }
 
 /*
-  Claral-style content width:
-  - Cap like container-xxl so the dashboard does not keep stretching on large screens
-  - Also lock to the width available with the EXPANDED aside, so collapsing the menu
-    only shifts the block (margin on .app-main) instead of growing card columns
+  Locked content width (Claral container):
+  Always sized as if the sidebar were expanded, so collapsing only
+  shifts this block left and leaves empty space on the right.
 */
 .app-content__inner {
   flex: 1 0 auto;
+  flex-grow: 1;
+  flex-shrink: 0;
   padding-bottom: 20px;
-  width: 100%;
-  max-width: min(
-    var(--app-container-max),
+  box-sizing: border-box;
+  width: min(
+    var(--app-container-max, 1320px),
     calc(100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x, 30px)))
   );
-  margin-left: auto;
+  max-width: 100%;
+  margin-left: 0;
   margin-right: auto;
-  box-sizing: border-box;
 }
 
 .app-footer {
   flex-shrink: 0;
+  width: min(
+    var(--app-container-max, 1320px),
+    calc(100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x, 30px)))
+  );
+  max-width: 100%;
   margin-top: auto;
+  margin-left: 0;
+  margin-right: auto;
   background: #ffffff;
-  margin-left: calc(-1 * var(--app-content-pad-x, 30px));
-  margin-right: calc(-1 * var(--app-content-pad-x, 30px));
   padding: 14px var(--app-content-pad-x, 30px);
   font-size: 0.95rem;
   font-weight: 400;
   color: #b5b5c3;
   border-top: 1px solid #ebedf3;
+  box-sizing: border-box;
 }
 
 .app-overlay {
@@ -128,24 +144,24 @@
 
 @media (max-width: 900px) {
   .app-main {
-    margin-left: 0;
+    padding-left: 0;
   }
 
   .app-shell.is-collapsed .app-main {
-    margin-left: 0;
+    padding-left: 0;
   }
 
   .app-content {
     padding: 15px 15px 0;
   }
 
-  .app-content__inner {
+  .app-content__inner,
+  .app-footer {
+    width: 100%;
     max-width: none;
   }
 
   .app-footer {
-    margin-left: -15px;
-    margin-right: -15px;
     padding: 12px 15px;
   }
 
