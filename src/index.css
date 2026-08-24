@@ -33,6 +33,9 @@
   --sidebar-width: 265px;
   --sidebar-collapsed: 70px;
   --topbar-height: 65px;
+  /* Claral/Metronic container-xxl — page body keeps this cap when the aside toggles */
+  --app-container-max: 1320px;
+  --app-content-pad-x: 30px;
 
   font-family: 'Poppins', Helvetica, sans-serif;
   font-size: 13px;
