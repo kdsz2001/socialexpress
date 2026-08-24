@@ -4,7 +4,6 @@ import {
   ArrowUpDown,
   CalendarDays,
   ChevronDown,
-  ChevronsUp,
   Search,
   SquarePen,
   Trash2,
@@ -533,7 +532,7 @@ export function Financeiro() {
                     aria-label="Recolher visão geral"
                     onClick={() => setOverviewOpen(false)}
                   >
-                    <ArrowUpDown size={18} strokeWidth={2.25} />
+                    <ArrowUpDown size={16} strokeWidth={2.25} />
                   </button>
                   <div className="financeiro-overview__metrics">
                     <div className="financeiro-overview__metric">
@@ -557,15 +556,17 @@ export function Financeiro() {
                   </div>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  className="financeiro-overview__trigger"
-                  aria-expanded="false"
-                  onClick={() => setOverviewOpen(true)}
-                >
-                  <ChevronsUp size={16} strokeWidth={2.5} />
-                  <span className="financeiro-overview__trigger-label">Visão geral</span>
-                </button>
+                <div className="financeiro-overview__bar">
+                  <button
+                    type="button"
+                    className="financeiro-overview__trigger"
+                    aria-expanded="false"
+                    onClick={() => setOverviewOpen(true)}
+                  >
+                    <ArrowUpDown size={16} strokeWidth={2.25} />
+                    <span className="financeiro-overview__trigger-label">Visão geral</span>
+                  </button>
+                </div>
               )}
             </div>,
             document.querySelector('.app-shell') ?? document.body,
