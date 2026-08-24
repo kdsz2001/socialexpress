@@ -43,6 +43,10 @@
   max-width: min(100%, 52rem);
 }
 
+.topbar__tabs--finance {
+  max-width: min(100%, 48rem);
+}
+
 .topbar__tab {
   border: 0;
   background: transparent;

@@ -10,11 +10,11 @@ import { Events } from './pages/Events'
 import { Products } from './pages/Products'
 import { Employees } from './pages/Employees'
 import { Orders } from './pages/Orders'
+import { Financeiro } from './pages/Financeiro'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
   { path: '/orcamentos', title: 'Orçamentos' },
-  { path: '/financeiro', title: 'Financeiro' },
   { path: '/fornecedores', title: 'Fornecedores' },
   { path: '/relatorios', title: 'Relatórios' },
   { path: '/configuracoes', title: 'Configurações' },
@@ -35,6 +35,7 @@ export default function App() {
         <Route path="/produtos" element={<Products />} />
         <Route path="/funcionarios" element={<Employees />} />
         <Route path="/pedidos" element={<Orders />} />
+        <Route path="/financeiro" element={<Financeiro />} />
         {pages.map((page) => (
           <Route
             key={page.path}

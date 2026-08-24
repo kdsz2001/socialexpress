@@ -1,0 +1,21 @@
+.financeiro-subheader__btn--income {
+  background: #e1f0ff;
+  color: #3699ff;
+}
+
+.financeiro-subheader__btn--income:hover,
+.financeiro-subheader__btn--income:focus-visible {
+  background: #c9e4ff;
+  color: #187de4;
+}
+
+.financeiro-subheader__btn--expense {
+  background: #ffe2e5;
+  color: #f64e60;
+}
+
+.financeiro-subheader__btn--expense:hover,
+.financeiro-subheader__btn--expense:focus-visible {
+  background: #ffcdd2;
+  color: #ee2d41;
+}

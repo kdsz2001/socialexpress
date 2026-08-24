@@ -10,6 +10,7 @@ import { EventsSubheader } from './EventsSubheader'
 import { ProductsSubheader } from './ProductsSubheader'
 import { EmployeesSubheader } from './EmployeesSubheader'
 import { OrdersSubheader } from './OrdersSubheader'
+import { FinanceiroSubheader } from './FinanceiroSubheader'
 import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
 import { SaveToast } from '../ui/SaveToast'
 import type { Appointment } from '../../lib/agendaStore'
@@ -154,6 +155,7 @@ export function AppLayout() {
         {location.pathname.startsWith('/produtos') && <ProductsSubheader />}
         {location.pathname.startsWith('/funcionarios') && <EmployeesSubheader />}
         {location.pathname === '/pedidos' && <OrdersSubheader />}
+        {location.pathname === '/financeiro' && <FinanceiroSubheader />}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
             <Outlet />

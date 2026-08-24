@@ -20,6 +20,7 @@ type TopbarProps = {
 type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
 type EmployeesTab = 'lista' | 'permissoes'
+type FinanceTab = 'caixa' | 'pagar' | 'receber' | 'dre'
 
 const SEARCH_LIMIT = 8
 const PANEL_WIDTH = 420
@@ -30,6 +31,13 @@ const PRODUCTS_TABS: { id: ProductsTab; label: string; path: string }[] = [
   { id: 'atributos', label: 'Atributos', path: '/produtos?tab=atributos' },
   { id: 'tipos', label: 'Tipos de produtos', path: '/produtos?tab=tipos' },
   { id: 'alteracao', label: 'Alteração em massa', path: '/produtos?tab=alteracao' },
+]
+
+const FINANCE_TABS: { id: FinanceTab; label: string; path: string }[] = [
+  { id: 'caixa', label: 'Movimentações do caixa', path: '/financeiro' },
+  { id: 'pagar', label: 'Contas a pagar', path: '/financeiro?tab=pagar' },
+  { id: 'receber', label: 'Contas a receber', path: '/financeiro?tab=receber' },
+  { id: 'dre', label: 'DRE', path: '/financeiro?tab=dre' },
 ]
 
 export function Topbar({ onMenuClick }: TopbarProps) {
@@ -51,6 +59,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const isProductsSection = location.pathname.startsWith('/produtos')
   const isEmployeesSection = location.pathname.startsWith('/funcionarios')
   const isOrdersSection = location.pathname === '/pedidos'
+  const isFinanceSection = location.pathname === '/financeiro'
   const isClientCreate = location.pathname === '/clientes/cadastrar'
   const isClientDetail =
     isClientsSection &&
@@ -83,6 +92,15 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     : paramTab === 'permissoes'
       ? 'permissoes'
       : 'lista'
+  const financeTab: FinanceTab | null = !isFinanceSection
+    ? null
+    : paramTab === 'pagar'
+      ? 'pagar'
+      : paramTab === 'receber'
+        ? 'receber'
+        : paramTab === 'dre'
+          ? 'dre'
+          : 'caixa'
 
   const trimmedQuery = query.trim()
   const hasQuery = trimmedQuery.length > 0
@@ -202,6 +220,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
   const setEmployeesTab = (tab: EmployeesTab) => {
     navigate(tab === 'permissoes' ? '/funcionarios?tab=permissoes' : '/funcionarios')
+  }
+
+  const setFinanceTab = (tab: FinanceTab) => {
+    const match = FINANCE_TABS.find((item) => item.id === tab)
+    if (match) navigate(match.path)
   }
 
   const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
@@ -371,6 +394,23 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           >
             Orçamentos
           </button>
+        </div>
+      ) : null}
+
+      {isFinanceSection && financeTab ? (
+        <div className="topbar__tabs topbar__tabs--finance" role="tablist" aria-label="Financeiro">
+          {FINANCE_TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={financeTab === item.id}
+              className={`topbar__tab${financeTab === item.id ? ' is-active' : ''}`}
+              onClick={() => setFinanceTab(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       ) : null}
 
