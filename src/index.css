@@ -34,6 +34,12 @@
   --sidebar-collapsed: 70px;
   --topbar-height: 65px;
   --app-content-pad-x: 30px;
+  /* Largura do miolo com menu aberto (conteúdo já dentro do padding) */
+  --app-panel-max: calc(
+    100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x))
+  );
+  /* Barras superiores: inclui o padding lateral para alinhar com o card */
+  --app-header-max: calc(100vw - var(--sidebar-width));
 
   font-family: 'Poppins', Helvetica, sans-serif;
   font-size: 13px;

@@ -2,14 +2,19 @@
   height: var(--topbar-height);
   background: var(--topbar-bg);
   border-bottom: 1px solid #ebedf3;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 25px;
+  display: block;
   flex-shrink: 0;
   position: sticky;
   top: 0;
   z-index: 20;
+}
+
+.topbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  padding: 0 var(--app-content-pad-x, 30px);
 }
 
 .topbar__menu {
@@ -34,7 +39,7 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  margin-left: 0.25rem;
+  margin-left: 0;
   min-width: 0;
 }
 
@@ -312,7 +317,7 @@
 }
 
 @media (max-width: 640px) {
-  .topbar {
+  .topbar__inner {
     padding: 0 15px;
   }
 

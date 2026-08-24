@@ -27,10 +27,12 @@ export function ProfileSubheader() {
 
   return (
     <header className="clients-subheader">
-      <div className="clients-subheader__heading">
-        <h1 className="clients-subheader__title">{title}</h1>
-        <span className="clients-subheader__sep" aria-hidden="true" />
-        <p className="clients-subheader__subtitle">{name}</p>
+      <div className="clients-subheader__inner app-header-align">
+        <div className="clients-subheader__heading">
+          <h1 className="clients-subheader__title">{title}</h1>
+          <span className="clients-subheader__sep" aria-hidden="true" />
+          <p className="clients-subheader__subtitle">{name}</p>
+        </div>
       </div>
     </header>
   )

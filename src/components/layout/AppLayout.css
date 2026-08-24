@@ -59,13 +59,32 @@
   - largura trava no espaço do menu ABERTO (não estica ao fechar)
   - com menu fechado, o painel só centraliza no miolo
 */
+.app-panel-align {
+  width: 100%;
+  max-width: var(--app-panel-max);
+  margin-inline: 0;
+  box-sizing: border-box;
+  transition: margin-inline 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-header-align {
+  width: 100%;
+  max-width: var(--app-header-max);
+  margin-inline: 0;
+  box-sizing: border-box;
+  transition: margin-inline 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-shell.is-collapsed .app-panel-align,
+.app-shell.is-collapsed .app-header-align {
+  margin-inline: auto;
+}
+
 .app-content__inner > .clients,
 .app-content__inner > .events,
 .app-content__inner > .agenda {
   width: 100%;
-  max-width: calc(
-    100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x, 30px))
-  );
+  max-width: var(--app-panel-max);
   margin-inline: 0;
   box-sizing: border-box;
   transition: margin-inline 0.5s cubic-bezier(0.22, 1, 0.36, 1);
@@ -174,7 +193,9 @@
 
   .app-content__inner > .clients,
   .app-content__inner > .events,
-  .app-content__inner > .agenda {
+  .app-content__inner > .agenda,
+  .app-panel-align,
+  .app-header-align {
     max-width: none;
     margin-inline: 0;
     transition: none;
@@ -182,7 +203,9 @@
 
   .app-shell.is-collapsed .app-content__inner > .clients,
   .app-shell.is-collapsed .app-content__inner > .events,
-  .app-shell.is-collapsed .app-content__inner > .agenda {
+  .app-shell.is-collapsed .app-content__inner > .agenda,
+  .app-shell.is-collapsed .app-panel-align,
+  .app-shell.is-collapsed .app-header-align {
     margin-inline: 0;
   }
 

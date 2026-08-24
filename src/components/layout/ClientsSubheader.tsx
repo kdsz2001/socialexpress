@@ -56,58 +56,60 @@ export function ClientsSubheader() {
   return (
     <>
       <header className="clients-subheader">
-        <div className="clients-subheader__heading">
-          <h1 className="clients-subheader__title">{title}</h1>
-          {showCount && (
-            <>
-              <span className="clients-subheader__sep" aria-hidden="true" />
-              <p className="clients-subheader__subtitle">{countLabel}</p>
-            </>
-          )}
-          {isDetail && detailName ? (
-            <>
-              <span className="clients-subheader__sep" aria-hidden="true" />
-              <p className="clients-subheader__subtitle">{detailName}</p>
-            </>
-          ) : null}
-        </div>
-
-        {showListActions && (
-          <div className="clients-subheader__actions">
-            <button
-              type="button"
-              className="clients-subheader__btn"
-              aria-label="Importar clientes"
-              onClick={() => setImportOpen(true)}
-            >
-              <CloudUpload size={18} strokeWidth={2} />
-              <span className="clients-subheader__tooltip" role="tooltip">
-                Importar clientes
-              </span>
-            </button>
-            <button
-              type="button"
-              className="clients-subheader__btn clients-subheader__btn--export"
-              aria-label="Exportar clientes"
-            >
-              <Download size={18} strokeWidth={2} />
-              <span className="clients-subheader__tooltip" role="tooltip">
-                Exportar clientes
-              </span>
-            </button>
+        <div className="clients-subheader__inner app-header-align">
+          <div className="clients-subheader__heading">
+            <h1 className="clients-subheader__title">{title}</h1>
+            {showCount && (
+              <>
+                <span className="clients-subheader__sep" aria-hidden="true" />
+                <p className="clients-subheader__subtitle">{countLabel}</p>
+              </>
+            )}
+            {isDetail && detailName ? (
+              <>
+                <span className="clients-subheader__sep" aria-hidden="true" />
+                <p className="clients-subheader__subtitle">{detailName}</p>
+              </>
+            ) : null}
           </div>
-        )}
 
-        {isDetail && (
-          <button
-            type="button"
-            className="clients-subheader__back"
-            onClick={() => navigate('/clientes')}
-          >
-            <ArrowLeft size={16} strokeWidth={2.25} />
-            Voltar
-          </button>
-        )}
+          {showListActions && (
+            <div className="clients-subheader__actions">
+              <button
+                type="button"
+                className="clients-subheader__btn"
+                aria-label="Importar clientes"
+                onClick={() => setImportOpen(true)}
+              >
+                <CloudUpload size={18} strokeWidth={2} />
+                <span className="clients-subheader__tooltip" role="tooltip">
+                  Importar clientes
+                </span>
+              </button>
+              <button
+                type="button"
+                className="clients-subheader__btn clients-subheader__btn--export"
+                aria-label="Exportar clientes"
+              >
+                <Download size={18} strokeWidth={2} />
+                <span className="clients-subheader__tooltip" role="tooltip">
+                  Exportar clientes
+                </span>
+              </button>
+            </div>
+          )}
+
+          {isDetail && (
+            <button
+              type="button"
+              className="clients-subheader__back"
+              onClick={() => navigate('/clientes')}
+            >
+              <ArrowLeft size={16} strokeWidth={2.25} />
+              Voltar
+            </button>
+          )}
+        </div>
       </header>
 
       <ImportClientsModal open={importOpen} onClose={() => setImportOpen(false)} />

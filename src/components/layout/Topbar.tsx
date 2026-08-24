@@ -248,88 +248,90 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
   return (
     <header className="topbar">
-      <button
-        type="button"
-        className="topbar__menu"
-        onClick={onMenuClick}
-        aria-label="Abrir menu"
-      >
-        <Menu size={22} strokeWidth={2} />
-      </button>
+      <div className="topbar__inner app-header-align">
+        <button
+          type="button"
+          className="topbar__menu"
+          onClick={onMenuClick}
+          aria-label="Abrir menu"
+        >
+          <Menu size={22} strokeWidth={2} />
+        </button>
 
-      {isClientsSection && (
-        <div className="topbar__tabs" role="tablist" aria-label="Clientes">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={clientsTab === 'todos'}
-            className={`topbar__tab${clientsTab === 'todos' ? ' is-active' : ''}`}
-            onClick={() => setClientsTab('todos')}
-          >
-            Todos clientes
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={clientsTab === 'aniversariantes'}
-            className={`topbar__tab${clientsTab === 'aniversariantes' ? ' is-active' : ''}`}
-            onClick={() => setClientsTab('aniversariantes')}
-          >
-            Aniversariantes
-          </button>
-          {showWhatsappTab ? (
+        {isClientsSection && (
+          <div className="topbar__tabs" role="tablist" aria-label="Clientes">
             <button
               type="button"
               role="tab"
-              aria-selected={clientsTab === 'whatsapp'}
-              className={`topbar__tab${clientsTab === 'whatsapp' ? ' is-active' : ''}`}
-              onClick={() => setClientsTab('whatsapp')}
+              aria-selected={clientsTab === 'todos'}
+              className={`topbar__tab${clientsTab === 'todos' ? ' is-active' : ''}`}
+              onClick={() => setClientsTab('todos')}
             >
-              WhatsApp em massa
+              Todos clientes
             </button>
-          ) : null}
-        </div>
-      )}
-
-      <div className="topbar__spacer" />
-
-      <div className="topbar__actions">
-        <div className="topbar__search-wrap">
-          <button
-            ref={buttonRef}
-            type="button"
-            className={`topbar__search ${searchOpen ? 'is-open' : ''}`}
-            aria-label="Buscar"
-            aria-expanded={searchOpen}
-            aria-controls={searchId}
-            onClick={() => setSearchOpen((open) => !open)}
-          >
-            <Search size={18} strokeWidth={2} />
-          </button>
-          {searchPanel}
-        </div>
-
-        <button
-          type="button"
-          className={`topbar__user${profileOpen ? ' is-open' : ''}`}
-          aria-label="Abrir perfil"
-          aria-expanded={profileOpen}
-          onClick={openProfile}
-        >
-          <span className="topbar__greeting">
-            <span className="topbar__greeting-hi">Olá,</span>{' '}
-            <span className="topbar__greeting-name">{displayName}</span>
-          </span>
-          <span className="topbar__avatar" aria-hidden="true">
-            {userProfile.avatarDataUrl ? (
-              <img
-                className="topbar__avatar-image"
-                src={userProfile.avatarDataUrl}
-                alt=""
-              />
+            <button
+              type="button"
+              role="tab"
+              aria-selected={clientsTab === 'aniversariantes'}
+              className={`topbar__tab${clientsTab === 'aniversariantes' ? ' is-active' : ''}`}
+              onClick={() => setClientsTab('aniversariantes')}
+            >
+              Aniversariantes
+            </button>
+            {showWhatsappTab ? (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={clientsTab === 'whatsapp'}
+                className={`topbar__tab${clientsTab === 'whatsapp' ? ' is-active' : ''}`}
+                onClick={() => setClientsTab('whatsapp')}
+              >
+                WhatsApp em massa
+              </button>
             ) : null}
-          </span>
-        </button>
+          </div>
+        )}
+
+        <div className="topbar__spacer" />
+
+        <div className="topbar__actions">
+          <div className="topbar__search-wrap">
+            <button
+              ref={buttonRef}
+              type="button"
+              className={`topbar__search ${searchOpen ? 'is-open' : ''}`}
+              aria-label="Buscar"
+              aria-expanded={searchOpen}
+              aria-controls={searchId}
+              onClick={() => setSearchOpen((open) => !open)}
+            >
+              <Search size={18} strokeWidth={2} />
+            </button>
+            {searchPanel}
+          </div>
+
+          <button
+            type="button"
+            className={`topbar__user${profileOpen ? ' is-open' : ''}`}
+            aria-label="Abrir perfil"
+            aria-expanded={profileOpen}
+            onClick={openProfile}
+          >
+            <span className="topbar__greeting">
+              <span className="topbar__greeting-hi">Olá,</span>{' '}
+              <span className="topbar__greeting-name">{displayName}</span>
+            </span>
+            <span className="topbar__avatar" aria-hidden="true">
+              {userProfile.avatarDataUrl ? (
+                <img
+                  className="topbar__avatar-image"
+                  src={userProfile.avatarDataUrl}
+                  alt=""
+                />
+              ) : null}
+            </span>
+          </button>
+        </div>
       </div>
 
       <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} />
