@@ -19,6 +19,7 @@ type TopbarProps = {
 
 type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
+type EmployeesTab = 'lista' | 'permissoes'
 
 const SEARCH_LIMIT = 8
 const PANEL_WIDTH = 420
@@ -48,6 +49,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
   const isClientsSection = location.pathname.startsWith('/clientes')
   const isProductsSection = location.pathname.startsWith('/produtos')
+  const isEmployeesSection = location.pathname.startsWith('/funcionarios')
   const isClientCreate = location.pathname === '/clientes/cadastrar'
   const isClientDetail =
     isClientsSection &&
@@ -75,6 +77,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           : paramTab === 'alteracao'
             ? 'alteracao'
             : 'todos'
+  const employeesTab: EmployeesTab | null = !isEmployeesSection
+    ? null
+    : paramTab === 'permissoes'
+      ? 'permissoes'
+      : 'lista'
 
   const trimmedQuery = query.trim()
   const hasQuery = trimmedQuery.length > 0
@@ -190,6 +197,10 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const setProductsTab = (tab: ProductsTab) => {
     const match = PRODUCTS_TABS.find((item) => item.id === tab)
     if (match) navigate(match.path)
+  }
+
+  const setEmployeesTab = (tab: EmployeesTab) => {
+    navigate(tab === 'permissoes' ? '/funcionarios?tab=permissoes' : '/funcionarios')
   }
 
   const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
@@ -333,6 +344,20 @@ export function Topbar({ onMenuClick }: TopbarProps) {
               {item.label}
             </button>
           ))}
+        </div>
+      ) : null}
+
+      {isEmployeesSection && employeesTab ? (
+        <div className="topbar__tabs" role="tablist" aria-label="Funcionários">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={employeesTab === 'permissoes'}
+            className={`topbar__tab${employeesTab === 'permissoes' ? ' is-active' : ''}`}
+            onClick={() => setEmployeesTab('permissoes')}
+          >
+            Gerenciar permissões
+          </button>
         </div>
       ) : null}
 

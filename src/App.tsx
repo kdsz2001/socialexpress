@@ -8,10 +8,10 @@ import { MyProfile } from './pages/MyProfile'
 import { Agenda } from './pages/Agenda'
 import { Events } from './pages/Events'
 import { Products } from './pages/Products'
+import { Employees } from './pages/Employees'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
-  { path: '/funcionarios', title: 'Funcionários' },
   { path: '/pedidos', title: 'Pedidos' },
   { path: '/financeiro', title: 'Financeiro' },
   { path: '/fornecedores', title: 'Fornecedores' },
@@ -32,6 +32,7 @@ export default function App() {
         <Route path="/agenda" element={<Agenda />} />
         <Route path="/eventos" element={<Events />} />
         <Route path="/produtos" element={<Products />} />
+        <Route path="/funcionarios" element={<Employees />} />
         {pages.map((page) => (
           <Route
             key={page.path}
