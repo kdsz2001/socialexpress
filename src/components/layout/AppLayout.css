@@ -73,7 +73,8 @@
 
 .app-content__inner > .clients,
 .app-content__inner > .events,
-.app-content__inner > .agenda {
+.app-content__inner > .agenda,
+.app-content__inner > .products {
   width: 100%;
   max-width: var(--app-panel-max);
   margin-inline: 0;
@@ -83,7 +84,8 @@
 
 .app-shell.is-collapsed .app-content__inner > .clients,
 .app-shell.is-collapsed .app-content__inner > .events,
-.app-shell.is-collapsed .app-content__inner > .agenda {
+.app-shell.is-collapsed .app-content__inner > .agenda,
+.app-shell.is-collapsed .app-content__inner > .products {
   margin-inline: auto;
 }
 
@@ -185,6 +187,7 @@
   .app-content__inner > .clients,
   .app-content__inner > .events,
   .app-content__inner > .agenda,
+  .app-content__inner > .products,
   .app-panel-align {
     max-width: none;
     margin-inline: 0;
@@ -194,6 +197,7 @@
   .app-shell.is-collapsed .app-content__inner > .clients,
   .app-shell.is-collapsed .app-content__inner > .events,
   .app-shell.is-collapsed .app-content__inner > .agenda,
+  .app-shell.is-collapsed .app-content__inner > .products,
   .app-shell.is-collapsed .app-panel-align {
     margin-inline: 0;
   }

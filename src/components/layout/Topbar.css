@@ -36,6 +36,11 @@
   gap: 0.35rem;
   margin-left: 0;
   min-width: 0;
+  overflow-x: auto;
+}
+
+.topbar__tabs--products {
+  max-width: min(100%, 52rem);
 }
 
 .topbar__tab {

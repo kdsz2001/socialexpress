@@ -18,9 +18,18 @@ type TopbarProps = {
 }
 
 type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
+type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
 
 const SEARCH_LIMIT = 8
 const PANEL_WIDTH = 420
+
+const PRODUCTS_TABS: { id: ProductsTab; label: string; path: string }[] = [
+  { id: 'consulta', label: 'Consulta', path: '/produtos?tab=consulta' },
+  { id: 'todos', label: 'Todos produtos', path: '/produtos' },
+  { id: 'atributos', label: 'Atributos', path: '/produtos?tab=atributos' },
+  { id: 'tipos', label: 'Tipos de produtos', path: '/produtos?tab=tipos' },
+  { id: 'alteracao', label: 'Alteração em massa', path: '/produtos?tab=alteracao' },
+]
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   const location = useLocation()
@@ -38,6 +47,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const searchId = useId()
 
   const isClientsSection = location.pathname.startsWith('/clientes')
+  const isProductsSection = location.pathname.startsWith('/produtos')
   const isClientCreate = location.pathname === '/clientes/cadastrar'
   const isClientDetail =
     isClientsSection &&
@@ -51,7 +61,20 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         ? 'aniversariantes'
         : paramTab === 'whatsapp'
           ? 'whatsapp'
-          : 'todos'
+          : isClientsSection
+            ? 'todos'
+            : null
+  const productsTab: ProductsTab | null = !isProductsSection
+    ? null
+    : paramTab === 'consulta'
+      ? 'consulta'
+      : paramTab === 'atributos'
+        ? 'atributos'
+        : paramTab === 'tipos'
+          ? 'tipos'
+          : paramTab === 'alteracao'
+            ? 'alteracao'
+            : 'todos'
 
   const trimmedQuery = query.trim()
   const hasQuery = trimmedQuery.length > 0
@@ -164,6 +187,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     navigate('/clientes?tab=whatsapp')
   }
 
+  const setProductsTab = (tab: ProductsTab) => {
+    const match = PRODUCTS_TABS.find((item) => item.id === tab)
+    if (match) navigate(match.path)
+  }
+
   const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
 
   const searchPanel =
@@ -257,7 +285,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         <Menu size={22} strokeWidth={2} />
       </button>
 
-      {isClientsSection && (
+      {isClientsSection && clientsTab && (
         <div className="topbar__tabs" role="tablist" aria-label="Clientes">
           <button
             type="button"
@@ -290,6 +318,23 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           ) : null}
         </div>
       )}
+
+      {isProductsSection && productsTab ? (
+        <div className="topbar__tabs topbar__tabs--products" role="tablist" aria-label="Produtos">
+          {PRODUCTS_TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={productsTab === item.id}
+              className={`topbar__tab${productsTab === item.id ? ' is-active' : ''}`}
+              onClick={() => setProductsTab(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div className="topbar__spacer" />
 

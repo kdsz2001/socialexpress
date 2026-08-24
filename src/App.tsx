@@ -7,10 +7,10 @@ import { ClientDetail } from './pages/ClientDetail'
 import { MyProfile } from './pages/MyProfile'
 import { Agenda } from './pages/Agenda'
 import { Events } from './pages/Events'
+import { Products } from './pages/Products'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
-  { path: '/produtos', title: 'Produtos' },
   { path: '/funcionarios', title: 'Funcionários' },
   { path: '/pedidos', title: 'Pedidos' },
   { path: '/financeiro', title: 'Financeiro' },
@@ -31,6 +31,7 @@ export default function App() {
         <Route path="/meu-perfil" element={<MyProfile />} />
         <Route path="/agenda" element={<Agenda />} />
         <Route path="/eventos" element={<Events />} />
+        <Route path="/produtos" element={<Products />} />
         {pages.map((page) => (
           <Route
             key={page.path}
