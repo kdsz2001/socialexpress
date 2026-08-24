@@ -3,8 +3,7 @@
   height: 100%;
   min-height: 100vh;
   background: var(--main-bg);
-  overflow-x: hidden;
-  /* Sidebar is position:fixed — reserve its space with padding so main never overflows */
+  /* Do not set overflow here — it clips the fixed sidebar in some browsers */
   padding-left: var(--sidebar-width);
   transition: padding-left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -30,7 +29,8 @@
   flex-direction: column;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 .app-content {
