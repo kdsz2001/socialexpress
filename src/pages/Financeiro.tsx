@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   ArrowUpDown,
   CalendarDays,
@@ -520,51 +521,56 @@ export function Financeiro() {
         </div>
       </section>
 
-      <div className={`financeiro-overview${overviewOpen ? ' is-open' : ''}`}>
-        {overviewOpen ? (
-          <div className="financeiro-overview__panel">
-            <button
-              type="button"
-              className="financeiro-overview__toggle"
-              aria-expanded="true"
-              aria-label="Recolher visão geral"
-              onClick={() => setOverviewOpen(false)}
-            >
-              <ArrowUpDown size={18} strokeWidth={2.25} />
-            </button>
-            <div className="financeiro-overview__metrics">
-              <div className="financeiro-overview__metric">
-                <span className="financeiro-overview__label">Pagamentos com crédito</span>
-                <span className="financeiro-overview__value">
-                  {totals.credit > 0 ? formatMoney(totals.credit) : '—'}
-                </span>
-              </div>
-              <div className="financeiro-overview__metric">
-                <span className="financeiro-overview__label">Cancelamentos</span>
-                <span className="financeiro-overview__value">
-                  {totals.canceled > 0 ? formatMoney(totals.canceled) : '—'}
-                </span>
-              </div>
-              <div className="financeiro-overview__metric">
-                <span className="financeiro-overview__label">Total em caixa</span>
-                <span className="financeiro-overview__value is-total">
-                  {formatMoney(totals.balance)}
-                </span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="financeiro-overview__trigger"
-            aria-expanded="false"
-            onClick={() => setOverviewOpen(true)}
-          >
-            <ChevronsUp size={18} strokeWidth={2.25} />
-            <span className="financeiro-overview__trigger-label">Visão geral</span>
-          </button>
-        )}
-      </div>
+      {typeof document !== 'undefined'
+        ? createPortal(
+            <div className={`financeiro-overview${overviewOpen ? ' is-open' : ''}`}>
+              {overviewOpen ? (
+                <div className="financeiro-overview__panel">
+                  <button
+                    type="button"
+                    className="financeiro-overview__toggle"
+                    aria-expanded="true"
+                    aria-label="Recolher visão geral"
+                    onClick={() => setOverviewOpen(false)}
+                  >
+                    <ArrowUpDown size={18} strokeWidth={2.25} />
+                  </button>
+                  <div className="financeiro-overview__metrics">
+                    <div className="financeiro-overview__metric">
+                      <span className="financeiro-overview__label">Pagamentos com crédito</span>
+                      <span className="financeiro-overview__value">
+                        {totals.credit > 0 ? formatMoney(totals.credit) : '—'}
+                      </span>
+                    </div>
+                    <div className="financeiro-overview__metric">
+                      <span className="financeiro-overview__label">Cancelamentos</span>
+                      <span className="financeiro-overview__value">
+                        {totals.canceled > 0 ? formatMoney(totals.canceled) : '—'}
+                      </span>
+                    </div>
+                    <div className="financeiro-overview__metric">
+                      <span className="financeiro-overview__label">Total em caixa</span>
+                      <span className="financeiro-overview__value is-total">
+                        {formatMoney(totals.balance)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="financeiro-overview__trigger"
+                  aria-expanded="false"
+                  onClick={() => setOverviewOpen(true)}
+                >
+                  <ChevronsUp size={18} strokeWidth={2.25} />
+                  <span className="financeiro-overview__trigger-label">Visão geral</span>
+                </button>
+              )}
+            </div>,
+            document.querySelector('.app-shell') ?? document.body,
+          )
+        : null}
 
       {modalOpen ? (
         <div className="financeiro-modal" role="presentation" onMouseDown={closeModal}>
