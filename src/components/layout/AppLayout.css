@@ -1,35 +1,36 @@
 .app-shell {
-  display: flex;
+  box-sizing: border-box;
   height: 100%;
   min-height: 100vh;
   background: var(--main-bg);
   overflow-x: hidden;
+  /* Sidebar is position:fixed — reserve its space with padding so main never overflows */
+  padding-left: var(--sidebar-width);
+  transition: padding-left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-shell.is-collapsed {
+  padding-left: var(--sidebar-collapsed);
 }
 
 /*
   Claral behavior:
-  - sidebar is fixed; app-main clears it with margin-left
-  - collapsing the menu only changes that margin (content fills the rest)
+  - main always fills the remaining viewport (100% of the padded shell)
+  - opening/closing the menu only changes shell padding
   - dashboard cards keep fixed px widths so they never stretch
 */
 .app-main {
-  flex: 1 1 auto;
-  width: auto;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
-  max-width: none;
-  min-height: 0;
+  min-height: 100vh;
   height: 100%;
   display: flex;
   flex-direction: column;
-  margin: 0 0 0 var(--sidebar-width);
+  margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  transition: margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
-}
-
-.app-shell.is-collapsed .app-main {
-  margin-left: var(--sidebar-collapsed);
 }
 
 .app-content {
@@ -45,9 +46,9 @@
 
 .app-content__inner {
   flex: 1 0 auto;
-  flex-shrink: 0;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   margin: 0;
   padding-bottom: 20px;
   box-sizing: border-box;
@@ -63,6 +64,7 @@
   font-size: 0.95rem;
   font-weight: 400;
   color: #b5b5c3;
+  border-bottom: 0;
   border-top: 1px solid #ebedf3;
   box-sizing: border-box;
 }
@@ -124,16 +126,16 @@
 }
 
 @media (max-width: 900px) {
+  .app-shell,
+  .app-shell.is-collapsed {
+    padding-left: 0;
+    transition: none;
+  }
+
   .app-main {
     width: 100%;
     min-width: 0;
     max-width: none;
-    margin-left: 0;
-    transition: none;
-  }
-
-  .app-shell.is-collapsed .app-main {
-    margin-left: 0;
   }
 
   .app-content {

@@ -1,26 +1,29 @@
 .dashboard {
-  width: max-content;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
   animation: dashboard-in 0.35s ease both;
 }
 
 /*
-  Quadrantes com largura FIXA em px (estilo Claral):
-  ao abrir/fechar o menu eles só mudam de lugar — nunca esticam.
+  Colunas com teto de 350px (Claral):
+  - não esticam além de 350 quando o menu fecha
+  - encolhem se a janela for estreita (sem cortar o site)
 */
 .dashboard__grid {
   display: grid;
-  grid-template-columns: 350px 350px 350px;
+  grid-template-columns: repeat(3, minmax(0, 350px));
   gap: 25px;
   align-items: start;
-  width: max-content;
+  width: 100%;
   justify-content: start;
+  box-sizing: border-box;
 }
 
 .dashboard__grid > * {
-  width: 350px;
+  width: 100%;
   max-width: 350px;
-  min-width: 350px;
+  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -37,23 +40,16 @@
 
 @media (max-width: 1200px) {
   .dashboard__grid {
-    grid-template-columns: 350px 350px;
+    grid-template-columns: repeat(2, minmax(0, 350px));
   }
 }
 
 @media (max-width: 900px) {
-  .dashboard {
-    width: 100%;
-  }
-
   .dashboard__grid {
-    grid-template-columns: 1fr;
-    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .dashboard__grid > * {
-    width: 100%;
     max-width: none;
-    min-width: 0;
   }
 }
