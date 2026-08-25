@@ -416,10 +416,10 @@
   pointer-events: auto;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 2.75rem;
   min-height: 72px;
   width: 100%;
-  padding: 0.85rem var(--app-content-pad-x, 30px);
+  padding: 0.9rem var(--app-content-pad-x, 30px) 0.9rem 1.15rem;
   box-sizing: border-box;
   background: #ffffff;
   border-top: 1px solid #ebedf3;
@@ -453,26 +453,37 @@
 .financeiro-overview__metrics {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 4rem;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: nowrap;
   min-width: 0;
   flex: 1;
-  padding: 0;
+  padding: 0 0.5rem 0 0;
 }
 
 .financeiro-overview__metric {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.25rem;
-  min-width: 8.5rem;
+  justify-content: center;
+  gap: 0.3rem;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 16rem;
+}
+
+.financeiro-overview__metric:last-child {
+  align-items: flex-start;
+  max-width: 14rem;
+  margin-left: auto;
+  flex: 0 1 auto;
 }
 
 .financeiro-overview__label {
   font-size: 0.95rem;
   font-weight: 500;
   color: #7e8299;
+  white-space: nowrap;
 }
 
 .financeiro-overview__value {
