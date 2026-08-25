@@ -79,7 +79,8 @@
 .app-content__inner > .orders,
 .app-content__inner > .financeiro,
 .app-content__inner > .suppliers,
-.app-content__inner > .reports {
+.app-content__inner > .reports,
+.app-content__inner > .settings {
   width: 100%;
   max-width: var(--app-panel-max);
   margin-inline: 0;
@@ -95,7 +96,8 @@
 .app-shell.is-collapsed .app-content__inner > .orders,
 .app-shell.is-collapsed .app-content__inner > .financeiro,
 .app-shell.is-collapsed .app-content__inner > .suppliers,
-.app-shell.is-collapsed .app-content__inner > .reports {
+.app-shell.is-collapsed .app-content__inner > .reports,
+.app-shell.is-collapsed .app-content__inner > .settings {
   margin-inline: auto;
 }
 
@@ -203,6 +205,7 @@
   .app-content__inner > .financeiro,
   .app-content__inner > .suppliers,
   .app-content__inner > .reports,
+  .app-content__inner > .settings,
   .app-panel-align {
     max-width: none;
     margin-inline: 0;
@@ -218,6 +221,7 @@
   .app-shell.is-collapsed .app-content__inner > .financeiro,
   .app-shell.is-collapsed .app-content__inner > .suppliers,
   .app-shell.is-collapsed .app-content__inner > .reports,
+  .app-shell.is-collapsed .app-content__inner > .settings,
   .app-shell.is-collapsed .app-panel-align {
     margin-inline: 0;
   }
