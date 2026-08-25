@@ -532,7 +532,7 @@ export function Financeiro() {
                     aria-label="Recolher visão geral"
                     onClick={() => setOverviewOpen(false)}
                   >
-                    <ArrowUpDown size={16} strokeWidth={2.25} />
+                    <ArrowUpDown size={20} strokeWidth={2.25} />
                   </button>
                   <div className="financeiro-overview__metrics">
                     <div className="financeiro-overview__metric">
@@ -563,7 +563,7 @@ export function Financeiro() {
                     aria-expanded="false"
                     onClick={() => setOverviewOpen(true)}
                   >
-                    <ArrowUpDown size={16} strokeWidth={2.25} />
+                    <ArrowUpDown size={20} strokeWidth={2.25} />
                     <span className="financeiro-overview__trigger-label">Visão geral</span>
                   </button>
                 </div>
