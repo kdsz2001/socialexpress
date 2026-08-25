@@ -77,7 +77,8 @@
 .app-content__inner > .products,
 .app-content__inner > .employees,
 .app-content__inner > .orders,
-.app-content__inner > .financeiro {
+.app-content__inner > .financeiro,
+.app-content__inner > .suppliers {
   width: 100%;
   max-width: var(--app-panel-max);
   margin-inline: 0;
@@ -91,7 +92,8 @@
 .app-shell.is-collapsed .app-content__inner > .products,
 .app-shell.is-collapsed .app-content__inner > .employees,
 .app-shell.is-collapsed .app-content__inner > .orders,
-.app-shell.is-collapsed .app-content__inner > .financeiro {
+.app-shell.is-collapsed .app-content__inner > .financeiro,
+.app-shell.is-collapsed .app-content__inner > .suppliers {
   margin-inline: auto;
 }
 
@@ -197,6 +199,7 @@
   .app-content__inner > .employees,
   .app-content__inner > .orders,
   .app-content__inner > .financeiro,
+  .app-content__inner > .suppliers,
   .app-panel-align {
     max-width: none;
     margin-inline: 0;
@@ -210,6 +213,7 @@
   .app-shell.is-collapsed .app-content__inner > .employees,
   .app-shell.is-collapsed .app-content__inner > .orders,
   .app-shell.is-collapsed .app-content__inner > .financeiro,
+  .app-shell.is-collapsed .app-content__inner > .suppliers,
   .app-shell.is-collapsed .app-panel-align {
     margin-inline: 0;
   }
