@@ -14,12 +14,10 @@ import { Financeiro } from './pages/Financeiro'
 import { Suppliers } from './pages/Suppliers'
 import { Reports } from './pages/Reports'
 import { Settings } from './pages/Settings'
+import { History } from './pages/History'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
-const pages = [
-  { path: '/orcamentos', title: 'Orçamentos' },
-  { path: '/historicos', title: 'Históricos' },
-] as const
+const pages = [{ path: '/orcamentos', title: 'Orçamentos' }] as const
 
 export default function App() {
   return (
@@ -39,6 +37,7 @@ export default function App() {
         <Route path="/fornecedores" element={<Suppliers />} />
         <Route path="/relatorios" element={<Reports />} />
         <Route path="/configuracoes" element={<Settings />} />
+        <Route path="/historicos" element={<History />} />
         {pages.map((page) => (
           <Route
             key={page.path}

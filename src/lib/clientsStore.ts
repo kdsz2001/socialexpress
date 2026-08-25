@@ -1,3 +1,11 @@
+import {
+  buildFieldDiffs,
+  logClientCreated,
+  logClientDeleted,
+  logClientUpdated,
+} from './historyLog'
+import { formatHistoryDate } from './historyStore'
+
 export type ClientPhone = {
   number: string
   primary: boolean
@@ -107,6 +115,9 @@ export function addClientsBulk(inputs: ClientInput[]): number {
 
   if (!created.length) return 0
   writeAll([...created, ...current])
+  for (const client of created) {
+    logClientCreated(getClientDisplayName(client))
+  }
   return created.length
 }
 
@@ -121,6 +132,7 @@ export function addClient(input: ClientInput): Client | null {
     createdAt: input.createdAt ?? new Date().toISOString(),
   }
   writeAll([client, ...readAll()])
+  logClientCreated(getClientDisplayName(client))
   return client
 }
 
@@ -148,15 +160,58 @@ export function updateClient(
   const current = readAll()
   const index = current.findIndex((client) => client.id === id)
   if (index < 0) return null
-  const updated = normalizeClient({ ...current[index], ...patch, id })
+  const before = current[index]
+  const updated = normalizeClient({ ...before, ...patch, id })
   const next = [...current]
   next[index] = updated
   writeAll(next)
+
+  const diffs = buildFieldDiffs(
+    {
+      nome: before.nome,
+      sobrenomes: before.sobrenomes,
+      chamado: before.chamado,
+      birthDate: before.birthDate ? formatHistoryDate(before.birthDate) : '',
+      email: before.email,
+      cpfCnpj: before.cpfCnpj,
+      phones: JSON.stringify(before.phones),
+      active: before.active,
+      cidade: before.cidade,
+      bairro: before.bairro,
+    },
+    {
+      nome: updated.nome,
+      sobrenomes: updated.sobrenomes,
+      chamado: updated.chamado,
+      birthDate: updated.birthDate ? formatHistoryDate(updated.birthDate) : '',
+      email: updated.email,
+      cpfCnpj: updated.cpfCnpj,
+      phones: JSON.stringify(updated.phones),
+      active: updated.active,
+      cidade: updated.cidade,
+      bairro: updated.bairro,
+    },
+    {
+      nome: 'nome',
+      sobrenomes: 'sobrenomes',
+      chamado: 'chamado',
+      birthDate: 'data de nascimento',
+      email: 'email',
+      cpfCnpj: 'cpf/cnpj',
+      phones: 'telefones',
+      active: 'ativo',
+      cidade: 'cidade',
+      bairro: 'bairro',
+    },
+  )
+  logClientUpdated(getClientDisplayName(updated), diffs)
   return updated
 }
 
 export function deleteClient(id: string) {
-  writeAll(readAll().filter((client) => client.id !== id))
+  const client = readAll().find((item) => item.id === id)
+  writeAll(readAll().filter((item) => item.id !== id))
+  if (client) logClientDeleted(getClientDisplayName(client))
 }
 
 export function getClientDisplayName(client: Client) {

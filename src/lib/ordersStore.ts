@@ -1,3 +1,11 @@
+import {
+  buildFieldDiffs,
+  logOrderCreated,
+  logOrderDeleted,
+  logOrderUpdated,
+} from './historyLog'
+import { formatHistoryDate } from './historyStore'
+
 export type OrderStatus = 'Aberto' | 'Confirmado' | 'Concluído' | 'Anulado'
 export type OrderOperation = 'Aluguel' | 'Venda'
 
@@ -69,6 +77,7 @@ export function addOrder(input: {
     createdAt: new Date().toISOString(),
   }
   writeAll([...all, item])
+  logOrderCreated(item.number, item.clientName)
   return item
 }
 
@@ -86,8 +95,9 @@ export function updateOrder(
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
   if (index < 0) return null
+  const before = all[index]
   const updated: Order = {
-    ...all[index],
+    ...before,
     clientName: input.clientName.trim(),
     phone: input.phone.trim(),
     eventDate: input.eventDate,
@@ -97,11 +107,42 @@ export function updateOrder(
   }
   all[index] = updated
   writeAll(all)
+  logOrderUpdated(
+    updated.number,
+    buildFieldDiffs(
+      {
+        clientName: before.clientName,
+        phone: before.phone,
+        eventDate: formatHistoryDate(before.eventDate),
+        total: before.total,
+        status: before.status,
+        operation: before.operation,
+      },
+      {
+        clientName: updated.clientName,
+        phone: updated.phone,
+        eventDate: formatHistoryDate(updated.eventDate),
+        total: updated.total,
+        status: updated.status,
+        operation: updated.operation,
+      },
+      {
+        clientName: 'cliente',
+        phone: 'telefone',
+        eventDate: 'data do evento',
+        total: 'total',
+        status: 'status',
+        operation: 'operação',
+      },
+    ),
+  )
   return updated
 }
 
 export function deleteOrder(id: string) {
-  writeAll(readAll().filter((item) => item.id !== id))
+  const item = readAll().find((entry) => entry.id === id)
+  writeAll(readAll().filter((entry) => entry.id !== id))
+  if (item) logOrderDeleted(item.number)
 }
 
 export function subscribeOrders(onChange: () => void) {

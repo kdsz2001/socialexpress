@@ -1,3 +1,10 @@
+import {
+  buildFieldDiffs,
+  logEmployeeCreated,
+  logEmployeeDeleted,
+  logEmployeeUpdated,
+} from './historyLog'
+
 export type EmployeeLevel = 'Master' | 'Administrador' | 'Funcionário'
 
 export type Employee = {
@@ -57,6 +64,7 @@ export function addEmployee(input: {
     createdAt: new Date().toISOString(),
   }
   writeAll([...readAll(), item])
+  logEmployeeCreated(item.name)
   return item
 }
 
@@ -73,8 +81,9 @@ export function updateEmployee(
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
   if (index < 0) return null
+  const before = all[index]
   const updated: Employee = {
-    ...all[index],
+    ...before,
     name: input.name.trim(),
     phone: input.phone.trim(),
     username: input.username.trim(),
@@ -83,6 +92,32 @@ export function updateEmployee(
   }
   all[index] = updated
   writeAll(all)
+  logEmployeeUpdated(
+    updated.name,
+    buildFieldDiffs(
+      {
+        name: before.name,
+        phone: before.phone,
+        username: before.username,
+        level: before.level,
+        active: before.active,
+      },
+      {
+        name: updated.name,
+        phone: updated.phone,
+        username: updated.username,
+        level: updated.level,
+        active: updated.active,
+      },
+      {
+        name: 'nome',
+        phone: 'telefone',
+        username: 'usuário',
+        level: 'nível',
+        active: 'ativo',
+      },
+    ),
+  )
   return updated
 }
 
@@ -90,13 +125,24 @@ export function setEmployeeActive(id: string, active: boolean): Employee | null 
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
   if (index < 0) return null
-  all[index] = { ...all[index], active }
+  const before = all[index]
+  all[index] = { ...before, active }
   writeAll(all)
+  logEmployeeUpdated(
+    before.name,
+    buildFieldDiffs(
+      { active: before.active },
+      { active },
+      { active: 'ativo' },
+    ),
+  )
   return all[index]
 }
 
 export function deleteEmployee(id: string) {
-  writeAll(readAll().filter((item) => item.id !== id))
+  const item = readAll().find((entry) => entry.id === id)
+  writeAll(readAll().filter((entry) => entry.id !== id))
+  if (item) logEmployeeDeleted(item.name)
 }
 
 export function subscribeEmployees(onChange: () => void) {

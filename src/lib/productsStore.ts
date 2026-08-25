@@ -1,3 +1,10 @@
+import {
+  buildFieldDiffs,
+  logProductCreated,
+  logProductDeleted,
+  logProductUpdated,
+} from './historyLog'
+
 export type ProductStatus = 'ativo' | 'inativo'
 
 export type Product = {
@@ -61,6 +68,7 @@ export function addProduct(input: {
     createdAt: new Date().toISOString(),
   }
   writeAll([...readAll(), item])
+  logProductCreated(item.name)
   return item
 }
 
@@ -77,8 +85,9 @@ export function updateProduct(
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
   if (index < 0) return null
+  const before = all[index]
   const updated: Product = {
-    ...all[index],
+    ...before,
     name: input.name.trim(),
     type: input.type.trim(),
     rental: input.rental.trim(),
@@ -87,11 +96,39 @@ export function updateProduct(
   }
   all[index] = updated
   writeAll(all)
+  logProductUpdated(
+    updated.name,
+    buildFieldDiffs(
+      {
+        name: before.name,
+        type: before.type,
+        rental: before.rental,
+        attributes: before.attributes,
+        status: before.status,
+      },
+      {
+        name: updated.name,
+        type: updated.type,
+        rental: updated.rental,
+        attributes: updated.attributes,
+        status: updated.status,
+      },
+      {
+        name: 'nome',
+        type: 'tipo',
+        rental: 'aluguel',
+        attributes: 'atributos',
+        status: 'status',
+      },
+    ),
+  )
   return updated
 }
 
 export function deleteProduct(id: string) {
-  writeAll(readAll().filter((item) => item.id !== id))
+  const item = readAll().find((entry) => entry.id === id)
+  writeAll(readAll().filter((entry) => entry.id !== id))
+  if (item) logProductDeleted(item.name)
 }
 
 export function subscribeProducts(onChange: () => void) {

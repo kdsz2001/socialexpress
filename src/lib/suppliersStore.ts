@@ -1,3 +1,10 @@
+import {
+  buildFieldDiffs,
+  logSupplierCreated,
+  logSupplierDeleted,
+  logSupplierUpdated,
+} from './historyLog'
+
 export type SupplierType = 'Consignado' | 'Empresas'
 
 export type Supplier = {
@@ -63,6 +70,7 @@ export function addSupplier(input: { name: string; type: SupplierType }): Suppli
     createdAt: new Date().toISOString(),
   }
   writeAll([...readAll(), item])
+  logSupplierCreated(item.name)
   return item
 }
 
@@ -73,18 +81,29 @@ export function updateSupplier(
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
   if (index < 0) return null
+  const before = all[index]
   const updated: Supplier = {
-    ...all[index],
+    ...before,
     name: input.name.trim(),
     type: input.type,
   }
   all[index] = updated
   writeAll(all)
+  logSupplierUpdated(
+    updated.name,
+    buildFieldDiffs(
+      { name: before.name, type: before.type },
+      { name: updated.name, type: updated.type },
+      { name: 'nome', type: 'tipo' },
+    ),
+  )
   return updated
 }
 
 export function deleteSupplier(id: string) {
-  writeAll(readAll().filter((item) => item.id !== id))
+  const item = readAll().find((entry) => entry.id === id)
+  writeAll(readAll().filter((entry) => entry.id !== id))
+  if (item) logSupplierDeleted(item.name)
 }
 
 export function subscribeSuppliers(onChange: () => void) {

@@ -1,3 +1,11 @@
+import {
+  buildFieldDiffs,
+  logCashCreated,
+  logCashDeleted,
+  logCashUpdated,
+} from './historyLog'
+import { formatHistoryDate } from './historyStore'
+
 export type CashMovementType = 'entrada' | 'saida'
 export type PaymentMethod =
   | 'Dinheiro'
@@ -51,6 +59,10 @@ export function listCashMovements(): CashMovement[] {
   return cached
 }
 
+function formatMoney(value: number) {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
 export function addCashMovement(input: {
   date: string
   description: string
@@ -73,6 +85,7 @@ export function addCashMovement(input: {
     createdAt: new Date().toISOString(),
   }
   writeAll([...readAll(), item])
+  logCashCreated(item.description, item.type, formatMoney(item.value))
   return item
 }
 
@@ -91,8 +104,9 @@ export function updateCashMovement(
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
   if (index < 0) return null
+  const before = all[index]
   const updated: CashMovement = {
-    ...all[index],
+    ...before,
     date: input.date,
     description: input.description.trim(),
     paymentMethod: input.paymentMethod,
@@ -103,11 +117,45 @@ export function updateCashMovement(
   }
   all[index] = updated
   writeAll(all)
+  logCashUpdated(
+    updated.description,
+    buildFieldDiffs(
+      {
+        date: formatHistoryDate(before.date),
+        description: before.description,
+        paymentMethod: before.paymentMethod,
+        value: formatMoney(before.value),
+        type: before.type,
+        operation: before.operation,
+        attendant: before.attendant,
+      },
+      {
+        date: formatHistoryDate(updated.date),
+        description: updated.description,
+        paymentMethod: updated.paymentMethod,
+        value: formatMoney(updated.value),
+        type: updated.type,
+        operation: updated.operation,
+        attendant: updated.attendant,
+      },
+      {
+        date: 'data',
+        description: 'descrição',
+        paymentMethod: 'pagamento',
+        value: 'valor',
+        type: 'tipo',
+        operation: 'operação',
+        attendant: 'atendente',
+      },
+    ),
+  )
   return updated
 }
 
 export function deleteCashMovement(id: string) {
-  writeAll(readAll().filter((item) => item.id !== id))
+  const item = readAll().find((entry) => entry.id === id)
+  writeAll(readAll().filter((entry) => entry.id !== id))
+  if (item) logCashDeleted(item.description)
 }
 
 export function subscribeCashMovements(onChange: () => void) {

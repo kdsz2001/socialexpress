@@ -1,3 +1,5 @@
+import { buildFieldDiffs, logShopSettingsUpdated } from './historyLog'
+
 export type ShopPhone = {
   id: string
   number: string
@@ -93,10 +95,45 @@ export function getShopSettings(): ShopSettings {
 }
 
 export function saveShopSettings(next: ShopSettings) {
+  const before = getShopSettings()
   const normalized = normalize(next)
   localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
   cached = normalized
   window.dispatchEvent(new Event('social-express:shop-settings-changed'))
+  logShopSettingsUpdated(
+    buildFieldDiffs(
+      {
+        razaoSocial: before.razaoSocial,
+        nomeFantasia: before.nomeFantasia,
+        cnpj: before.cnpj,
+        email: before.email,
+        phones: JSON.stringify(before.phones),
+        cidade: before.cidade,
+        bairro: before.bairro,
+        logo: before.logoDataUrl ? '1' : '0',
+      },
+      {
+        razaoSocial: normalized.razaoSocial,
+        nomeFantasia: normalized.nomeFantasia,
+        cnpj: normalized.cnpj,
+        email: normalized.email,
+        phones: JSON.stringify(normalized.phones),
+        cidade: normalized.cidade,
+        bairro: normalized.bairro,
+        logo: normalized.logoDataUrl ? '1' : '0',
+      },
+      {
+        razaoSocial: 'razão social',
+        nomeFantasia: 'nome fantasia',
+        cnpj: 'cnpj',
+        email: 'email',
+        phones: 'telefones',
+        cidade: 'cidade',
+        bairro: 'bairro',
+        logo: 'logo',
+      },
+    ),
+  )
 }
 
 export function subscribeShopSettings(onChange: () => void) {

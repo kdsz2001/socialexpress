@@ -14,6 +14,7 @@ import { FinanceiroSubheader } from './FinanceiroSubheader'
 import { SuppliersSubheader } from './SuppliersSubheader'
 import { ReportsSubheader } from './ReportsSubheader'
 import { SettingsSubheader } from './SettingsSubheader'
+import { HistorySubheader } from './HistorySubheader'
 import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
 import { SaveToast } from '../ui/SaveToast'
 import type { Appointment } from '../../lib/agendaStore'
@@ -170,6 +171,7 @@ export function AppLayout() {
         {location.pathname === '/fornecedores' && <SuppliersSubheader />}
         {location.pathname === '/relatorios' && <ReportsSubheader />}
         {location.pathname === '/configuracoes' && <SettingsSubheader />}
+        {location.pathname === '/historicos' && <HistorySubheader />}
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
             <Outlet />

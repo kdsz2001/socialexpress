@@ -1,3 +1,13 @@
+import {
+  buildFieldDiffs,
+  logAppointmentCompleted,
+  logAppointmentCreated,
+  logAppointmentDeleted,
+  logAppointmentReopened,
+  logAppointmentUpdated,
+} from './historyLog'
+import { formatHistoryDate } from './historyStore'
+
 export type AppointmentColor = 'coral' | 'blue' | 'teal' | 'purple' | 'navy'
 
 export type Appointment = {
@@ -94,6 +104,7 @@ export function addAppointment(
     completedAt: input.completedAt,
   }
   writeAll([...readAll(), next])
+  logAppointmentCreated(next.title, next.date, next.startTime)
   return next
 }
 
@@ -104,9 +115,43 @@ export function updateAppointment(
   const items = readAll()
   const index = items.findIndex((item) => item.id === id)
   if (index < 0) return null
-  const next = { ...items[index], ...patch }
+  const before = items[index]
+  const next = { ...before, ...patch }
   items[index] = next
   writeAll(items)
+
+  if (before.completed !== next.completed) {
+    if (next.completed) logAppointmentCompleted(next.title, next.date)
+    else logAppointmentReopened(next.title, next.date)
+  } else {
+    const diffs = buildFieldDiffs(
+      {
+        title: before.title,
+        date: formatHistoryDate(before.date),
+        startTime: before.startTime,
+        endTime: before.endTime,
+        details: before.details,
+        orderLabel: before.orderLabel,
+      },
+      {
+        title: next.title,
+        date: formatHistoryDate(next.date),
+        startTime: next.startTime,
+        endTime: next.endTime,
+        details: next.details,
+        orderLabel: next.orderLabel,
+      },
+      {
+        title: 'título',
+        date: 'data',
+        startTime: 'horário início',
+        endTime: 'horário fim',
+        details: 'detalhes',
+        orderLabel: 'pedido',
+      },
+    )
+    logAppointmentUpdated(next.title, diffs)
+  }
   return next
 }
 
@@ -125,7 +170,9 @@ export function reopenAppointment(id: string) {
 }
 
 export function deleteAppointment(id: string) {
-  writeAll(readAll().filter((item) => item.id !== id))
+  const item = readAll().find((entry) => entry.id === id)
+  writeAll(readAll().filter((entry) => entry.id !== id))
+  if (item) logAppointmentDeleted(item.title, item.date)
 }
 
 export function getAppointmentById(id: string) {

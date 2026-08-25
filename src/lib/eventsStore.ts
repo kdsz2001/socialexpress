@@ -1,3 +1,11 @@
+import {
+  buildFieldDiffs,
+  logEventCreated,
+  logEventDeleted,
+  logEventUpdated,
+} from './historyLog'
+import { formatHistoryDate } from './historyStore'
+
 export type EventItem = {
   id: string
   title: string
@@ -44,6 +52,7 @@ export function addEvent(input: { title: string; date: string }): EventItem {
   }
   const next = [...readAll(), item]
   writeAll(next)
+  logEventCreated(item.title, item.date)
   return item
 }
 
@@ -51,18 +60,35 @@ export function updateEvent(id: string, input: { title: string; date: string }):
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
   if (index < 0) return null
+  const before = all[index]
   const updated: EventItem = {
-    ...all[index],
+    ...before,
     title: input.title.trim(),
     date: input.date,
   }
   all[index] = updated
   writeAll(all)
+  logEventUpdated(
+    updated.title,
+    buildFieldDiffs(
+      {
+        title: before.title,
+        date: formatHistoryDate(before.date),
+      },
+      {
+        title: updated.title,
+        date: formatHistoryDate(updated.date),
+      },
+      { title: 'evento', date: 'data' },
+    ),
+  )
   return updated
 }
 
 export function deleteEvent(id: string) {
-  writeAll(readAll().filter((item) => item.id !== id))
+  const item = readAll().find((entry) => entry.id === id)
+  writeAll(readAll().filter((entry) => entry.id !== id))
+  if (item) logEventDeleted(item.title)
 }
 
 export function subscribeEvents(onChange: () => void) {
