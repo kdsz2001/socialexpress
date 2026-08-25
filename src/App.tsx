@@ -12,11 +12,11 @@ import { Employees } from './pages/Employees'
 import { Orders } from './pages/Orders'
 import { Financeiro } from './pages/Financeiro'
 import { Suppliers } from './pages/Suppliers'
+import { Reports } from './pages/Reports'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [
   { path: '/orcamentos', title: 'Orçamentos' },
-  { path: '/relatorios', title: 'Relatórios' },
   { path: '/configuracoes', title: 'Configurações' },
   { path: '/historicos', title: 'Históricos' },
 ] as const
@@ -37,6 +37,7 @@ export default function App() {
         <Route path="/pedidos" element={<Orders />} />
         <Route path="/financeiro" element={<Financeiro />} />
         <Route path="/fornecedores" element={<Suppliers />} />
+        <Route path="/relatorios" element={<Reports />} />
         {pages.map((page) => (
           <Route
             key={page.path}
