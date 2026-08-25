@@ -10,11 +10,12 @@ import {
 } from '../lib/suppliersStore'
 import './Suppliers.css'
 
-const TYPES: SupplierType[] = ['Produto', 'Serviço', 'Frete', 'Outro']
+const TYPES: SupplierType[] = ['Consignado', 'Empresas']
 
 const TYPE_FILTERS: { id: 'todos' | SupplierType; label: string }[] = [
   { id: 'todos', label: 'Todos tipos' },
-  ...TYPES.map((type) => ({ id: type, label: type })),
+  { id: 'Consignado', label: 'Consignado' },
+  { id: 'Empresas', label: 'Empresas' },
 ]
 
 export function Suppliers() {
@@ -26,8 +27,7 @@ export function Suppliers() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Supplier | null>(null)
   const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [type, setType] = useState<SupplierType>('Produto')
+  const [type, setType] = useState<SupplierType>('Empresas')
   const [touched, setTouched] = useState(false)
 
   const filtered = useMemo(() => {
@@ -37,7 +37,6 @@ export function Suppliers() {
       if (!q) return true
       return (
         item.name.toLocaleLowerCase('pt-BR').includes(q) ||
-        item.phone.toLocaleLowerCase('pt-BR').includes(q) ||
         item.type.toLocaleLowerCase('pt-BR').includes(q)
       )
     })
@@ -46,8 +45,7 @@ export function Suppliers() {
   const openCreate = () => {
     setEditing(null)
     setName('')
-    setPhone('')
-    setType('Produto')
+    setType('Empresas')
     setTouched(false)
     setModalOpen(true)
   }
@@ -55,7 +53,6 @@ export function Suppliers() {
   const openEdit = (item: Supplier) => {
     setEditing(item)
     setName(item.name)
-    setPhone(item.phone)
     setType(item.type)
     setTouched(false)
     setModalOpen(true)
@@ -72,7 +69,7 @@ export function Suppliers() {
   const saveSupplier = () => {
     setTouched(true)
     if (missingName) return
-    const payload = { name, phone, type }
+    const payload = { name, type }
     if (editing) updateSupplier(editing.id, payload)
     else addSupplier(payload)
     closeModal()
@@ -124,7 +121,6 @@ export function Suppliers() {
             <thead>
               <tr>
                 <th className="suppliers__col-name">Fornecedor</th>
-                <th className="suppliers__col-phone">Telefone</th>
                 <th className="suppliers__col-type">Tipo</th>
                 <th className="suppliers__col-actions">Ações</th>
               </tr>
@@ -132,7 +128,7 @@ export function Suppliers() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td className="suppliers__empty" colSpan={4}>
+                  <td className="suppliers__empty" colSpan={3}>
                     Nenhum resultado encontrado
                   </td>
                 </tr>
@@ -142,8 +138,7 @@ export function Suppliers() {
                     <td>
                       <span className="suppliers__name">{item.name}</span>
                     </td>
-                    <td>{item.phone || ''}</td>
-                    <td>{item.type}</td>
+                    <td className="suppliers__type-cell">{item.type}</td>
                     <td className="suppliers__actions-cell">
                       <button
                         type="button"
@@ -205,17 +200,6 @@ export function Suppliers() {
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Ex.: Distribuidora Silva"
                   autoFocus
-                />
-              </label>
-
-              <label className="suppliers-modal__field">
-                <span>Telefone</span>
-                <input
-                  type="text"
-                  className="suppliers-modal__input"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  placeholder="Ex.: (47) 99999-9999"
                 />
               </label>
 

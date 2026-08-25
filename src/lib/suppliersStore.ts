@@ -1,9 +1,8 @@
-export type SupplierType = 'Produto' | 'Serviço' | 'Frete' | 'Outro'
+export type SupplierType = 'Consignado' | 'Empresas'
 
 export type Supplier = {
   id: string
   name: string
-  phone: string
   type: SupplierType
   createdAt: string
 }
@@ -12,12 +11,30 @@ const STORAGE_KEY = 'social-express:suppliers'
 
 let cached: Supplier[] | null = null
 
+function normalizeType(value: unknown): SupplierType {
+  if (value === 'Consignado' || value === 'Empresas') return value
+  return 'Empresas'
+}
+
+function normalizeSupplier(raw: unknown): Supplier | null {
+  if (!raw || typeof raw !== 'object') return null
+  const item = raw as Record<string, unknown>
+  if (typeof item.id !== 'string' || typeof item.name !== 'string') return null
+  return {
+    id: item.id,
+    name: item.name,
+    type: normalizeType(item.type),
+    createdAt: typeof item.createdAt === 'string' ? item.createdAt : new Date().toISOString(),
+  }
+}
+
 function readAll(): Supplier[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
-    const parsed = JSON.parse(raw) as Supplier[]
-    return Array.isArray(parsed) ? parsed : []
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return []
+    return parsed.map(normalizeSupplier).filter((item): item is Supplier => item !== null)
   } catch {
     return []
   }
@@ -38,15 +55,10 @@ export function listSuppliers(): Supplier[] {
   return cached
 }
 
-export function addSupplier(input: {
-  name: string
-  phone: string
-  type: SupplierType
-}): Supplier {
+export function addSupplier(input: { name: string; type: SupplierType }): Supplier {
   const item: Supplier = {
     id: crypto.randomUUID(),
     name: input.name.trim(),
-    phone: input.phone.trim(),
     type: input.type,
     createdAt: new Date().toISOString(),
   }
@@ -56,7 +68,7 @@ export function addSupplier(input: {
 
 export function updateSupplier(
   id: string,
-  input: { name: string; phone: string; type: SupplierType },
+  input: { name: string; type: SupplierType },
 ): Supplier | null {
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
@@ -64,7 +76,6 @@ export function updateSupplier(
   const updated: Supplier = {
     ...all[index],
     name: input.name.trim(),
-    phone: input.phone.trim(),
     type: input.type,
   }
   all[index] = updated

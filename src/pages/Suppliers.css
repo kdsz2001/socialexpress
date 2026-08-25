@@ -152,15 +152,12 @@
 }
 
 .suppliers__col-name {
-  width: 38%;
-}
-
-.suppliers__col-phone {
-  width: 24%;
+  width: 55%;
 }
 
 .suppliers__col-type {
-  width: 22%;
+  width: 28%;
+  text-align: center;
 }
 
 .suppliers__col-actions {
@@ -171,6 +168,10 @@
 .suppliers__name {
   font-weight: 600;
   color: #3f4254;
+}
+
+.suppliers__type-cell {
+  text-align: center;
 }
 
 .suppliers__actions-cell {
