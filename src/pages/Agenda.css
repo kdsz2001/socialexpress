@@ -209,11 +209,11 @@
 }
 
 .agenda__month-cell.is-today {
-  background: #fdf6e3;
+  background: #fce4e2;
 }
 
 .agenda__month-cell.is-today:hover {
-  background: #fbf0d4;
+  background: #f8d5d1;
 }
 
 .agenda__month-cell.is-selected,
@@ -245,7 +245,7 @@
 .agenda__month-cell.is-today.is-past,
 .agenda__month-cell.is-today.is-past:hover,
 .agenda__month-cell.is-today.is-past:active {
-  background: #fdf6e3;
+  background: #fce4e2;
 }
 
 .agenda__month-date {
@@ -401,12 +401,12 @@
 }
 
 .agenda__col-head.is-today {
-  background: #fdf6e3;
+  background: #fce4e2;
   color: #5e6278;
 }
 
 .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head--gutter) {
-  background: #fdf6e3;
+  background: #fce4e2;
   font-size: 0.9rem;
   font-weight: 500;
   color: #5e6278;
@@ -451,12 +451,12 @@
 
 .agenda__allday.is-today,
 .agenda__day-col.is-today {
-  background: #fdf6e3;
+  background: #fce4e2;
 }
 
 .agenda__timegrid.is-day .agenda__allday,
 .agenda__timegrid.is-day .agenda__day-col {
-  background: #fdf6e3;
+  background: #fce4e2;
 }
 
 .agenda__timegrid.is-day .agenda__day-col {
