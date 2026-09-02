@@ -32,7 +32,7 @@ export function StatusCard({ title, theme, items }: StatusCardProps) {
             >
               <span className="status-card__label">
                 <span className="status-card__icon" aria-hidden="true">
-                  <Icon size={30} width={30} height={30} strokeWidth={2.6} />
+                  <Icon size={28} width={28} height={28} strokeWidth={2} />
                 </span>
                 <span className="status-card__text">{item.label}</span>
               </span>

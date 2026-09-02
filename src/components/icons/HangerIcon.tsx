@@ -1,9 +1,9 @@
 import type { SVGProps } from 'react'
 
-/** Cabide — traço mais grosso no dashboard */
+/** Cabide — gancho aberto + corpo triangular limpo */
 export function HangerIcon({
   size = 24,
-  strokeWidth = 2.6,
+  strokeWidth = 2,
   width,
   height,
   ...props
@@ -23,8 +23,8 @@ export function HangerIcon({
       aria-hidden="true"
       {...props}
     >
-      <circle cx="12" cy="5" r="1.75" />
-      <path d="M12 6.75 4.35 14.35A1.85 1.85 0 0 0 5.7 17.5h12.6a1.85 1.85 0 0 0 1.35-3.15L12 6.75Z" />
+      <path d="M9.6 5.1a2.4 2.4 0 1 1 3.2 2.25" />
+      <path d="M12 7.5 4.7 15.1a1.45 1.45 0 0 0 1.05 2.4h12.5a1.45 1.45 0 0 0 1.05-2.4L12 7.5Z" />
     </svg>
   )
 }

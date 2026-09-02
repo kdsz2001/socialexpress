@@ -54,13 +54,14 @@
   margin-right: 1.25rem; /* .mr-5 */
   flex-shrink: 0;
   line-height: 0;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 2.1rem;
+  height: 2.1rem;
 }
 
 .status-card__icon svg {
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  overflow: visible;
 }
 
 .status-card__text {

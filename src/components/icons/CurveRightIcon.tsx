@@ -1,9 +1,12 @@
 import type { SVGProps } from 'react'
 
-/** Seta curva direita — Retiradas */
+/**
+ * Seta curva direita (estilo Lucide Redo2) — Retiradas
+ * Geometria calibrada para stroke ~2 sem “borrar” a ponta.
+ */
 export function CurveRightIcon({
   size = 24,
-  strokeWidth = 2.6,
+  strokeWidth = 2,
   width,
   height,
   ...props
@@ -23,8 +26,8 @@ export function CurveRightIcon({
       aria-hidden="true"
       {...props}
     >
-      <path d="M3 12a7 7 0 0 1 7-7h8" />
-      <path d="M14 2l4 3-4 3" />
+      <path d="m15 14 5-5-5-5" />
+      <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
     </svg>
   )
 }

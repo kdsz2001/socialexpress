@@ -1,9 +1,12 @@
 import type { SVGProps } from 'react'
 
-/** Seta curva esquerda — Devoluções */
+/**
+ * Seta curva esquerda (estilo Lucide Undo2) — Devoluções
+ * Geometria calibrada para stroke ~2 sem “borrar” a ponta.
+ */
 export function CurveLeftIcon({
   size = 24,
-  strokeWidth = 2.6,
+  strokeWidth = 2,
   width,
   height,
   ...props
@@ -23,8 +26,8 @@ export function CurveLeftIcon({
       aria-hidden="true"
       {...props}
     >
-      <path d="M21 12a7 7 0 0 0-7-7H6" />
-      <path d="M10 2 6 5l4 3" />
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
     </svg>
   )
 }
