@@ -180,36 +180,39 @@ export async function fetchPairingCode(phoneNumber) {
     const state = await fetchConnectionState()
     if (state.state === 'connecting' || state.state === 'open') {
       await logoutInstance()
-      await sleep(1200)
+      await sleep(800)
     }
   } catch {
     // segue mesmo assim
   }
 
   await ensureInstance()
-  let data = await evoFetch(
+  const data = await evoFetch(
     `/instance/connect/${encodeURIComponent(name)}?number=${encodeURIComponent(number)}`,
   )
   let pairingCode = extractPairingCode(data)
-  // no máximo 2 novas tentativas (evita “gerando infinito”)
-  for (let i = 0; !pairingCode && i < 2; i += 1) {
-    await sleep(1200)
-    data = await evoFetch(
+  let base64 = extractQrBase64(data)
+  let raw = data
+
+  if (!pairingCode) {
+    await sleep(1000)
+    raw = await evoFetch(
       `/instance/connect/${encodeURIComponent(name)}?number=${encodeURIComponent(number)}`,
     )
-    pairingCode = extractPairingCode(data)
+    pairingCode = extractPairingCode(raw)
+    base64 = extractQrBase64(raw) || base64
   }
 
   if (!pairingCode) {
     throw new Error(
-      'Não foi possível gerar o código. Confira o número (DDD + 9 dígitos) e tente de novo.',
+      'Não foi possível gerar o código. Confira o número (11 dígitos) ou use o QR ao lado.',
     )
   }
 
   return {
-    raw: data,
+    raw,
     pairingCode,
-    base64: extractQrBase64(data),
+    base64,
     number,
   }
 }

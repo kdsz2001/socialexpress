@@ -69,6 +69,7 @@ export function Crm() {
   const [busy, setBusy] = useState(false)
   const [bridgeError, setBridgeError] = useState<string | null>(null)
   const [phoneInput, setPhoneInput] = useState('')
+  const [qrBootstrapped, setQrBootstrapped] = useState(false)
 
   useEffect(() => {
     if (live) return
@@ -90,6 +91,40 @@ export function Crm() {
     return () => window.clearTimeout(timer)
   }, [live, state.status])
 
+  // Evolution: já puxa o QR oficial na abertura da tela
+  useEffect(() => {
+    if (!live || qrBootstrapped) return
+    if (state.status === 'connected') {
+      setQrBootstrapped(true)
+      return
+    }
+    let cancelled = false
+    setQrBootstrapped(true)
+    setBusy(true)
+    startCrmConnecting()
+    void (async () => {
+      try {
+        const connection = await bridgeConnect()
+        if (cancelled) return
+        const snapshot = await bridgeGetState()
+        hydrateCrmFromBridge({
+          ...snapshot,
+          connection: { ...snapshot.connection, ...connection },
+        })
+        setBridgeError(null)
+      } catch (error) {
+        if (!cancelled) {
+          setBridgeError(error instanceof Error ? error.message : 'Falha ao carregar QR')
+        }
+      } finally {
+        if (!cancelled) setBusy(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [live, qrBootstrapped, state.status])
+
   // Evolution: poll bridge
   useEffect(() => {
     if (!live) return
@@ -100,8 +135,7 @@ export function Crm() {
         const snapshot = await bridgeGetState()
         if (cancelled) return
         hydrateCrmFromBridge(snapshot)
-        setBridgeError(null)
-        if (snapshot.connection?.status === 'connecting') {
+        if (snapshot.connection?.status === 'connecting' || snapshot.connection?.qrBase64) {
           await bridgeStatus()
           const again = await bridgeGetState()
           if (!cancelled) hydrateCrmFromBridge(again)
@@ -173,10 +207,16 @@ export function Crm() {
       refreshCrmQr()
       return
     }
+    setBridgeError(null)
     setBusy(true)
+    startCrmConnecting()
     try {
-      await bridgeRefreshQr()
-      hydrateCrmFromBridge(await bridgeGetState())
+      const connection = await bridgeRefreshQr()
+      const snapshot = await bridgeGetState()
+      hydrateCrmFromBridge({
+        ...snapshot,
+        connection: { ...snapshot.connection, ...connection },
+      })
     } catch (error) {
       setBridgeError(error instanceof Error ? error.message : 'Falha ao renovar QR')
     } finally {
@@ -203,9 +243,17 @@ export function Crm() {
         ...snapshot,
         connection: { ...snapshot.connection, ...connection },
       })
+      if (!connection.pairingCode) {
+        setBridgeError('Código não veio. Use o QR oficial ao lado ou tente de novo.')
+      }
     } catch (error) {
       setBridgeError(error instanceof Error ? error.message : 'Falha ao gerar código')
-      disconnectCrm()
+      // Mantém o QR atual — não desconecta a tela inteira
+      try {
+        hydrateCrmFromBridge(await bridgeGetState())
+      } catch {
+        // ignore
+      }
     } finally {
       setBusy(false)
     }
@@ -270,7 +318,6 @@ export function Crm() {
           onRefreshQr={() => void onRefreshQr()}
           onStart={() => void onStartConnect()}
           onPairing={() => void onPairing()}
-          onCancel={() => void onDisconnect()}
         />
       </div>
     )
@@ -437,7 +484,6 @@ function ConnectPanel({
   onRefreshQr,
   onStart,
   onPairing,
-  onCancel,
 }: {
   status: 'disconnected' | 'connecting'
   busy: boolean
@@ -451,8 +497,10 @@ function ConnectPanel({
   onRefreshQr: () => void
   onStart: () => void
   onPairing: () => void
-  onCancel: () => void
 }) {
+  const showFakeQr = mode === 'mock' && !qrBase64
+  const showOfficialQr = Boolean(qrBase64)
+
   return (
     <section className="crm__connect">
       <div className="crm__connect-copy">
@@ -467,7 +515,7 @@ function ConnectPanel({
         </h2>
         <p>
           {mode === 'evolution'
-            ? 'Use o QR ou o código de pareamento. Depois de conectar 1x, a sessão fica no servidor e o CRM recebe as mensagens via webhook.'
+            ? 'O QR oficial já aparece à direita. Escaneie no celular. Se o WhatsApp bloquear o QR, use o código por número.'
             : 'Modo demo (simulado). Para WhatsApp real, configure o bridge — veja docs/CRM-EVOLUTION-RAILWAY.md.'}
         </p>
         <ul>
@@ -484,8 +532,8 @@ function ConnectPanel({
         ) : (
           <div className="crm__pairing">
             <p className="crm__note">
-              Se o QR falhar no celular, use o código: WhatsApp → Aparelhos conectados → Conectar um
-              aparelho → <strong>Conectar com número de telefone</strong>.
+              Alternativa: WhatsApp → Aparelhos conectados → Conectar um aparelho →{' '}
+              <strong>Conectar com número de telefone</strong>.
             </p>
             <label className="crm__pairing-label" htmlFor="crm-pairing-phone">
               Seu WhatsApp (com DDD){' '}
@@ -529,39 +577,30 @@ function ConnectPanel({
       </div>
 
       <div className="crm__qr-card">
-        <div className={`crm__qr${status === 'connecting' ? ' is-scanning' : ''}`} aria-hidden="true">
-          {qrBase64 ? (
-            <img src={qrBase64} alt="QR Code WhatsApp" className="crm__qr-image" />
-          ) : pairingCode ? (
-            <div className="crm__qr-pairing-only">
-              <strong>{pairingCode}</strong>
-              <span>Digite no celular</span>
-            </div>
-          ) : (
+        <div className={`crm__qr${busy && !showOfficialQr ? ' is-scanning' : ''}`} aria-hidden="true">
+          {showOfficialQr ? (
+            <img src={qrBase64!} alt="QR Code WhatsApp oficial" className="crm__qr-image" />
+          ) : showFakeQr ? (
             <QrPattern token={qrToken} />
-          )}
-          {status === 'connecting' && !qrBase64 && !pairingCode ? (
-            <div className="crm__qr-overlay">
+          ) : (
+            <div className="crm__qr-loading">
               <RefreshCcw size={22} strokeWidth={2.25} className="is-spin" />
-              Gerando…
+              <span>Carregando QR oficial…</span>
             </div>
-          ) : null}
+          )}
         </div>
         <p className="crm__qr-token">
-          {mode === 'evolution' ? 'Evolution' : 'Demo'} · {qrToken.slice(-8).toUpperCase()}
+          {mode === 'evolution' ? 'QR oficial Evolution' : 'Demo'} · {qrToken.slice(-8).toUpperCase()}
         </p>
-        <div className="crm__qr-actions">
-          <button type="button" className="crm__ghost" onClick={onRefreshQr} disabled={busy}>
-            <QrCode size={15} strokeWidth={2.25} />
-            Novo QR
-          </button>
-          {status === 'connecting' ? (
-            <button type="button" className="crm__primary" onClick={onCancel} disabled={busy}>
-              Cancelar
+        <div className="crm__qr-actions crm__qr-actions--single">
+          {mode === 'evolution' ? (
+            <button type="button" className="crm__primary" onClick={onRefreshQr} disabled={busy}>
+              <QrCode size={15} strokeWidth={2.25} />
+              {busy ? 'Gerando QR…' : 'Novo QR'}
             </button>
           ) : (
-            <button type="button" className="crm__primary" onClick={onStart} disabled={busy}>
-              {mode === 'evolution' ? 'Conectar com QR' : 'Simular leitura do QR'}
+            <button type="button" className="crm__primary" onClick={onStart} disabled={status === 'connecting'}>
+              {status === 'connecting' ? 'Aguardando…' : 'Simular leitura do QR'}
             </button>
           )}
         </div>

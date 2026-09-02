@@ -48,7 +48,8 @@ app.post('/api/whatsapp/connect', async (_req, res) => {
       })
     }
 
-    patchConnection({ status: 'connecting', lastError: null, qrBase64: null })
+    const previousQr = readBridgeState().connection?.qrBase64 || null
+    patchConnection({ status: 'connecting', lastError: null })
     await ensureInstance(`${PUBLIC_URL}/api/webhook/evolution`)
     const qr = await fetchQr()
     const state = await fetchConnectionState()
@@ -58,6 +59,7 @@ app.post('/api/whatsapp/connect', async (_req, res) => {
         status: 'connected',
         connectedAt: Date.now(),
         qrBase64: null,
+        pairingCode: null,
         accountName: 'WhatsApp conectado',
         accountPhone: '',
       })
@@ -65,11 +67,12 @@ app.post('/api/whatsapp/connect', async (_req, res) => {
       return res.json({ ...next.connection, mode: 'evolution' })
     }
 
+    const qrBase64 = qr.base64 || previousQr
     const next = patchConnection({
       status: 'connecting',
-      qrBase64: qr.base64,
+      qrBase64,
       pairingCode: qr.pairingCode || null,
-      lastError: qr.base64 ? null : 'QR ainda não disponível — tente de novo em alguns segundos',
+      lastError: qrBase64 ? null : 'QR ainda não disponível — clique em Novo QR',
     })
     return res.json({ ...next.connection, mode: 'evolution' })
   } catch (error) {
@@ -86,20 +89,37 @@ app.get('/api/whatsapp/status', async (_req, res) => {
     if (!evolutionConfigured()) {
       return res.json({ ...readBridgeState().connection, mode: 'mock' })
     }
+    const current = readBridgeState().connection
     const state = await fetchConnectionState()
     if (state.state === 'open') {
       const next = patchConnection({
         status: 'connected',
-        connectedAt: readBridgeState().connection.connectedAt || Date.now(),
+        connectedAt: current.connectedAt || Date.now(),
         qrBase64: null,
+        pairingCode: null,
       })
       return res.json({ ...next.connection, mode: 'evolution', evolutionState: state.state })
     }
     if (state.state === 'connecting') {
-      const next = patchConnection({ status: 'connecting' })
+      // Mantém o QR atual; se sumiu, tenta buscar de novo
+      let qrBase64 = current.qrBase64
+      if (!qrBase64) {
+        try {
+          const qr = await fetchQr()
+          qrBase64 = qr.base64
+        } catch {
+          // ignore
+        }
+      }
+      const next = patchConnection({
+        status: 'connecting',
+        qrBase64: qrBase64 || current.qrBase64,
+      })
       return res.json({ ...next.connection, mode: 'evolution', evolutionState: state.state })
     }
-    const next = patchConnection({ status: 'disconnected' })
+    const next = patchConnection({
+      status: current.qrBase64 ? 'connecting' : 'disconnected',
+    })
     return res.json({ ...next.connection, mode: 'evolution', evolutionState: state.state })
   } catch (error) {
     return res.json({
@@ -112,13 +132,27 @@ app.get('/api/whatsapp/status', async (_req, res) => {
 
 app.post('/api/whatsapp/qr/refresh', async (_req, res) => {
   try {
+    if (!evolutionConfigured()) {
+      return res.status(400).json({ error: 'Evolution não configurada' })
+    }
+    // Força QR novo/válido: limpa sessão antiga e gera de novo
+    try {
+      await logoutInstance()
+    } catch {
+      // ignore
+    }
+    patchConnection({
+      status: 'connecting',
+      lastError: null,
+      pairingCode: null,
+    })
     await ensureInstance(`${PUBLIC_URL}/api/webhook/evolution`)
     const qr = await fetchQr()
     const next = patchConnection({
       status: 'connecting',
       qrBase64: qr.base64,
       pairingCode: qr.pairingCode || null,
-      lastError: qr.base64 ? null : 'QR indisponível',
+      lastError: qr.base64 ? null : 'QR indisponível — tente Novo QR de novo',
     })
     res.json(next.connection)
   } catch (error) {
@@ -134,31 +168,30 @@ app.post('/api/whatsapp/pairing', async (req, res) => {
       })
     }
     const phone = req.body?.number || req.body?.phone || ''
-    patchConnection({ status: 'connecting', lastError: null, qrBase64: null, pairingCode: null })
+    const previousQr = readBridgeState().connection?.qrBase64 || null
+    patchConnection({ status: 'connecting', lastError: null, pairingCode: null })
     await ensureInstance(`${PUBLIC_URL}/api/webhook/evolution`)
     const result = await fetchPairingCode(phone)
     if (!result.pairingCode) {
       const next = patchConnection({
         status: 'connecting',
-        qrBase64: result.base64,
+        qrBase64: result.base64 || previousQr,
         pairingCode: null,
         accountPhone: result.number,
-        lastError:
-          'Código de pareamento indisponível. Clique em Novo QR ou tente de novo em alguns segundos.',
+        lastError: 'Código indisponível. Use o QR ao lado ou tente de novo.',
       })
       return res.status(502).json({ error: next.connection.lastError, ...next.connection })
     }
     const next = patchConnection({
       status: 'connecting',
       pairingCode: result.pairingCode,
-      qrBase64: result.base64,
+      qrBase64: result.base64 || previousQr,
       accountPhone: result.number,
       lastError: null,
     })
     return res.json({ ...next.connection, mode: 'evolution' })
   } catch (error) {
     patchConnection({
-      status: 'disconnected',
       lastError: error.message || 'Falha ao gerar pairing code',
     })
     return res.status(500).json({ error: error.message || 'Falha ao gerar pairing code' })

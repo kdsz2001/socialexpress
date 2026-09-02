@@ -241,6 +241,26 @@
   justify-content: center;
 }
 
+.crm__qr-actions--single {
+  width: 100%;
+}
+
+.crm__qr-actions--single .crm__primary {
+  width: 100%;
+  justify-content: center;
+}
+
+.crm__qr-loading {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  gap: 0.55rem;
+  color: #3699ff;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
 .is-spin {
   animation: crm-spin 0.9s linear infinite;
 }
