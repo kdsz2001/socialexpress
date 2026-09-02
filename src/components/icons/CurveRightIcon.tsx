@@ -1,9 +1,9 @@
 import type { SVGProps } from 'react'
 
-/** Seta curva direita — Retiradas (Clarial) */
+/** Seta curva direita — Retiradas */
 export function CurveRightIcon({
   size = 24,
-  strokeWidth = 1.75,
+  strokeWidth = 2.6,
   width,
   height,
   ...props

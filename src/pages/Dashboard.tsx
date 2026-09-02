@@ -1,5 +1,5 @@
 import { ClipboardList, Banknote, ShoppingCart } from 'lucide-react'
-import { BlazerIcon } from '../components/icons/BlazerIcon'
+import { HangerIcon } from '../components/icons/HangerIcon'
 import { CurveRightIcon } from '../components/icons/CurveRightIcon'
 import { CurveLeftIcon } from '../components/icons/CurveLeftIcon'
 import { StatusCard } from '../components/dashboard/StatusCard'
@@ -9,7 +9,7 @@ import { AgendaCard } from '../components/dashboard/AgendaCard'
 import './Dashboard.css'
 
 const statusItems = [
-  { label: 'Provas', value: 0, icon: BlazerIcon },
+  { label: 'Provas', value: 0, icon: HangerIcon },
   { label: 'Retiradas', value: 0, icon: CurveRightIcon },
   { label: 'Devoluções', value: 0, icon: CurveLeftIcon },
 ]

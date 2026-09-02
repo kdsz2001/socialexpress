@@ -1,9 +1,9 @@
 import type { SVGProps } from 'react'
 
-/** Seta curva esquerda — Devoluções (Clarial) */
+/** Seta curva esquerda — Devoluções */
 export function CurveLeftIcon({
   size = 24,
-  strokeWidth = 1.75,
+  strokeWidth = 2.6,
   width,
   height,
   ...props
@@ -24,7 +24,7 @@ export function CurveLeftIcon({
       {...props}
     >
       <path d="M21 12a7 7 0 0 0-7-7H6" />
-      <path d="M10 2L6 5l4 3" />
+      <path d="M10 2 6 5l4 3" />
     </svg>
   )
 }
