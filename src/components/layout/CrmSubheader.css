@@ -1,0 +1,25 @@
+.crm-subheader__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.85rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: #f3f6f9;
+  color: #7e8299;
+  font-size: 0.78rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.crm-subheader__status.is-on {
+  background: #e8fff3;
+  color: #0bb783;
+}
+
+.clients-subheader__heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0;
+}

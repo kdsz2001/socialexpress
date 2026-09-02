@@ -1,0 +1,336 @@
+.topbar {
+  height: var(--topbar-height);
+  background: var(--topbar-bg);
+  border-bottom: 1px solid #ebedf3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 var(--app-content-pad-x, 30px);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.topbar__menu {
+  display: none;
+  color: var(--text-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 0.42rem;
+  place-items: center;
+}
+
+.topbar__menu:hover {
+  background: var(--main-bg);
+}
+
+.topbar__spacer {
+  flex: 1;
+}
+
+/* Abas Clientes — barra branca do topo (estilo Clarial) */
+.topbar__tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.topbar__tabs--products {
+  max-width: min(100%, 52rem);
+}
+
+.topbar__tabs--finance {
+  max-width: min(100%, 48rem);
+}
+
+.topbar__tab {
+  border: 0;
+  background: transparent;
+  color: #7e8299;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 0.55rem 1rem;
+  border-radius: 0.42rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.topbar__tab:hover {
+  color: #3699ff;
+}
+
+.topbar__tab.is-active {
+  color: #3699ff;
+  background: #f3f6f9;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar__search-wrap {
+  position: relative;
+}
+
+.topbar__search {
+  color: #3699ff;
+  width: 36px;
+  height: 36px;
+  border-radius: 0.42rem;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.topbar__search:hover,
+.topbar__search.is-open {
+  background: #e1f0ff;
+  color: #3699ff;
+}
+
+.topbar__search-panel {
+  position: fixed;
+  z-index: 1300;
+  background: #ffffff;
+  border-radius: 0.65rem;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
+  padding: 1rem 0 0.65rem;
+  animation: search-in 0.16s ease both;
+}
+
+.topbar__search-panel.has-result {
+  min-height: 220px;
+}
+
+.topbar__search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.5rem 0.85rem;
+}
+
+.topbar__search-panel.has-result .topbar__search-form {
+  border-bottom: 1px solid #ebedf3;
+}
+
+.topbar__search-panel-icon {
+  color: #b5b5c3;
+  flex-shrink: 0;
+}
+
+.topbar__search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #3f4254;
+}
+
+.topbar__search-input::placeholder {
+  color: #b5b5c3;
+  font-weight: 400;
+}
+
+.topbar__search-clear {
+  color: #b5b5c3;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.topbar__search-clear:hover {
+  color: #7e8299;
+}
+
+.topbar__search-results {
+  padding: 0.85rem 0 0.35rem;
+}
+
+.topbar__search-group {
+  margin: 0 0 0.35rem;
+  padding: 0 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #3699ff;
+}
+
+.topbar__search-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.topbar__search-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.7rem 1.5rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease;
+}
+
+.topbar__search-item:hover,
+.topbar__search-item:focus-visible {
+  background: #f3f6f9;
+}
+
+.topbar__search-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: #3699ff;
+  color: #ffffff;
+}
+
+.topbar__search-name {
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #3f4254;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar__search-empty {
+  margin: 1rem 1.5rem 0.5rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #b5b5c3;
+  line-height: 1.5;
+}
+
+.topbar__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px 6px 12px;
+  margin-right: -10px;
+  border-radius: 0.42rem;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.topbar__user:hover,
+.topbar__user.is-open {
+  background: #f3f6f9;
+}
+
+.topbar__greeting {
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* Clarial: "Olá," cinza claro */
+.topbar__greeting-hi {
+  font-weight: 400;
+  color: #b5b5c3;
+}
+
+/* Clarial: nome em cinza-ardósia mais forte */
+.topbar__greeting-name {
+  font-weight: 500;
+  color: #3f4254;
+}
+
+.topbar__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.42rem;
+  background-color: #eef0f4;
+  background-image:
+    radial-gradient(circle at 50% 38%, #b5b5c3 0 22%, transparent 23%),
+    radial-gradient(ellipse 55% 40% at 50% 78%, #b5b5c3 0 52%, transparent 53%);
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.topbar__avatar:has(.topbar__avatar-image) {
+  background-image: none;
+}
+
+.topbar__avatar-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  image-rendering: auto;
+  image-rendering: high-quality;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+@keyframes search-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .topbar__menu {
+    display: grid;
+  }
+
+  .topbar__tabs {
+    margin-left: 0.15rem;
+  }
+
+  .topbar__tab {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 0 15px;
+  }
+
+  .topbar__greeting {
+    display: none;
+  }
+
+  .topbar__tab {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.9rem;
+  }
+}

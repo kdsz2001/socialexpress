@@ -1,0 +1,96 @@
+/* Medidas iguais ao Clarial/Metronic: p-5, mb-5, rounded, icon-lg */
+
+.status-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
+  padding: 2rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.status-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #181c32;
+  margin: 0 0 1.25rem;
+  line-height: 1.2;
+}
+
+.status-card__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Linha colorida = .bg-light-* + .rounded + .p-5 + .mb-5 */
+.status-card__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem; /* .p-5 */
+  border-radius: 0.42rem; /* .rounded */
+  margin-bottom: 1.25rem; /* .mb-5 */
+  box-sizing: border-box;
+}
+
+.status-card__item.is-last {
+  margin-bottom: 0;
+}
+
+.status-card__label {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.status-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1.25rem; /* .mr-5 */
+  flex-shrink: 0;
+  line-height: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+.status-card__icon svg {
+  width: 2.1rem;
+  height: 2.1rem;
+  overflow: visible;
+}
+
+.status-card__text {
+  font-size: 1rem;
+  font-weight: 500; /* .font-weight-bold no Metronic */
+  line-height: 1.2;
+}
+
+.status-card__value {
+  font-size: 1.08rem; /* .font-size-lg */
+  font-weight: 600; /* .font-weight-bolder */
+  line-height: 1.2;
+  padding: 0.25rem 0; /* .py-1 */
+  margin-left: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Cores oficiais do tema Clarial/Metronic */
+.status-card--overdue .status-card__item {
+  background-color: #ffe2e5;
+  color: #f64e60;
+}
+
+.status-card--today .status-card__item {
+  background-color: #e1f0ff;
+  color: #3699ff;
+}
+
+.status-card--upcoming .status-card__item {
+  background-color: #c9f7f5;
+  color: #1bc5bd;
+}

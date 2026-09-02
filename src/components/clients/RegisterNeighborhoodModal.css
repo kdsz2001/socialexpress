@@ -1,0 +1,135 @@
+.bairro-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.bairro-modal__overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(24, 28, 50, 0.35);
+  cursor: default;
+}
+
+.bairro-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
+  padding: 28px 28px 24px;
+  text-align: center;
+  animation: bairro-modal-in 0.18s ease;
+}
+
+.bairro-modal__icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  border: 2px solid #8950fc;
+  color: #8950fc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bairro-modal__title {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #181c32;
+}
+
+.bairro-modal__text {
+  margin: 0 0 18px;
+  font-size: 0.975rem;
+  line-height: 1.55;
+  color: #7e8299;
+}
+
+.bairro-modal__text strong {
+  color: #3f4254;
+  font-weight: 600;
+}
+
+.bairro-modal__input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #69b3ff;
+  border-radius: 4px;
+  background: #fff;
+  color: #3f4254;
+  font-size: 0.975rem;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.12);
+  margin-bottom: 20px;
+}
+
+.bairro-modal__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bairro-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  font-size: 0.925rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, filter 0.15s ease;
+}
+
+.bairro-modal__btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.bairro-modal__btn--cancel {
+  background: #e4e6ef;
+  color: #3f4254;
+}
+
+.bairro-modal__btn--cancel:hover {
+  background: #d7dae7;
+}
+
+.bairro-modal__btn--confirm {
+  background: #3699ff;
+  color: #fff;
+}
+
+.bairro-modal__btn--confirm:hover:not(:disabled) {
+  background: #187de4;
+}
+
+@keyframes bairro-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

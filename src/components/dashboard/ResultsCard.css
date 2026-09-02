@@ -1,0 +1,85 @@
+.results-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
+  padding: 2rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.results-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #181c32;
+  margin: 0 0 1.25rem;
+  line-height: 1.2;
+}
+
+.results-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.results-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.75rem;
+}
+
+.results-card__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.results-card__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.42rem;
+  background: #c9f7f5;
+  color: #1bc5bd;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.results-card__icon svg {
+  width: 2.35rem;
+  height: 2.35rem;
+}
+
+.results-card__text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #7e8299;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.results-card__value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #7e8299;
+  white-space: nowrap;
+  background: #f3f6f9;
+  border-radius: 0.42rem;
+  padding: 0.35rem 0.55rem;
+  min-width: 0;
+  min-height: 0;
+  text-align: center;
+  line-height: 1.2;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

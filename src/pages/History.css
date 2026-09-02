@@ -1,0 +1,449 @@
+.history {
+  width: 100%;
+  animation: history-in 0.35s ease both;
+}
+
+@keyframes history-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.history__card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
+  padding: 1.5rem;
+}
+
+.history__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #ebedf3;
+}
+
+.history__date {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  flex: 0 1 320px;
+  min-width: min(100%, 240px);
+}
+
+.history__date-field {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 0.9rem;
+  border: 1px solid #e4e6ef;
+  border-right: 0;
+  border-radius: 0.42rem 0 0 0.42rem;
+  background: #ffffff;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.history__date-cal {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e4e6ef;
+  border-radius: 0 0.42rem 0.42rem 0;
+  background: #f3f6f9;
+  color: #3699ff;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.history__date-field.is-open,
+.history__date-cal.is-open,
+.history__date-field:hover,
+.history__date-cal:hover {
+  border-color: #3699ff;
+}
+
+.history__date-field.is-open {
+  box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.12);
+}
+
+.history__date-cal.is-open {
+  background: #e1f0ff;
+}
+
+.history__date-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 40px;
+  min-width: 200px;
+  padding: 0.45rem 0;
+  background: #ffffff;
+  border-radius: 0.55rem;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
+  z-index: 40;
+  animation: history-in 0.16s ease both;
+}
+
+.history__date-option {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border: 0;
+  background: transparent;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.history__date-option:hover,
+.history__date-option.is-active {
+  background: #f3f6f9;
+  color: #3699ff;
+}
+
+.history__date-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+}
+
+.history__filter {
+  position: relative;
+}
+
+.history__filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  min-width: 160px;
+  height: 40px;
+  padding: 0 0.85rem;
+  border: 1px solid #e4e6ef;
+  border-radius: 0.42rem;
+  background: #f3f6f9;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.history__filter-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history__filter-btn:hover,
+.history__filter-btn.is-open {
+  border-color: #3699ff;
+}
+
+.history__filter-btn.is-active,
+.history__filter-btn.is-open.is-active {
+  background: #3699ff;
+  border-color: #3699ff;
+  color: #ffffff;
+}
+
+.history__filter-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  max-height: 260px;
+  overflow: auto;
+  padding: 0.45rem 0;
+  background: #ffffff;
+  border-radius: 0.55rem;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
+  z-index: 40;
+  animation: history-in 0.16s ease both;
+}
+
+.history__filter-option {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border: 0;
+  background: transparent;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.history__filter-option:hover,
+.history__filter-option.is-active {
+  background: #f3f6f9;
+  color: #3699ff;
+}
+
+.history__table-wrap {
+  overflow-x: auto;
+}
+
+.history__table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin-top: 0.35rem;
+}
+
+.history__table th {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #b5b5c3;
+  border-bottom: 1px solid #ebedf3;
+  white-space: nowrap;
+}
+
+.history__table td {
+  padding: 1.15rem 1.25rem;
+  font-size: 0.98rem;
+  color: #3f4254;
+  border-bottom: 1px solid #ebedf3;
+  vertical-align: top;
+}
+
+.history__col-module {
+  width: 16%;
+}
+
+.history__col-desc {
+  width: 48%;
+}
+
+.history__col-date {
+  width: 18%;
+}
+
+.history__col-user {
+  width: 18%;
+}
+
+.history__th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.history__th-sort.is-sorted {
+  color: #3699ff;
+}
+
+.history__th-sort svg {
+  color: #3699ff;
+  transition: transform 0.15s ease;
+}
+
+.history__th-sort svg.is-desc {
+  transform: rotate(180deg);
+}
+
+.history__module {
+  color: #3f4254;
+  font-weight: 400;
+}
+
+.history__desc-text {
+  margin: 0;
+  line-height: 1.45;
+  color: #3f4254;
+  word-break: break-word;
+}
+
+.history__desc-text strong {
+  font-weight: 700;
+  color: #181c32;
+}
+
+.history__diffs {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 100%;
+}
+
+.history__diff {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  padding: 0.15rem 0.45rem;
+  border-radius: 2px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.history__diff--remove {
+  background: #ffcccc;
+  color: #3f4254;
+}
+
+.history__diff--add {
+  background: #ccffcc;
+  color: #3f4254;
+}
+
+.history__date-cell {
+  color: #7e8299;
+  white-space: nowrap;
+}
+
+.history__user {
+  color: #7e8299;
+  word-break: break-word;
+}
+
+.history__empty {
+  text-align: center;
+  color: #b5b5c3;
+  padding: 2.5rem 1.25rem !important;
+}
+
+.history__pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.85rem;
+}
+
+.history__pager-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.history__pager-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.history__pager-size {
+  height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid #e4e6ef;
+  border-radius: 4px;
+  background: #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237E8299' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E")
+    no-repeat right 10px center;
+  appearance: none;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.history__pager-info {
+  font-size: 0.875rem;
+  color: #7e8299;
+}
+
+.history__pager-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px;
+  background: #f3f6f9;
+  color: #b5b5c3;
+  cursor: pointer;
+}
+
+.history__pager-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.history__pager-btn.is-active {
+  background: #3699ff;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .history__col-module {
+    width: 22%;
+  }
+
+  .history__col-desc {
+    width: 40%;
+  }
+
+  .history__col-date,
+  .history__col-user {
+    width: 19%;
+  }
+
+  .history__table th,
+  .history__table td {
+    padding: 0.9rem 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .history__card {
+    padding: 1rem;
+  }
+
+  .history__date {
+    flex: 1 1 100%;
+  }
+
+  .history__filter {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+
+  .history__filter-btn {
+    width: 100%;
+  }
+
+  .history__table {
+    table-layout: auto;
+  }
+
+  .history__col-module,
+  .history__col-desc,
+  .history__col-date,
+  .history__col-user {
+    width: auto;
+  }
+}

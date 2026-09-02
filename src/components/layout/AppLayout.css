@@ -1,0 +1,258 @@
+.app-shell {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100vh;
+  background: var(--main-bg);
+  /* Do not set overflow here — it clips the fixed sidebar in some browsers */
+  padding-left: var(--sidebar-width);
+  transition: padding-left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-shell.is-collapsed {
+  padding-left: var(--sidebar-collapsed);
+}
+
+/*
+  Claral behavior:
+  - main always fills the remaining viewport (100% of the padded shell)
+  - opening/closing the menu only changes shell padding
+  - dashboard cards keep fixed px widths so they never stretch
+*/
+.app-main {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.app-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 25px var(--app-content-pad-x, 30px) 0;
+  box-sizing: border-box;
+}
+
+.app-content__inner {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding-bottom: 20px;
+  box-sizing: border-box;
+}
+
+/*
+  Clientes / Agenda / Eventos / etc:
+  - largura trava no espaço do menu ABERTO (não estica ao fechar)
+  - com menu fechado, margens simétricas (mesmo delta do sidebar)
+    centralizam sem translateX — evita cortar pra fora
+*/
+.app-panel-align {
+  width: 100%;
+  max-width: var(--app-panel-max);
+  margin-left: 0;
+  margin-right: auto;
+  box-sizing: border-box;
+  transition:
+    margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    margin-right 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-shell.is-collapsed .app-panel-align {
+  margin-left: calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2);
+  margin-right: auto;
+}
+
+.app-content__inner > .clients,
+.app-content__inner > .events,
+.app-content__inner > .agenda,
+.app-content__inner > .products,
+.app-content__inner > .employees,
+.app-content__inner > .orders,
+.app-content__inner > .financeiro,
+.app-content__inner > .suppliers,
+.app-content__inner > .reports,
+.app-content__inner > .settings,
+.app-content__inner > .history,
+.app-content__inner > .crm {
+  width: 100%;
+  max-width: var(--app-panel-max);
+  margin-left: 0;
+  margin-right: auto;
+  box-sizing: border-box;
+  transition:
+    margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    margin-right 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-shell.is-collapsed .app-content__inner > .clients,
+.app-shell.is-collapsed .app-content__inner > .events,
+.app-shell.is-collapsed .app-content__inner > .agenda,
+.app-shell.is-collapsed .app-content__inner > .products,
+.app-shell.is-collapsed .app-content__inner > .employees,
+.app-shell.is-collapsed .app-content__inner > .orders,
+.app-shell.is-collapsed .app-content__inner > .financeiro,
+.app-shell.is-collapsed .app-content__inner > .suppliers,
+.app-shell.is-collapsed .app-content__inner > .reports,
+.app-shell.is-collapsed .app-content__inner > .settings,
+.app-shell.is-collapsed .app-content__inner > .history,
+.app-shell.is-collapsed .app-content__inner > .crm {
+  margin-left: calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2);
+  margin-right: auto;
+}
+
+.app-footer {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  margin-top: auto;
+  background: #ffffff;
+  padding: 14px 0;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #b5b5c3;
+  border-bottom: 0;
+  border-top: 1px solid #ebedf3;
+  box-sizing: border-box;
+}
+
+.app-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  background: rgba(30, 30, 45, 0.45);
+  border: none;
+  cursor: pointer;
+  animation: overlay-in 0.2s ease both;
+}
+
+.scrolltop {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  position: fixed;
+  bottom: 40px;
+  right: 20px;
+  cursor: pointer;
+  z-index: 100;
+  background-color: #3699ff;
+  border: none;
+  border-radius: 0.42rem;
+  color: #ffffff;
+  opacity: 0.3;
+  box-shadow: 0 0 15px 0 rgba(54, 153, 255, 0.25);
+}
+
+.scrolltop.is-visible {
+  display: flex;
+  animation: animation-scrolltop 0.4s ease-out 1;
+}
+
+.scrolltop:hover {
+  opacity: 1;
+}
+
+@keyframes animation-scrolltop {
+  from {
+    margin-bottom: -15px;
+  }
+  to {
+    margin-bottom: 0;
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-shell,
+  .app-shell.is-collapsed {
+    padding-left: 0;
+    transition: none;
+  }
+
+  .app-main {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .app-content {
+    padding: 15px 15px 0;
+    align-items: stretch;
+  }
+
+  .app-content__inner,
+  .app-footer {
+    width: 100%;
+    max-width: none;
+  }
+
+  .app-content__inner > .clients,
+  .app-content__inner > .events,
+  .app-content__inner > .agenda,
+  .app-content__inner > .products,
+  .app-content__inner > .employees,
+  .app-content__inner > .orders,
+  .app-content__inner > .financeiro,
+  .app-content__inner > .suppliers,
+  .app-content__inner > .reports,
+  .app-content__inner > .settings,
+  .app-content__inner > .history,
+  .app-content__inner > .crm,
+  .app-panel-align {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    transition: none;
+  }
+
+  .app-shell.is-collapsed .app-content__inner > .clients,
+  .app-shell.is-collapsed .app-content__inner > .events,
+  .app-shell.is-collapsed .app-content__inner > .agenda,
+  .app-shell.is-collapsed .app-content__inner > .products,
+  .app-shell.is-collapsed .app-content__inner > .employees,
+  .app-shell.is-collapsed .app-content__inner > .orders,
+  .app-shell.is-collapsed .app-content__inner > .financeiro,
+  .app-shell.is-collapsed .app-content__inner > .suppliers,
+  .app-shell.is-collapsed .app-content__inner > .reports,
+  .app-shell.is-collapsed .app-content__inner > .settings,
+  .app-shell.is-collapsed .app-content__inner > .history,
+  .app-shell.is-collapsed .app-content__inner > .crm,
+  .app-shell.is-collapsed .app-panel-align {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .app-footer {
+    padding: 12px 0;
+  }
+
+  .scrolltop {
+    bottom: 30px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+  }
+}

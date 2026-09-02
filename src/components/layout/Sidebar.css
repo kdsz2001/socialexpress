@@ -1,0 +1,365 @@
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 40;
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+
+/* Fixado fechado: só ícones. No hover (.is-hover-open) abre por cima do conteúdo */
+.sidebar.is-collapsed {
+  width: var(--sidebar-collapsed);
+  z-index: 55;
+}
+
+.sidebar.is-collapsed.is-hover-open {
+  width: var(--sidebar-width);
+  box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.28);
+}
+
+/* ——— Brand: gola + gravata/seta (flex — sem absolute bugado) ——— */
+.sidebar__brand {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: var(--topbar-height);
+  padding: 0 12px 0 25px;
+  flex-shrink: 0;
+  background: var(--sidebar-brand-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition:
+    height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    padding 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    gap 0.45s ease;
+}
+
+/* Fechado (sem hover): px pares + stack fixo (sem drift no zoom) */
+.sidebar.is-collapsed:not(.is-hover-open) .sidebar__brand {
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  width: 70px;
+  height: 70px;
+  padding: 16px 0 6px;
+  gap: 0;
+  box-sizing: border-box;
+}
+
+.sidebar.is-collapsed.is-hover-open .sidebar__brand {
+  width: 100%;
+  height: var(--topbar-height);
+  padding: 0 12px 0 25px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar__lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  white-space: nowrap;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sidebar__lockup--home {
+  cursor: pointer;
+}
+
+.sidebar__lockup--home:hover .sidebar__word,
+.sidebar__lockup--home:hover .sidebar__collar {
+  filter: brightness(1.08);
+}
+
+.sidebar__word {
+  font-family: 'Montserrat', 'Poppins', sans-serif;
+  font-size: 1.06rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-blue);
+  line-height: 1;
+  overflow: hidden;
+  max-width: 9.5rem;
+  opacity: 1;
+  transition:
+    opacity 0.2s ease,
+    max-width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sidebar__emblem {
+  flex-shrink: 0;
+  width: 21px;
+  height: 13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  transition:
+    width 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Gola oficial (máscara do brand-mark) no azul Clarial */
+.sidebar__collar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: var(--brand-blue);
+  -webkit-mask: url('/brand-mark-white.png') center / contain no-repeat;
+  mask: url('/brand-mark-white.png') center / contain no-repeat;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ——— Dock fechado: larguras pares / altura inteira (zoom-stable) ——— */
+.sidebar__dock {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 70px;
+  height: auto;
+  margin: 0;
+  padding: 2px 0 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  line-height: 0;
+  color: inherit;
+}
+
+.sidebar__dock:hover {
+  background: rgba(54, 153, 255, 0.08);
+}
+
+.sidebar__dock:focus-visible {
+  outline: 2px solid rgba(54, 153, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.sidebar__dock-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 28px; /* par: (70-28)/2 = 21px exato */
+  flex-shrink: 0;
+}
+
+.sidebar__dock .sidebar__emblem {
+  width: 28px;
+  height: 18px;
+  margin: 0;
+  z-index: 2;
+}
+
+.sidebar__dock .sidebar__necktie--docked {
+  display: block;
+  width: 16px; /* par: (28-16)/2 = 6px exato */
+  height: 26px; /* inteiro — evita arredondamento no zoom */
+  margin: -4px 0 0;
+  flex-shrink: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/*
+  Gravata azul Clarial (modelo da logo).
+  Aberta: gira 90° → seta ← .
+*/
+.sidebar__tie-toggle {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--brand-blue);
+  background: transparent;
+  /* translateX antes do rotate sobe a gravata na horizontal (alinha com a logo) */
+  transform: rotate(90deg) translateX(-1px);
+  transition:
+    transform 0.5s cubic-bezier(0.33, 1, 0.32, 1),
+    width 0.4s ease,
+    height 0.4s ease,
+    margin 0.45s cubic-bezier(0.33, 1, 0.32, 1),
+    background 0.15s ease;
+}
+
+.sidebar__tie-toggle:hover {
+  background: transparent; /* sem “bola” no hover */
+}
+
+.sidebar__tie-toggle:focus-visible {
+  outline: 2px solid rgba(54, 153, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.sidebar__necktie {
+  display: block;
+  width: 18px; /* altura visual ≈ tamanho da logo quando rotacionada */
+  height: auto;
+}
+
+/* Aberta: crossfade suave estilo Clarial (não acende no instante) */
+.sidebar:not(.is-collapsed) .necktie-mark__idle,
+.sidebar:not(.is-collapsed) .necktie-mark__hover {
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar:not(.is-collapsed) .necktie-mark__hover {
+  opacity: 0;
+}
+
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .necktie-mark__hover,
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .necktie-mark__hover {
+  opacity: 1;
+}
+
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:hover .necktie-mark__idle,
+.sidebar:not(.is-collapsed) .sidebar__tie-toggle:focus-visible .necktie-mark__idle {
+  opacity: 0;
+}
+
+.sidebar__nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 25px 0 20px;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.sidebar__nav:hover {
+  scrollbar-color: var(--sidebar-scroll-thumb) transparent;
+}
+
+/* Scrollbar só aparece no hover (estilo Clarial/Perfect Scrollbar) */
+.sidebar__nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar__nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar__nav::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.sidebar__nav:hover::-webkit-scrollbar-thumb {
+  background: var(--sidebar-scroll-thumb);
+}
+
+.sidebar__nav:hover::-webkit-scrollbar-thumb:hover {
+  background: #7a85ad;
+}
+
+.sidebar__nav ul {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 9px 25px;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--sidebar-text);
+  transition: color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+/* Fechado sem hover: só ícone centralizado */
+.sidebar.is-collapsed:not(.is-hover-open) .sidebar__link {
+  justify-content: center;
+  padding: 12px 0;
+  width: 70px;
+}
+
+.sidebar.is-collapsed:not(.is-hover-open) .sidebar__label {
+  display: none;
+}
+
+/* No hover com menu fixado fechado: abre com labels iguais ao aberto */
+.sidebar.is-collapsed.is-hover-open .sidebar__link {
+  justify-content: flex-start;
+  padding: 9px 25px;
+  width: auto;
+}
+
+.sidebar.is-collapsed.is-hover-open .sidebar__label {
+  display: inline;
+}
+
+.sidebar__link:hover {
+  background: #1b1b28;
+  color: #ffffff;
+}
+
+.sidebar__link:hover svg {
+  color: #ffffff;
+}
+
+/* Seleção quase imperceptível (como Clarial: #1b1b28 sobre #1e1e2d) */
+.sidebar__link.is-active {
+  background: #1b1b28;
+  color: #cfcfd8;
+}
+
+.sidebar__link svg {
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  color: #cfcfd8; /* ícones "acesos" — claros como no Clarial */
+}
+
+.sidebar__link.is-active svg {
+  color: #cfcfd8;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar:not(.is-collapsed) {
+    transform: translateX(0);
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.35);
+  }
+
+  .sidebar.is-collapsed {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+    overflow: hidden;
+  }
+
+  .sidebar.is-collapsed.is-hover-open {
+    transform: translateX(-100%);
+  }
+}
