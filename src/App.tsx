@@ -15,6 +15,7 @@ import { Suppliers } from './pages/Suppliers'
 import { Reports } from './pages/Reports'
 import { Settings } from './pages/Settings'
 import { History } from './pages/History'
+import { Crm } from './pages/Crm'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [{ path: '/orcamentos', title: 'Orçamentos' }] as const
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/clientes/cadastrar" element={<ClientCreate />} />
         <Route path="/clientes/:clientId" element={<ClientDetail />} />
         <Route path="/meu-perfil" element={<MyProfile />} />
+        <Route path="/crm" element={<Crm />} />
         <Route path="/agenda" element={<Agenda />} />
         <Route path="/eventos" element={<Events />} />
         <Route path="/produtos" element={<Products />} />

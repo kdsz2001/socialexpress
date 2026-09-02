@@ -15,6 +15,7 @@ import { SuppliersSubheader } from './SuppliersSubheader'
 import { ReportsSubheader } from './ReportsSubheader'
 import { SettingsSubheader } from './SettingsSubheader'
 import { HistorySubheader } from './HistorySubheader'
+import { CrmSubheader } from './CrmSubheader'
 import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
 import { SaveToast } from '../ui/SaveToast'
 import type { Appointment } from '../../lib/agendaStore'
@@ -30,6 +31,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/clientes': 'Clientes',
   '/clientes/cadastrar': 'Cadastro de clientes',
   '/meu-perfil': 'Meu perfil',
+  '/crm': 'CRM',
   '/agenda': 'Agenda',
   '/eventos': 'Eventos',
   '/produtos': 'Produtos',
@@ -159,6 +161,7 @@ export function AppLayout() {
       <div className="app-main">
         <Topbar onMenuClick={toggle} />
         {location.pathname.startsWith('/clientes') && <ClientsSubheader />}
+        {location.pathname === '/crm' && <CrmSubheader />}
         {location.pathname === '/meu-perfil' && <ProfileSubheader />}
         {location.pathname === '/agenda' && (
           <AgendaSubheader onNewAppointment={() => openNewAppointment()} />

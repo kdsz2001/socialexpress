@@ -1,0 +1,35 @@
+.crm {
+  width: 100%;
+  animation: crm-in 0.35s ease both;
+}
+
+@keyframes crm-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.crm__card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
+  padding: 2rem 2.25rem;
+}
+
+.crm__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #181c32;
+}
+
+.crm__text {
+  margin: 0;
+  font-size: 1rem;
+  color: #7e8299;
+}
