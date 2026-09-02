@@ -245,20 +245,32 @@ app.post('/api/whatsapp/sync', async (_req, res) => {
       })
     }
 
-    const conversations = await syncRecentConversations({ maxChats: 40, maxMessages: 30 })
-    const next = importConversations(conversations)
+    const result = await syncRecentConversations({ maxChats: 50, maxMessages: 25 })
+    const conversations = result.imported || []
+    const stats = result.stats || {}
+    importConversations(conversations)
     patchConnection({
       status: 'connected',
       lastSyncAt: Date.now(),
       lastError: null,
-      accountName: next.connection.accountName || 'WhatsApp conectado',
+      accountName: 'WhatsApp conectado',
     })
     createBackup(`Sync WhatsApp (${conversations.length} conversas)`)
     const fresh = readBridgeState()
+
+    let tip = null
+    if (!conversations.length) {
+      tip =
+        'Nenhuma conversa veio da Evolution. No celular: Aparelhos conectados → Evolution API → Histórico de conversas. Se estiver "Pausado" ou "Sincronizando", deixe o WhatsApp aberto no Wi‑Fi até terminar e clique Sincronizar de novo. Mensagens novas também passam a aparecer depois disso.'
+    }
+
     return res.json({
       ...fresh,
-      importedChats: conversations.length,
-      importedMessages: conversations.reduce((sum, item) => sum + (item.messages?.length || 0), 0),
+      importedChats: stats.importedChats ?? conversations.length,
+      importedMessages: stats.importedMessages ?? 0,
+      chatsFound: stats.chatsFound ?? 0,
+      contactsFound: stats.contactsFound ?? 0,
+      tip,
     })
   } catch (error) {
     patchConnection({ lastError: error.message || 'Falha ao sincronizar conversas' })
@@ -312,8 +324,9 @@ app.post('/api/webhook/evolution', (req, res) => {
         })
         createBackup('Backup automático CONNECTION_UPDATE')
         // Puxa conversas em background (não atrasa o webhook)
-        void syncRecentConversations({ maxChats: 40, maxMessages: 30 })
-          .then((conversations) => {
+        void syncRecentConversations({ maxChats: 50, maxMessages: 25 })
+          .then((result) => {
+            const conversations = result.imported || []
             importConversations(conversations)
             patchConnection({ lastSyncAt: Date.now() })
             createBackup(`Sync automático (${conversations.length} conversas)`)

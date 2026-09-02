@@ -87,10 +87,15 @@ export async function bridgeDisconnect() {
 }
 
 export async function bridgeSyncConversations() {
-  return bridgeFetch<BridgeSnapshot & { importedChats?: number; importedMessages?: number }>(
-    '/api/whatsapp/sync',
-    { method: 'POST' },
-  )
+  return bridgeFetch<
+    BridgeSnapshot & {
+      importedChats?: number
+      importedMessages?: number
+      chatsFound?: number
+      contactsFound?: number
+      tip?: string | null
+    }
+  >('/api/whatsapp/sync', { method: 'POST' })
 }
 
 export async function bridgeSetLeadLabel(leadId: string, labelId: string) {

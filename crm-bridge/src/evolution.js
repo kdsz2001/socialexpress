@@ -282,33 +282,59 @@ export function getInstanceName() {
 
 export async function findChats() {
   const name = INSTANCE()
-  const data = await evoFetch(`/chat/findChats/${encodeURIComponent(name)}`, {
-    method: 'POST',
-    body: JSON.stringify({}),
-  })
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data?.chats)) return data.chats
-  if (Array.isArray(data?.data)) return data.data
+  try {
+    const data = await evoFetch(`/chat/findChats/${encodeURIComponent(name)}`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    })
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.chats)) return data.chats
+    if (Array.isArray(data?.data)) return data.data
+    if (Array.isArray(data?.records)) return data.records
+  } catch {
+    // ignore
+  }
+  return []
+}
+
+export async function findContacts() {
+  const name = INSTANCE()
+  try {
+    const data = await evoFetch(`/chat/findContacts/${encodeURIComponent(name)}`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    })
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.contacts)) return data.contacts
+    if (Array.isArray(data?.data)) return data.data
+    if (Array.isArray(data?.records)) return data.records
+  } catch {
+    // ignore
+  }
   return []
 }
 
 export async function findMessages(remoteJid, limit = 40) {
   const name = INSTANCE()
-  const data = await evoFetch(`/chat/findMessages/${encodeURIComponent(name)}`, {
-    method: 'POST',
-    body: JSON.stringify({
-      where: {
-        key: {
-          remoteJid,
+  try {
+    const data = await evoFetch(`/chat/findMessages/${encodeURIComponent(name)}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        where: {
+          key: {
+            remoteJid,
+          },
         },
-      },
-      limit,
-    }),
-  })
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data?.messages)) return data.messages
-  if (Array.isArray(data?.records)) return data.records
-  if (Array.isArray(data?.data)) return data.data
+        limit,
+      }),
+    })
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.messages)) return data.messages
+    if (Array.isArray(data?.records)) return data.records
+    if (Array.isArray(data?.data)) return data.data
+  } catch {
+    // ignore
+  }
   return []
 }
 
@@ -321,64 +347,114 @@ function extractTextFromMessage(item) {
     item?.message?.documentMessage?.caption ||
     item?.message?.buttonsResponseMessage?.selectedDisplayText ||
     item?.message?.listResponseMessage?.title ||
+    item?.message?.templateButtonReplyMessage?.selectedDisplayText ||
     item?.body ||
     item?.text ||
+    item?.lastMessage?.message?.conversation ||
+    item?.lastMessage?.message?.extendedTextMessage?.text ||
     ''
   )
 }
 
 function messageTimestampMs(item) {
-  const raw = item?.messageTimestamp || item?.timestamp || item?.updateAt || Date.now()
+  const raw =
+    item?.messageTimestamp ||
+    item?.timestamp ||
+    item?.updateAt ||
+    item?.updatedAt ||
+    item?.conversationTimestamp ||
+    Date.now()
   const num = Number(raw)
   if (!Number.isFinite(num)) return Date.now()
   return String(Math.trunc(num)).length < 13 ? num * 1000 : num
 }
 
-/** Importa conversas recentes do WhatsApp (sem grupos). */
-export async function syncRecentConversations({ maxChats = 40, maxMessages = 30 } = {}) {
+function isIndividualJid(jid) {
+  const value = String(jid || '')
+  if (!value) return false
+  if (value.endsWith('@g.us')) return false
+  if (value.includes('status@')) return false
+  if (value.includes('broadcast')) return false
+  if (value.includes('@lid')) return false
+  return value.includes('@s.whatsapp.net') || /^\d+$/.test(value.split('@')[0])
+}
+
+function jidPhone(jid) {
+  return String(jid || '')
+    .split('@')[0]
+    .replace(/\D/g, '')
+}
+
+/** Importa conversas/contatos recentes do WhatsApp (sem grupos). */
+export async function syncRecentConversations({ maxChats = 50, maxMessages = 25 } = {}) {
   const chats = await findChats()
-  const individual = chats
-    .filter((chat) => {
-      const jid = chat?.remoteJid || chat?.id || chat?.key?.remoteJid || ''
-      return jid && !String(jid).endsWith('@g.us') && !String(jid).includes('status@') && !String(jid).includes('broadcast')
+  const contacts = await findContacts()
+
+  const byPhone = new Map()
+
+  for (const chat of chats) {
+    const remoteJid = chat?.remoteJid || chat?.id || chat?.key?.remoteJid || ''
+    if (!isIndividualJid(remoteJid)) continue
+    const phone = jidPhone(remoteJid)
+    if (!phone || phone.length < 10) continue
+    byPhone.set(phone, {
+      remoteJid: remoteJid.includes('@') ? remoteJid : `${phone}@s.whatsapp.net`,
+      pushName: chat?.pushName || chat?.name || chat?.notify || '',
+      chat,
+      messagesRaw: chat?.lastMessage ? [chat.lastMessage] : [],
     })
+  }
+
+  for (const contact of contacts) {
+    const remoteJid = contact?.remoteJid || contact?.id || contact?.whatsappId || ''
+    if (!isIndividualJid(remoteJid)) continue
+    const phone = jidPhone(remoteJid)
+    if (!phone || phone.length < 10) continue
+    const current = byPhone.get(phone)
+    if (!current) {
+      byPhone.set(phone, {
+        remoteJid: remoteJid.includes('@') ? remoteJid : `${phone}@s.whatsapp.net`,
+        pushName: contact?.pushName || contact?.name || contact?.notify || '',
+        chat: contact,
+        messagesRaw: [],
+      })
+    } else if (!current.pushName) {
+      current.pushName = contact?.pushName || contact?.name || contact?.notify || current.pushName
+    }
+  }
+
+  const ordered = [...byPhone.values()]
     .sort((a, b) => {
-      const ta = Number(a?.updatedAt || a?.conversationTimestamp || a?.lastMsgTimestamp || 0)
-      const tb = Number(b?.updatedAt || b?.conversationTimestamp || b?.lastMsgTimestamp || 0)
+      const ta = messageTimestampMs(a.chat)
+      const tb = messageTimestampMs(b.chat)
       return tb - ta
     })
     .slice(0, maxChats)
 
   const imported = []
-  for (const chat of individual) {
-    const remoteJid = chat?.remoteJid || chat?.id || chat?.key?.remoteJid
-    if (!remoteJid) continue
-    const phone = String(remoteJid).split('@')[0].replace(/\D/g, '')
-    if (!phone) continue
-
+  for (const entry of ordered) {
     let messages = []
     try {
-      messages = await findMessages(remoteJid, maxMessages)
+      messages = await findMessages(entry.remoteJid, maxMessages)
     } catch {
       messages = []
     }
-
-    // Alguns retornos trazem lastMessage no chat sem findMessages
-    if (!messages.length && chat?.lastMessage) {
-      messages = [chat.lastMessage]
+    if (!messages.length && entry.messagesRaw.length) {
+      messages = entry.messagesRaw
     }
 
     const normalized = messages
       .map((item) => {
         const text = extractTextFromMessage(item)
         if (!text) return null
+        const phone = jidPhone(entry.remoteJid)
         return {
           id:
             item?.key?.id ||
             item?.id ||
             `msg-${phone}-${messageTimestampMs(item)}-${Math.random().toString(36).slice(2, 6)}`,
           phone,
-          pushName: chat?.pushName || chat?.name || item?.pushName || '',
+          pushName: entry.pushName || item?.pushName || '',
           text,
           fromMe: Boolean(item?.key?.fromMe ?? item?.fromMe),
           at: messageTimestampMs(item),
@@ -388,22 +464,24 @@ export async function syncRecentConversations({ maxChats = 40, maxMessages = 30 
       .sort((a, b) => a.at - b.at)
       .slice(-maxMessages)
 
-    if (!normalized.length) {
-      // Ainda cria lead “vazio” com nome do chat para aparecer na lista
-      imported.push({
-        phone,
-        pushName: chat?.pushName || chat?.name || 'Contato WhatsApp',
-        messages: [],
-      })
-      continue
-    }
-
     imported.push({
-      phone,
-      pushName: chat?.pushName || chat?.name || normalized.find((m) => !m.fromMe)?.pushName || 'Contato WhatsApp',
+      phone: jidPhone(entry.remoteJid),
+      pushName:
+        entry.pushName ||
+        normalized.find((m) => !m.fromMe)?.pushName ||
+        'Contato WhatsApp',
       messages: normalized,
     })
   }
 
-  return imported
+  return {
+    imported,
+    stats: {
+      chatsFound: chats.length,
+      contactsFound: contacts.length,
+      individualFound: byPhone.size,
+      importedChats: imported.length,
+      importedMessages: imported.reduce((sum, item) => sum + (item.messages?.length || 0), 0),
+    },
+  }
 }

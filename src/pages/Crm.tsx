@@ -62,6 +62,7 @@ export function Crm() {
   const [draftRules, setDraftRules] = useState<CrmScoreRule[]>(state.scoreRules)
   const [demoText, setDemoText] = useState('')
   const [busy, setBusy] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [bridgeError, setBridgeError] = useState<string | null>(null)
   const [qrBootstrapped, setQrBootstrapped] = useState(false)
   const [qrRenderKey, setQrRenderKey] = useState(0)
@@ -208,27 +209,46 @@ export function Crm() {
     }
   }, [live, state.status])
 
-  // Ao conectar, puxa conversas 1x automaticamente
+  // Ao conectar, puxa conversas 1x automaticamente e tenta de novo a cada 60s
   useEffect(() => {
     if (!live) return
     if (state.status !== 'connected') {
       didSyncRef.current = false
       return
     }
-    if (didSyncRef.current) return
-    didSyncRef.current = true
-    void (async () => {
+
+    const runSync = async (silent: boolean) => {
       try {
         const synced = await bridgeSyncConversations()
         hydrateCrmFromBridge(synced)
+        if (!silent && !synced.importedChats) {
+          setBridgeError(
+            synced.tip ||
+              'Histórico ainda não chegou da Evolution. Deixe o WhatsApp aberto no celular e tente Sincronizar.',
+          )
+        }
+        if (synced.importedChats) setBridgeError(null)
       } catch (error) {
-        setBridgeError(
-          error instanceof Error
-            ? error.message
-            : 'Conectou, mas não consegui puxar as conversas. Clique em Sincronizar.',
-        )
+        if (!silent) {
+          setBridgeError(
+            error instanceof Error
+              ? error.message
+              : 'Conectou, mas não consegui puxar as conversas. Clique em Sincronizar.',
+          )
+        }
       }
-    })()
+    }
+
+    if (!didSyncRef.current) {
+      didSyncRef.current = true
+      void runSync(false)
+    }
+
+    const timer = window.setInterval(() => {
+      void runSync(true)
+    }, 60000)
+
+    return () => window.clearInterval(timer)
   }, [live, state.status])
 
   const counts = useMemo(() => {
@@ -307,17 +327,21 @@ export function Crm() {
       return
     }
     setBridgeError(null)
+    setSyncing(true)
     try {
       await bridgeStatus()
       const synced = await bridgeSyncConversations()
       hydrateCrmFromBridge(synced)
       if (!synced.importedChats) {
         setBridgeError(
-          'Sync ok, mas nenhuma conversa veio da Evolution. Confira se o WhatsApp está conectado e se há chats salvos.',
+          synced.tip ||
+            'Nenhuma conversa veio ainda. No celular o histórico da Evolution pode estar Pausado/Sincronizando — deixe o WhatsApp aberto e clique Sincronizar de novo.',
         )
       }
     } catch (error) {
       setBridgeError(error instanceof Error ? error.message : 'Falha ao sincronizar')
+    } finally {
+      setSyncing(false)
     }
   }
 
@@ -397,9 +421,14 @@ export function Crm() {
             >
               Backups
             </button>
-            <button type="button" className="crm__ghost" onClick={() => void onSync()}>
-              <RefreshCcw size={14} strokeWidth={2.25} />
-              Sincronizar
+            <button
+              type="button"
+              className="crm__ghost"
+              onClick={() => void onSync()}
+              disabled={syncing}
+            >
+              <RefreshCcw size={14} strokeWidth={2.25} className={syncing ? 'is-spin' : undefined} />
+              {syncing ? 'Sincronizando…' : 'Sincronizar'}
             </button>
             <button type="button" className="crm__danger" onClick={() => void onDisconnect()}>
               <Unplug size={14} strokeWidth={2.25} />
