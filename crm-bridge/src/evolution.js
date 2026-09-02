@@ -74,7 +74,6 @@ export async function ensureInstance(webhookUrl) {
         }),
       })
     } catch (createError) {
-      // Instância já existe
       if (createError.status !== 403 && createError.status !== 409) {
         const msg = String(createError.message || '')
         if (!/already|exist|existe/i.test(msg)) throw createError
@@ -121,7 +120,6 @@ function normalizePhone(number) {
   if (local.startsWith('55') && local.length >= 12) local = local.slice(2)
   if (local.length > 11) local = local.slice(-11)
 
-  // Celular BR antigo sem o 9
   if (local.length === 10 && /^[1-9]{2}[6-9]/.test(local)) {
     local = `${local.slice(0, 2)}9${local.slice(2)}`
   }
@@ -142,11 +140,7 @@ function extractQrBase64(data) {
 }
 
 function extractPairingCode(data) {
-  const code =
-    data?.pairingCode ||
-    data?.qrcode?.pairingCode ||
-    data?.pair?.code ||
-    null
+  const code = data?.pairingCode || data?.qrcode?.pairingCode || data?.pair?.code || null
   return typeof code === 'string' && code.trim() ? code.trim().toUpperCase() : null
 }
 
@@ -154,9 +148,8 @@ export async function fetchQr() {
   const name = INSTANCE()
   let data = await evoFetch(`/instance/connect/${encodeURIComponent(name)}`)
   let base64 = extractQrBase64(data)
-  // Evolution às vezes demora 1–2s para montar o QR
-  for (let i = 0; !base64 && i < 2; i += 1) {
-    await sleep(900)
+  if (!base64) {
+    await sleep(600)
     data = await evoFetch(`/instance/connect/${encodeURIComponent(name)}`)
     base64 = extractQrBase64(data)
   }
@@ -167,7 +160,74 @@ export async function fetchQr() {
   }
 }
 
-/** Gera código de pareamento (WhatsApp → Conectar com número). */
+async function softLogout() {
+  const name = INSTANCE()
+  try {
+    await evoFetch(`/instance/logout/${encodeURIComponent(name)}`, { method: 'DELETE' })
+  } catch {
+    // ignore
+  }
+}
+
+export async function logoutInstance() {
+  const name = INSTANCE()
+  try {
+    await evoFetch(`/instance/logout/${encodeURIComponent(name)}`, { method: 'DELETE' })
+  } catch {
+    // ignore
+  }
+  try {
+    await evoFetch(`/instance/delete/${encodeURIComponent(name)}`, { method: 'DELETE' })
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * QR novo rápido:
+ * 1) reconnect leve
+ * 2) logout (sem apagar)
+ * 3) delete + recreate só se falhar
+ */
+export async function refreshQrFast(webhookUrl, previousBase64 = null) {
+  await ensureInstance(webhookUrl)
+
+  let qr = await fetchQr()
+  if (qr.base64 && qr.base64 !== previousBase64) {
+    return { ...qr, strategy: 'soft' }
+  }
+
+  await softLogout()
+  await sleep(400)
+  await ensureInstance(webhookUrl)
+  qr = await fetchQr()
+  if (qr.base64) {
+    return { ...qr, strategy: 'logout' }
+  }
+
+  await logoutInstance()
+  await sleep(500)
+  await ensureInstance(webhookUrl)
+  qr = await fetchQr()
+  return { ...qr, strategy: 'recreate' }
+}
+
+export async function recreateFreshQr(webhookUrl, previousBase64 = null) {
+  return refreshQrFast(webhookUrl, previousBase64)
+}
+
+export async function fetchConnectionState() {
+  const name = INSTANCE()
+  const data = await evoFetch(`/instance/connectionState/${encodeURIComponent(name)}`)
+  const state =
+    data?.instance?.state ||
+    data?.state ||
+    data?.status ||
+    data?.connectionState ||
+    'close'
+  return { raw: data, state: String(state).toLowerCase() }
+}
+
 export async function fetchPairingCode(phoneNumber) {
   const name = INSTANCE()
   const number = normalizePhone(phoneNumber)
@@ -175,15 +235,14 @@ export async function fetchPairingCode(phoneNumber) {
     throw new Error('Informe o WhatsApp com DDD (11 dígitos). Ex: 48988650977')
   }
 
-  // Se a instância ficou "connecting" no QR, pairing code não sai — reinicia sessão
   try {
     const state = await fetchConnectionState()
     if (state.state === 'connecting' || state.state === 'open') {
-      await logoutInstance()
-      await sleep(800)
+      await softLogout()
+      await sleep(500)
     }
   } catch {
-    // segue mesmo assim
+    // segue
   }
 
   await ensureInstance()
@@ -195,7 +254,7 @@ export async function fetchPairingCode(phoneNumber) {
   let raw = data
 
   if (!pairingCode) {
-    await sleep(1000)
+    await sleep(800)
     raw = await evoFetch(
       `/instance/connect/${encodeURIComponent(name)}?number=${encodeURIComponent(number)}`,
     )
@@ -215,47 +274,6 @@ export async function fetchPairingCode(phoneNumber) {
     base64,
     number,
   }
-}
-
-export async function fetchConnectionState() {
-  const name = INSTANCE()
-  const data = await evoFetch(`/instance/connectionState/${encodeURIComponent(name)}`)
-  const state =
-    data?.instance?.state ||
-    data?.state ||
-    data?.status ||
-    data?.connectionState ||
-    'close'
-  return { raw: data, state: String(state).toLowerCase() }
-}
-
-export async function logoutInstance() {
-  const name = INSTANCE()
-  try {
-    await evoFetch(`/instance/logout/${encodeURIComponent(name)}`, { method: 'DELETE' })
-  } catch {
-    // ignore
-  }
-  try {
-    await evoFetch(`/instance/delete/${encodeURIComponent(name)}`, { method: 'DELETE' })
-  } catch {
-    // ignore
-  }
-}
-
-/** Apaga a sessão e gera um QR novo (base64 diferente). */
-export async function recreateFreshQr(webhookUrl, previousBase64 = null) {
-  await logoutInstance()
-  await sleep(700)
-  await ensureInstance(webhookUrl)
-  await sleep(500)
-
-  let qr = await fetchQr()
-  for (let i = 0; i < 2 && (!qr.base64 || (previousBase64 && qr.base64 === previousBase64)); i += 1) {
-    await sleep(800)
-    qr = await fetchQr()
-  }
-  return qr
 }
 
 export function getInstanceName() {

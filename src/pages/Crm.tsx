@@ -67,36 +67,47 @@ export function Crm() {
   const qrFetchRef = useRef(false)
 
   const pullOfficialQr = async (forceNew: boolean) => {
-    // Enquanto gera, não aceita outro clique/refresh
     if (qrFetchRef.current) return null
     qrFetchRef.current = true
+    const previousQr = state.qrBase64
     try {
       if (forceNew) {
-        hydrateCrmFromBridge({
-          connection: {
-            status: 'connecting',
-            qrBase64: null,
-            lastError: null,
-          },
-        })
         setBusy(true)
-        setQrRenderKey((key) => key + 1)
+        setBridgeError(null)
       }
 
-      const connection = forceNew ? await bridgeRefreshQr() : await bridgeConnect()
+      const request = forceNew ? bridgeRefreshQr() : bridgeConnect()
+      const timeout = new Promise((_, reject) => {
+        window.setTimeout(() => reject(new Error('Demorou demais para gerar o QR. Tente de novo.')), 18000)
+      })
+      const connection = (await Promise.race([request, timeout])) as Awaited<
+        ReturnType<typeof bridgeRefreshQr>
+      >
       const snapshot = await bridgeGetState()
       hydrateCrmFromBridge({
         ...snapshot,
         connection: { ...snapshot.connection, ...connection },
       })
-      if (connection.qrBase64) {
-        setQrRenderKey((key) => key + 1)
+
+      const nextQr = (connection.qrBase64 as string | null | undefined) || null
+      if (nextQr) {
+        if (!previousQr || nextQr !== previousQr) {
+          setQrRenderKey((key) => key + 1)
+        }
         setBridgeError(null)
       } else if (connection.lastError) {
         setBridgeError(String(connection.lastError))
+      } else {
+        setBridgeError('QR não veio. Clique em Novo QR de novo.')
       }
       return connection
     } catch (error) {
+      // Restaura estado do bridge se a chamada falhou
+      try {
+        hydrateCrmFromBridge(await bridgeGetState())
+      } catch {
+        // ignore
+      }
       throw error
     } finally {
       qrFetchRef.current = false
@@ -518,26 +529,34 @@ function ConnectPanel({
         ) : (
           <p className="crm__note">
             Escaneie o QR oficial. Ele renova automaticamente a cada 45 segundos. Clique em{' '}
-            <strong>Novo QR</strong> para trocar a imagem agora.
+            <strong>Novo QR</strong> para atualizar agora (o botão trava até a nova imagem aparecer).
           </p>
         )}
       </div>
 
       <div className="crm__qr-card">
-        <div className={`crm__qr${busy || (!showOfficialQr && mode === 'evolution') ? ' is-scanning' : ''}`}>
+        <div className={`crm__qr${busy ? ' is-scanning' : ''}`}>
           {showOfficialQr ? (
-            <img
-              key={`${qrRenderKey}-${qrBase64!.slice(-24)}`}
-              src={qrBase64!}
-              alt="QR Code WhatsApp oficial"
-              className="crm__qr-image"
-            />
+            <>
+              <img
+                key={`${qrRenderKey}-${qrBase64!.slice(-24)}`}
+                src={qrBase64!}
+                alt="QR Code WhatsApp oficial"
+                className="crm__qr-image"
+              />
+              {busy ? (
+                <div className="crm__qr-overlay">
+                  <RefreshCcw size={22} strokeWidth={2.25} className="is-spin" />
+                  Atualizando QR…
+                </div>
+              ) : null}
+            </>
           ) : showFakeQr ? (
             <QrPattern token={qrToken} />
           ) : (
             <div className="crm__qr-loading">
               <RefreshCcw size={22} strokeWidth={2.25} className="is-spin" />
-              <span>{busy ? 'Gerando novo QR…' : 'Carregando QR oficial…'}</span>
+              <span>Carregando QR oficial…</span>
             </div>
           )}
         </div>
@@ -554,7 +573,7 @@ function ConnectPanel({
               disabled={busy || (!showOfficialQr && !error)}
             >
               <QrCode size={15} strokeWidth={2.25} />
-              {busy || (!showOfficialQr && !error)
+              {busy
                 ? 'Aguarde o QR…'
                 : showOfficialQr
                   ? 'Novo QR'
