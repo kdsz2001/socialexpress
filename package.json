@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "crm:bridge": "npm --prefix crm-bridge run dev",
+    "crm:bridge:install": "npm --prefix crm-bridge install"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",

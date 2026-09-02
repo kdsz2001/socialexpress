@@ -88,6 +88,30 @@
   border: 1px solid #e4e6ef;
 }
 
+.crm__qr-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.crm__banner-error {
+  margin: 0.75rem 1.35rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.5rem;
+  background: #ffe2e5;
+  color: #f64e60;
+  font-size: 0.9rem;
+}
+
+.crm__connect-copy .crm__banner-error {
+  margin: 0.85rem 0;
+}
+
+.crm__note code {
+  font-size: 0.85em;
+}
+
 .crm__qr-grid {
   display: grid;
   grid-template-columns: repeat(13, 1fr);

@@ -11,11 +11,22 @@ import {
 } from 'lucide-react'
 import { useCrm } from '../hooks/useCrm'
 import {
+  bridgeConnect,
+  bridgeCreateBackup,
+  bridgeDisconnect,
+  bridgeGetState,
+  bridgeRefreshQr,
+  bridgeSetLeadLabel,
+  bridgeStatus,
+  crmBridgeEnabled,
+} from '../lib/crmApi'
+import {
   addCrmDemoMessage,
   completeCrmConnection,
   createCrmBackup,
   disconnectCrm,
   ensureCrmSession,
+  hydrateCrmFromBridge,
   reanalyzeCrmLead,
   refreshCrmQr,
   setCrmLeadLabel,
@@ -43,28 +54,65 @@ function scoreTone(score: number) {
 
 export function Crm() {
   const state = useCrm()
+  const live = crmBridgeEnabled()
   const [tab, setTab] = useState<'todos' | CrmLabelId>('todos')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<'board' | 'scoring' | 'backups'>('board')
   const [draftRules, setDraftRules] = useState<CrmScoreRule[]>(state.scoreRules)
   const [demoText, setDemoText] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [bridgeError, setBridgeError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (live) return
     ensureCrmSession()
-  }, [])
+  }, [live])
 
   useEffect(() => {
     setDraftRules(state.scoreRules)
   }, [state.scoreRules])
 
+  // Mock auto-complete only
   useEffect(() => {
+    if (live) return
     if (state.status !== 'connecting') return
     const timer = window.setTimeout(() => {
       completeCrmConnection()
       createCrmBackup('Backup automático pós-conexão')
     }, 2200)
     return () => window.clearTimeout(timer)
-  }, [state.status])
+  }, [live, state.status])
+
+  // Evolution: poll bridge
+  useEffect(() => {
+    if (!live) return
+    let cancelled = false
+
+    const pull = async () => {
+      try {
+        const snapshot = await bridgeGetState()
+        if (cancelled) return
+        hydrateCrmFromBridge(snapshot)
+        setBridgeError(null)
+        if (snapshot.connection?.status === 'connecting') {
+          await bridgeStatus()
+          const again = await bridgeGetState()
+          if (!cancelled) hydrateCrmFromBridge(again)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setBridgeError(error instanceof Error ? error.message : 'Bridge offline')
+        }
+      }
+    }
+
+    void pull()
+    const timer = window.setInterval(pull, 2500)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [live])
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { todos: state.leads.length }
@@ -93,14 +141,96 @@ export function Crm() {
     if (selected.id !== selectedId) setSelectedId(selected.id)
   }, [selected, selectedId])
 
+  const onStartConnect = async () => {
+    setBridgeError(null)
+    if (!live) {
+      startCrmConnecting()
+      return
+    }
+    setBusy(true)
+    startCrmConnecting()
+    try {
+      const connection = await bridgeConnect()
+      const snapshot = await bridgeGetState()
+      hydrateCrmFromBridge({ ...snapshot, connection: { ...snapshot.connection, ...connection } })
+    } catch (error) {
+      setBridgeError(error instanceof Error ? error.message : 'Falha ao conectar')
+      disconnectCrm()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const onRefreshQr = async () => {
+    if (!live) {
+      refreshCrmQr()
+      return
+    }
+    setBusy(true)
+    try {
+      await bridgeRefreshQr()
+      hydrateCrmFromBridge(await bridgeGetState())
+    } catch (error) {
+      setBridgeError(error instanceof Error ? error.message : 'Falha ao renovar QR')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const onDisconnect = async () => {
+    if (live) {
+      try {
+        await bridgeDisconnect()
+      } catch {
+        // ignore
+      }
+    }
+    disconnectCrm()
+  }
+
+  const onSync = async () => {
+    if (!live) {
+      syncCrmNow()
+      return
+    }
+    try {
+      await bridgeStatus()
+      hydrateCrmFromBridge(await bridgeGetState())
+    } catch (error) {
+      setBridgeError(error instanceof Error ? error.message : 'Falha ao sincronizar')
+    }
+  }
+
+  const onChangeLabel = async (leadId: string, labelId: CrmLabelId) => {
+    setCrmLeadLabel(leadId, labelId)
+    if (live) {
+      try {
+        hydrateCrmFromBridge(await bridgeSetLeadLabel(leadId, labelId))
+      } catch {
+        // keep local
+      }
+    }
+  }
+
+  const onBackup = async () => {
+    if (!live) {
+      createCrmBackup('Backup manual do CRM')
+      return
+    }
+    hydrateCrmFromBridge(await bridgeCreateBackup('Backup manual do CRM'))
+  }
+
   if (state.status !== 'connected') {
     return (
       <div className="crm">
         <ConnectPanel
-          status={state.status}
+          status={state.status === 'connecting' || busy ? 'connecting' : 'disconnected'}
+          mode={live ? 'evolution' : 'mock'}
           qrToken={state.qrToken}
-          onRefreshQr={refreshCrmQr}
-          onStart={() => startCrmConnecting()}
+          qrBase64={state.qrBase64}
+          error={bridgeError || state.lastError}
+          onRefreshQr={() => void onRefreshQr()}
+          onStart={() => void onStartConnect()}
         />
       </div>
     )
@@ -113,11 +243,11 @@ export function Crm() {
           <div className="crm__account">
             <span className="crm__online">
               <Wifi size={14} strokeWidth={2.25} />
-              Conectado
+              {live ? 'WhatsApp real' : 'Demo conectada'}
             </span>
             <div>
-              <strong>{state.accountName}</strong>
-              <p>{state.accountPhone}</p>
+              <strong>{state.accountName || 'WhatsApp'}</strong>
+              <p>{state.accountPhone || (live ? 'Sessão Evolution' : 'Modo simulado')}</p>
             </div>
             <span className="crm__sync">Última sync: {formatWhen(state.lastSyncAt)}</span>
           </div>
@@ -145,16 +275,18 @@ export function Crm() {
             >
               Backups
             </button>
-            <button type="button" className="crm__ghost" onClick={() => syncCrmNow()}>
+            <button type="button" className="crm__ghost" onClick={() => void onSync()}>
               <RefreshCcw size={14} strokeWidth={2.25} />
               Sincronizar
             </button>
-            <button type="button" className="crm__danger" onClick={() => disconnectCrm()}>
+            <button type="button" className="crm__danger" onClick={() => void onDisconnect()}>
               <Unplug size={14} strokeWidth={2.25} />
               Desconectar
             </button>
           </div>
         </header>
+
+        {bridgeError ? <p className="crm__banner-error">{bridgeError}</p> : null}
 
         {view === 'scoring' ? (
           <ScorePanel
@@ -165,10 +297,7 @@ export function Crm() {
         ) : null}
 
         {view === 'backups' ? (
-          <BackupsPanel
-            backups={state.backups}
-            onCreate={() => createCrmBackup('Backup manual do CRM')}
-          />
+          <BackupsPanel backups={state.backups} onCreate={() => void onBackup()} />
         ) : null}
 
         {view === 'board' ? (
@@ -199,7 +328,11 @@ export function Crm() {
             <div className="crm__workspace">
               <aside className="crm__list">
                 {filtered.length === 0 ? (
-                  <p className="crm__empty">Nenhum lead nesta etiqueta.</p>
+                  <p className="crm__empty">
+                    {live
+                      ? 'Nenhum lead ainda. Quando alguém mandar mensagem no WhatsApp, aparece aqui.'
+                      : 'Nenhum lead nesta etiqueta.'}
+                  </p>
                 ) : (
                   filtered.map((lead) => (
                     <button
@@ -228,8 +361,9 @@ export function Crm() {
                     lead={selected}
                     labels={state.labels}
                     demoText={demoText}
+                    live={live}
                     onDemoText={setDemoText}
-                    onLabel={(labelId) => setCrmLeadLabel(selected.id, labelId)}
+                    onLabel={(labelId) => void onChangeLabel(selected.id, labelId)}
                     onReanalyze={() => reanalyzeCrmLead(selected.id)}
                     onSendDemo={() => {
                       const text = demoText.trim()
@@ -252,12 +386,18 @@ export function Crm() {
 
 function ConnectPanel({
   status,
+  mode,
   qrToken,
+  qrBase64,
+  error,
   onRefreshQr,
   onStart,
 }: {
   status: 'disconnected' | 'connecting'
+  mode: 'mock' | 'evolution'
   qrToken: string
+  qrBase64: string | null
+  error: string | null
   onRefreshQr: () => void
   onStart: () => void
 }) {
@@ -268,35 +408,58 @@ function ConnectPanel({
           <MessageCircle size={14} strokeWidth={2.25} />
           WhatsApp CRM
         </span>
-        <h2>Conecte o WhatsApp para montar o pipeline</h2>
+        <h2>
+          {mode === 'evolution'
+            ? 'Conecte seu WhatsApp com Evolution (Railway)'
+            : 'Conecte o WhatsApp para montar o pipeline'}
+        </h2>
         <p>
-          Escaneie o QR Code (protótipo). Depois de conectado 1x, o painel mantém os leads, etiquetas,
-          análise da IA e backups locais — e tenta manter a sessão ativa.
+          {mode === 'evolution'
+            ? 'Escaneie o QR gerado pela Evolution API. Depois de conectar 1x, a sessão fica no servidor e o CRM recebe as mensagens via webhook.'
+            : 'Modo demo (simulado). Para WhatsApp real, configure o bridge — veja docs/CRM-EVOLUTION-RAILWAY.md.'}
         </p>
         <ul>
           <li>Abas por etiqueta: Pago, Sem resposta, Agendamento…</li>
           <li>IA lê a conversa e extrai evento, data, traje, nome e score</li>
-          <li>Ao mudar a etiqueta, o lead troca de aba automaticamente</li>
+          <li>Mensagens novas criam/atualizam leads automaticamente</li>
         </ul>
-        <p className="crm__note">
-          Esta versão é um protótipo visual com dados simulados. A conexão real (Baileys / Evolution API
-          / WhatsApp Cloud) entra numa próxima etapa com backend.
-        </p>
+        {error ? <p className="crm__banner-error">{error}</p> : null}
+        {mode === 'mock' ? (
+          <p className="crm__note">
+            Sem <code>VITE_CRM_BRIDGE_URL</code> o CRM roda em demo. Siga o guia Railway + Evolution para o QR
+            real.
+          </p>
+        ) : (
+          <p className="crm__note">
+            No celular: WhatsApp → Aparelhos conectados → Conectar um aparelho → ler este QR.
+          </p>
+        )}
       </div>
 
       <div className="crm__qr-card">
         <div className={`crm__qr${status === 'connecting' ? ' is-scanning' : ''}`} aria-hidden="true">
-          <QrPattern token={qrToken} />
-          {status === 'connecting' ? (
+          {qrBase64 ? (
+            <img src={qrBase64} alt="QR Code WhatsApp" className="crm__qr-image" />
+          ) : (
+            <QrPattern token={qrToken} />
+          )}
+          {status === 'connecting' && !qrBase64 ? (
             <div className="crm__qr-overlay">
               <RefreshCcw size={22} strokeWidth={2.25} className="is-spin" />
-              Lendo QR…
+              Gerando QR…
             </div>
           ) : null}
         </div>
-        <p className="crm__qr-token">Sessão {qrToken.slice(-8).toUpperCase()}</p>
+        <p className="crm__qr-token">
+          {mode === 'evolution' ? 'Evolution' : 'Demo'} · {qrToken.slice(-8).toUpperCase()}
+        </p>
         <div className="crm__qr-actions">
-          <button type="button" className="crm__ghost" onClick={onRefreshQr} disabled={status === 'connecting'}>
+          <button
+            type="button"
+            className="crm__ghost"
+            onClick={onRefreshQr}
+            disabled={status === 'connecting'}
+          >
             <QrCode size={15} strokeWidth={2.25} />
             Novo QR
           </button>
@@ -306,7 +469,11 @@ function ConnectPanel({
             onClick={onStart}
             disabled={status === 'connecting'}
           >
-            {status === 'connecting' ? 'Conectando…' : 'Simular leitura do QR'}
+            {status === 'connecting'
+              ? 'Aguardando leitura…'
+              : mode === 'evolution'
+                ? 'Conectar WhatsApp (Evolution)'
+                : 'Simular leitura do QR'}
           </button>
         </div>
       </div>
@@ -337,6 +504,7 @@ function LeadDetail({
   lead,
   labels,
   demoText,
+  live,
   onDemoText,
   onLabel,
   onReanalyze,
@@ -345,6 +513,7 @@ function LeadDetail({
   lead: CrmLead
   labels: { id: CrmLabelId; name: string; color: string }[]
   demoText: string
+  live?: boolean
   onDemoText: (value: string) => void
   onLabel: (labelId: CrmLabelId) => void
   onReanalyze: () => void
@@ -408,19 +577,25 @@ function LeadDetail({
         ))}
       </div>
 
-      <div className="crm__composer">
-        <input
-          value={demoText}
-          onChange={(event) => onDemoText(event.target.value)}
-          placeholder='Simular msg do cliente… ex: "quero um terno cinza para 10/10"'
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') onSendDemo()
-          }}
-        />
-        <button type="button" className="crm__primary" onClick={onSendDemo}>
-          Enviar e analisar
-        </button>
-      </div>
+      {live ? (
+        <p className="crm__empty" style={{ margin: '0.5rem 0 0' }}>
+          Mensagens reais chegam pelo WhatsApp conectado. Use a etiqueta acima para mover o lead de aba.
+        </p>
+      ) : (
+        <div className="crm__composer">
+          <input
+            value={demoText}
+            onChange={(event) => onDemoText(event.target.value)}
+            placeholder='Simular msg do cliente… ex: "quero um terno cinza para 10/10"'
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') onSendDemo()
+            }}
+          />
+          <button type="button" className="crm__primary" onClick={onSendDemo}>
+            Enviar e analisar
+          </button>
+        </div>
+      )}
     </div>
   )
 }

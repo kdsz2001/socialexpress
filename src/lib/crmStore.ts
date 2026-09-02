@@ -63,6 +63,9 @@ export type CrmState = {
   accountName: string
   accountPhone: string
   qrToken: string
+  qrBase64: string | null
+  connectionMode: 'mock' | 'evolution'
+  lastError: string | null
   labels: CrmLabel[]
   leads: CrmLead[]
   scoreRules: CrmScoreRule[]
@@ -99,6 +102,9 @@ function emptyState(): CrmState {
     accountName: '',
     accountPhone: '',
     qrToken: createQrToken(),
+    qrBase64: null,
+    connectionMode: 'mock',
+    lastError: null,
     labels: DEFAULT_LABELS.map((item) => ({ ...item })),
     leads: [],
     scoreRules: DEFAULT_SCORE_RULES.map((item) => ({ ...item })),
@@ -125,6 +131,9 @@ function normalizeState(raw: unknown): CrmState {
     accountName: typeof item.accountName === 'string' ? item.accountName : '',
     accountPhone: typeof item.accountPhone === 'string' ? item.accountPhone : '',
     qrToken: typeof item.qrToken === 'string' ? item.qrToken : createQrToken(),
+    qrBase64: typeof item.qrBase64 === 'string' ? item.qrBase64 : null,
+    connectionMode: item.connectionMode === 'evolution' ? 'evolution' : 'mock',
+    lastError: typeof item.lastError === 'string' ? item.lastError : null,
     labels: Array.isArray(item.labels) && item.labels.length ? item.labels : base.labels,
     leads: Array.isArray(item.leads) ? item.leads : [],
     scoreRules:
@@ -205,6 +214,45 @@ export function disconnectCrm() {
     accountName: '',
     accountPhone: '',
     qrToken: createQrToken(),
+    qrBase64: null,
+    lastError: null,
+  })
+}
+
+/** Mescla snapshot do crm-bridge (Evolution) no estado local do CRM. */
+export function hydrateCrmFromBridge(payload: {
+  connection?: Partial<{
+    status: CrmConnectionStatus
+    accountName: string
+    accountPhone: string
+    connectedAt: number | null
+    lastSyncAt: number | null
+    qrBase64: string | null
+    lastError: string | null
+  }>
+  labels?: CrmLabel[]
+  leads?: CrmLead[]
+  scoreRules?: CrmScoreRule[]
+  backups?: CrmBackup[]
+}) {
+  return update((current) => {
+    const connection = payload.connection || {}
+    return {
+      ...current,
+      connectionMode: 'evolution',
+      status: connection.status || current.status,
+      accountName: connection.accountName ?? current.accountName,
+      accountPhone: connection.accountPhone ?? current.accountPhone,
+      connectedAt:
+        connection.connectedAt === undefined ? current.connectedAt : connection.connectedAt,
+      lastSyncAt: connection.lastSyncAt ?? current.lastSyncAt ?? Date.now(),
+      qrBase64: connection.qrBase64 === undefined ? current.qrBase64 : connection.qrBase64,
+      lastError: connection.lastError === undefined ? current.lastError : connection.lastError,
+      labels: payload.labels?.length ? payload.labels : current.labels,
+      leads: Array.isArray(payload.leads) ? payload.leads : current.leads,
+      scoreRules: payload.scoreRules?.length ? payload.scoreRules : current.scoreRules,
+      backups: Array.isArray(payload.backups) ? payload.backups : current.backups,
+    }
   })
 }
 

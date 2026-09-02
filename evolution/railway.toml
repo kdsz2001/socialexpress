@@ -1,0 +1,15 @@
+# Deploy no Railway (Docker)
+# 1) New Project → Deploy from GitHub (ou Empty → Docker Image)
+# 2) Image: atendai/evolution-api:v2.2.3
+# 3) Add PostgreSQL plugin e variáveis abaixo
+# 4) Expor porta 8080
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+healthcheckPath = "/"
+healthcheckTimeout = 30
+restartPolicyMaxRetries = 5

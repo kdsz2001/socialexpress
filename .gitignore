@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+crm-bridge/.env
+crm-bridge/data
+crm-bridge/node_modules
 
 # Editor directories and files
 .vscode/*
