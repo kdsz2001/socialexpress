@@ -246,6 +246,7 @@ export function Crm() {
       <div className="crm">
         <ConnectPanel
           status={state.status === 'connecting' || busy ? 'connecting' : 'disconnected'}
+          busy={busy}
           mode={live ? 'evolution' : 'mock'}
           qrToken={state.qrToken}
           qrBase64={state.qrBase64}
@@ -256,6 +257,7 @@ export function Crm() {
           onRefreshQr={() => void onRefreshQr()}
           onStart={() => void onStartConnect()}
           onPairing={() => void onPairing()}
+          onCancel={() => void onDisconnect()}
         />
       </div>
     )
@@ -411,6 +413,7 @@ export function Crm() {
 
 function ConnectPanel({
   status,
+  busy,
   mode,
   qrToken,
   qrBase64,
@@ -421,8 +424,10 @@ function ConnectPanel({
   onRefreshQr,
   onStart,
   onPairing,
+  onCancel,
 }: {
   status: 'disconnected' | 'connecting'
+  busy: boolean
   mode: 'mock' | 'evolution'
   qrToken: string
   qrBase64: string | null
@@ -433,6 +438,7 @@ function ConnectPanel({
   onRefreshQr: () => void
   onStart: () => void
   onPairing: () => void
+  onCancel: () => void
 }) {
   return (
     <section className="crm__connect">
@@ -476,16 +482,17 @@ function ConnectPanel({
                 id="crm-pairing-phone"
                 className="crm__pairing-input"
                 inputMode="tel"
+                autoComplete="tel"
                 placeholder="11999999999"
                 value={phoneInput}
                 onChange={(event) => onPhoneChange(event.target.value)}
-                disabled={status === 'connecting'}
+                disabled={busy}
               />
               <button
                 type="button"
                 className="crm__ghost"
                 onClick={onPairing}
-                disabled={status === 'connecting' || !phoneInput.trim()}
+                disabled={busy || !phoneInput.trim()}
               >
                 Gerar código
               </button>
@@ -523,27 +530,19 @@ function ConnectPanel({
           {mode === 'evolution' ? 'Evolution' : 'Demo'} · {qrToken.slice(-8).toUpperCase()}
         </p>
         <div className="crm__qr-actions">
-          <button
-            type="button"
-            className="crm__ghost"
-            onClick={onRefreshQr}
-            disabled={status === 'connecting'}
-          >
+          <button type="button" className="crm__ghost" onClick={onRefreshQr} disabled={busy}>
             <QrCode size={15} strokeWidth={2.25} />
             Novo QR
           </button>
-          <button
-            type="button"
-            className="crm__primary"
-            onClick={onStart}
-            disabled={status === 'connecting'}
-          >
-            {status === 'connecting'
-              ? 'Aguardando…'
-              : mode === 'evolution'
-                ? 'Conectar com QR'
-                : 'Simular leitura do QR'}
-          </button>
+          {status === 'connecting' ? (
+            <button type="button" className="crm__primary" onClick={onCancel} disabled={busy}>
+              Cancelar
+            </button>
+          ) : (
+            <button type="button" className="crm__primary" onClick={onStart} disabled={busy}>
+              {mode === 'evolution' ? 'Conectar com QR' : 'Simular leitura do QR'}
+            </button>
+          )}
         </div>
       </div>
     </section>
