@@ -15,7 +15,6 @@ import {
   bridgeCreateBackup,
   bridgeDisconnect,
   bridgeGetState,
-  bridgePairing,
   bridgeRefreshQr,
   bridgeSetLeadLabel,
   bridgeStatus,
@@ -38,11 +37,6 @@ import {
   type CrmLead,
   type CrmScoreRule,
 } from '../lib/crmStore'
-import {
-  formatBrazilPhoneDisplay,
-  phoneCharHint,
-  validateWhatsappPhone,
-} from '../lib/whatsappPhone'
 import './Crm.css'
 
 function formatWhen(ts: number | null) {
@@ -68,7 +62,6 @@ export function Crm() {
   const [demoText, setDemoText] = useState('')
   const [busy, setBusy] = useState(false)
   const [bridgeError, setBridgeError] = useState<string | null>(null)
-  const [phoneInput, setPhoneInput] = useState('')
   const [qrBootstrapped, setQrBootstrapped] = useState(false)
 
   useEffect(() => {
@@ -125,12 +118,13 @@ export function Crm() {
     }
   }, [live, qrBootstrapped, state.status])
 
-  // Evolution: poll bridge
+  // Evolution: poll status + atualiza QR sozinho a cada 35s (só enquanto desconectado)
   useEffect(() => {
     if (!live) return
+    if (state.status === 'connected') return
     let cancelled = false
 
-    const pull = async () => {
+    const pullStatus = async () => {
       try {
         const snapshot = await bridgeGetState()
         if (cancelled) return
@@ -147,13 +141,30 @@ export function Crm() {
       }
     }
 
-    void pull()
-    const timer = window.setInterval(pull, 2500)
+    const refreshQrSoft = async () => {
+      if (cancelled || busy) return
+      try {
+        const connection = await bridgeConnect()
+        if (cancelled) return
+        const snapshot = await bridgeGetState()
+        hydrateCrmFromBridge({
+          ...snapshot,
+          connection: { ...snapshot.connection, ...connection },
+        })
+      } catch {
+        // ignore soft refresh errors
+      }
+    }
+
+    void pullStatus()
+    const statusTimer = window.setInterval(pullStatus, 2500)
+    const qrTimer = window.setInterval(refreshQrSoft, 35000)
     return () => {
       cancelled = true
-      window.clearInterval(timer)
+      window.clearInterval(statusTimer)
+      window.clearInterval(qrTimer)
     }
-  }, [live])
+  }, [live, busy, state.status])
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { todos: state.leads.length }
@@ -224,41 +235,6 @@ export function Crm() {
     }
   }
 
-  const onPairing = async () => {
-    if (!live) return
-    const parsed = validateWhatsappPhone(phoneInput)
-    setPhoneInput(parsed.display)
-    if (!parsed.ok) {
-      setBridgeError(parsed.error)
-      return
-    }
-
-    setBridgeError(null)
-    setBusy(true)
-    startCrmConnecting()
-    try {
-      const connection = await bridgePairing(parsed.evolution)
-      const snapshot = await bridgeGetState()
-      hydrateCrmFromBridge({
-        ...snapshot,
-        connection: { ...snapshot.connection, ...connection },
-      })
-      if (!connection.pairingCode) {
-        setBridgeError('Código não veio. Use o QR oficial ao lado ou tente de novo.')
-      }
-    } catch (error) {
-      setBridgeError(error instanceof Error ? error.message : 'Falha ao gerar código')
-      // Mantém o QR atual — não desconecta a tela inteira
-      try {
-        hydrateCrmFromBridge(await bridgeGetState())
-      } catch {
-        // ignore
-      }
-    } finally {
-      setBusy(false)
-    }
-  }
-
   const onDisconnect = async () => {
     if (live) {
       try {
@@ -311,13 +287,9 @@ export function Crm() {
           mode={live ? 'evolution' : 'mock'}
           qrToken={state.qrToken}
           qrBase64={state.qrBase64}
-          pairingCode={state.pairingCode}
-          phoneInput={phoneInput}
-          onPhoneChange={setPhoneInput}
           error={bridgeError || state.lastError}
           onRefreshQr={() => void onRefreshQr()}
           onStart={() => void onStartConnect()}
-          onPairing={() => void onPairing()}
         />
       </div>
     )
@@ -477,26 +449,18 @@ function ConnectPanel({
   mode,
   qrToken,
   qrBase64,
-  pairingCode,
-  phoneInput,
-  onPhoneChange,
   error,
   onRefreshQr,
   onStart,
-  onPairing,
 }: {
   status: 'disconnected' | 'connecting'
   busy: boolean
   mode: 'mock' | 'evolution'
   qrToken: string
   qrBase64: string | null
-  pairingCode: string | null
-  phoneInput: string
-  onPhoneChange: (value: string) => void
   error: string | null
   onRefreshQr: () => void
   onStart: () => void
-  onPairing: () => void
 }) {
   const showFakeQr = mode === 'mock' && !qrBase64
   const showOfficialQr = Boolean(qrBase64)
@@ -515,7 +479,7 @@ function ConnectPanel({
         </h2>
         <p>
           {mode === 'evolution'
-            ? 'O QR oficial já aparece à direita. Escaneie no celular. Se o WhatsApp bloquear o QR, use o código por número.'
+            ? 'O QR oficial aparece à direita e se atualiza sozinho. No celular: WhatsApp → Aparelhos conectados → Conectar um aparelho.'
             : 'Modo demo (simulado). Para WhatsApp real, configure o bridge — veja docs/CRM-EVOLUTION-RAILWAY.md.'}
         </p>
         <ul>
@@ -530,49 +494,10 @@ function ConnectPanel({
             real.
           </p>
         ) : (
-          <div className="crm__pairing">
-            <p className="crm__note">
-              Alternativa: WhatsApp → Aparelhos conectados → Conectar um aparelho →{' '}
-              <strong>Conectar com número de telefone</strong>.
-            </p>
-            <label className="crm__pairing-label" htmlFor="crm-pairing-phone">
-              Seu WhatsApp (com DDD){' '}
-              <span className="crm__pairing-count">{phoneCharHint(phoneInput)}</span>
-            </label>
-            <div className="crm__pairing-row">
-              <input
-                id="crm-pairing-phone"
-                className="crm__pairing-input"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="(48) 98865-0977"
-                maxLength={16}
-                value={phoneInput}
-                onChange={(event) => onPhoneChange(formatBrazilPhoneDisplay(event.target.value))}
-                onPaste={(event) => {
-                  event.preventDefault()
-                  const text = event.clipboardData.getData('text')
-                  onPhoneChange(formatBrazilPhoneDisplay(text))
-                }}
-                onBlur={() => onPhoneChange(formatBrazilPhoneDisplay(phoneInput))}
-                disabled={busy}
-              />
-              <button
-                type="button"
-                className="crm__ghost"
-                onClick={onPairing}
-                disabled={busy || !phoneInput.trim()}
-              >
-                Gerar código
-              </button>
-            </div>
-            {pairingCode ? (
-              <div className="crm__pairing-code" aria-live="polite">
-                <span>Código</span>
-                <strong>{pairingCode}</strong>
-              </div>
-            ) : null}
-          </div>
+          <p className="crm__note">
+            Escaneie o QR oficial. Ele renova automaticamente a cada ~35 segundos. Se precisar, use{' '}
+            <strong>Novo QR</strong>.
+          </p>
         )}
       </div>
 
@@ -599,7 +524,12 @@ function ConnectPanel({
               {busy ? 'Gerando QR…' : 'Novo QR'}
             </button>
           ) : (
-            <button type="button" className="crm__primary" onClick={onStart} disabled={status === 'connecting'}>
+            <button
+              type="button"
+              className="crm__primary"
+              onClick={onStart}
+              disabled={status === 'connecting'}
+            >
               {status === 'connecting' ? 'Aguardando…' : 'Simular leitura do QR'}
             </button>
           )}
