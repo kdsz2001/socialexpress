@@ -55,20 +55,25 @@
 }
 
 /*
-  Clientes / Agenda / Eventos:
+  Clientes / Agenda / Eventos / etc:
   - largura trava no espaço do menu ABERTO (não estica ao fechar)
-  - com menu fechado, o painel só centraliza no miolo
+  - com menu fechado, o painel desliza com o mesmo timing do sidebar
+    (translateX — animável; margin:auto não é)
 */
 .app-panel-align {
   width: 100%;
   max-width: var(--app-panel-max);
   margin-inline: 0;
   box-sizing: border-box;
-  transition: margin-inline 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateX(0);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 
 .app-shell.is-collapsed .app-panel-align {
-  margin-inline: auto;
+  transform: translateX(
+    calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2)
+  );
 }
 
 .app-content__inner > .clients,
@@ -80,12 +85,16 @@
 .app-content__inner > .financeiro,
 .app-content__inner > .suppliers,
 .app-content__inner > .reports,
-.app-content__inner > .settings {
+.app-content__inner > .settings,
+.app-content__inner > .history,
+.app-content__inner > .crm {
   width: 100%;
   max-width: var(--app-panel-max);
   margin-inline: 0;
   box-sizing: border-box;
-  transition: margin-inline 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateX(0);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 
 .app-shell.is-collapsed .app-content__inner > .clients,
@@ -97,8 +106,12 @@
 .app-shell.is-collapsed .app-content__inner > .financeiro,
 .app-shell.is-collapsed .app-content__inner > .suppliers,
 .app-shell.is-collapsed .app-content__inner > .reports,
-.app-shell.is-collapsed .app-content__inner > .settings {
-  margin-inline: auto;
+.app-shell.is-collapsed .app-content__inner > .settings,
+.app-shell.is-collapsed .app-content__inner > .history,
+.app-shell.is-collapsed .app-content__inner > .crm {
+  transform: translateX(
+    calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2)
+  );
 }
 
 .app-footer {
@@ -206,10 +219,14 @@
   .app-content__inner > .suppliers,
   .app-content__inner > .reports,
   .app-content__inner > .settings,
+  .app-content__inner > .history,
+  .app-content__inner > .crm,
   .app-panel-align {
     max-width: none;
     margin-inline: 0;
+    transform: none;
     transition: none;
+    will-change: auto;
   }
 
   .app-shell.is-collapsed .app-content__inner > .clients,
@@ -222,8 +239,11 @@
   .app-shell.is-collapsed .app-content__inner > .suppliers,
   .app-shell.is-collapsed .app-content__inner > .reports,
   .app-shell.is-collapsed .app-content__inner > .settings,
+  .app-shell.is-collapsed .app-content__inner > .history,
+  .app-shell.is-collapsed .app-content__inner > .crm,
   .app-shell.is-collapsed .app-panel-align {
     margin-inline: 0;
+    transform: none;
   }
 
   .app-footer {

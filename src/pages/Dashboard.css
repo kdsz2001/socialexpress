@@ -6,29 +6,35 @@
 }
 
 /*
-  Cards com teto de 350px (tamanho original):
-  - menu fechado: bloco centralizado, cards em 350px
-  - menu aberto: se faltar espaço, encolhem só o necessário — sem cortar a tela
-  - nunca passam de 350px (não esticam)
+  Cards fixos em 350px (não esticam ao abrir/fechar o menu).
+  Ao recolher, o bloco só desliza com o mesmo easing do sidebar —
+  sem trocar justify-content (isso causava o “pulo”).
 */
 .dashboard__grid {
+  --dashboard-card: 350px;
+  --dashboard-gap: 25px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 350px));
-  gap: 25px;
+  grid-template-columns: repeat(3, var(--dashboard-card));
+  gap: var(--dashboard-gap);
   align-items: start;
-  width: 100%;
+  width: max-content;
   max-width: 100%;
   justify-content: start;
   box-sizing: border-box;
+  transform: translateX(0);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 
 .app-shell.is-collapsed .dashboard__grid {
-  justify-content: center;
+  transform: translateX(
+    calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2)
+  );
 }
 
 .dashboard__grid > * {
-  width: 100%;
-  max-width: 350px;
+  width: var(--dashboard-card);
+  max-width: var(--dashboard-card);
   min-width: 0;
   box-sizing: border-box;
 }
@@ -46,21 +52,26 @@
 
 @media (max-width: 1200px) {
   .dashboard__grid {
-    grid-template-columns: repeat(2, minmax(0, 350px));
+    grid-template-columns: repeat(2, var(--dashboard-card));
   }
 }
 
 @media (max-width: 900px) {
   .dashboard__grid {
     grid-template-columns: minmax(0, 1fr);
+    width: 100%;
     justify-content: stretch;
+    transform: none;
+    transition: none;
+    will-change: auto;
   }
 
   .app-shell.is-collapsed .dashboard__grid {
-    justify-content: stretch;
+    transform: none;
   }
 
   .dashboard__grid > * {
+    width: 100%;
     max-width: none;
   }
 }
