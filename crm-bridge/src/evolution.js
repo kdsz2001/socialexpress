@@ -234,12 +234,29 @@ export async function logoutInstance() {
   try {
     await evoFetch(`/instance/logout/${encodeURIComponent(name)}`, { method: 'DELETE' })
   } catch {
-    try {
-      await evoFetch(`/instance/delete/${encodeURIComponent(name)}`, { method: 'DELETE' })
-    } catch {
-      // ignore
-    }
+    // ignore
   }
+  try {
+    await evoFetch(`/instance/delete/${encodeURIComponent(name)}`, { method: 'DELETE' })
+  } catch {
+    // ignore
+  }
+}
+
+/** Apaga a sessão e gera um QR novo (base64 diferente). */
+export async function recreateFreshQr(webhookUrl, previousBase64 = null) {
+  await logoutInstance()
+  await sleep(1200)
+  await ensureInstance(webhookUrl)
+  await sleep(800)
+
+  let qr = await fetchQr()
+  // Garante que veio QR; se veio o mesmo da tela anterior, tenta mais 1x
+  for (let i = 0; i < 3 && (!qr.base64 || (previousBase64 && qr.base64 === previousBase64)); i += 1) {
+    await sleep(1200)
+    qr = await fetchQr()
+  }
+  return qr
 }
 
 export function getInstanceName() {

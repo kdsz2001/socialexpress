@@ -63,23 +63,43 @@ export function Crm() {
   const [busy, setBusy] = useState(false)
   const [bridgeError, setBridgeError] = useState<string | null>(null)
   const [qrBootstrapped, setQrBootstrapped] = useState(false)
+  const [qrRenderKey, setQrRenderKey] = useState(0)
   const qrFetchRef = useRef(false)
 
   const pullOfficialQr = async (forceNew: boolean) => {
-    if (qrFetchRef.current) return
+    // Clique em Novo QR sempre entra; refresh automático só se estiver livre
+    if (qrFetchRef.current && !forceNew) return
     qrFetchRef.current = true
     try {
+      if (forceNew) {
+        // Some a imagem antiga imediatamente
+        hydrateCrmFromBridge({
+          connection: {
+            status: 'connecting',
+            qrBase64: null,
+            lastError: null,
+          },
+        })
+        setBusy(true)
+        setQrRenderKey((key) => key + 1)
+      }
+
       const connection = forceNew ? await bridgeRefreshQr() : await bridgeConnect()
       const snapshot = await bridgeGetState()
       hydrateCrmFromBridge({
         ...snapshot,
         connection: { ...snapshot.connection, ...connection },
       })
+      if (connection.qrBase64) {
+        setQrRenderKey((key) => key + 1)
+      }
       setBridgeError(null)
+      return connection
     } catch (error) {
       throw error
     } finally {
       qrFetchRef.current = false
+      if (forceNew) setBusy(false)
     }
   }
 
@@ -158,7 +178,8 @@ export function Crm() {
     const refreshQrSoft = async () => {
       if (cancelled) return
       try {
-        await pullOfficialQr(false)
+        // Força QR novo também no automático, para a imagem mudar
+        await pullOfficialQr(true)
       } catch {
         // ignore soft refresh errors
       }
@@ -282,6 +303,7 @@ export function Crm() {
           mode={live ? 'evolution' : 'mock'}
           qrToken={state.qrToken}
           qrBase64={state.qrBase64}
+          qrRenderKey={qrRenderKey}
           error={bridgeError || state.lastError}
           onRefreshQr={() => void onRefreshQr()}
           onStart={() => void onStartConnect()}
@@ -444,6 +466,7 @@ function ConnectPanel({
   mode,
   qrToken,
   qrBase64,
+  qrRenderKey,
   error,
   onRefreshQr,
   onStart,
@@ -453,6 +476,7 @@ function ConnectPanel({
   mode: 'mock' | 'evolution'
   qrToken: string
   qrBase64: string | null
+  qrRenderKey: number
   error: string | null
   onRefreshQr: () => void
   onStart: () => void
@@ -490,27 +514,33 @@ function ConnectPanel({
           </p>
         ) : (
           <p className="crm__note">
-            Escaneie o QR oficial. Ele renova automaticamente a cada 45 segundos. Se precisar, clique em{' '}
-            <strong>Novo QR</strong>.
+            Escaneie o QR oficial. Ele renova automaticamente a cada 45 segundos. Clique em{' '}
+            <strong>Novo QR</strong> para trocar a imagem agora.
           </p>
         )}
       </div>
 
       <div className="crm__qr-card">
-        <div className={`crm__qr${busy && !showOfficialQr ? ' is-scanning' : ''}`} aria-hidden="true">
+        <div className={`crm__qr${busy || (!showOfficialQr && mode === 'evolution') ? ' is-scanning' : ''}`}>
           {showOfficialQr ? (
-            <img src={qrBase64!} alt="QR Code WhatsApp oficial" className="crm__qr-image" />
+            <img
+              key={`${qrRenderKey}-${qrBase64!.slice(-24)}`}
+              src={qrBase64!}
+              alt="QR Code WhatsApp oficial"
+              className="crm__qr-image"
+            />
           ) : showFakeQr ? (
             <QrPattern token={qrToken} />
           ) : (
             <div className="crm__qr-loading">
               <RefreshCcw size={22} strokeWidth={2.25} className="is-spin" />
-              <span>Carregando QR oficial…</span>
+              <span>{busy ? 'Gerando novo QR…' : 'Carregando QR oficial…'}</span>
             </div>
           )}
         </div>
         <p className="crm__qr-token">
           {mode === 'evolution' ? 'QR oficial Evolution' : 'Demo'} · {qrToken.slice(-8).toUpperCase()}
+          {qrRenderKey > 0 ? ` · #${qrRenderKey}` : ''}
         </p>
         <div className="crm__qr-actions crm__qr-actions--single">
           {mode === 'evolution' ? (

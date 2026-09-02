@@ -17,6 +17,7 @@ import {
   fetchQr,
   getInstanceName,
   logoutInstance,
+  recreateFreshQr,
 } from './evolution.js'
 
 const app = express()
@@ -135,26 +136,33 @@ app.post('/api/whatsapp/qr/refresh', async (_req, res) => {
     if (!evolutionConfigured()) {
       return res.status(400).json({ error: 'Evolution não configurada' })
     }
-    // Força QR novo/válido: limpa sessão antiga e gera de novo
-    try {
-      await logoutInstance()
-    } catch {
-      // ignore
-    }
+    const previousQr = readBridgeState().connection?.qrBase64 || null
+    // Limpa o QR atual para a UI trocar a imagem de verdade
     patchConnection({
       status: 'connecting',
       lastError: null,
       pairingCode: null,
+      qrBase64: null,
     })
-    await ensureInstance(`${PUBLIC_URL}/api/webhook/evolution`)
-    const qr = await fetchQr()
+
+    const qr = await recreateFreshQr(`${PUBLIC_URL}/api/webhook/evolution`, previousQr)
+    if (!qr.base64) {
+      const next = patchConnection({
+        status: 'connecting',
+        qrBase64: null,
+        lastError: 'Não foi possível gerar um QR novo. Tente novamente.',
+      })
+      return res.status(502).json({ error: next.connection.lastError, ...next.connection })
+    }
+
     const next = patchConnection({
       status: 'connecting',
       qrBase64: qr.base64,
       pairingCode: qr.pairingCode || null,
-      lastError: qr.base64 ? null : 'QR indisponível — tente Novo QR de novo',
+      lastError: null,
+      qrUpdatedAt: Date.now(),
     })
-    res.json(next.connection)
+    res.json({ ...next.connection, changed: qr.base64 !== previousQr })
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
