@@ -2,38 +2,39 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+  transition: padding 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   animation: dashboard-in 0.35s ease both;
 }
 
 /*
-  Cards fixos em 350px (não esticam ao abrir/fechar o menu).
-  Ao recolher, o bloco só desliza com o mesmo easing do sidebar —
-  sem trocar justify-content (isso causava o “pulo”).
+  Cards com teto de 350px:
+  - encolhem só se faltar espaço (sem estourar a tela)
+  - ao fechar o menu, padding simétrico (mesmo delta do sidebar)
+    centraliza sem translateX — evita cortar pra fora
 */
 .dashboard__grid {
   --dashboard-card: 350px;
   --dashboard-gap: 25px;
   display: grid;
-  grid-template-columns: repeat(3, var(--dashboard-card));
+  grid-template-columns: repeat(3, minmax(0, var(--dashboard-card)));
   gap: var(--dashboard-gap);
   align-items: start;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
   justify-content: start;
   box-sizing: border-box;
-  transform: translateX(0);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
 }
 
-.app-shell.is-collapsed .dashboard__grid {
-  transform: translateX(
-    calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2)
-  );
+.app-shell.is-collapsed .dashboard {
+  padding-left: calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2);
+  padding-right: calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2);
 }
 
 .dashboard__grid > * {
-  width: var(--dashboard-card);
+  width: 100%;
   max-width: var(--dashboard-card);
   min-width: 0;
   box-sizing: border-box;
@@ -52,26 +53,28 @@
 
 @media (max-width: 1200px) {
   .dashboard__grid {
-    grid-template-columns: repeat(2, var(--dashboard-card));
+    grid-template-columns: repeat(2, minmax(0, var(--dashboard-card)));
   }
 }
 
 @media (max-width: 900px) {
-  .dashboard__grid {
-    grid-template-columns: minmax(0, 1fr);
-    width: 100%;
-    justify-content: stretch;
-    transform: none;
+  .dashboard {
+    padding-left: 0;
+    padding-right: 0;
     transition: none;
-    will-change: auto;
   }
 
-  .app-shell.is-collapsed .dashboard__grid {
-    transform: none;
+  .app-shell.is-collapsed .dashboard {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .dashboard__grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
   }
 
   .dashboard__grid > * {
-    width: 100%;
     max-width: none;
   }
 }

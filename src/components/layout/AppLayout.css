@@ -57,23 +57,23 @@
 /*
   Clientes / Agenda / Eventos / etc:
   - largura trava no espaço do menu ABERTO (não estica ao fechar)
-  - com menu fechado, o painel desliza com o mesmo timing do sidebar
-    (translateX — animável; margin:auto não é)
+  - com menu fechado, margens simétricas (mesmo delta do sidebar)
+    centralizam sem translateX — evita cortar pra fora
 */
 .app-panel-align {
   width: 100%;
   max-width: var(--app-panel-max);
-  margin-inline: 0;
+  margin-left: 0;
+  margin-right: auto;
   box-sizing: border-box;
-  transform: translateX(0);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
+  transition:
+    margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    margin-right 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .app-shell.is-collapsed .app-panel-align {
-  transform: translateX(
-    calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2)
-  );
+  margin-left: calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2);
+  margin-right: auto;
 }
 
 .app-content__inner > .clients,
@@ -90,11 +90,12 @@
 .app-content__inner > .crm {
   width: 100%;
   max-width: var(--app-panel-max);
-  margin-inline: 0;
+  margin-left: 0;
+  margin-right: auto;
   box-sizing: border-box;
-  transform: translateX(0);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
+  transition:
+    margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    margin-right 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .app-shell.is-collapsed .app-content__inner > .clients,
@@ -109,9 +110,8 @@
 .app-shell.is-collapsed .app-content__inner > .settings,
 .app-shell.is-collapsed .app-content__inner > .history,
 .app-shell.is-collapsed .app-content__inner > .crm {
-  transform: translateX(
-    calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2)
-  );
+  margin-left: calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2);
+  margin-right: auto;
 }
 
 .app-footer {
@@ -223,10 +223,9 @@
   .app-content__inner > .crm,
   .app-panel-align {
     max-width: none;
-    margin-inline: 0;
-    transform: none;
+    margin-left: 0;
+    margin-right: 0;
     transition: none;
-    will-change: auto;
   }
 
   .app-shell.is-collapsed .app-content__inner > .clients,
@@ -242,8 +241,8 @@
   .app-shell.is-collapsed .app-content__inner > .history,
   .app-shell.is-collapsed .app-content__inner > .crm,
   .app-shell.is-collapsed .app-panel-align {
-    margin-inline: 0;
-    transform: none;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .app-footer {
