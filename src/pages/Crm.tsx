@@ -38,6 +38,11 @@ import {
   type CrmLead,
   type CrmScoreRule,
 } from '../lib/crmStore'
+import {
+  formatBrazilPhoneDisplay,
+  phoneCharHint,
+  validateWhatsappPhone,
+} from '../lib/whatsappPhone'
 import './Crm.css'
 
 function formatWhen(ts: number | null) {
@@ -181,11 +186,18 @@ export function Crm() {
 
   const onPairing = async () => {
     if (!live) return
+    const parsed = validateWhatsappPhone(phoneInput)
+    setPhoneInput(parsed.display)
+    if (!parsed.ok) {
+      setBridgeError(parsed.error)
+      return
+    }
+
     setBridgeError(null)
     setBusy(true)
     startCrmConnecting()
     try {
-      const connection = await bridgePairing(phoneInput)
+      const connection = await bridgePairing(parsed.evolution)
       const snapshot = await bridgeGetState()
       hydrateCrmFromBridge({
         ...snapshot,
@@ -193,6 +205,7 @@ export function Crm() {
       })
     } catch (error) {
       setBridgeError(error instanceof Error ? error.message : 'Falha ao gerar código')
+      disconnectCrm()
     } finally {
       setBusy(false)
     }
@@ -475,7 +488,8 @@ function ConnectPanel({
               aparelho → <strong>Conectar com número de telefone</strong>.
             </p>
             <label className="crm__pairing-label" htmlFor="crm-pairing-phone">
-              Seu WhatsApp (com DDD)
+              Seu WhatsApp (com DDD){' '}
+              <span className="crm__pairing-count">{phoneCharHint(phoneInput)}</span>
             </label>
             <div className="crm__pairing-row">
               <input
@@ -483,9 +497,16 @@ function ConnectPanel({
                 className="crm__pairing-input"
                 inputMode="tel"
                 autoComplete="tel"
-                placeholder="11999999999"
+                placeholder="(48) 98865-0977"
+                maxLength={16}
                 value={phoneInput}
-                onChange={(event) => onPhoneChange(event.target.value)}
+                onChange={(event) => onPhoneChange(formatBrazilPhoneDisplay(event.target.value))}
+                onPaste={(event) => {
+                  event.preventDefault()
+                  const text = event.clipboardData.getData('text')
+                  onPhoneChange(formatBrazilPhoneDisplay(text))
+                }}
+                onBlur={() => onPhoneChange(formatBrazilPhoneDisplay(phoneInput))}
                 disabled={busy}
               />
               <button

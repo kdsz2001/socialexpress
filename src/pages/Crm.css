@@ -78,6 +78,16 @@
   font-size: 0.8rem;
   font-weight: 600;
   color: #3f4254;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.crm__pairing-count {
+  margin-left: auto;
+  font-weight: 500;
+  color: #a1a5b7;
+  font-variant-numeric: tabular-nums;
 }
 
 .crm__pairing-row {

@@ -116,9 +116,18 @@ function sleep(ms) {
 function normalizePhone(number) {
   const digits = String(number || '').replace(/\D/g, '')
   if (!digits) return ''
-  // BR: se veio sem DDI, prefixa 55
-  if (digits.length >= 10 && digits.length <= 11) return `55${digits}`
-  return digits
+
+  let local = digits
+  if (local.startsWith('55') && local.length >= 12) local = local.slice(2)
+  if (local.length > 11) local = local.slice(-11)
+
+  // Celular BR antigo sem o 9
+  if (local.length === 10 && /^[1-9]{2}[6-9]/.test(local)) {
+    local = `${local.slice(0, 2)}9${local.slice(2)}`
+  }
+
+  if (local.length < 10 || local.length > 11) return ''
+  return `55${local}`
 }
 
 function extractQrBase64(data) {
@@ -162,8 +171,8 @@ export async function fetchQr() {
 export async function fetchPairingCode(phoneNumber) {
   const name = INSTANCE()
   const number = normalizePhone(phoneNumber)
-  if (!number || number.length < 12) {
-    throw new Error('Informe o WhatsApp com DDD (ex: 11999999999 ou 5511999999999)')
+  if (!number || number.length < 12 || number.length > 13) {
+    throw new Error('Informe o WhatsApp com DDD (11 dígitos). Ex: 48988650977')
   }
 
   // Se a instância ficou "connecting" no QR, pairing code não sai — reinicia sessão
@@ -182,12 +191,19 @@ export async function fetchPairingCode(phoneNumber) {
     `/instance/connect/${encodeURIComponent(name)}?number=${encodeURIComponent(number)}`,
   )
   let pairingCode = extractPairingCode(data)
-  for (let i = 0; !pairingCode && i < 4; i += 1) {
-    await sleep(1500)
+  // no máximo 2 novas tentativas (evita “gerando infinito”)
+  for (let i = 0; !pairingCode && i < 2; i += 1) {
+    await sleep(1200)
     data = await evoFetch(
       `/instance/connect/${encodeURIComponent(name)}?number=${encodeURIComponent(number)}`,
     )
     pairingCode = extractPairingCode(data)
+  }
+
+  if (!pairingCode) {
+    throw new Error(
+      'Não foi possível gerar o código. Confira o número (DDD + 9 dígitos) e tente de novo.',
+    )
   }
 
   return {
