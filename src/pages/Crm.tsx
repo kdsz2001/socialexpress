@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   CheckCircle2,
   MessageCircle,
@@ -63,6 +63,25 @@ export function Crm() {
   const [busy, setBusy] = useState(false)
   const [bridgeError, setBridgeError] = useState<string | null>(null)
   const [qrBootstrapped, setQrBootstrapped] = useState(false)
+  const qrFetchRef = useRef(false)
+
+  const pullOfficialQr = async (forceNew: boolean) => {
+    if (qrFetchRef.current) return
+    qrFetchRef.current = true
+    try {
+      const connection = forceNew ? await bridgeRefreshQr() : await bridgeConnect()
+      const snapshot = await bridgeGetState()
+      hydrateCrmFromBridge({
+        ...snapshot,
+        connection: { ...snapshot.connection, ...connection },
+      })
+      setBridgeError(null)
+    } catch (error) {
+      throw error
+    } finally {
+      qrFetchRef.current = false
+    }
+  }
 
   useEffect(() => {
     if (live) return
@@ -84,7 +103,7 @@ export function Crm() {
     return () => window.clearTimeout(timer)
   }, [live, state.status])
 
-  // Evolution: já puxa o QR oficial na abertura da tela
+  // Evolution: QR oficial na abertura
   useEffect(() => {
     if (!live || qrBootstrapped) return
     if (state.status === 'connected') {
@@ -93,18 +112,12 @@ export function Crm() {
     }
     let cancelled = false
     setQrBootstrapped(true)
-    setBusy(true)
     startCrmConnecting()
+    // Só mostra "carregando" se ainda não há QR na tela
+    if (!state.qrBase64) setBusy(true)
     void (async () => {
       try {
-        const connection = await bridgeConnect()
-        if (cancelled) return
-        const snapshot = await bridgeGetState()
-        hydrateCrmFromBridge({
-          ...snapshot,
-          connection: { ...snapshot.connection, ...connection },
-        })
-        setBridgeError(null)
+        await pullOfficialQr(false)
       } catch (error) {
         if (!cancelled) {
           setBridgeError(error instanceof Error ? error.message : 'Falha ao carregar QR')
@@ -116,9 +129,10 @@ export function Crm() {
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live, qrBootstrapped, state.status])
 
-  // Evolution: poll status + atualiza QR sozinho a cada 35s (só enquanto desconectado)
+  // Evolution: status + QR automático a cada 45s
   useEffect(() => {
     if (!live) return
     if (state.status === 'connected') return
@@ -142,15 +156,9 @@ export function Crm() {
     }
 
     const refreshQrSoft = async () => {
-      if (cancelled || busy) return
+      if (cancelled) return
       try {
-        const connection = await bridgeConnect()
-        if (cancelled) return
-        const snapshot = await bridgeGetState()
-        hydrateCrmFromBridge({
-          ...snapshot,
-          connection: { ...snapshot.connection, ...connection },
-        })
+        await pullOfficialQr(false)
       } catch {
         // ignore soft refresh errors
       }
@@ -158,13 +166,13 @@ export function Crm() {
 
     void pullStatus()
     const statusTimer = window.setInterval(pullStatus, 2500)
-    const qrTimer = window.setInterval(refreshQrSoft, 35000)
+    const qrTimer = window.setInterval(refreshQrSoft, 45000)
     return () => {
       cancelled = true
       window.clearInterval(statusTimer)
       window.clearInterval(qrTimer)
     }
-  }, [live, busy, state.status])
+  }, [live, state.status])
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { todos: state.leads.length }
@@ -199,17 +207,12 @@ export function Crm() {
       startCrmConnecting()
       return
     }
-    setBusy(true)
     startCrmConnecting()
     try {
-      const connection = await bridgeConnect()
-      const snapshot = await bridgeGetState()
-      hydrateCrmFromBridge({ ...snapshot, connection: { ...snapshot.connection, ...connection } })
+      await pullOfficialQr(false)
     } catch (error) {
       setBridgeError(error instanceof Error ? error.message : 'Falha ao conectar')
       disconnectCrm()
-    } finally {
-      setBusy(false)
     }
   }
 
@@ -219,19 +222,11 @@ export function Crm() {
       return
     }
     setBridgeError(null)
-    setBusy(true)
     startCrmConnecting()
     try {
-      const connection = await bridgeRefreshQr()
-      const snapshot = await bridgeGetState()
-      hydrateCrmFromBridge({
-        ...snapshot,
-        connection: { ...snapshot.connection, ...connection },
-      })
+      await pullOfficialQr(true)
     } catch (error) {
       setBridgeError(error instanceof Error ? error.message : 'Falha ao renovar QR')
-    } finally {
-      setBusy(false)
     }
   }
 
@@ -495,7 +490,7 @@ function ConnectPanel({
           </p>
         ) : (
           <p className="crm__note">
-            Escaneie o QR oficial. Ele renova automaticamente a cada ~35 segundos. Se precisar, use{' '}
+            Escaneie o QR oficial. Ele renova automaticamente a cada 45 segundos. Se precisar, clique em{' '}
             <strong>Novo QR</strong>.
           </p>
         )}
@@ -519,9 +514,9 @@ function ConnectPanel({
         </p>
         <div className="crm__qr-actions crm__qr-actions--single">
           {mode === 'evolution' ? (
-            <button type="button" className="crm__primary" onClick={onRefreshQr} disabled={busy}>
+            <button type="button" className="crm__primary" onClick={onRefreshQr}>
               <QrCode size={15} strokeWidth={2.25} />
-              {busy ? 'Gerando QR…' : 'Novo QR'}
+              Novo QR
             </button>
           ) : (
             <button
