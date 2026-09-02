@@ -1,7 +1,7 @@
 import { ClipboardList, Banknote, ShoppingCart } from 'lucide-react'
 import { BlazerIcon } from '../components/icons/BlazerIcon'
-import { HandoffOutIcon } from '../components/icons/HandoffOutIcon'
-import { HandoffInIcon } from '../components/icons/HandoffInIcon'
+import { CurveRightIcon } from '../components/icons/CurveRightIcon'
+import { CurveLeftIcon } from '../components/icons/CurveLeftIcon'
 import { StatusCard } from '../components/dashboard/StatusCard'
 import { ResultsCard } from '../components/dashboard/ResultsCard'
 import { AccountsCard } from '../components/dashboard/AccountsCard'
@@ -10,8 +10,8 @@ import './Dashboard.css'
 
 const statusItems = [
   { label: 'Provas', value: 0, icon: BlazerIcon },
-  { label: 'Retiradas', value: 0, icon: HandoffOutIcon },
-  { label: 'Devoluções', value: 0, icon: HandoffInIcon },
+  { label: 'Retiradas', value: 0, icon: CurveRightIcon },
+  { label: 'Devoluções', value: 0, icon: CurveLeftIcon },
 ]
 
 const resultRows = [
