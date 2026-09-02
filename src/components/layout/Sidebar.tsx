@@ -12,7 +12,7 @@ import {
   Activity,
   Settings,
   BookOpen,
-  Handshake,
+  ContactRound,
 } from 'lucide-react'
 import { TieIcon } from '../icons/TieIcon'
 import { NecktieMark } from '../icons/NecktieMark'
@@ -21,9 +21,9 @@ import './Sidebar.css'
 const navItems = [
   { to: '/', label: 'Dashboard', icon: Monitor },
   { to: '/clientes', label: 'Clientes', icon: User },
-  { to: '/crm', label: 'CRM', icon: Handshake },
   { to: '/agenda', label: 'Agenda', icon: Calendar },
   { to: '/eventos', label: 'Eventos', icon: Wine },
+  { to: '/crm', label: 'CRM', icon: ContactRound },
   { to: '/produtos', label: 'Produtos', icon: TieIcon },
   { to: '/funcionarios', label: 'Funcionários', icon: Users },
   { to: '/pedidos', label: 'Pedidos', icon: Receipt },
