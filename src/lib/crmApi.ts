@@ -17,6 +17,10 @@ export type BridgeConnection = {
   pairingCode?: string | null
   lastError?: string | null
   mode?: string
+  crmOpen?: boolean
+  evolutionState?: string | null
+  sessionReady?: boolean
+  needsConfirm?: boolean
 }
 
 export type BridgeSnapshot = {
@@ -63,6 +67,10 @@ export async function bridgeGetState() {
 
 export async function bridgeConnect() {
   return bridgeFetch<BridgeConnection>('/api/whatsapp/connect', { method: 'POST' })
+}
+
+export async function bridgeConfirmSession() {
+  return bridgeFetch<BridgeConnection>('/api/whatsapp/confirm-session', { method: 'POST' })
 }
 
 export async function bridgeStatus() {

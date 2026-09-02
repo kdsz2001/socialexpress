@@ -234,6 +234,9 @@ export function hydrateCrmFromBridge(payload: {
     qrBase64: string | null
     pairingCode: string | null
     lastError: string | null
+    crmOpen?: boolean
+    sessionReady?: boolean
+    needsConfirm?: boolean
   }>
   labels?: CrmLabel[]
   leads?: CrmLead[]
@@ -242,10 +245,16 @@ export function hydrateCrmFromBridge(payload: {
 }) {
   return update((current) => {
     const connection = payload.connection || {}
+    const crmOpen = connection.crmOpen === true
+    // Sem confirmação do usuário, nunca sobe para connected
+    let status = connection.status || current.status
+    if (status === 'connected' && !crmOpen) {
+      status = 'connecting'
+    }
     return {
       ...current,
       connectionMode: 'evolution',
-      status: connection.status || current.status,
+      status,
       accountName: connection.accountName ?? current.accountName,
       accountPhone: connection.accountPhone ?? current.accountPhone,
       connectedAt:

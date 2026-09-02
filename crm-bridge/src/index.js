@@ -52,38 +52,81 @@ app.post('/api/whatsapp/connect', async (_req, res) => {
     }
 
     const previousQr = readBridgeState().connection?.qrBase64 || null
-    patchConnection({ status: 'connecting', lastError: null })
+    patchConnection({ status: 'connecting', lastError: null, crmOpen: false })
     await ensureInstance(`${PUBLIC_URL}/api/webhook/evolution`)
-    const qr = await fetchQr()
     const state = await fetchConnectionState()
 
+    // Sessão já existe na Evolution: NÃO abre o CRM sozinho
     if (state.state === 'open') {
       const next = patchConnection({
-        status: 'connected',
-        connectedAt: Date.now(),
+        status: 'connecting',
+        crmOpen: false,
+        evolutionState: 'open',
         qrBase64: null,
         pairingCode: null,
-        accountName: 'WhatsApp conectado',
-        accountPhone: '',
+        lastError: null,
+        accountName: 'Sessão WhatsApp já ativa na Evolution',
       })
-      createBackup('Backup automático pós-conexão')
-      return res.json({ ...next.connection, mode: 'evolution' })
+      return res.json({
+        ...next.connection,
+        mode: 'evolution',
+        sessionReady: true,
+        needsConfirm: true,
+      })
     }
 
+    const qr = await fetchQr()
     const qrBase64 = qr.base64 || previousQr
     const next = patchConnection({
       status: 'connecting',
+      crmOpen: false,
+      evolutionState: state.state,
       qrBase64,
       pairingCode: qr.pairingCode || null,
       lastError: qrBase64 ? null : 'QR ainda não disponível — clique em Novo QR',
     })
-    return res.json({ ...next.connection, mode: 'evolution' })
+    return res.json({
+      ...next.connection,
+      mode: 'evolution',
+      sessionReady: false,
+      needsConfirm: false,
+    })
   } catch (error) {
     patchConnection({
       status: 'disconnected',
+      crmOpen: false,
       lastError: error.message || 'Falha ao conectar Evolution',
     })
     return res.status(500).json({ error: error.message || 'Falha ao conectar' })
+  }
+})
+
+app.post('/api/whatsapp/confirm-session', async (_req, res) => {
+  try {
+    if (!evolutionConfigured()) {
+      return res.status(400).json({ error: 'Evolution não configurada' })
+    }
+    const state = await fetchConnectionState()
+    if (state.state !== 'open') {
+      return res.status(400).json({
+        error: 'Não há sessão ativa. Escaneie o QR primeiro.',
+        evolutionState: state.state,
+      })
+    }
+    const next = patchConnection({
+      status: 'connected',
+      crmOpen: true,
+      evolutionState: 'open',
+      connectedAt: Date.now(),
+      qrBase64: null,
+      pairingCode: null,
+      accountName: 'WhatsApp conectado',
+      lastError: null,
+    })
+    createBackup('CRM aberto na sessão Evolution existente')
+    return res.json({ ...next.connection, mode: 'evolution', sessionReady: true })
+  } catch (error) {
+    return res.status(500).json({ error: error.message || 'Falha ao confirmar sessão' })
   }
 })
 
@@ -94,17 +137,41 @@ app.get('/api/whatsapp/status', async (_req, res) => {
     }
     const current = readBridgeState().connection
     const state = await fetchConnectionState()
+
     if (state.state === 'open') {
+      // Só marca connected se o usuário já abriu o CRM nesta sessão
+      if (current.crmOpen) {
+        const next = patchConnection({
+          status: 'connected',
+          evolutionState: 'open',
+          connectedAt: current.connectedAt || Date.now(),
+          qrBase64: null,
+          pairingCode: null,
+        })
+        return res.json({
+          ...next.connection,
+          mode: 'evolution',
+          evolutionState: state.state,
+          sessionReady: true,
+          needsConfirm: false,
+        })
+      }
       const next = patchConnection({
-        status: 'connected',
-        connectedAt: current.connectedAt || Date.now(),
+        status: 'connecting',
+        evolutionState: 'open',
         qrBase64: null,
-        pairingCode: null,
+        crmOpen: false,
       })
-      return res.json({ ...next.connection, mode: 'evolution', evolutionState: state.state })
+      return res.json({
+        ...next.connection,
+        mode: 'evolution',
+        evolutionState: state.state,
+        sessionReady: true,
+        needsConfirm: true,
+      })
     }
+
     if (state.state === 'connecting') {
-      // Mantém o QR atual; se sumiu, tenta buscar de novo
       let qrBase64 = current.qrBase64
       if (!qrBase64) {
         try {
@@ -116,14 +183,31 @@ app.get('/api/whatsapp/status', async (_req, res) => {
       }
       const next = patchConnection({
         status: 'connecting',
+        crmOpen: false,
+        evolutionState: 'connecting',
         qrBase64: qrBase64 || current.qrBase64,
       })
-      return res.json({ ...next.connection, mode: 'evolution', evolutionState: state.state })
+      return res.json({
+        ...next.connection,
+        mode: 'evolution',
+        evolutionState: state.state,
+        sessionReady: false,
+        needsConfirm: false,
+      })
     }
+
     const next = patchConnection({
       status: current.qrBase64 ? 'connecting' : 'disconnected',
+      crmOpen: false,
+      evolutionState: state.state,
     })
-    return res.json({ ...next.connection, mode: 'evolution', evolutionState: state.state })
+    return res.json({
+      ...next.connection,
+      mode: 'evolution',
+      evolutionState: state.state,
+      sessionReady: false,
+      needsConfirm: false,
+    })
   } catch (error) {
     return res.json({
       ...readBridgeState().connection,
@@ -224,6 +308,8 @@ app.post('/api/whatsapp/disconnect', async (_req, res) => {
   }
   const next = patchConnection({
     status: 'disconnected',
+    crmOpen: false,
+    evolutionState: null,
     connectedAt: null,
     accountName: '',
     accountPhone: '',
@@ -237,6 +323,12 @@ app.post('/api/whatsapp/sync', async (_req, res) => {
   try {
     if (!evolutionConfigured()) {
       return res.status(400).json({ error: 'Evolution não configurada' })
+    }
+    const current = readBridgeState().connection
+    if (!current.crmOpen) {
+      return res.status(400).json({
+        error: 'Abra a sessão no CRM primeiro (confirme a sessão ou escaneie o QR).',
+      })
     }
     const state = await fetchConnectionState()
     if (state.state !== 'open') {
@@ -316,28 +408,43 @@ app.post('/api/webhook/evolution', (req, res) => {
     if (event.includes('CONNECTION_UPDATE')) {
       const state = String(data?.state || data?.status || '').toLowerCase()
       if (state === 'open') {
-        patchConnection({
-          status: 'connected',
-          connectedAt: Date.now(),
-          qrBase64: null,
-          accountName: 'WhatsApp conectado',
-        })
-        createBackup('Backup automático CONNECTION_UPDATE')
-        // Puxa conversas em background (não atrasa o webhook)
-        void syncRecentConversations({ maxChats: 50, maxMessages: 25 })
-          .then((result) => {
-            const conversations = result.imported || []
-            importConversations(conversations)
-            patchConnection({ lastSyncAt: Date.now() })
-            createBackup(`Sync automático (${conversations.length} conversas)`)
+        const current = readBridgeState().connection
+        // Webhook NÃO abre o CRM sozinho — só marca que a sessão Evolution está pronta
+        if (current.crmOpen) {
+          patchConnection({
+            status: 'connected',
+            connectedAt: current.connectedAt || Date.now(),
+            qrBase64: null,
+            evolutionState: 'open',
+            accountName: 'WhatsApp conectado',
           })
-          .catch(() => {
-            // ignore sync errors no webhook
+          createBackup('Backup automático CONNECTION_UPDATE')
+          void syncRecentConversations({ maxChats: 50, maxMessages: 25 })
+            .then((result) => {
+              const conversations = result.imported || []
+              importConversations(conversations)
+              patchConnection({ lastSyncAt: Date.now() })
+              createBackup(`Sync automático (${conversations.length} conversas)`)
+            })
+            .catch(() => {})
+        } else {
+          patchConnection({
+            status: 'connecting',
+            crmOpen: false,
+            evolutionState: 'open',
+            qrBase64: null,
+            accountName: 'Sessão WhatsApp pronta — confirme no CRM',
           })
+        }
       } else if (state === 'close') {
-        patchConnection({ status: 'disconnected', qrBase64: null })
+        patchConnection({
+          status: 'disconnected',
+          crmOpen: false,
+          evolutionState: 'close',
+          qrBase64: null,
+        })
       } else if (state === 'connecting') {
-        patchConnection({ status: 'connecting' })
+        patchConnection({ status: 'connecting', evolutionState: 'connecting', crmOpen: false })
       }
     }
 

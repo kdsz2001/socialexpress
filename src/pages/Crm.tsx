@@ -12,6 +12,7 @@ import {
 import { useCrm } from '../hooks/useCrm'
 import {
   bridgeConnect,
+  bridgeConfirmSession,
   bridgeCreateBackup,
   bridgeDisconnect,
   bridgeGetState,
@@ -66,8 +67,10 @@ export function Crm() {
   const [bridgeError, setBridgeError] = useState<string | null>(null)
   const [qrBootstrapped, setQrBootstrapped] = useState(false)
   const [qrRenderKey, setQrRenderKey] = useState(0)
+  const [sessionReady, setSessionReady] = useState(false)
   const qrFetchRef = useRef(false)
   const didSyncRef = useRef(false)
+  const liveBootRef = useRef(false)
 
   const pullOfficialQr = async (forceNew: boolean) => {
     if (qrFetchRef.current) return null
@@ -85,12 +88,13 @@ export function Crm() {
       })
       const connection = (await Promise.race([request, timeout])) as Awaited<
         ReturnType<typeof bridgeRefreshQr>
-      >
+      > & { sessionReady?: boolean; needsConfirm?: boolean }
       const snapshot = await bridgeGetState()
       hydrateCrmFromBridge({
         ...snapshot,
-        connection: { ...snapshot.connection, ...connection },
+        connection: { ...snapshot.connection, ...connection, crmOpen: false },
       })
+      setSessionReady(Boolean(connection.sessionReady || connection.needsConfirm))
 
       const nextQr = (connection.qrBase64 as string | null | undefined) || null
       if (nextQr) {
@@ -98,14 +102,15 @@ export function Crm() {
           setQrRenderKey((key) => key + 1)
         }
         setBridgeError(null)
+      } else if (connection.sessionReady || connection.needsConfirm) {
+        setBridgeError(null)
       } else if (connection.lastError) {
         setBridgeError(String(connection.lastError))
-      } else {
+      } else if (!connection.sessionReady) {
         setBridgeError('QR não veio. Clique em Novo QR de novo.')
       }
       return connection
     } catch (error) {
-      // Restaura estado do bridge se a chamada falhou
       try {
         hydrateCrmFromBridge(await bridgeGetState())
       } catch {
@@ -121,6 +126,15 @@ export function Crm() {
   useEffect(() => {
     if (live) return
     ensureCrmSession()
+  }, [live])
+
+  // Modo Evolution: ao abrir a página, NÃO entra conectado sozinho
+  useEffect(() => {
+    if (!live || liveBootRef.current) return
+    liveBootRef.current = true
+    disconnectCrm()
+    startCrmConnecting()
+    setSessionReady(false)
   }, [live])
 
   useEffect(() => {
@@ -177,11 +191,31 @@ export function Crm() {
       try {
         const snapshot = await bridgeGetState()
         if (cancelled) return
-        hydrateCrmFromBridge(snapshot)
-        if (snapshot.connection?.status === 'connecting' || snapshot.connection?.qrBase64) {
-          await bridgeStatus()
-          const again = await bridgeGetState()
-          if (!cancelled) hydrateCrmFromBridge(again)
+        // Nunca promove para connected pelo poll — só atualiza QR/estado
+        hydrateCrmFromBridge({
+          ...snapshot,
+          connection: {
+            ...snapshot.connection,
+            crmOpen: false,
+            status:
+              snapshot.connection?.status === 'connected'
+                ? 'connecting'
+                : snapshot.connection?.status,
+          },
+        })
+        const status = await bridgeStatus()
+        setSessionReady(Boolean(status.sessionReady || status.needsConfirm))
+        const again = await bridgeGetState()
+        if (!cancelled) {
+          hydrateCrmFromBridge({
+            ...again,
+            connection: {
+              ...again.connection,
+              crmOpen: false,
+              status:
+                again.connection?.status === 'connected' ? 'connecting' : again.connection?.status,
+            },
+          })
         }
       } catch (error) {
         if (!cancelled) {
@@ -293,6 +327,25 @@ export function Crm() {
     }
   }
 
+  const onConfirmSession = async () => {
+    if (!live) return
+    setBridgeError(null)
+    setBusy(true)
+    try {
+      const connection = await bridgeConfirmSession()
+      const snapshot = await bridgeGetState()
+      hydrateCrmFromBridge({
+        ...snapshot,
+        connection: { ...snapshot.connection, ...connection, crmOpen: true, status: 'connected' },
+      })
+      setSessionReady(false)
+    } catch (error) {
+      setBridgeError(error instanceof Error ? error.message : 'Falha ao abrir sessão')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const onRefreshQr = async () => {
     if (!live) {
       refreshCrmQr()
@@ -319,6 +372,15 @@ export function Crm() {
       }
     }
     disconnectCrm()
+    setSessionReady(false)
+    if (live) {
+      startCrmConnecting()
+      try {
+        await pullOfficialQr(true)
+      } catch {
+        // QR pode falhar; usuário clica Novo QR
+      }
+    }
   }
 
   const onSync = async () => {
@@ -374,9 +436,12 @@ export function Crm() {
           qrToken={state.qrToken}
           qrBase64={state.qrBase64}
           qrRenderKey={qrRenderKey}
+          sessionReady={sessionReady}
           error={bridgeError || state.lastError}
           onRefreshQr={() => void onRefreshQr()}
           onStart={() => void onStartConnect()}
+          onConfirmSession={() => void onConfirmSession()}
+          onDisconnectSession={() => void onDisconnect()}
         />
       </div>
     )
@@ -542,9 +607,12 @@ function ConnectPanel({
   qrToken,
   qrBase64,
   qrRenderKey,
+  sessionReady,
   error,
   onRefreshQr,
   onStart,
+  onConfirmSession,
+  onDisconnectSession,
 }: {
   status: 'disconnected' | 'connecting'
   busy: boolean
@@ -552,9 +620,12 @@ function ConnectPanel({
   qrToken: string
   qrBase64: string | null
   qrRenderKey: number
+  sessionReady: boolean
   error: string | null
   onRefreshQr: () => void
   onStart: () => void
+  onConfirmSession: () => void
+  onDisconnectSession: () => void
 }) {
   const showFakeQr = mode === 'mock' && !qrBase64
   const showOfficialQr = Boolean(qrBase64)
@@ -573,7 +644,9 @@ function ConnectPanel({
         </h2>
         <p>
           {mode === 'evolution'
-            ? 'O QR oficial aparece à direita e se atualiza sozinho. No celular: WhatsApp → Aparelhos conectados → Conectar um aparelho.'
+            ? sessionReady
+              ? 'Já existe uma sessão WhatsApp ativa na Evolution. O CRM não entra sozinho — confirme abaixo para abrir o pipeline.'
+              : 'Escaneie o QR oficial à direita. O CRM só conecta depois da leitura (ou se você confirmar uma sessão já ativa).'
             : 'Modo demo (simulado). Para WhatsApp real, configure o bridge — veja docs/CRM-EVOLUTION-RAILWAY.md.'}
         </p>
         <ul>
@@ -587,17 +660,47 @@ function ConnectPanel({
             Sem <code>VITE_CRM_BRIDGE_URL</code> o CRM roda em demo. Siga o guia Railway + Evolution para o QR
             real.
           </p>
+        ) : sessionReady ? (
+          <div className="crm__pairing">
+            <p className="crm__note">
+              Sessão detectada na Evolution. Clique em <strong>Abrir CRM com esta sessão</strong> ou
+              desconecte para gerar um QR novo.
+            </p>
+            <div className="crm__pairing-row">
+              <button
+                type="button"
+                className="crm__primary"
+                onClick={onConfirmSession}
+                disabled={busy}
+              >
+                Abrir CRM com esta sessão
+              </button>
+              <button
+                type="button"
+                className="crm__ghost"
+                onClick={onDisconnectSession}
+                disabled={busy}
+              >
+                Desconectar e gerar QR
+              </button>
+            </div>
+          </div>
         ) : (
           <p className="crm__note">
             Escaneie o QR oficial. Ele renova automaticamente a cada 45 segundos. Clique em{' '}
-            <strong>Novo QR</strong> para atualizar agora (o botão trava até a nova imagem aparecer).
+            <strong>Novo QR</strong> para atualizar agora.
           </p>
         )}
       </div>
 
       <div className="crm__qr-card">
         <div className={`crm__qr${busy ? ' is-scanning' : ''}`}>
-          {showOfficialQr ? (
+          {sessionReady && mode === 'evolution' ? (
+            <div className="crm__qr-loading">
+              <CheckCircle2 size={28} strokeWidth={2.25} />
+              <span>Sessão já ativa</span>
+            </div>
+          ) : showOfficialQr ? (
             <>
               <img
                 key={`${qrRenderKey}-${qrBase64!.slice(-24)}`}
@@ -627,19 +730,30 @@ function ConnectPanel({
         </p>
         <div className="crm__qr-actions crm__qr-actions--single">
           {mode === 'evolution' ? (
-            <button
-              type="button"
-              className="crm__primary"
-              onClick={onRefreshQr}
-              disabled={busy || (!showOfficialQr && !error)}
-            >
-              <QrCode size={15} strokeWidth={2.25} />
-              {busy
-                ? 'Aguarde o QR…'
-                : showOfficialQr
-                  ? 'Novo QR'
-                  : 'Tentar de novo'}
-            </button>
+            sessionReady ? (
+              <button
+                type="button"
+                className="crm__primary"
+                onClick={onConfirmSession}
+                disabled={busy}
+              >
+                Abrir CRM com esta sessão
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="crm__primary"
+                onClick={onRefreshQr}
+                disabled={busy || (!showOfficialQr && !error)}
+              >
+                <QrCode size={15} strokeWidth={2.25} />
+                {busy
+                  ? 'Aguarde o QR…'
+                  : showOfficialQr
+                    ? 'Novo QR'
+                    : 'Tentar de novo'}
+              </button>
+            )
           ) : (
             <button
               type="button"

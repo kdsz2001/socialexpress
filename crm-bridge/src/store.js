@@ -27,6 +27,9 @@ function emptyState() {
       qrBase64: null,
       pairingCode: null,
       lastError: null,
+      // Só fica true depois que o usuário confirma no CRM
+      crmOpen: false,
+      evolutionState: null,
     },
     labels: DEFAULT_LABELS,
     leads: [],
