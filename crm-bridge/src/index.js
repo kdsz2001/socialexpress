@@ -13,6 +13,7 @@ import {
   ensureInstance,
   evolutionConfigured,
   fetchConnectionState,
+  fetchPairingCode,
   fetchQr,
   getInstanceName,
   logoutInstance,
@@ -67,6 +68,7 @@ app.post('/api/whatsapp/connect', async (_req, res) => {
     const next = patchConnection({
       status: 'connecting',
       qrBase64: qr.base64,
+      pairingCode: qr.pairingCode || null,
       lastError: qr.base64 ? null : 'QR ainda não disponível — tente de novo em alguns segundos',
     })
     return res.json({ ...next.connection, mode: 'evolution' })
@@ -115,11 +117,51 @@ app.post('/api/whatsapp/qr/refresh', async (_req, res) => {
     const next = patchConnection({
       status: 'connecting',
       qrBase64: qr.base64,
+      pairingCode: qr.pairingCode || null,
       lastError: qr.base64 ? null : 'QR indisponível',
     })
     res.json(next.connection)
   } catch (error) {
     res.status(500).json({ error: error.message })
+  }
+})
+
+app.post('/api/whatsapp/pairing', async (req, res) => {
+  try {
+    if (!evolutionConfigured()) {
+      return res.status(400).json({
+        error: 'Configure EVOLUTION_BASE_URL e EVOLUTION_API_KEY no crm-bridge/.env',
+      })
+    }
+    const phone = req.body?.number || req.body?.phone || ''
+    patchConnection({ status: 'connecting', lastError: null, qrBase64: null, pairingCode: null })
+    await ensureInstance(`${PUBLIC_URL}/api/webhook/evolution`)
+    const result = await fetchPairingCode(phone)
+    if (!result.pairingCode) {
+      const next = patchConnection({
+        status: 'connecting',
+        qrBase64: result.base64,
+        pairingCode: null,
+        accountPhone: result.number,
+        lastError:
+          'Código de pareamento indisponível. Clique em Novo QR ou tente de novo em alguns segundos.',
+      })
+      return res.status(502).json({ error: next.connection.lastError, ...next.connection })
+    }
+    const next = patchConnection({
+      status: 'connecting',
+      pairingCode: result.pairingCode,
+      qrBase64: result.base64,
+      accountPhone: result.number,
+      lastError: null,
+    })
+    return res.json({ ...next.connection, mode: 'evolution' })
+  } catch (error) {
+    patchConnection({
+      status: 'disconnected',
+      lastError: error.message || 'Falha ao gerar pairing code',
+    })
+    return res.status(500).json({ error: error.message || 'Falha ao gerar pairing code' })
   }
 })
 
@@ -135,6 +177,7 @@ app.post('/api/whatsapp/disconnect', async (_req, res) => {
     accountName: '',
     accountPhone: '',
     qrBase64: null,
+    pairingCode: null,
   })
   res.json(next.connection)
 })

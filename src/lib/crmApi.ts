@@ -14,6 +14,7 @@ export type BridgeConnection = {
   connectedAt?: number | null
   lastSyncAt?: number | null
   qrBase64?: string | null
+  pairingCode?: string | null
   lastError?: string | null
   mode?: string
 }
@@ -70,6 +71,13 @@ export async function bridgeStatus() {
 
 export async function bridgeRefreshQr() {
   return bridgeFetch<BridgeConnection>('/api/whatsapp/qr/refresh', { method: 'POST' })
+}
+
+export async function bridgePairing(number: string) {
+  return bridgeFetch<BridgeConnection>('/api/whatsapp/pairing', {
+    method: 'POST',
+    body: JSON.stringify({ number }),
+  })
 }
 
 export async function bridgeDisconnect() {

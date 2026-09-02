@@ -15,6 +15,7 @@ import {
   bridgeCreateBackup,
   bridgeDisconnect,
   bridgeGetState,
+  bridgePairing,
   bridgeRefreshQr,
   bridgeSetLeadLabel,
   bridgeStatus,
@@ -62,6 +63,7 @@ export function Crm() {
   const [demoText, setDemoText] = useState('')
   const [busy, setBusy] = useState(false)
   const [bridgeError, setBridgeError] = useState<string | null>(null)
+  const [phoneInput, setPhoneInput] = useState('')
 
   useEffect(() => {
     if (live) return
@@ -177,6 +179,25 @@ export function Crm() {
     }
   }
 
+  const onPairing = async () => {
+    if (!live) return
+    setBridgeError(null)
+    setBusy(true)
+    startCrmConnecting()
+    try {
+      const connection = await bridgePairing(phoneInput)
+      const snapshot = await bridgeGetState()
+      hydrateCrmFromBridge({
+        ...snapshot,
+        connection: { ...snapshot.connection, ...connection },
+      })
+    } catch (error) {
+      setBridgeError(error instanceof Error ? error.message : 'Falha ao gerar código')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const onDisconnect = async () => {
     if (live) {
       try {
@@ -228,9 +249,13 @@ export function Crm() {
           mode={live ? 'evolution' : 'mock'}
           qrToken={state.qrToken}
           qrBase64={state.qrBase64}
+          pairingCode={state.pairingCode}
+          phoneInput={phoneInput}
+          onPhoneChange={setPhoneInput}
           error={bridgeError || state.lastError}
           onRefreshQr={() => void onRefreshQr()}
           onStart={() => void onStartConnect()}
+          onPairing={() => void onPairing()}
         />
       </div>
     )
@@ -389,17 +414,25 @@ function ConnectPanel({
   mode,
   qrToken,
   qrBase64,
+  pairingCode,
+  phoneInput,
+  onPhoneChange,
   error,
   onRefreshQr,
   onStart,
+  onPairing,
 }: {
   status: 'disconnected' | 'connecting'
   mode: 'mock' | 'evolution'
   qrToken: string
   qrBase64: string | null
+  pairingCode: string | null
+  phoneInput: string
+  onPhoneChange: (value: string) => void
   error: string | null
   onRefreshQr: () => void
   onStart: () => void
+  onPairing: () => void
 }) {
   return (
     <section className="crm__connect">
@@ -415,7 +448,7 @@ function ConnectPanel({
         </h2>
         <p>
           {mode === 'evolution'
-            ? 'Escaneie o QR gerado pela Evolution API. Depois de conectar 1x, a sessão fica no servidor e o CRM recebe as mensagens via webhook.'
+            ? 'Use o QR ou o código de pareamento. Depois de conectar 1x, a sessão fica no servidor e o CRM recebe as mensagens via webhook.'
             : 'Modo demo (simulado). Para WhatsApp real, configure o bridge — veja docs/CRM-EVOLUTION-RAILWAY.md.'}
         </p>
         <ul>
@@ -430,9 +463,40 @@ function ConnectPanel({
             real.
           </p>
         ) : (
-          <p className="crm__note">
-            No celular: WhatsApp → Aparelhos conectados → Conectar um aparelho → ler este QR.
-          </p>
+          <div className="crm__pairing">
+            <p className="crm__note">
+              Se o QR falhar no celular, use o código: WhatsApp → Aparelhos conectados → Conectar um
+              aparelho → <strong>Conectar com número de telefone</strong>.
+            </p>
+            <label className="crm__pairing-label" htmlFor="crm-pairing-phone">
+              Seu WhatsApp (com DDD)
+            </label>
+            <div className="crm__pairing-row">
+              <input
+                id="crm-pairing-phone"
+                className="crm__pairing-input"
+                inputMode="tel"
+                placeholder="11999999999"
+                value={phoneInput}
+                onChange={(event) => onPhoneChange(event.target.value)}
+                disabled={status === 'connecting'}
+              />
+              <button
+                type="button"
+                className="crm__ghost"
+                onClick={onPairing}
+                disabled={status === 'connecting' || !phoneInput.trim()}
+              >
+                Gerar código
+              </button>
+            </div>
+            {pairingCode ? (
+              <div className="crm__pairing-code" aria-live="polite">
+                <span>Código</span>
+                <strong>{pairingCode}</strong>
+              </div>
+            ) : null}
+          </div>
         )}
       </div>
 
@@ -440,13 +504,18 @@ function ConnectPanel({
         <div className={`crm__qr${status === 'connecting' ? ' is-scanning' : ''}`} aria-hidden="true">
           {qrBase64 ? (
             <img src={qrBase64} alt="QR Code WhatsApp" className="crm__qr-image" />
+          ) : pairingCode ? (
+            <div className="crm__qr-pairing-only">
+              <strong>{pairingCode}</strong>
+              <span>Digite no celular</span>
+            </div>
           ) : (
             <QrPattern token={qrToken} />
           )}
-          {status === 'connecting' && !qrBase64 ? (
+          {status === 'connecting' && !qrBase64 && !pairingCode ? (
             <div className="crm__qr-overlay">
               <RefreshCcw size={22} strokeWidth={2.25} className="is-spin" />
-              Gerando QR…
+              Gerando…
             </div>
           ) : null}
         </div>
@@ -470,9 +539,9 @@ function ConnectPanel({
             disabled={status === 'connecting'}
           >
             {status === 'connecting'
-              ? 'Aguardando leitura…'
+              ? 'Aguardando…'
               : mode === 'evolution'
-                ? 'Conectar WhatsApp (Evolution)'
+                ? 'Conectar com QR'
                 : 'Simular leitura do QR'}
           </button>
         </div>

@@ -64,6 +64,7 @@ export type CrmState = {
   accountPhone: string
   qrToken: string
   qrBase64: string | null
+  pairingCode: string | null
   connectionMode: 'mock' | 'evolution'
   lastError: string | null
   labels: CrmLabel[]
@@ -103,6 +104,7 @@ function emptyState(): CrmState {
     accountPhone: '',
     qrToken: createQrToken(),
     qrBase64: null,
+    pairingCode: null,
     connectionMode: 'mock',
     lastError: null,
     labels: DEFAULT_LABELS.map((item) => ({ ...item })),
@@ -132,6 +134,7 @@ function normalizeState(raw: unknown): CrmState {
     accountPhone: typeof item.accountPhone === 'string' ? item.accountPhone : '',
     qrToken: typeof item.qrToken === 'string' ? item.qrToken : createQrToken(),
     qrBase64: typeof item.qrBase64 === 'string' ? item.qrBase64 : null,
+    pairingCode: typeof item.pairingCode === 'string' ? item.pairingCode : null,
     connectionMode: item.connectionMode === 'evolution' ? 'evolution' : 'mock',
     lastError: typeof item.lastError === 'string' ? item.lastError : null,
     labels: Array.isArray(item.labels) && item.labels.length ? item.labels : base.labels,
@@ -215,6 +218,7 @@ export function disconnectCrm() {
     accountPhone: '',
     qrToken: createQrToken(),
     qrBase64: null,
+    pairingCode: null,
     lastError: null,
   })
 }
@@ -228,6 +232,7 @@ export function hydrateCrmFromBridge(payload: {
     connectedAt: number | null
     lastSyncAt: number | null
     qrBase64: string | null
+    pairingCode: string | null
     lastError: string | null
   }>
   labels?: CrmLabel[]
@@ -247,6 +252,8 @@ export function hydrateCrmFromBridge(payload: {
         connection.connectedAt === undefined ? current.connectedAt : connection.connectedAt,
       lastSyncAt: connection.lastSyncAt ?? current.lastSyncAt ?? Date.now(),
       qrBase64: connection.qrBase64 === undefined ? current.qrBase64 : connection.qrBase64,
+      pairingCode:
+        connection.pairingCode === undefined ? current.pairingCode : connection.pairingCode,
       lastError: connection.lastError === undefined ? current.lastError : connection.lastError,
       labels: payload.labels?.length ? payload.labels : current.labels,
       leads: Array.isArray(payload.leads) ? payload.leads : current.leads,

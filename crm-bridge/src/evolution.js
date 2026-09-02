@@ -49,10 +49,7 @@ export async function ensureInstance(webhookUrl) {
   const name = INSTANCE()
   try {
     await evoFetch(`/instance/connectionState/${encodeURIComponent(name)}`)
-  } catch (error) {
-    if (error.status !== 404) {
-      // tenta criar mesmo assim se não existir
-    }
+  } catch {
     try {
       await evoFetch('/instance/create', {
         method: 'POST',
@@ -112,18 +109,92 @@ export async function ensureInstance(webhookUrl) {
   return name
 }
 
-export async function fetchQr() {
-  const name = INSTANCE()
-  const data = await evoFetch(`/instance/connect/${encodeURIComponent(name)}`)
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function normalizePhone(number) {
+  const digits = String(number || '').replace(/\D/g, '')
+  if (!digits) return ''
+  // BR: se veio sem DDI, prefixa 55
+  if (digits.length >= 10 && digits.length <= 11) return `55${digits}`
+  return digits
+}
+
+function extractQrBase64(data) {
   const base64 =
     data?.base64 ||
     data?.qrcode?.base64 ||
     data?.qrcode?.code ||
-    data?.code ||
+    (typeof data?.code === 'string' && data.code.startsWith('data:') ? data.code : null) ||
     null
+  if (!base64 || typeof base64 !== 'string') return null
+  return base64.startsWith('data:') ? base64 : `data:image/png;base64,${base64}`
+}
+
+function extractPairingCode(data) {
+  const code =
+    data?.pairingCode ||
+    data?.qrcode?.pairingCode ||
+    data?.pair?.code ||
+    null
+  return typeof code === 'string' && code.trim() ? code.trim().toUpperCase() : null
+}
+
+export async function fetchQr() {
+  const name = INSTANCE()
+  let data = await evoFetch(`/instance/connect/${encodeURIComponent(name)}`)
+  let base64 = extractQrBase64(data)
+  // Evolution às vezes demora 1–3s para montar o QR
+  for (let i = 0; !base64 && i < 4; i += 1) {
+    await sleep(1500)
+    data = await evoFetch(`/instance/connect/${encodeURIComponent(name)}`)
+    base64 = extractQrBase64(data)
+  }
   return {
     raw: data,
-    base64: typeof base64 === 'string' && base64.startsWith('data:') ? base64 : base64 ? `data:image/png;base64,${base64}` : null,
+    base64,
+    pairingCode: extractPairingCode(data),
+  }
+}
+
+/** Gera código de pareamento (WhatsApp → Conectar com número). */
+export async function fetchPairingCode(phoneNumber) {
+  const name = INSTANCE()
+  const number = normalizePhone(phoneNumber)
+  if (!number || number.length < 12) {
+    throw new Error('Informe o WhatsApp com DDD (ex: 11999999999 ou 5511999999999)')
+  }
+
+  // Se a instância ficou "connecting" no QR, pairing code não sai — reinicia sessão
+  try {
+    const state = await fetchConnectionState()
+    if (state.state === 'connecting' || state.state === 'open') {
+      await logoutInstance()
+      await sleep(1200)
+    }
+  } catch {
+    // segue mesmo assim
+  }
+
+  await ensureInstance()
+  let data = await evoFetch(
+    `/instance/connect/${encodeURIComponent(name)}?number=${encodeURIComponent(number)}`,
+  )
+  let pairingCode = extractPairingCode(data)
+  for (let i = 0; !pairingCode && i < 4; i += 1) {
+    await sleep(1500)
+    data = await evoFetch(
+      `/instance/connect/${encodeURIComponent(name)}?number=${encodeURIComponent(number)}`,
+    )
+    pairingCode = extractPairingCode(data)
+  }
+
+  return {
+    raw: data,
+    pairingCode,
+    base64: extractQrBase64(data),
+    number,
   }
 }
 

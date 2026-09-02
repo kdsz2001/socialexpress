@@ -13,6 +13,7 @@ function getServerSnapshot(): CrmState {
     accountPhone: '',
     qrToken: 'server',
     qrBase64: null,
+    pairingCode: null,
     connectionMode: 'mock',
     lastError: null,
     labels: [],

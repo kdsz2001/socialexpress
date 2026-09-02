@@ -25,6 +25,7 @@ function emptyState() {
       connectedAt: null,
       lastSyncAt: null,
       qrBase64: null,
+      pairingCode: null,
       lastError: null,
     },
     labels: DEFAULT_LABELS,

@@ -67,6 +67,82 @@
   font-size: 0.9rem !important;
 }
 
+.crm__pairing {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.crm__pairing-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #3f4254;
+}
+
+.crm__pairing-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.crm__pairing-input {
+  flex: 1 1 160px;
+  min-width: 0;
+  height: 2.35rem;
+  padding: 0 0.75rem;
+  border: 1px solid #e4e6ef;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  color: #181c32;
+  background: #fff;
+}
+
+.crm__pairing-code {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+  background: #e8fff3;
+  border: 1px solid #c9f7e5;
+}
+
+.crm__pairing-code span {
+  font-size: 0.75rem;
+  color: #0bb783;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.crm__pairing-code strong {
+  font-size: 1.65rem;
+  letter-spacing: 0.18em;
+  color: #0a7a58;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.crm__qr-pairing-only {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.crm__qr-pairing-only strong {
+  font-size: 1.5rem;
+  letter-spacing: 0.16em;
+  color: #181c32;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.crm__qr-pairing-only span {
+  font-size: 0.8rem;
+  color: #7e8299;
+}
+
 .crm__qr-card {
   display: flex;
   flex-direction: column;
