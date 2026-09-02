@@ -189,34 +189,28 @@ export function Crm() {
 
     const pullStatus = async () => {
       try {
+        const status = await bridgeStatus()
+        if (cancelled) return
+        // Só pede confirmação em sessão antiga (sem QR lido nesta tela)
+        setSessionReady(Boolean(status.needsConfirm))
+
         const snapshot = await bridgeGetState()
         if (cancelled) return
-        // Nunca promove para connected pelo poll — só atualiza QR/estado
+
+        // Confia no bridge: após QR → connected; sessão antiga → connecting + needsConfirm
         hydrateCrmFromBridge({
           ...snapshot,
           connection: {
             ...snapshot.connection,
-            crmOpen: false,
-            status:
-              snapshot.connection?.status === 'connected'
-                ? 'connecting'
-                : snapshot.connection?.status,
+            ...status,
+            crmOpen: Boolean(status.crmOpen),
+            status: status.needsConfirm
+              ? 'connecting'
+              : status.status === 'connected'
+                ? 'connected'
+                : status.status || snapshot.connection?.status || 'connecting',
           },
         })
-        const status = await bridgeStatus()
-        setSessionReady(Boolean(status.sessionReady || status.needsConfirm))
-        const again = await bridgeGetState()
-        if (!cancelled) {
-          hydrateCrmFromBridge({
-            ...again,
-            connection: {
-              ...again.connection,
-              crmOpen: false,
-              status:
-                again.connection?.status === 'connected' ? 'connecting' : again.connection?.status,
-            },
-          })
-        }
       } catch (error) {
         if (!cancelled) {
           setBridgeError(error instanceof Error ? error.message : 'Bridge offline')
@@ -243,7 +237,7 @@ export function Crm() {
     }
   }, [live, state.status])
 
-  // Ao conectar, puxa conversas 1x automaticamente e tenta de novo a cada 60s
+  // Conectado: busca só mensagens novas a cada 20s (sem histórico antigo)
   useEffect(() => {
     if (!live) return
     if (state.status !== 'connected') {
@@ -255,19 +249,14 @@ export function Crm() {
       try {
         const synced = await bridgeSyncConversations()
         hydrateCrmFromBridge(synced)
-        if (!silent && !synced.importedChats) {
-          setBridgeError(
-            synced.tip ||
-              'Histórico ainda não chegou da Evolution. Deixe o WhatsApp aberto no celular e tente Sincronizar.',
-          )
-        }
-        if (synced.importedChats) setBridgeError(null)
+        if (!silent && synced.importedChats) setBridgeError(null)
+        // Vazio não é erro — só aguardando mensagens novas
       } catch (error) {
         if (!silent) {
           setBridgeError(
             error instanceof Error
               ? error.message
-              : 'Conectou, mas não consegui puxar as conversas. Clique em Sincronizar.',
+              : 'Conectou. Se novas mensagens não aparecerem, clique em Atualizar.',
           )
         }
       }
@@ -275,12 +264,12 @@ export function Crm() {
 
     if (!didSyncRef.current) {
       didSyncRef.current = true
-      void runSync(false)
+      void runSync(true)
     }
 
     const timer = window.setInterval(() => {
       void runSync(true)
-    }, 60000)
+    }, 20000)
 
     return () => window.clearInterval(timer)
   }, [live, state.status])
@@ -397,11 +386,11 @@ export function Crm() {
       if (!synced.importedChats) {
         setBridgeError(
           synced.tip ||
-            'Nenhuma conversa veio ainda. No celular o histórico da Evolution pode estar Pausado/Sincronizando — deixe o WhatsApp aberto e clique Sincronizar de novo.',
+            'Sem mensagens novas ainda. Peça para alguém te mandar um WhatsApp e aguarde ~20s.',
         )
       }
     } catch (error) {
-      setBridgeError(error instanceof Error ? error.message : 'Falha ao sincronizar')
+      setBridgeError(error instanceof Error ? error.message : 'Falha ao buscar mensagens novas')
     } finally {
       setSyncing(false)
     }
@@ -493,7 +482,7 @@ export function Crm() {
               disabled={syncing}
             >
               <RefreshCcw size={14} strokeWidth={2.25} className={syncing ? 'is-spin' : undefined} />
-              {syncing ? 'Sincronizando…' : 'Sincronizar'}
+              {syncing ? 'Buscando…' : 'Atualizar'}
             </button>
             <button type="button" className="crm__danger" onClick={() => void onDisconnect()}>
               <Unplug size={14} strokeWidth={2.25} />
@@ -646,7 +635,7 @@ function ConnectPanel({
           {mode === 'evolution'
             ? sessionReady
               ? 'Já existe uma sessão WhatsApp ativa na Evolution. O CRM não entra sozinho — confirme abaixo para abrir o pipeline.'
-              : 'Escaneie o QR oficial à direita. O CRM só conecta depois da leitura (ou se você confirmar uma sessão já ativa).'
+              : 'Escaneie o QR oficial à direita. Depois da leitura o CRM abre e passa a capturar só mensagens novas (sem histórico antigo).'
             : 'Modo demo (simulado). Para WhatsApp real, configure o bridge — veja docs/CRM-EVOLUTION-RAILWAY.md.'}
         </p>
         <ul>

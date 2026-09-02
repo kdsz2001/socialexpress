@@ -27,8 +27,9 @@ function emptyState() {
       qrBase64: null,
       pairingCode: null,
       lastError: null,
-      // Só fica true depois que o usuário confirma no CRM
+      // Só fica true depois que o usuário confirma no CRM ou lê o QR nesta tela
       crmOpen: false,
+      awaitingQrScan: false,
       evolutionState: null,
     },
     labels: DEFAULT_LABELS,

@@ -52,15 +52,16 @@ app.post('/api/whatsapp/connect', async (_req, res) => {
     }
 
     const previousQr = readBridgeState().connection?.qrBase64 || null
-    patchConnection({ status: 'connecting', lastError: null, crmOpen: false })
+    patchConnection({ status: 'connecting', lastError: null, crmOpen: false, awaitingQrScan: false })
     await ensureInstance(`${PUBLIC_URL}/api/webhook/evolution`)
     const state = await fetchConnectionState()
 
-    // Sessão já existe na Evolution: NÃO abre o CRM sozinho
+    // Sessão já existe: pede confirmação (não abre sozinho)
     if (state.state === 'open') {
       const next = patchConnection({
         status: 'connecting',
         crmOpen: false,
+        awaitingQrScan: false,
         evolutionState: 'open',
         qrBase64: null,
         pairingCode: null,
@@ -80,6 +81,7 @@ app.post('/api/whatsapp/connect', async (_req, res) => {
     const next = patchConnection({
       status: 'connecting',
       crmOpen: false,
+      awaitingQrScan: true,
       evolutionState: state.state,
       qrBase64,
       pairingCode: qr.pairingCode || null,
@@ -95,6 +97,7 @@ app.post('/api/whatsapp/connect', async (_req, res) => {
     patchConnection({
       status: 'disconnected',
       crmOpen: false,
+      awaitingQrScan: false,
       lastError: error.message || 'Falha ao conectar Evolution',
     })
     return res.status(500).json({ error: error.message || 'Falha ao conectar' })
@@ -116,6 +119,7 @@ app.post('/api/whatsapp/confirm-session', async (_req, res) => {
     const next = patchConnection({
       status: 'connected',
       crmOpen: true,
+      awaitingQrScan: false,
       evolutionState: 'open',
       connectedAt: Date.now(),
       qrBase64: null,
@@ -139,14 +143,18 @@ app.get('/api/whatsapp/status', async (_req, res) => {
     const state = await fetchConnectionState()
 
     if (state.state === 'open') {
-      // Só marca connected se o usuário já abriu o CRM nesta sessão
-      if (current.crmOpen) {
+      // Leu o QR nesta tela OU já confirmou → abre CRM
+      if (current.awaitingQrScan || current.crmOpen) {
         const next = patchConnection({
           status: 'connected',
+          crmOpen: true,
+          awaitingQrScan: false,
           evolutionState: 'open',
           connectedAt: current.connectedAt || Date.now(),
           qrBase64: null,
           pairingCode: null,
+          accountName: 'WhatsApp conectado',
+          lastError: null,
         })
         return res.json({
           ...next.connection,
@@ -156,11 +164,13 @@ app.get('/api/whatsapp/status', async (_req, res) => {
           needsConfirm: false,
         })
       }
+      // Sessão antiga sem leitura nesta tela
       const next = patchConnection({
         status: 'connecting',
         evolutionState: 'open',
         qrBase64: null,
         crmOpen: false,
+        awaitingQrScan: false,
       })
       return res.json({
         ...next.connection,
@@ -184,6 +194,7 @@ app.get('/api/whatsapp/status', async (_req, res) => {
       const next = patchConnection({
         status: 'connecting',
         crmOpen: false,
+        awaitingQrScan: true,
         evolutionState: 'connecting',
         qrBase64: qrBase64 || current.qrBase64,
       })
@@ -199,6 +210,7 @@ app.get('/api/whatsapp/status', async (_req, res) => {
     const next = patchConnection({
       status: current.qrBase64 ? 'connecting' : 'disconnected',
       crmOpen: false,
+      awaitingQrScan: Boolean(current.qrBase64),
       evolutionState: state.state,
     })
     return res.json({
@@ -223,11 +235,12 @@ app.post('/api/whatsapp/qr/refresh', async (_req, res) => {
       return res.status(400).json({ error: 'Evolution não configurada' })
     }
     const previousQr = readBridgeState().connection?.qrBase64 || null
-    // Mantém o QR antigo na tela até o novo chegar (evita ficar preso em "Gerando...")
     patchConnection({
       status: 'connecting',
       lastError: null,
       pairingCode: null,
+      crmOpen: false,
+      awaitingQrScan: true,
     })
 
     const qr = await refreshQrFast(`${PUBLIC_URL}/api/webhook/evolution`, previousQr)
@@ -235,6 +248,7 @@ app.post('/api/whatsapp/qr/refresh', async (_req, res) => {
       const next = patchConnection({
         status: 'connecting',
         qrBase64: previousQr,
+        awaitingQrScan: true,
         lastError: 'Não foi possível gerar um QR novo. Tente novamente.',
       })
       return res.status(502).json({ error: next.connection.lastError, ...next.connection })
@@ -242,6 +256,8 @@ app.post('/api/whatsapp/qr/refresh', async (_req, res) => {
 
     const next = patchConnection({
       status: 'connecting',
+      crmOpen: false,
+      awaitingQrScan: true,
       qrBase64: qr.base64,
       pairingCode: qr.pairingCode || null,
       lastError: null,
@@ -256,6 +272,7 @@ app.post('/api/whatsapp/qr/refresh', async (_req, res) => {
     const previousQr = readBridgeState().connection?.qrBase64 || null
     patchConnection({
       qrBase64: previousQr,
+      awaitingQrScan: true,
       lastError: error.message || 'Falha ao renovar QR',
     })
     res.status(500).json({ error: error.message })
@@ -309,12 +326,14 @@ app.post('/api/whatsapp/disconnect', async (_req, res) => {
   const next = patchConnection({
     status: 'disconnected',
     crmOpen: false,
+    awaitingQrScan: false,
     evolutionState: null,
     connectedAt: null,
     accountName: '',
     accountPhone: '',
     qrBase64: null,
     pairingCode: null,
+    lastError: null,
   })
   res.json(next.connection)
 })
@@ -337,7 +356,14 @@ app.post('/api/whatsapp/sync', async (_req, res) => {
       })
     }
 
-    const result = await syncRecentConversations({ maxChats: 50, maxMessages: 25 })
+    // Só mensagens novas a partir da conexão (não puxa histórico antigo)
+    const sinceMs = (current.connectedAt || Date.now()) - 60_000
+    const result = await syncRecentConversations({
+      maxChats: 30,
+      maxMessages: 20,
+      sinceMs,
+      includeContacts: false,
+    })
     const conversations = result.imported || []
     const stats = result.stats || {}
     importConversations(conversations)
@@ -347,13 +373,15 @@ app.post('/api/whatsapp/sync', async (_req, res) => {
       lastError: null,
       accountName: 'WhatsApp conectado',
     })
-    createBackup(`Sync WhatsApp (${conversations.length} conversas)`)
+    if (conversations.length) {
+      createBackup(`Sync novas msgs (${conversations.length} conversas)`)
+    }
     const fresh = readBridgeState()
 
     let tip = null
     if (!conversations.length) {
       tip =
-        'Nenhuma conversa veio da Evolution. No celular: Aparelhos conectados → Evolution API → Histórico de conversas. Se estiver "Pausado" ou "Sincronizando", deixe o WhatsApp aberto no Wi‑Fi até terminar e clique Sincronizar de novo. Mensagens novas também passam a aparecer depois disso.'
+        'Conectado. Sem mensagens novas ainda — quando alguém falar no WhatsApp, o lead aparece aqui (atualiza sozinho a cada ~20s).'
     }
 
     return res.json({
@@ -409,28 +437,39 @@ app.post('/api/webhook/evolution', (req, res) => {
       const state = String(data?.state || data?.status || '').toLowerCase()
       if (state === 'open') {
         const current = readBridgeState().connection
-        // Webhook NÃO abre o CRM sozinho — só marca que a sessão Evolution está pronta
-        if (current.crmOpen) {
+        // Abre CRM se leu QR nesta tela OU já estava aberto; sessão antiga pede confirmação
+        if (current.crmOpen || current.awaitingQrScan) {
+          const connectedAt = current.connectedAt || Date.now()
           patchConnection({
             status: 'connected',
-            connectedAt: current.connectedAt || Date.now(),
+            crmOpen: true,
+            awaitingQrScan: false,
+            connectedAt,
             qrBase64: null,
             evolutionState: 'open',
             accountName: 'WhatsApp conectado',
           })
           createBackup('Backup automático CONNECTION_UPDATE')
-          void syncRecentConversations({ maxChats: 50, maxMessages: 25 })
+          const sinceMs = connectedAt - 60_000
+          void syncRecentConversations({
+            maxChats: 30,
+            maxMessages: 20,
+            sinceMs,
+            includeContacts: false,
+          })
             .then((result) => {
               const conversations = result.imported || []
+              if (!conversations.length) return
               importConversations(conversations)
               patchConnection({ lastSyncAt: Date.now() })
-              createBackup(`Sync automático (${conversations.length} conversas)`)
+              createBackup(`Sync novas msgs (${conversations.length})`)
             })
             .catch(() => {})
         } else {
           patchConnection({
             status: 'connecting',
             crmOpen: false,
+            awaitingQrScan: false,
             evolutionState: 'open',
             qrBase64: null,
             accountName: 'Sessão WhatsApp pronta — confirme no CRM',
@@ -440,15 +479,24 @@ app.post('/api/webhook/evolution', (req, res) => {
         patchConnection({
           status: 'disconnected',
           crmOpen: false,
+          awaitingQrScan: false,
           evolutionState: 'close',
           qrBase64: null,
         })
       } else if (state === 'connecting') {
-        patchConnection({ status: 'connecting', evolutionState: 'connecting', crmOpen: false })
+        patchConnection({
+          status: 'connecting',
+          evolutionState: 'connecting',
+          crmOpen: false,
+        })
       }
     }
 
     if (event.includes('MESSAGES_UPSERT') || event.includes('MESSAGES.UPSERT')) {
+      const current = readBridgeState().connection
+      if (!current.crmOpen) {
+        return res.json({ ok: true, skipped: 'crm_closed' })
+      }
       const payload = data?.key ? data : data?.messages?.[0] || data?.message || data
       const list = Array.isArray(data?.messages) ? data.messages : [payload]
       for (const item of list) {

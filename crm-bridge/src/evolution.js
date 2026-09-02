@@ -385,10 +385,18 @@ function jidPhone(jid) {
     .replace(/\D/g, '')
 }
 
-/** Importa conversas/contatos recentes do WhatsApp (sem grupos). */
-export async function syncRecentConversations({ maxChats = 50, maxMessages = 25 } = {}) {
+/**
+ * Puxa atividade recente do WhatsApp (sem grupos).
+ * Com sinceMs: só mensagens novas (não importa histórico antigo).
+ */
+export async function syncRecentConversations({
+  maxChats = 40,
+  maxMessages = 20,
+  sinceMs = null,
+  includeContacts = false,
+} = {}) {
   const chats = await findChats()
-  const contacts = await findContacts()
+  const contacts = includeContacts ? await findContacts() : []
 
   const byPhone = new Map()
 
@@ -397,6 +405,11 @@ export async function syncRecentConversations({ maxChats = 50, maxMessages = 25 
     if (!isIndividualJid(remoteJid)) continue
     const phone = jidPhone(remoteJid)
     if (!phone || phone.length < 10) continue
+    // Em modo "só novas", ignora chats sem atividade recente
+    if (sinceMs) {
+      const lastAt = messageTimestampMs(chat?.lastMessage || chat)
+      if (lastAt < sinceMs - 120000) continue
+    }
     byPhone.set(phone, {
       remoteJid: remoteJid.includes('@') ? remoteJid : `${phone}@s.whatsapp.net`,
       pushName: chat?.pushName || chat?.name || chat?.notify || '',
@@ -405,21 +418,23 @@ export async function syncRecentConversations({ maxChats = 50, maxMessages = 25 
     })
   }
 
-  for (const contact of contacts) {
-    const remoteJid = contact?.remoteJid || contact?.id || contact?.whatsappId || ''
-    if (!isIndividualJid(remoteJid)) continue
-    const phone = jidPhone(remoteJid)
-    if (!phone || phone.length < 10) continue
-    const current = byPhone.get(phone)
-    if (!current) {
-      byPhone.set(phone, {
-        remoteJid: remoteJid.includes('@') ? remoteJid : `${phone}@s.whatsapp.net`,
-        pushName: contact?.pushName || contact?.name || contact?.notify || '',
-        chat: contact,
-        messagesRaw: [],
-      })
-    } else if (!current.pushName) {
-      current.pushName = contact?.pushName || contact?.name || contact?.notify || current.pushName
+  if (includeContacts) {
+    for (const contact of contacts) {
+      const remoteJid = contact?.remoteJid || contact?.id || contact?.whatsappId || ''
+      if (!isIndividualJid(remoteJid)) continue
+      const phone = jidPhone(remoteJid)
+      if (!phone || phone.length < 10) continue
+      const current = byPhone.get(phone)
+      if (!current) {
+        byPhone.set(phone, {
+          remoteJid: remoteJid.includes('@') ? remoteJid : `${phone}@s.whatsapp.net`,
+          pushName: contact?.pushName || contact?.name || contact?.notify || '',
+          chat: contact,
+          messagesRaw: [],
+        })
+      } else if (!current.pushName) {
+        current.pushName = contact?.pushName || contact?.name || contact?.notify || current.pushName
+      }
     }
   }
 
@@ -448,21 +463,26 @@ export async function syncRecentConversations({ maxChats = 50, maxMessages = 25 
         const text = extractTextFromMessage(item)
         if (!text) return null
         const phone = jidPhone(entry.remoteJid)
+        const at = messageTimestampMs(item)
+        if (sinceMs && at < sinceMs) return null
         return {
           id:
             item?.key?.id ||
             item?.id ||
-            `msg-${phone}-${messageTimestampMs(item)}-${Math.random().toString(36).slice(2, 6)}`,
+            `msg-${phone}-${at}-${Math.random().toString(36).slice(2, 6)}`,
           phone,
           pushName: entry.pushName || item?.pushName || '',
           text,
           fromMe: Boolean(item?.key?.fromMe ?? item?.fromMe),
-          at: messageTimestampMs(item),
+          at,
         }
       })
       .filter(Boolean)
       .sort((a, b) => a.at - b.at)
       .slice(-maxMessages)
+
+    // Sem mensagens novas → não cria lead (modo histórico antigo desligado)
+    if (!normalized.length) continue
 
     imported.push({
       phone: jidPhone(entry.remoteJid),
@@ -482,6 +502,7 @@ export async function syncRecentConversations({ maxChats = 50, maxMessages = 25 
       individualFound: byPhone.size,
       importedChats: imported.length,
       importedMessages: imported.reduce((sum, item) => sum + (item.messages?.length || 0), 0),
+      sinceMs: sinceMs || null,
     },
   }
 }
