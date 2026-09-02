@@ -67,12 +67,11 @@ export function Crm() {
   const qrFetchRef = useRef(false)
 
   const pullOfficialQr = async (forceNew: boolean) => {
-    // Clique em Novo QR sempre entra; refresh automático só se estiver livre
-    if (qrFetchRef.current && !forceNew) return
+    // Enquanto gera, não aceita outro clique/refresh
+    if (qrFetchRef.current) return null
     qrFetchRef.current = true
     try {
       if (forceNew) {
-        // Some a imagem antiga imediatamente
         hydrateCrmFromBridge({
           connection: {
             status: 'connecting',
@@ -92,14 +91,16 @@ export function Crm() {
       })
       if (connection.qrBase64) {
         setQrRenderKey((key) => key + 1)
+        setBridgeError(null)
+      } else if (connection.lastError) {
+        setBridgeError(String(connection.lastError))
       }
-      setBridgeError(null)
       return connection
     } catch (error) {
       throw error
     } finally {
       qrFetchRef.current = false
-      if (forceNew) setBusy(false)
+      setBusy(false)
     }
   }
 
@@ -176,9 +177,8 @@ export function Crm() {
     }
 
     const refreshQrSoft = async () => {
-      if (cancelled) return
+      if (cancelled || busy || qrFetchRef.current || !state.qrBase64) return
       try {
-        // Força QR novo também no automático, para a imagem mudar
         await pullOfficialQr(true)
       } catch {
         // ignore soft refresh errors
@@ -242,6 +242,9 @@ export function Crm() {
       refreshCrmQr()
       return
     }
+    // Bloqueado enquanto gera; só libera novo clique com QR na tela (ou para tentar de novo após erro)
+    if (busy || qrFetchRef.current) return
+    if (!state.qrBase64 && !(bridgeError || state.lastError)) return
     setBridgeError(null)
     startCrmConnecting()
     try {
@@ -544,9 +547,18 @@ function ConnectPanel({
         </p>
         <div className="crm__qr-actions crm__qr-actions--single">
           {mode === 'evolution' ? (
-            <button type="button" className="crm__primary" onClick={onRefreshQr}>
+            <button
+              type="button"
+              className="crm__primary"
+              onClick={onRefreshQr}
+              disabled={busy || (!showOfficialQr && !error)}
+            >
               <QrCode size={15} strokeWidth={2.25} />
-              Novo QR
+              {busy || (!showOfficialQr && !error)
+                ? 'Aguarde o QR…'
+                : showOfficialQr
+                  ? 'Novo QR'
+                  : 'Tentar de novo'}
             </button>
           ) : (
             <button

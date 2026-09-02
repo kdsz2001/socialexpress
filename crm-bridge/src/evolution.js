@@ -154,9 +154,9 @@ export async function fetchQr() {
   const name = INSTANCE()
   let data = await evoFetch(`/instance/connect/${encodeURIComponent(name)}`)
   let base64 = extractQrBase64(data)
-  // Evolution às vezes demora 1–3s para montar o QR
-  for (let i = 0; !base64 && i < 4; i += 1) {
-    await sleep(1500)
+  // Evolution às vezes demora 1–2s para montar o QR
+  for (let i = 0; !base64 && i < 2; i += 1) {
+    await sleep(900)
     data = await evoFetch(`/instance/connect/${encodeURIComponent(name)}`)
     base64 = extractQrBase64(data)
   }
@@ -246,14 +246,13 @@ export async function logoutInstance() {
 /** Apaga a sessão e gera um QR novo (base64 diferente). */
 export async function recreateFreshQr(webhookUrl, previousBase64 = null) {
   await logoutInstance()
-  await sleep(1200)
+  await sleep(700)
   await ensureInstance(webhookUrl)
-  await sleep(800)
+  await sleep(500)
 
   let qr = await fetchQr()
-  // Garante que veio QR; se veio o mesmo da tela anterior, tenta mais 1x
-  for (let i = 0; i < 3 && (!qr.base64 || (previousBase64 && qr.base64 === previousBase64)); i += 1) {
-    await sleep(1200)
+  for (let i = 0; i < 2 && (!qr.base64 || (previousBase64 && qr.base64 === previousBase64)); i += 1) {
+    await sleep(800)
     qr = await fetchQr()
   }
   return qr
