@@ -104,9 +104,10 @@ Abra **CRM** → **Conectar WhatsApp (Evolution)** → escaneie o QR no celular
 
 ### 5) O que já funciona neste protótipo
 
-- QR real da Evolution
-- Status connected / connecting / disconnected
-- Webhook de mensagens → cria/atualiza leads
+- QR real da Evolution → após escanear, o CRM abre
+- Sessão antiga na Evolution **não** abre o CRM sozinha (pede confirmação)
+- **Só mensagens novas** viram leads (não depende de histórico antigo do WhatsApp)
+- Poll a cada ~20s + webhook (se `PUBLIC_BRIDGE_URL` for público / ngrok)
 - IA local (evento, data, traje, score)
 - Etiquetas no CRM (abas)
 - Backups no bridge (`crm-bridge/data`)
@@ -124,7 +125,8 @@ Abra **CRM** → **Conectar WhatsApp (Evolution)** → escaneie o QR no celular
 | `Evolution não configurada` | `.env` do bridge |
 | QR não aparece | `SERVER_URL` da Evolution = domínio HTTPS público |
 | Conectou e caiu | celular na internet; não desconecte em Aparelhos conectados |
-| Webhook não chega | `PUBLIC_BRIDGE_URL` precisa ser HTTPS público (ngrok/Railway) |
+| Pipeline vazio | normal no início — mande uma mensagem **nova** no WhatsApp; não puxamos histórico antigo |
+| Webhook não chega | `PUBLIC_BRIDGE_URL` precisa ser HTTPS público (ngrok/Railway); o poll local ainda captura novas msgs |
 | 401 na Evolution | `AUTHENTICATION_API_KEY` igual no Railway e no bridge |
 
 ### Modo simulado
