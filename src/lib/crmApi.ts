@@ -81,7 +81,16 @@ export async function bridgePairing(number: string) {
 }
 
 export async function bridgeDisconnect() {
-  return bridgeFetch<{ ok: boolean }>('/api/whatsapp/disconnect', { method: 'POST' })
+  return bridgeFetch<{ ok?: boolean } & BridgeConnection>('/api/whatsapp/disconnect', {
+    method: 'POST',
+  })
+}
+
+export async function bridgeSyncConversations() {
+  return bridgeFetch<BridgeSnapshot & { importedChats?: number; importedMessages?: number }>(
+    '/api/whatsapp/sync',
+    { method: 'POST' },
+  )
 }
 
 export async function bridgeSetLeadLabel(leadId: string, labelId: string) {

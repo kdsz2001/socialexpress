@@ -3,6 +3,7 @@ import cors from 'cors'
 import express from 'express'
 import {
   createBackup,
+  importConversations,
   patchConnection,
   readBridgeState,
   setLeadLabel,
@@ -18,6 +19,7 @@ import {
   getInstanceName,
   logoutInstance,
   refreshQrFast,
+  syncRecentConversations,
 } from './evolution.js'
 
 const app = express()
@@ -231,6 +233,39 @@ app.post('/api/whatsapp/disconnect', async (_req, res) => {
   res.json(next.connection)
 })
 
+app.post('/api/whatsapp/sync', async (_req, res) => {
+  try {
+    if (!evolutionConfigured()) {
+      return res.status(400).json({ error: 'Evolution não configurada' })
+    }
+    const state = await fetchConnectionState()
+    if (state.state !== 'open') {
+      return res.status(400).json({
+        error: 'WhatsApp ainda não está conectado na Evolution. Escaneie o QR primeiro.',
+      })
+    }
+
+    const conversations = await syncRecentConversations({ maxChats: 40, maxMessages: 30 })
+    const next = importConversations(conversations)
+    patchConnection({
+      status: 'connected',
+      lastSyncAt: Date.now(),
+      lastError: null,
+      accountName: next.connection.accountName || 'WhatsApp conectado',
+    })
+    createBackup(`Sync WhatsApp (${conversations.length} conversas)`)
+    const fresh = readBridgeState()
+    return res.json({
+      ...fresh,
+      importedChats: conversations.length,
+      importedMessages: conversations.reduce((sum, item) => sum + (item.messages?.length || 0), 0),
+    })
+  } catch (error) {
+    patchConnection({ lastError: error.message || 'Falha ao sincronizar conversas' })
+    return res.status(500).json({ error: error.message || 'Falha ao sincronizar conversas' })
+  }
+})
+
 app.patch('/api/leads/:id/label', (req, res) => {
   const state = setLeadLabel(req.params.id, req.body?.labelId || 'novo')
   res.json(state)
@@ -276,6 +311,16 @@ app.post('/api/webhook/evolution', (req, res) => {
           accountName: 'WhatsApp conectado',
         })
         createBackup('Backup automático CONNECTION_UPDATE')
+        // Puxa conversas em background (não atrasa o webhook)
+        void syncRecentConversations({ maxChats: 40, maxMessages: 30 })
+          .then((conversations) => {
+            importConversations(conversations)
+            patchConnection({ lastSyncAt: Date.now() })
+            createBackup(`Sync automático (${conversations.length} conversas)`)
+          })
+          .catch(() => {
+            // ignore sync errors no webhook
+          })
       } else if (state === 'close') {
         patchConnection({ status: 'disconnected', qrBase64: null })
       } else if (state === 'connecting') {
@@ -305,6 +350,7 @@ app.post('/api/webhook/evolution', (req, res) => {
           pushName: item?.pushName || item?.notifyName || '',
           text,
           fromMe,
+          id: item?.key?.id || undefined,
           at: item?.messageTimestamp
             ? Number(item.messageTimestamp) * (String(item.messageTimestamp).length < 13 ? 1000 : 1)
             : Date.now(),

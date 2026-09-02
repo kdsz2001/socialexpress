@@ -279,3 +279,131 @@ export async function fetchPairingCode(phoneNumber) {
 export function getInstanceName() {
   return INSTANCE()
 }
+
+export async function findChats() {
+  const name = INSTANCE()
+  const data = await evoFetch(`/chat/findChats/${encodeURIComponent(name)}`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  })
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.chats)) return data.chats
+  if (Array.isArray(data?.data)) return data.data
+  return []
+}
+
+export async function findMessages(remoteJid, limit = 40) {
+  const name = INSTANCE()
+  const data = await evoFetch(`/chat/findMessages/${encodeURIComponent(name)}`, {
+    method: 'POST',
+    body: JSON.stringify({
+      where: {
+        key: {
+          remoteJid,
+        },
+      },
+      limit,
+    }),
+  })
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.messages)) return data.messages
+  if (Array.isArray(data?.records)) return data.records
+  if (Array.isArray(data?.data)) return data.data
+  return []
+}
+
+function extractTextFromMessage(item) {
+  return (
+    item?.message?.conversation ||
+    item?.message?.extendedTextMessage?.text ||
+    item?.message?.imageMessage?.caption ||
+    item?.message?.videoMessage?.caption ||
+    item?.message?.documentMessage?.caption ||
+    item?.message?.buttonsResponseMessage?.selectedDisplayText ||
+    item?.message?.listResponseMessage?.title ||
+    item?.body ||
+    item?.text ||
+    ''
+  )
+}
+
+function messageTimestampMs(item) {
+  const raw = item?.messageTimestamp || item?.timestamp || item?.updateAt || Date.now()
+  const num = Number(raw)
+  if (!Number.isFinite(num)) return Date.now()
+  return String(Math.trunc(num)).length < 13 ? num * 1000 : num
+}
+
+/** Importa conversas recentes do WhatsApp (sem grupos). */
+export async function syncRecentConversations({ maxChats = 40, maxMessages = 30 } = {}) {
+  const chats = await findChats()
+  const individual = chats
+    .filter((chat) => {
+      const jid = chat?.remoteJid || chat?.id || chat?.key?.remoteJid || ''
+      return jid && !String(jid).endsWith('@g.us') && !String(jid).includes('status@') && !String(jid).includes('broadcast')
+    })
+    .sort((a, b) => {
+      const ta = Number(a?.updatedAt || a?.conversationTimestamp || a?.lastMsgTimestamp || 0)
+      const tb = Number(b?.updatedAt || b?.conversationTimestamp || b?.lastMsgTimestamp || 0)
+      return tb - ta
+    })
+    .slice(0, maxChats)
+
+  const imported = []
+  for (const chat of individual) {
+    const remoteJid = chat?.remoteJid || chat?.id || chat?.key?.remoteJid
+    if (!remoteJid) continue
+    const phone = String(remoteJid).split('@')[0].replace(/\D/g, '')
+    if (!phone) continue
+
+    let messages = []
+    try {
+      messages = await findMessages(remoteJid, maxMessages)
+    } catch {
+      messages = []
+    }
+
+    // Alguns retornos trazem lastMessage no chat sem findMessages
+    if (!messages.length && chat?.lastMessage) {
+      messages = [chat.lastMessage]
+    }
+
+    const normalized = messages
+      .map((item) => {
+        const text = extractTextFromMessage(item)
+        if (!text) return null
+        return {
+          id:
+            item?.key?.id ||
+            item?.id ||
+            `msg-${phone}-${messageTimestampMs(item)}-${Math.random().toString(36).slice(2, 6)}`,
+          phone,
+          pushName: chat?.pushName || chat?.name || item?.pushName || '',
+          text,
+          fromMe: Boolean(item?.key?.fromMe ?? item?.fromMe),
+          at: messageTimestampMs(item),
+        }
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.at - b.at)
+      .slice(-maxMessages)
+
+    if (!normalized.length) {
+      // Ainda cria lead “vazio” com nome do chat para aparecer na lista
+      imported.push({
+        phone,
+        pushName: chat?.pushName || chat?.name || 'Contato WhatsApp',
+        messages: [],
+      })
+      continue
+    }
+
+    imported.push({
+      phone,
+      pushName: chat?.pushName || chat?.name || normalized.find((m) => !m.fromMe)?.pushName || 'Contato WhatsApp',
+      messages: normalized,
+    })
+  }
+
+  return imported
+}

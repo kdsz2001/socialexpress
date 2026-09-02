@@ -70,14 +70,14 @@ export function patchConnection(patch) {
   return writeBridgeState(state)
 }
 
-export function upsertIncomingMessage({ phone, pushName, text, fromMe, at }) {
+export function upsertIncomingMessage({ phone, pushName, text, fromMe, at, id }) {
   const state = readBridgeState()
   const cleanPhone = String(phone || '').replace(/\D/g, '')
   if (!cleanPhone || !text) return state
 
   let lead = state.leads.find((item) => item.phoneDigits === cleanPhone)
   const message = {
-    id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: id || `msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     from: fromMe ? 'store' : 'client',
     text: String(text),
     at: at || Date.now(),
@@ -102,15 +102,70 @@ export function upsertIncomingMessage({ phone, pushName, text, fromMe, at }) {
     }
     state.leads.unshift(lead)
   } else {
-    lead.messages = [...(lead.messages || []), message].slice(-200)
-    if (pushName && lead.name === 'Cliente WhatsApp') lead.name = pushName
-    lead.updatedAt = Date.now()
+    const exists = (lead.messages || []).some((item) => item.id === message.id)
+    if (!exists) {
+      lead.messages = [...(lead.messages || []), message]
+        .sort((a, b) => a.at - b.at)
+        .slice(-200)
+    }
+    if (pushName && (lead.name === 'Cliente WhatsApp' || lead.name === 'Contato WhatsApp')) {
+      lead.name = pushName
+    }
+    lead.updatedAt = Math.max(lead.updatedAt || 0, message.at)
   }
 
-  const analyzed = analyzeConversation(lead.messages, state.scoreRules, lead)
-  Object.assign(lead, analyzed)
+  if ((lead.messages || []).length) {
+    const analyzed = analyzeConversation(lead.messages, state.scoreRules, lead)
+    Object.assign(lead, analyzed)
+  }
   state.connection.lastSyncAt = Date.now()
   return writeBridgeState(state)
+}
+
+/** Importa lote de conversas (sync histórico). */
+export function importConversations(conversations = []) {
+  let state = readBridgeState()
+  for (const conversation of conversations) {
+    const phone = String(conversation.phone || '').replace(/\D/g, '')
+    if (!phone) continue
+
+    if (!conversation.messages?.length) {
+      let lead = state.leads.find((item) => item.phoneDigits === phone)
+      if (!lead) {
+        lead = {
+          id: `lead-${phone}`,
+          name: conversation.pushName || 'Contato WhatsApp',
+          phone: formatBrPhone(phone),
+          phoneDigits: phone,
+          labelId: 'novo',
+          eventType: '',
+          eventDate: '',
+          suitInterest: '',
+          score: 0,
+          scoreHits: [],
+          aiSummary: '',
+          messages: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        }
+        state.leads.unshift(lead)
+        state = writeBridgeState(state)
+      }
+      continue
+    }
+
+    for (const message of conversation.messages) {
+      state = upsertIncomingMessage({
+        phone,
+        pushName: conversation.pushName || message.pushName || '',
+        text: message.text,
+        fromMe: message.fromMe,
+        at: message.at,
+        id: message.id,
+      })
+    }
+  }
+  return readBridgeState()
 }
 
 export function setLeadLabel(leadId, labelId) {

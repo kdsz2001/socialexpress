@@ -18,6 +18,7 @@ import {
   bridgeRefreshQr,
   bridgeSetLeadLabel,
   bridgeStatus,
+  bridgeSyncConversations,
   crmBridgeEnabled,
 } from '../lib/crmApi'
 import {
@@ -65,6 +66,7 @@ export function Crm() {
   const [qrBootstrapped, setQrBootstrapped] = useState(false)
   const [qrRenderKey, setQrRenderKey] = useState(0)
   const qrFetchRef = useRef(false)
+  const didSyncRef = useRef(false)
 
   const pullOfficialQr = async (forceNew: boolean) => {
     if (qrFetchRef.current) return null
@@ -206,6 +208,29 @@ export function Crm() {
     }
   }, [live, state.status])
 
+  // Ao conectar, puxa conversas 1x automaticamente
+  useEffect(() => {
+    if (!live) return
+    if (state.status !== 'connected') {
+      didSyncRef.current = false
+      return
+    }
+    if (didSyncRef.current) return
+    didSyncRef.current = true
+    void (async () => {
+      try {
+        const synced = await bridgeSyncConversations()
+        hydrateCrmFromBridge(synced)
+      } catch (error) {
+        setBridgeError(
+          error instanceof Error
+            ? error.message
+            : 'Conectou, mas não consegui puxar as conversas. Clique em Sincronizar.',
+        )
+      }
+    })()
+  }, [live, state.status])
+
   const counts = useMemo(() => {
     const map: Record<string, number> = { todos: state.leads.length }
     for (const label of state.labels) map[label.id] = 0
@@ -281,9 +306,16 @@ export function Crm() {
       syncCrmNow()
       return
     }
+    setBridgeError(null)
     try {
       await bridgeStatus()
-      hydrateCrmFromBridge(await bridgeGetState())
+      const synced = await bridgeSyncConversations()
+      hydrateCrmFromBridge(synced)
+      if (!synced.importedChats) {
+        setBridgeError(
+          'Sync ok, mas nenhuma conversa veio da Evolution. Confira se o WhatsApp está conectado e se há chats salvos.',
+        )
+      }
     } catch (error) {
       setBridgeError(error instanceof Error ? error.message : 'Falha ao sincronizar')
     }
