@@ -511,7 +511,7 @@ function LeadDetail({
       <div className="crm__ai">
         <div className="crm__ai-title">
           <Sparkles size={15} strokeWidth={2.25} />
-          Análise da IA
+          Análise do atendimento
           <button type="button" className="crm__link" onClick={onReanalyze}>
             Reanalisar
           </button>
