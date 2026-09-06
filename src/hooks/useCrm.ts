@@ -11,6 +11,7 @@ function getServerSnapshot(): CrmState {
     connectedAt: null,
     accountName: '',
     accountPhone: '',
+    storeWhatsapp: '',
     qrToken: 'server',
     qrBase64: null,
     pairingCode: null,

@@ -16,6 +16,7 @@ import { Reports } from './pages/Reports'
 import { Settings } from './pages/Settings'
 import { History } from './pages/History'
 import { Crm } from './pages/Crm'
+import { CrmCapture } from './pages/CrmCapture'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [{ path: '/orcamentos', title: 'Orçamentos' }] as const
@@ -23,6 +24,7 @@ const pages = [{ path: '/orcamentos', title: 'Orçamentos' }] as const
 export default function App() {
   return (
     <Routes>
+      <Route path="/captura" element={<CrmCapture />} />
       <Route element={<AppLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="/clientes" element={<Clients />} />
