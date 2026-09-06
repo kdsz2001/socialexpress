@@ -477,46 +477,67 @@ export function createQuickLead(input: {
   eventType?: string
   eventDate?: string
   suitInterest?: string
+  suitId?: string | null
+  potentialValue?: number
 }) {
   let createdId = ''
   const state = update((current) => {
-    const notes = (input.notes || '').trim()
-    const messages: CrmMessage[] = notes
-      ? [{ id: crypto.randomUUID(), from: 'client', text: notes, at: Date.now() }]
-      : []
+    const suit =
+      (input.suitId
+        ? current.suits.find((item) => item.id === input.suitId)
+        : null) ||
+      (input.suitInterest
+        ? current.suits.find(
+            (item) =>
+              normalizeSearchText(item.name) === normalizeSearchText(input.suitInterest || ''),
+          )
+        : null) ||
+      null
+
+    const suitInterest = suit?.name || (input.suitInterest || '').trim()
+    const potentialValue =
+      typeof input.potentialValue === 'number' && input.potentialValue >= 0
+        ? input.potentialValue
+        : suit
+          ? Number(suit.price) || 0
+          : 0
+
     const base: CrmLead = {
       id: crypto.randomUUID(),
-      name: (input.name || '').trim() || 'Novo lead',
+      name: (input.name || '').trim() || 'Novo contato',
       phone: formatPhoneDisplay(input.phone || '') || '—',
       labelId: input.labelId || 'novo',
       eventType: input.eventType || '',
-      eventDate: input.eventDate || '',
-      suitInterest: input.suitInterest || '',
-      suitId: null,
-      potentialValue: 0,
+      eventDate: (input.eventDate || '').trim(),
+      suitInterest,
+      suitId: suit?.id || null,
+      potentialValue,
       outcome: 'open',
       outcomeNote: '',
       score: 0,
       scoreHits: [],
-      aiSummary: '',
-      messages,
+      aiSummary: [
+        (input.name || '').trim() || 'Contato',
+        input.eventDate ? `evento: ${input.eventDate}` : null,
+        suitInterest ? `traje: ${suitInterest}` : null,
+        potentialValue ? `potencial: ${formatMoneyBr(potentialValue)}` : null,
+      ]
+        .filter(Boolean)
+        .join(' · '),
+      messages: [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
     }
-    const analyzed = messages.length
-      ? analyzeConversation(messages, current.scoreRules, base, current.suits)
-      : applyScoreToLead(base, current.scoreRules)
+
+    const scored = applyScoreToLead(base, current.scoreRules)
     const lead: CrmLead = {
       ...base,
-      ...analyzed,
-      name: analyzed.name || base.name,
-      suitId: analyzed.suitId ?? base.suitId,
-      potentialValue: analyzed.potentialValue ?? base.potentialValue,
+      ...scored,
+      potentialValue,
+      suitId: suit?.id || null,
+      suitInterest,
       outcome: 'open',
       outcomeNote: '',
-      aiSummary:
-        analyzed.aiSummary ||
-        [base.name, base.phone !== '—' ? base.phone : null].filter(Boolean).join(' · '),
     }
     createdId = lead.id
     return {
@@ -527,6 +548,61 @@ export function createQuickLead(input: {
     }
   })
   return { state, leadId: createdId }
+}
+
+export function updateCrmLeadBasics(
+  leadId: string,
+  input: {
+    name?: string
+    phone?: string
+    eventDate?: string
+    suitId?: string | null
+  },
+) {
+  return update((current) => {
+    const suit = input.suitId
+      ? current.suits.find((item) => item.id === input.suitId) || null
+      : null
+    return {
+      ...current,
+      leads: current.leads.map((lead) => {
+        if (lead.id !== leadId) return lead
+        const nextSuitId = input.suitId === undefined ? lead.suitId : suit?.id || null
+        const nextSuit =
+          nextSuitId ? current.suits.find((item) => item.id === nextSuitId) || null : null
+        const name = input.name !== undefined ? input.name.trim() || lead.name : lead.name
+        const phone =
+          input.phone !== undefined ? formatPhoneDisplay(input.phone) || lead.phone : lead.phone
+        const eventDate =
+          input.eventDate !== undefined ? input.eventDate.trim() : lead.eventDate
+        const suitInterest = nextSuit?.name || (input.suitId === null ? '' : lead.suitInterest)
+        const potentialValue = nextSuit
+          ? Number(nextSuit.price) || 0
+          : input.suitId === null
+            ? 0
+            : lead.potentialValue
+        return {
+          ...lead,
+          name,
+          phone,
+          eventDate,
+          suitId: nextSuitId,
+          suitInterest,
+          potentialValue,
+          aiSummary: [
+            name,
+            eventDate ? `evento: ${eventDate}` : null,
+            suitInterest ? `traje: ${suitInterest}` : null,
+            potentialValue ? `potencial: ${formatMoneyBr(potentialValue)}` : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          updatedAt: Date.now(),
+        }
+      }),
+      lastSyncAt: Date.now(),
+    }
+  })
 }
 
 /** Cola conversa → cria ou atualiza lead com IA. */

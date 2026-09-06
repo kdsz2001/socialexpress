@@ -1,108 +1,87 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   CheckCircle2,
-  ClipboardPaste,
-  ExternalLink,
   PieChart,
-  RefreshCcw,
-  Settings2,
-  Sparkles,
+  Plus,
   Tags,
+  UserPlus,
   XCircle,
 } from 'lucide-react'
 import { useCrm } from '../hooks/useCrm'
 import {
   bootEasyCrm,
-  createCrmBackup,
+  createQuickLead,
   formatMoneyBr,
   getCrmValueStats,
-  ingestChatPaste,
-  loadDemoLeads,
-  reanalyzeCrmLead,
-  setCrmLeadLabel,
   setCrmLeadOutcome,
-  setCrmLeadSuit,
-  setCrmStoreWhatsapp,
-  updateCrmScoreRules,
+  updateCrmLeadBasics,
   updateCrmSuits,
-  type CrmLabelId,
   type CrmLead,
   type CrmOutcome,
-  type CrmScoreRule,
   type CrmSuitItem,
 } from '../lib/crmStore'
 import './Crm.css'
 
-function formatWhen(ts: number | null) {
-  if (!ts) return '—'
-  const date = new Date(ts)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-}
-
-function scoreTone(score: number) {
-  if (score >= 70) return 'is-hot'
-  if (score >= 40) return 'is-warm'
-  return 'is-cool'
-}
-
 function outcomeLabel(outcome: CrmOutcome) {
   if (outcome === 'won') return 'Ganho'
   if (outcome === 'lost') return 'Perdido'
-  return 'Aberto'
+  return 'Em aberto'
 }
 
-type CrmView = 'board' | 'paste' | 'catalog' | 'values' | 'link' | 'scoring' | 'backups'
+type CrmView = 'board' | 'novo' | 'catalog' | 'values'
 
 export function Crm() {
   const state = useCrm()
-  const [tab, setTab] = useState<'todos' | CrmLabelId>('todos')
+  const [tab, setTab] = useState<'todos' | 'open' | 'won' | 'lost'>('todos')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<CrmView>('board')
-  const [draftRules, setDraftRules] = useState<CrmScoreRule[]>(state.scoreRules)
   const [draftSuits, setDraftSuits] = useState<CrmSuitItem[]>(state.suits)
   const [toast, setToast] = useState<string | null>(null)
 
-  const [pasteText, setPasteText] = useState('')
-  const [pasteIntoSelected, setPasteIntoSelected] = useState(false)
-  const [storePhoneDraft, setStorePhoneDraft] = useState(state.storeWhatsapp)
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [eventDate, setEventDate] = useState('')
+  const [suitId, setSuitId] = useState('')
 
   useEffect(() => {
     bootEasyCrm()
   }, [])
 
   useEffect(() => {
-    setDraftRules(state.scoreRules)
-  }, [state.scoreRules])
-
-  useEffect(() => {
     setDraftSuits(state.suits)
   }, [state.suits])
 
   useEffect(() => {
-    setStorePhoneDraft(state.storeWhatsapp)
-  }, [state.storeWhatsapp])
-
-  useEffect(() => {
     if (!toast) return
-    const timer = window.setTimeout(() => setToast(null), 2800)
+    const timer = window.setTimeout(() => setToast(null), 2500)
     return () => window.clearTimeout(timer)
   }, [toast])
 
   const stats = useMemo(() => getCrmValueStats(state), [state])
 
-  const counts = useMemo(() => {
-    const map: Record<string, number> = { todos: state.leads.length }
-    for (const label of state.labels) map[label.id] = 0
-    for (const lead of state.leads) map[lead.labelId] = (map[lead.labelId] ?? 0) + 1
-    return map
-  }, [state.leads, state.labels])
+  const selectedSuit = useMemo(
+    () => state.suits.find((suit) => suit.id === suitId && suit.enabled) || null,
+    [state.suits, suitId],
+  )
+  const estimatedValue = selectedSuit ? Number(selectedSuit.price) || 0 : 0
 
   const filtered = useMemo(() => {
-    const list =
-      tab === 'todos' ? state.leads : state.leads.filter((lead) => lead.labelId === tab)
-    return list.slice().sort((a, b) => b.updatedAt - a.updatedAt)
+    let list = state.leads.slice()
+    if (tab === 'open') list = list.filter((lead) => (lead.outcome || 'open') === 'open')
+    if (tab === 'won') list = list.filter((lead) => lead.outcome === 'won')
+    if (tab === 'lost') list = list.filter((lead) => lead.outcome === 'lost')
+    return list.sort((a, b) => b.updatedAt - a.updatedAt)
   }, [state.leads, tab])
+
+  const counts = useMemo(
+    () => ({
+      todos: state.leads.length,
+      open: state.leads.filter((lead) => (lead.outcome || 'open') === 'open').length,
+      won: state.leads.filter((lead) => lead.outcome === 'won').length,
+      lost: state.leads.filter((lead) => lead.outcome === 'lost').length,
+    }),
+    [state.leads],
+  )
 
   const selected =
     filtered.find((lead) => lead.id === selectedId) ??
@@ -118,27 +97,24 @@ export function Crm() {
     if (selected.id !== selectedId) setSelectedId(selected.id)
   }, [selected, selectedId])
 
-  const captureUrl =
-    typeof window !== 'undefined' ? `${window.location.origin}/captura` : '/captura'
-
-  const onPasteChat = () => {
-    if (!pasteText.trim()) {
-      setToast('Cole a conversa do atendimento.')
+  const onSaveContact = () => {
+    if (!name.trim() || !phone.trim()) {
+      setToast('Informe nome e número.')
       return
     }
-    const intoSelected = pasteIntoSelected && selected
-    const { leadId } = ingestChatPaste({
-      paste: pasteText,
-      leadId: intoSelected ? selected.id : null,
+    const { leadId } = createQuickLead({
+      name: name.trim(),
+      phone: phone.trim(),
+      eventDate: eventDate.trim(),
+      suitId: suitId || null,
+      potentialValue: estimatedValue,
     })
-    setPasteText('')
-    setPasteIntoSelected(false)
+    setName('')
+    setPhone('')
+    setEventDate('')
+    setSuitId('')
     setView('board')
-    setToast(
-      intoSelected
-        ? 'Conversa atualizada — valor potencial recalculado'
-        : 'Contato registrado',
-    )
+    setToast('Contato adicionado — potencial atualizado')
     if (leadId) setSelectedId(leadId)
   }
 
@@ -165,15 +141,15 @@ export function Crm() {
               className={`crm__chip${view === 'board' ? ' is-active' : ''}`}
               onClick={() => setView('board')}
             >
-              Pipeline
+              Contatos
             </button>
             <button
               type="button"
-              className={`crm__chip${view === 'paste' ? ' is-active' : ''}`}
-              onClick={() => setView('paste')}
+              className={`crm__chip${view === 'novo' ? ' is-active' : ''}`}
+              onClick={() => setView('novo')}
             >
-              <ClipboardPaste size={14} strokeWidth={2.25} />
-              Registrar conversa
+              <UserPlus size={14} strokeWidth={2.25} />
+              Novo contato
             </button>
             <button
               type="button"
@@ -189,71 +165,74 @@ export function Crm() {
               onClick={() => setView('values')}
             >
               <PieChart size={14} strokeWidth={2.25} />
-              Análise de valores
-            </button>
-            <button
-              type="button"
-              className={`crm__chip${view === 'link' ? ' is-active' : ''}`}
-              onClick={() => setView('link')}
-            >
-              Formulário
-            </button>
-            <button
-              type="button"
-              className={`crm__chip${view === 'scoring' ? ' is-active' : ''}`}
-              onClick={() => setView('scoring')}
-            >
-              <Settings2 size={14} strokeWidth={2.25} />
-              Pontuação
-            </button>
-            <button
-              type="button"
-              className={`crm__chip${view === 'backups' ? ' is-active' : ''}`}
-              onClick={() => setView('backups')}
-            >
-              Backups
+              Análise
             </button>
           </div>
         </header>
 
         {toast ? <p className="crm__banner-ok">{toast}</p> : null}
 
-        {view === 'paste' ? (
+        {view === 'novo' ? (
           <div className="crm__panel">
             <div className="crm__panel-head">
               <div>
-                <h3>Registrar conversa</h3>
+                <h3>Novo contato</h3>
                 <p>
-                  Cole o histórico do atendimento. O sistema identifica nome, evento, traje do
-                  catálogo e o <strong>valor potencial</strong>.
+                  Preencha os dados. O valor estimado vem do traje e atualiza o potencial na hora.
                 </p>
               </div>
             </div>
-            <div className="crm__form-grid">
-              <label className="crm__form-span">
-                Histórico da conversa
-                <textarea
-                  value={pasteText}
-                  onChange={(e) => setPasteText(e.target.value)}
-                  rows={12}
-                  placeholder={`Exemplo:\nOi, meu nome é João\nQuero o Azul Marinho para casamento dia 10/10\nTelefone (47) 99999-1122`}
+
+            <div className="crm__form-grid crm__form-grid--contact">
+              <label>
+                Nome
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nome do cliente"
+                  autoFocus
                 />
               </label>
-              {selected ? (
-                <label className="crm__check crm__form-span">
-                  <input
-                    type="checkbox"
-                    checked={pasteIntoSelected}
-                    onChange={(e) => setPasteIntoSelected(e.target.checked)}
-                  />
-                  Atualizar o contato selecionado ({selected.name}) em vez de criar outro
-                </label>
-              ) : null}
+              <label>
+                Número
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(47) 99999-0000"
+                />
+              </label>
+              <label>
+                Dia do evento
+                <input
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                  placeholder="15/11/2026"
+                />
+              </label>
+              <label>
+                Traje
+                <select value={suitId} onChange={(e) => setSuitId(e.target.value)}>
+                  <option value="">Selecione o traje…</option>
+                  {state.suits
+                    .filter((suit) => suit.enabled)
+                    .map((suit) => (
+                      <option key={suit.id} value={suit.id}>
+                        {suit.name} — {formatMoneyBr(suit.price)}
+                      </option>
+                    ))}
+                </select>
+              </label>
             </div>
+
+            <div className="crm__estimate">
+              <span>Valor estimado</span>
+              <strong>{formatMoneyBr(estimatedValue)}</strong>
+            </div>
+
             <div className="crm__form-actions">
-              <button type="button" className="crm__primary" onClick={onPasteChat}>
-                <ClipboardPaste size={15} strokeWidth={2.25} />
-                Registrar contato
+              <button type="button" className="crm__primary" onClick={onSaveContact}>
+                <Plus size={15} strokeWidth={2.25} />
+                Salvar contato
               </button>
               <button type="button" className="crm__ghost" onClick={() => setView('board')}>
                 Cancelar
@@ -268,101 +247,32 @@ export function Crm() {
             onChange={setDraftSuits}
             onSave={() => {
               updateCrmSuits(draftSuits)
-              setToast('Catálogo salvo — contatos reanalisados')
+              setToast('Catálogo salvo — valores atualizados')
             }}
           />
         ) : null}
 
         {view === 'values' ? <ValuesPanel stats={stats} /> : null}
 
-        {view === 'link' ? (
-          <div className="crm__panel">
-            <div className="crm__panel-head">
-              <div>
-                <h3>Formulário de captura</h3>
-                <p>Link para divulgação ou tablet da loja. O cliente preenche e o contato entra no CRM.</p>
-              </div>
-            </div>
-            <div className="crm__form-grid">
-              <label className="crm__form-span">
-                Telefone da loja
-                <input
-                  value={storePhoneDraft}
-                  onChange={(e) => setStorePhoneDraft(e.target.value)}
-                  placeholder="47999990000"
-                />
-              </label>
-              <label className="crm__form-span">
-                Link
-                <input readOnly value={captureUrl} onFocus={(e) => e.target.select()} />
-              </label>
-            </div>
-            <div className="crm__form-actions">
-              <button
-                type="button"
-                className="crm__primary"
-                onClick={() => {
-                  setCrmStoreWhatsapp(storePhoneDraft)
-                  setToast('Telefone da loja salvo')
-                }}
-              >
-                Salvar número
-              </button>
-              <a className="crm__ghost crm__ghost-link" href={captureUrl} target="_blank" rel="noreferrer">
-                <ExternalLink size={14} strokeWidth={2.25} />
-                Abrir formulário
-              </a>
-            </div>
-          </div>
-        ) : null}
-
-        {view === 'scoring' ? (
-          <ScorePanel
-            rules={draftRules}
-            onChange={setDraftRules}
-            onSave={() => {
-              updateCrmScoreRules(draftRules)
-              setToast('Regras salvas')
-            }}
-          />
-        ) : null}
-
-        {view === 'backups' ? (
-          <BackupsPanel
-            backups={state.backups}
-            onCreate={() => {
-              createCrmBackup('Backup manual do CRM')
-              setToast('Backup gerado')
-            }}
-            onLoadDemo={() => {
-              loadDemoLeads()
-              setToast('Dados de exemplo carregados')
-              setView('board')
-            }}
-          />
-        ) : null}
-
         {view === 'board' ? (
           <>
-            <nav className="crm__tabs" aria-label="Etiquetas do CRM">
-              <button
-                type="button"
-                className={`crm__tab${tab === 'todos' ? ' is-active' : ''}`}
-                onClick={() => setTab('todos')}
-              >
-                Todos
-                <span>{counts.todos ?? 0}</span>
-              </button>
-              {state.labels.map((label) => (
+            <nav className="crm__tabs" aria-label="Filtro de resultado">
+              {(
+                [
+                  ['todos', 'Todos', counts.todos],
+                  ['open', 'Em aberto', counts.open],
+                  ['won', 'Ganhos', counts.won],
+                  ['lost', 'Perdidos', counts.lost],
+                ] as const
+              ).map(([id, label, count]) => (
                 <button
-                  key={label.id}
+                  key={id}
                   type="button"
-                  className={`crm__tab${tab === label.id ? ' is-active' : ''}`}
-                  style={{ ['--tab-color' as string]: label.color }}
-                  onClick={() => setTab(label.id)}
+                  className={`crm__tab${tab === id ? ' is-active' : ''}`}
+                  onClick={() => setTab(id)}
                 >
-                  {label.name}
-                  <span>{counts[label.id] ?? 0}</span>
+                  {label}
+                  <span>{count}</span>
                 </button>
               ))}
             </nav>
@@ -371,19 +281,9 @@ export function Crm() {
               <aside className="crm__list">
                 {filtered.length === 0 ? (
                   <div className="crm__empty-box">
-                    <p className="crm__empty">Nenhum contato cadastrado.</p>
-                    <button type="button" className="crm__primary" onClick={() => setView('paste')}>
-                      Registrar conversa
-                    </button>
-                    <button
-                      type="button"
-                      className="crm__ghost"
-                      onClick={() => {
-                        loadDemoLeads()
-                        setToast('Dados de exemplo carregados')
-                      }}
-                    >
-                      Carregar exemplos
+                    <p className="crm__empty">Nenhum contato neste filtro.</p>
+                    <button type="button" className="crm__primary" onClick={() => setView('novo')}>
+                      Novo contato
                     </button>
                   </div>
                 ) : (
@@ -396,12 +296,14 @@ export function Crm() {
                     >
                       <div className="crm__lead-top">
                         <strong>{lead.name}</strong>
-                        <span className={`crm__score ${scoreTone(lead.score)}`}>{lead.score}</span>
+                        <span className="crm__lead-value">
+                          {formatMoneyBr(lead.potentialValue || 0)}
+                        </span>
                       </div>
                       <p>{lead.phone}</p>
                       <div className="crm__lead-meta">
-                        <span>{lead.suitInterest || 'Traje ?'}</span>
-                        <span>{formatMoneyBr(lead.potentialValue || 0)}</span>
+                        <span>{lead.eventDate || 'Sem data'}</span>
+                        <span>{lead.suitInterest || 'Sem traje'}</span>
                       </div>
                       <span className={`crm__outcome-pill is-${lead.outcome || 'open'}`}>
                         {outcomeLabel(lead.outcome || 'open')}
@@ -413,33 +315,29 @@ export function Crm() {
 
               <div className="crm__detail">
                 {selected ? (
-                  <LeadDetail
+                  <ContactDetail
                     lead={selected}
-                    labels={state.labels}
                     suits={state.suits}
-                    onLabel={(labelId) => setCrmLeadLabel(selected.id, labelId)}
-                    onSuit={(suitId) => setCrmLeadSuit(selected.id, suitId)}
+                    onSuit={(nextSuitId) => {
+                      updateCrmLeadBasics(selected.id, { suitId: nextSuitId })
+                      setToast('Valor potencial atualizado')
+                    }}
+                    onEventDate={(nextDate) => {
+                      updateCrmLeadBasics(selected.id, { eventDate: nextDate })
+                    }}
                     onOutcome={(outcome) => {
                       setCrmLeadOutcome(selected.id, outcome)
                       setToast(
                         outcome === 'won'
-                          ? 'Classificado como ganho'
+                          ? 'Classificado como ganho — análise atualizada'
                           : outcome === 'lost'
-                            ? 'Classificado como perdido'
+                            ? 'Classificado como perdido — análise atualizada'
                             : 'Retornado para em aberto',
                       )
                     }}
-                    onReanalyze={() => {
-                      reanalyzeCrmLead(selected.id)
-                      setToast('Análise atualizada com o catálogo')
-                    }}
-                    onPasteHere={() => {
-                      setPasteIntoSelected(true)
-                      setView('paste')
-                    }}
                   />
                 ) : (
-                  <p className="crm__empty">Registre uma conversa para adicionar o primeiro contato.</p>
+                  <p className="crm__empty">Selecione um contato ou cadastre um novo.</p>
                 )}
               </div>
             </div>
@@ -450,24 +348,18 @@ export function Crm() {
   )
 }
 
-function LeadDetail({
+function ContactDetail({
   lead,
-  labels,
   suits,
-  onLabel,
   onSuit,
+  onEventDate,
   onOutcome,
-  onReanalyze,
-  onPasteHere,
 }: {
   lead: CrmLead
-  labels: { id: CrmLabelId; name: string; color: string }[]
   suits: CrmSuitItem[]
-  onLabel: (labelId: CrmLabelId) => void
   onSuit: (suitId: string | null) => void
+  onEventDate: (eventDate: string) => void
   onOutcome: (outcome: CrmOutcome) => void
-  onReanalyze: () => void
-  onPasteHere: () => void
 }) {
   return (
     <div className="crm__detail-inner">
@@ -478,7 +370,7 @@ function LeadDetail({
         </div>
         <div className="crm__value-stack">
           <span className="crm__money">{formatMoneyBr(lead.potentialValue || 0)}</span>
-          <span className={`crm__score is-lg ${scoreTone(lead.score)}`}>Score {lead.score}</span>
+          <span className="crm__value-caption">Valor potencial</span>
         </div>
       </header>
 
@@ -489,7 +381,7 @@ function LeadDetail({
           onClick={() => onOutcome('won')}
         >
           <CheckCircle2 size={15} strokeWidth={2.25} />
-          Ganhamos
+          Ganho
         </button>
         <button
           type="button"
@@ -497,7 +389,7 @@ function LeadDetail({
           onClick={() => onOutcome('lost')}
         >
           <XCircle size={15} strokeWidth={2.25} />
-          Perdemos
+          Perdido
         </button>
         <button
           type="button"
@@ -508,30 +400,22 @@ function LeadDetail({
         </button>
       </div>
 
-      <div className="crm__ai">
-        <div className="crm__ai-title">
-          <Sparkles size={15} strokeWidth={2.25} />
-          Análise do atendimento
-          <button type="button" className="crm__link" onClick={onReanalyze}>
-            Reanalisar
-          </button>
-        </div>
-        <p>{lead.aiSummary || 'Aguardando conversa…'}</p>
-        <div className="crm__facts">
-          <Fact label="Evento" value={lead.eventType || '—'} />
-          <Fact label="Data" value={lead.eventDate || '—'} />
-          <Fact label="Valor potencial" value={formatMoneyBr(lead.potentialValue || 0)} />
-        </div>
-      </div>
-
       <div className="crm__detail-fields">
         <label className="crm__label-field">
-          Traje do catálogo
+          Dia do evento
+          <input
+            value={lead.eventDate || ''}
+            onChange={(event) => onEventDate(event.target.value)}
+            placeholder="15/11/2026"
+          />
+        </label>
+        <label className="crm__label-field">
+          Traje (valor estimado)
           <select
             value={lead.suitId || ''}
             onChange={(event) => onSuit(event.target.value || null)}
           >
-            <option value="">Sem traje / não identificado</option>
+            <option value="">Sem traje</option>
             {suits
               .filter((suit) => suit.enabled)
               .map((suit) => (
@@ -541,42 +425,13 @@ function LeadDetail({
               ))}
           </select>
         </label>
-
-        <label className="crm__label-field">
-          Etiqueta
-          <select
-            value={lead.labelId}
-            onChange={(event) => onLabel(event.target.value as CrmLabelId)}
-          >
-            {labels.map((label) => (
-              <option key={label.id} value={label.id}>
-                {label.name}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
 
-      <div className="crm__thread">
-        {lead.messages.length === 0 ? (
-          <p className="crm__empty">Sem mensagens registradas. Acrescente o histórico da conversa.</p>
-        ) : (
-          lead.messages.map((message) => (
-            <div
-              key={message.id}
-              className={`crm__bubble${message.from === 'store' ? ' is-store' : ' is-client'}`}
-            >
-              <p>{message.text}</p>
-              <time>{formatWhen(message.at)}</time>
-            </div>
-          ))
-        )}
+      <div className="crm__facts crm__facts--simple">
+        <Fact label="Status" value={outcomeLabel(lead.outcome || 'open')} />
+        <Fact label="Traje" value={lead.suitInterest || '—'} />
+        <Fact label="Potencial" value={formatMoneyBr(lead.potentialValue || 0)} />
       </div>
-
-      <button type="button" className="crm__primary crm__ghost-block" onClick={onPasteHere}>
-        <ClipboardPaste size={14} strokeWidth={2.25} />
-        Acrescentar conversa a este contato
-      </button>
     </div>
   )
 }
@@ -603,15 +458,12 @@ function CatalogPanel({
     <div className="crm__panel">
       <div className="crm__panel-head">
         <div>
-          <h3>Catálogo de trajes e valores</h3>
-          <p>
-            Quando a conversa mencionar o nome do traje, o contato recebe esse valor potencial
-            automaticamente.
-          </p>
+          <h3>Trajes e valores</h3>
+          <p>Defina o catálogo. Ao escolher o traje no contato, o valor potencial atualiza.</p>
         </div>
         <button type="button" className="crm__primary" onClick={onSave}>
           <CheckCircle2 size={15} strokeWidth={2.25} />
-          Salvar catálogo
+          Salvar
         </button>
       </div>
 
@@ -666,12 +518,7 @@ function CatalogPanel({
           onClick={() =>
             onChange([
               ...suits,
-              {
-                id: crypto.randomUUID(),
-                name: 'Novo traje',
-                price: 0,
-                enabled: true,
-              },
+              { id: crypto.randomUUID(), name: 'Novo traje', price: 0, enabled: true },
             ])
           }
         >
@@ -682,33 +529,32 @@ function CatalogPanel({
   )
 }
 
-function ValuesPanel({
-  stats,
-}: {
-  stats: ReturnType<typeof getCrmValueStats>
-}) {
+function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) {
+  const outcomeSlices = stats.outcomeSlices.map((slice) => ({
+    name: slice.label,
+    value: slice.value,
+    color: slice.color,
+  }))
+
   return (
     <div className="crm__panel">
       <div className="crm__panel-head">
         <div>
           <h3>Análise de valores</h3>
-          <p>
-            Visão do valor potencial por resultado (ganho / perdido / aberto) e por traje do
-            catálogo.
-          </p>
+          <p>Atualiza em tempo real quando você cadastra ou classifica um contato.</p>
         </div>
       </div>
 
       <div className="crm__stats-grid">
-        <div className="crm__stat-card">
+        <div className="crm__stat-card is-won">
           <strong>{formatMoneyBr(stats.totals.won)}</strong>
           <span>Ganhos</span>
         </div>
-        <div className="crm__stat-card">
+        <div className="crm__stat-card is-lost">
           <strong>{formatMoneyBr(stats.totals.lost)}</strong>
           <span>Perdidos</span>
         </div>
-        <div className="crm__stat-card">
+        <div className="crm__stat-card is-open">
           <strong>{formatMoneyBr(stats.totals.open)}</strong>
           <span>Em aberto</span>
         </div>
@@ -719,24 +565,39 @@ function ValuesPanel({
       </div>
 
       <div className="crm__pies">
-        <PieBlock title="Por resultado" slices={stats.outcomeSlices.map((s) => ({
-          name: s.label,
-          value: s.value,
-          color: s.color,
-        }))} />
-        <PieBlock title="Por traje" slices={stats.suitSlices} />
+        <DonutBlock
+          title="Resultado comercial"
+          subtitle="Quanto do potencial já foi ganho, perdido ou segue aberto"
+          slices={outcomeSlices}
+          centerLabel="Total"
+          centerValue={formatMoneyBr(stats.totals.all)}
+        />
+        <DonutBlock
+          title="Por traje"
+          subtitle="Distribuição do potencial conforme o catálogo"
+          slices={stats.suitSlices}
+          centerLabel="Trajes"
+          centerValue={String(stats.suitSlices.length)}
+        />
       </div>
 
       {stats.bySuit.length === 0 ? (
-        <p className="crm__empty">Registre conversas com trajes do catálogo para gerar a análise.</p>
+        <p className="crm__empty">Cadastre contatos com traje para montar a análise.</p>
       ) : (
         <ul className="crm__suit-table">
+          <li className="crm__suit-table-head">
+            <strong>Traje</strong>
+            <span>Em aberto</span>
+            <span>Ganho</span>
+            <span>Perdido</span>
+            <em>Total</em>
+          </li>
           {stats.bySuit.map((row) => (
             <li key={row.name}>
               <strong>{row.name}</strong>
-              <span>Aberto {formatMoneyBr(row.open)}</span>
-              <span>Ganho {formatMoneyBr(row.won)}</span>
-              <span>Perdido {formatMoneyBr(row.lost)}</span>
+              <span>{formatMoneyBr(row.open)}</span>
+              <span>{formatMoneyBr(row.won)}</span>
+              <span>{formatMoneyBr(row.lost)}</span>
               <em>{formatMoneyBr(row.total)}</em>
             </li>
           ))}
@@ -746,35 +607,57 @@ function ValuesPanel({
   )
 }
 
-function PieBlock({
+function DonutBlock({
   title,
+  subtitle,
   slices,
+  centerLabel,
+  centerValue,
 }: {
   title: string
+  subtitle: string
   slices: Array<{ name: string; value: number; color: string }>
+  centerLabel: string
+  centerValue: string
 }) {
   const total = slices.reduce((sum, item) => sum + item.value, 0)
   const gradient = buildConicGradient(slices, total)
 
   return (
-    <div className="crm__pie-block">
-      <h4>{title}</h4>
-      <div
-        className="crm__pie"
-        style={{ background: total > 0 ? gradient : '#e4e6ef' }}
-        aria-hidden
-      />
-      <ul className="crm__pie-legend">
+    <div className="crm__pie-block crm__pie-block--pro">
+      <div className="crm__pie-copy">
+        <h4>{title}</h4>
+        <p>{subtitle}</p>
+      </div>
+      <div className="crm__donut-wrap">
+        <div
+          className="crm__donut"
+          style={{ background: total > 0 ? gradient : '#eef1f6' }}
+          aria-hidden
+        >
+          <div className="crm__donut-hole">
+            <span>{centerLabel}</span>
+            <strong>{centerValue}</strong>
+          </div>
+        </div>
+      </div>
+      <ul className="crm__pie-legend crm__pie-legend--pro">
         {slices.length === 0 ? (
-          <li>Sem dados</li>
+          <li>Sem dados ainda</li>
         ) : (
-          slices.map((slice) => (
-            <li key={slice.name}>
-              <i style={{ background: slice.color }} />
-              <span>{slice.name}</span>
-              <strong>{formatMoneyBr(slice.value)}</strong>
-            </li>
-          ))
+          slices.map((slice) => {
+            const pct = total > 0 ? Math.round((slice.value / total) * 100) : 0
+            return (
+              <li key={slice.name}>
+                <i style={{ background: slice.color }} />
+                <div>
+                  <span>{slice.name}</span>
+                  <em>{pct}%</em>
+                </div>
+                <strong>{formatMoneyBr(slice.value)}</strong>
+              </li>
+            )
+          })
         )}
       </ul>
     </div>
@@ -785,7 +668,7 @@ function buildConicGradient(
   slices: Array<{ value: number; color: string }>,
   total: number,
 ) {
-  if (!total) return '#e4e6ef'
+  if (!total) return '#eef1f6'
   let cursor = 0
   const parts: string[] = []
   for (const slice of slices) {
@@ -797,107 +680,3 @@ function buildConicGradient(
   return `conic-gradient(${parts.join(', ')})`
 }
 
-function ScorePanel({
-  rules,
-  onChange,
-  onSave,
-}: {
-  rules: CrmScoreRule[]
-  onChange: (rules: CrmScoreRule[]) => void
-  onSave: () => void
-}) {
-  return (
-    <div className="crm__panel">
-      <div className="crm__panel-head">
-        <div>
-          <h3>Pontuação da conversa</h3>
-          <p>Palavras-chave que reforçam o score comercial do contato.</p>
-        </div>
-        <button type="button" className="crm__primary" onClick={onSave}>
-          <CheckCircle2 size={15} strokeWidth={2.25} />
-          Salvar regras
-        </button>
-      </div>
-      <div className="crm__rules">
-        {rules.map((rule, index) => (
-          <div key={rule.id} className="crm__rule">
-            <label className="crm__check">
-              <input
-                type="checkbox"
-                checked={rule.enabled}
-                onChange={(event) => {
-                  const next = rules.slice()
-                  next[index] = { ...rule, enabled: event.target.checked }
-                  onChange(next)
-                }}
-              />
-              Ativa
-            </label>
-            <input
-              value={rule.keyword}
-              onChange={(event) => {
-                const next = rules.slice()
-                next[index] = { ...rule, keyword: event.target.value }
-                onChange(next)
-              }}
-              placeholder="palavra-chave"
-            />
-            <input
-              type="number"
-              value={rule.points}
-              onChange={(event) => {
-                const next = rules.slice()
-                next[index] = { ...rule, points: Number(event.target.value) || 0 }
-                onChange(next)
-              }}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function BackupsPanel({
-  backups,
-  onCreate,
-  onLoadDemo,
-}: {
-  backups: { id: string; createdAt: number; leadCount: number; note: string }[]
-  onCreate: () => void
-  onLoadDemo: () => void
-}) {
-  return (
-    <div className="crm__panel">
-      <div className="crm__panel-head">
-        <div>
-          <h3>Backups</h3>
-          <p>Cópias de segurança dos contatos neste navegador.</p>
-        </div>
-        <div className="crm__form-actions" style={{ margin: 0 }}>
-          <button type="button" className="crm__primary" onClick={onCreate}>
-            Gerar backup
-          </button>
-          <button type="button" className="crm__ghost" onClick={onLoadDemo}>
-            <RefreshCcw size={14} strokeWidth={2.25} />
-            Carregar exemplos
-          </button>
-        </div>
-      </div>
-      {backups.length === 0 ? (
-        <p className="crm__empty">Nenhum backup ainda.</p>
-      ) : (
-        <ul className="crm__backups">
-          {backups.map((backup) => (
-            <li key={backup.id}>
-              <strong>{formatWhen(backup.createdAt)}</strong>
-              <span>
-                {backup.leadCount} contatos · {backup.note}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}

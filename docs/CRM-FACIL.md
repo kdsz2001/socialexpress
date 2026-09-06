@@ -1,16 +1,14 @@
 ## CRM Comercial — Social Express
 
-Pipeline de contatos com valor potencial, classificação de ganho/perda e análise por traje.
+Fluxo simples e intuitivo:
 
-### Fluxo
-1. **Trajes e valores** — cadastre o catálogo (ex.: Azul Marinho R$ 480)
-2. **Registrar conversa** — cole o histórico do atendimento
-3. O sistema identifica nome, evento, traje e **valor potencial**
-4. Classifique: **Ganhamos**, **Perdemos** ou **Em aberto**
-5. Veja a **Análise de valores** (por resultado e por traje)
+1. **Novo contato** → Nome, Número, Dia do evento, Traje  
+2. O **valor estimado** vem do catálogo e atualiza o potencial na hora  
+3. Classifique: **Ganho**, **Perdido** ou **Em aberto**  
+4. A aba **Análise** (pizza) atualiza em tempo real  
 
-### Formulário de captura
-Link público em `/captura` para divulgação ou tablet da loja.
+### Trajes e valores
+Cadastre o catálogo (ex.: Azul Marinho R$ 480). Ao escolher o traje no contato, o potencial muda automaticamente.
 
 ### Como iniciar
 ```powershell

@@ -835,9 +835,177 @@
   align-items: stretch;
 }
 
-.crm__empty-box .crm__empty {
-  margin: 0 0 0.35rem;
+.crm__form-grid--contact {
+  grid-template-columns: 1fr 1fr;
 }
+
+.crm__form-grid select {
+  border: 1px solid #e4e6ef;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  font-weight: 500;
+  color: #181c32;
+  background: #fafbff;
+}
+
+.crm__estimate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1rem 0.25rem 0.25rem;
+  padding: 0.95rem 1.1rem;
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #f1f8ff 0%, #eefbf7 100%);
+  border: 1px solid #e1f0ff;
+}
+
+.crm__estimate span {
+  color: #5e6278;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.crm__estimate strong {
+  color: #0bb783;
+  font-size: 1.25rem;
+}
+
+.crm__lead-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0bb783;
+}
+
+.crm__value-caption {
+  font-size: 0.75rem;
+  color: #a1a5b7;
+  font-weight: 600;
+}
+
+.crm__facts--simple {
+  margin-top: 0.5rem;
+}
+
+.crm__stat-card.is-won strong {
+  color: #0bb783;
+}
+
+.crm__stat-card.is-lost strong {
+  color: #f64e60;
+}
+
+.crm__stat-card.is-open strong {
+  color: #3699ff;
+}
+
+.crm__pie-block--pro {
+  background: #fafbff;
+  border: 1px solid #ebedf3;
+  border-radius: 0.85rem;
+  padding: 1.1rem 1.15rem 1.15rem;
+}
+
+.crm__pie-copy h4 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: #181c32;
+}
+
+.crm__pie-copy p {
+  margin: 0 0 1rem;
+  color: #7e8299;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.crm__donut-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.crm__donut {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.crm__donut-hole {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  box-shadow: 0 0 0 1px #eef1f6;
+}
+
+.crm__donut-hole span {
+  font-size: 0.72rem;
+  color: #a1a5b7;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.crm__donut-hole strong {
+  font-size: 0.95rem;
+  color: #181c32;
+}
+
+.crm__pie-legend--pro li {
+  grid-template-columns: 12px 1fr auto;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f1f3f8;
+}
+
+.crm__pie-legend--pro li:last-child {
+  border-bottom: 0;
+}
+
+.crm__pie-legend--pro div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.crm__pie-legend--pro em {
+  font-style: normal;
+  color: #a1a5b7;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.crm__suit-table-head {
+  background: #f3f6f9 !important;
+  border-color: transparent !important;
+  font-weight: 600;
+}
+
+.crm__label-field input {
+  border: 1px solid #e4e6ef;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  font-weight: 500;
+  color: #181c32;
+  background: #fafbff;
+  width: 100%;
+}
+
+@media (max-width: 980px) {
+  .crm__form-grid--contact {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 .crm__money {
   display: block;
