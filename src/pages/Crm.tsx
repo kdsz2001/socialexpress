@@ -123,7 +123,7 @@ export function Crm() {
 
   const onPasteChat = () => {
     if (!pasteText.trim()) {
-      setToast('Cole a conversa do WhatsApp.')
+      setToast('Cole a conversa do atendimento.')
       return
     }
     const intoSelected = pasteIntoSelected && selected
@@ -136,8 +136,8 @@ export function Crm() {
     setView('board')
     setToast(
       intoSelected
-        ? 'Conversa salva — valor potencial atualizado'
-        : 'Contato salvo da conversa',
+        ? 'Conversa atualizada — valor potencial recalculado'
+        : 'Contato registrado',
     )
     if (leadId) setSelectedId(leadId)
   }
@@ -147,20 +147,15 @@ export function Crm() {
       <section className="crm__shell">
         <header className="crm__top">
           <div className="crm__account">
-            <span className="crm__online">
-              <Sparkles size={14} strokeWidth={2.25} />
-              CRM de contatos
-            </span>
             <div>
-              <strong>{state.accountName || 'Social Express CRM'}</strong>
+              <strong>Pipeline comercial</strong>
               <p>
                 {state.leads.length} contato{state.leads.length === 1 ? '' : 's'} · potencial{' '}
                 {formatMoneyBr(stats.totals.all)}
               </p>
             </div>
             <span className="crm__sync">
-              Ganhos {formatMoneyBr(stats.totals.won)} · Perdidos{' '}
-              {formatMoneyBr(stats.totals.lost)}
+              Ganhos {formatMoneyBr(stats.totals.won)} · Perdidos {formatMoneyBr(stats.totals.lost)}
             </span>
           </div>
 
@@ -178,7 +173,7 @@ export function Crm() {
               onClick={() => setView('paste')}
             >
               <ClipboardPaste size={14} strokeWidth={2.25} />
-              Colar conversa
+              Registrar conversa
             </button>
             <button
               type="button"
@@ -194,7 +189,7 @@ export function Crm() {
               onClick={() => setView('values')}
             >
               <PieChart size={14} strokeWidth={2.25} />
-              Pizza de valores
+              Análise de valores
             </button>
             <button
               type="button"
@@ -227,21 +222,21 @@ export function Crm() {
           <div className="crm__panel">
             <div className="crm__panel-head">
               <div>
-                <h3>Salvar contato pela conversa</h3>
+                <h3>Registrar conversa</h3>
                 <p>
-                  Copie a conversa no WhatsApp e cole aqui. A IA extrai nome, evento, traje do
+                  Cole o histórico do atendimento. O sistema identifica nome, evento, traje do
                   catálogo e o <strong>valor potencial</strong>.
                 </p>
               </div>
             </div>
             <div className="crm__form-grid">
               <label className="crm__form-span">
-                Conversa do WhatsApp
+                Histórico da conversa
                 <textarea
                   value={pasteText}
                   onChange={(e) => setPasteText(e.target.value)}
                   rows={12}
-                  placeholder={`Cole aqui, por exemplo:\nOi, meu nome é João\nQuero o Azul Marinho para casamento dia 10/10\nMeu zap (47) 99999-1122`}
+                  placeholder={`Exemplo:\nOi, meu nome é João\nQuero o Azul Marinho para casamento dia 10/10\nTelefone (47) 99999-1122`}
                 />
               </label>
               {selected ? (
@@ -258,7 +253,7 @@ export function Crm() {
             <div className="crm__form-actions">
               <button type="button" className="crm__primary" onClick={onPasteChat}>
                 <ClipboardPaste size={15} strokeWidth={2.25} />
-                Salvar contato
+                Registrar contato
               </button>
               <button type="button" className="crm__ghost" onClick={() => setView('board')}>
                 Cancelar
@@ -273,7 +268,7 @@ export function Crm() {
             onChange={setDraftSuits}
             onSave={() => {
               updateCrmSuits(draftSuits)
-              setToast('Catálogo salvo — leads reanalisados')
+              setToast('Catálogo salvo — contatos reanalisados')
             }}
           />
         ) : null}
@@ -284,13 +279,13 @@ export function Crm() {
           <div className="crm__panel">
             <div className="crm__panel-head">
               <div>
-                <h3>Formulário público</h3>
-                <p>Link para bio ou tablet. Cliente preenche e o contato entra no CRM.</p>
+                <h3>Formulário de captura</h3>
+                <p>Link para divulgação ou tablet da loja. O cliente preenche e o contato entra no CRM.</p>
               </div>
             </div>
             <div className="crm__form-grid">
               <label className="crm__form-span">
-                WhatsApp da loja
+                Telefone da loja
                 <input
                   value={storePhoneDraft}
                   onChange={(e) => setStorePhoneDraft(e.target.value)}
@@ -308,7 +303,7 @@ export function Crm() {
                 className="crm__primary"
                 onClick={() => {
                   setCrmStoreWhatsapp(storePhoneDraft)
-                  setToast('WhatsApp da loja salvo')
+                  setToast('Telefone da loja salvo')
                 }}
               >
                 Salvar número
@@ -341,7 +336,7 @@ export function Crm() {
             }}
             onLoadDemo={() => {
               loadDemoLeads()
-              setToast('Exemplos carregados')
+              setToast('Dados de exemplo carregados')
               setView('board')
             }}
           />
@@ -376,19 +371,19 @@ export function Crm() {
               <aside className="crm__list">
                 {filtered.length === 0 ? (
                   <div className="crm__empty-box">
-                    <p className="crm__empty">Nenhum contato ainda.</p>
+                    <p className="crm__empty">Nenhum contato cadastrado.</p>
                     <button type="button" className="crm__primary" onClick={() => setView('paste')}>
-                      Colar conversa do WhatsApp
+                      Registrar conversa
                     </button>
                     <button
                       type="button"
                       className="crm__ghost"
                       onClick={() => {
                         loadDemoLeads()
-                        setToast('Exemplos carregados')
+                        setToast('Dados de exemplo carregados')
                       }}
                     >
-                      Ver exemplos
+                      Carregar exemplos
                     </button>
                   </div>
                 ) : (
@@ -428,15 +423,15 @@ export function Crm() {
                       setCrmLeadOutcome(selected.id, outcome)
                       setToast(
                         outcome === 'won'
-                          ? 'Marcado como ganho'
+                          ? 'Classificado como ganho'
                           : outcome === 'lost'
-                            ? 'Marcado como perdido'
-                            : 'Voltou para em aberto',
+                            ? 'Classificado como perdido'
+                            : 'Retornado para em aberto',
                       )
                     }}
                     onReanalyze={() => {
                       reanalyzeCrmLead(selected.id)
-                      setToast('Contato reanalisado com o catálogo')
+                      setToast('Análise atualizada com o catálogo')
                     }}
                     onPasteHere={() => {
                       setPasteIntoSelected(true)
@@ -444,7 +439,7 @@ export function Crm() {
                     }}
                   />
                 ) : (
-                  <p className="crm__empty">Cole uma conversa para salvar o primeiro contato.</p>
+                  <p className="crm__empty">Registre uma conversa para adicionar o primeiro contato.</p>
                 )}
               </div>
             </div>
@@ -564,7 +559,7 @@ function LeadDetail({
 
       <div className="crm__thread">
         {lead.messages.length === 0 ? (
-          <p className="crm__empty">Sem mensagens — cole a conversa do WhatsApp.</p>
+          <p className="crm__empty">Sem mensagens registradas. Acrescente o histórico da conversa.</p>
         ) : (
           lead.messages.map((message) => (
             <div
@@ -580,7 +575,7 @@ function LeadDetail({
 
       <button type="button" className="crm__primary crm__ghost-block" onClick={onPasteHere}>
         <ClipboardPaste size={14} strokeWidth={2.25} />
-        Colar mais conversa neste contato
+        Acrescentar conversa a este contato
       </button>
     </div>
   )
@@ -610,7 +605,7 @@ function CatalogPanel({
         <div>
           <h3>Catálogo de trajes e valores</h3>
           <p>
-            Quando a conversa mencionar o nome do traje, o lead recebe esse valor potencial
+            Quando a conversa mencionar o nome do traje, o contato recebe esse valor potencial
             automaticamente.
           </p>
         </div>
@@ -696,7 +691,7 @@ function ValuesPanel({
     <div className="crm__panel">
       <div className="crm__panel-head">
         <div>
-          <h3>Pizza de valores</h3>
+          <h3>Análise de valores</h3>
           <p>
             Visão do valor potencial por resultado (ganho / perdido / aberto) e por traje do
             catálogo.
@@ -733,7 +728,7 @@ function ValuesPanel({
       </div>
 
       {stats.bySuit.length === 0 ? (
-        <p className="crm__empty">Cole conversas com trajes do catálogo para popular a pizza.</p>
+        <p className="crm__empty">Registre conversas com trajes do catálogo para gerar a análise.</p>
       ) : (
         <ul className="crm__suit-table">
           {stats.bySuit.map((row) => (
@@ -816,7 +811,7 @@ function ScorePanel({
       <div className="crm__panel-head">
         <div>
           <h3>Pontuação da conversa</h3>
-          <p>Palavras-chave extras (além do valor do traje) para o score do lead.</p>
+          <p>Palavras-chave que reforçam o score comercial do contato.</p>
         </div>
         <button type="button" className="crm__primary" onClick={onSave}>
           <CheckCircle2 size={15} strokeWidth={2.25} />
@@ -876,8 +871,8 @@ function BackupsPanel({
     <div className="crm__panel">
       <div className="crm__panel-head">
         <div>
-          <h3>Backups do CRM</h3>
-          <p>Snapshots locais dos contatos neste navegador.</p>
+          <h3>Backups</h3>
+          <p>Cópias de segurança dos contatos neste navegador.</p>
         </div>
         <div className="crm__form-actions" style={{ margin: 0 }}>
           <button type="button" className="crm__primary" onClick={onCreate}>
@@ -897,7 +892,7 @@ function BackupsPanel({
             <li key={backup.id}>
               <strong>{formatWhen(backup.createdAt)}</strong>
               <span>
-                {backup.leadCount} leads · {backup.note}
+                {backup.leadCount} contatos · {backup.note}
               </span>
             </li>
           ))}

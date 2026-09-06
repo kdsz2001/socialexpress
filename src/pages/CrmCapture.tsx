@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { CheckCircle2, MessageCircle } from 'lucide-react'
+import { CheckCircle2, Phone } from 'lucide-react'
 import {
   bootEasyCrm,
   buildCaptureWhatsappLink,
@@ -24,7 +24,7 @@ export function CrmCapture() {
     event.preventDefault()
     setError(null)
     if (!name.trim() || !phone.trim()) {
-      setError('Informe nome e WhatsApp.')
+      setError('Informe nome e telefone.')
       return
     }
     bootEasyCrm()
@@ -39,7 +39,7 @@ export function CrmCapture() {
     setDone(true)
   }
 
-  const waLink = buildCaptureWhatsappLink({
+  const contactLink = buildCaptureWhatsappLink({
     storePhone,
     name: name.trim() || 'Cliente',
     phone: phone.trim() || '—',
@@ -53,20 +53,20 @@ export function CrmCapture() {
     <div className="crm-capture">
       <div className="crm-capture__card">
         <span className="crm-capture__brand">Social Express</span>
-        <h1>Fale com a gente</h1>
+        <h1>Solicite seu atendimento</h1>
         <p className="crm-capture__sub">
-          Preencha em 30 segundos. Nossa equipe entra em contato pelo WhatsApp.
+          Preencha os dados abaixo. Nossa equipe retorna o contato em breve.
         </p>
 
         {done ? (
           <div className="crm-capture__done">
             <CheckCircle2 size={28} strokeWidth={2.25} />
-            <h2>Recebemos seu pedido</h2>
-            <p>Seu lead já está no CRM da loja neste aparelho.</p>
-            {waLink ? (
-              <a className="crm-capture__primary" href={waLink} target="_blank" rel="noreferrer">
-                <MessageCircle size={16} strokeWidth={2.25} />
-                Também enviar no WhatsApp
+            <h2>Solicitação enviada</h2>
+            <p>Recebemos suas informações. Em breve entraremos em contato.</p>
+            {contactLink ? (
+              <a className="crm-capture__primary" href={contactLink} target="_blank" rel="noreferrer">
+                <Phone size={16} strokeWidth={2.25} />
+                Falar com a loja agora
               </a>
             ) : null}
             <button
@@ -82,17 +82,17 @@ export function CrmCapture() {
                 setNotes('')
               }}
             >
-              Enviar outro
+              Nova solicitação
             </button>
           </div>
         ) : (
           <form className="crm-capture__form" onSubmit={onSubmit}>
             <label>
-              Seu nome *
+              Nome completo *
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </label>
             <label>
-              Seu WhatsApp *
+              Telefone *
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -124,7 +124,7 @@ export function CrmCapture() {
               <input
                 value={suitInterest}
                 onChange={(e) => setSuitInterest(e.target.value)}
-                placeholder="Terno azul, off white…"
+                placeholder="Azul Marinho, Off White…"
               />
             </label>
             <label>
@@ -133,24 +133,19 @@ export function CrmCapture() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                placeholder="Conta um pouco o que você precisa"
+                placeholder="Conte o que você precisa"
               />
             </label>
             {error ? <p className="crm-capture__error">{error}</p> : null}
             <button type="submit" className="crm-capture__primary">
-              Enviar para o CRM
+              Enviar solicitação
             </button>
-            {waLink ? (
-              <a className="crm-capture__ghost" href={waLink} target="_blank" rel="noreferrer">
-                <MessageCircle size={15} strokeWidth={2.25} />
-                Ou abrir WhatsApp da loja
+            {contactLink ? (
+              <a className="crm-capture__ghost" href={contactLink} target="_blank" rel="noreferrer">
+                <Phone size={15} strokeWidth={2.25} />
+                Preferir falar agora
               </a>
-            ) : (
-              <p className="crm-capture__hint">
-                Dica: a loja pode cadastrar o WhatsApp em CRM → Formulário para liberar o botão
-                direto.
-              </p>
-            )}
+            ) : null}
           </form>
         )}
       </div>

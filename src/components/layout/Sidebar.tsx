@@ -23,7 +23,7 @@ const navItems = [
   { to: '/clientes', label: 'Clientes', icon: User },
   { to: '/agenda', label: 'Agenda', icon: Calendar },
   { to: '/eventos', label: 'Eventos', icon: Wine },
-  { to: '/crm', label: 'CRM', icon: ContactRound },
+  { to: '/crm', label: 'CRM Comercial', icon: ContactRound },
   { to: '/produtos', label: 'Produtos', icon: TieIcon },
   { to: '/funcionarios', label: 'Funcionários', icon: Users },
   { to: '/pedidos', label: 'Pedidos', icon: Receipt },

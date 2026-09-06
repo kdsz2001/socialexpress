@@ -1,20 +1,20 @@
-.crm-subheader__status {
+.crm-subheader__meta {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   margin-left: 0.85rem;
-  padding: 0.3rem 0.65rem;
-  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.45rem;
   background: #f3f6f9;
-  color: #7e8299;
-  font-size: 0.78rem;
+  color: #5e6278;
+  font-size: 0.8rem;
   font-weight: 600;
   vertical-align: middle;
 }
 
-.crm-subheader__status.is-on {
-  background: #e8fff3;
-  color: #0bb783;
+.crm-subheader__dot {
+  color: #b5b5c3;
+  font-weight: 500;
 }
 
 .clients-subheader__heading {

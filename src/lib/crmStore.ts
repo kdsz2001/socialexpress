@@ -77,7 +77,7 @@ export type CrmState = {
   connectedAt: number | null
   accountName: string
   accountPhone: string
-  /** WhatsApp da loja (formulário /captura → wa.me) */
+  /** Telefone da loja (formulário /captura → wa.me) */
   storeWhatsapp: string
   qrToken: string
   qrBase64: string | null
@@ -375,13 +375,13 @@ export function hydrateCrmFromBridge(payload: {
   })
 }
 
-/** Abre o CRM fácil (sem WhatsApp conectado). */
+/** Inicializa o CRM comercial (modo local). */
 export function bootEasyCrm() {
   return update((current) => ({
     ...current,
     status: 'connected',
     connectedAt: current.connectedAt || Date.now(),
-    accountName: current.accountName || 'Social Express CRM',
+    accountName: current.accountName || 'Social Express',
     accountPhone: current.accountPhone || '',
     connectionMode: 'mock',
     qrBase64: null,
@@ -414,7 +414,7 @@ function extractPhoneFromText(text: string) {
   return match ? formatPhoneDisplay(match[0]) : ''
 }
 
-/** Interpreta texto colado do WhatsApp / conversa. */
+/** Interpreta histórico de conversa colado. */
 export function parseChatPaste(raw: string): CrmMessage[] {
   const lines = String(raw || '')
     .split(/\r?\n/)
@@ -427,7 +427,7 @@ export function parseChatPaste(raw: string): CrmMessage[] {
 
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i]
-    // Export WhatsApp: [01/09/2026, 14:22:10] Nome: texto
+    // Export de conversa: [01/09/2026, 14:22:10] Nome: texto
     const wa = line.match(
       /^\[?(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*([^:|]{1,40}):\s*(.+)$/,
     )
@@ -581,7 +581,7 @@ export function ingestChatPaste(input: {
     const analyzed = analyzeConversation(messages, current.scoreRules, base, current.suits)
     const lead: CrmLead = {
       id: crypto.randomUUID(),
-      name: analyzed.name || 'Cliente WhatsApp',
+      name: analyzed.name || 'Contato',
       phone,
       labelId: 'novo',
       eventType: analyzed.eventType,
@@ -653,7 +653,7 @@ export function buildCaptureWhatsappLink(input: {
   const text = [
     'Olá! Vim pelo formulário da Social Express.',
     `Nome: ${input.name}`,
-    `WhatsApp: ${input.phone}`,
+    `Telefone: ${input.phone}`,
     input.eventType ? `Evento: ${input.eventType}` : null,
     input.eventDate ? `Data: ${input.eventDate}` : null,
     input.suitInterest ? `Traje: ${input.suitInterest}` : null,
@@ -942,7 +942,7 @@ export function analyzeConversation(
 
   const draft: CrmLead = {
     id: base?.id ?? 'temp',
-    name: name || base?.name || 'Cliente WhatsApp',
+    name: name || base?.name || 'Contato',
     phone: base?.phone ?? '',
     labelId: base?.labelId ?? 'novo',
     eventType,
@@ -1045,7 +1045,7 @@ function seedDemoLeads(rules: CrmScoreRule[]): CrmLead[] {
     },
     {
       id: 'lead-5',
-      name: 'Cliente WhatsApp',
+      name: 'Contato',
       phone: '(47) 99900-4455',
       labelId: 'novo',
       eventType: '',

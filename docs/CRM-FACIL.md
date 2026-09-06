@@ -1,36 +1,18 @@
-## CRM fácil — contatos, valor potencial e ganho/perda
+## CRM Comercial — Social Express
 
-Fluxo principal: **colar conversa do WhatsApp** → salvar contato → valor do traje → marcar ganho ou perda.
+Pipeline de contatos com valor potencial, classificação de ganho/perda e análise por traje.
 
-### 1) Catálogo de trajes
-Em **CRM → Trajes e valores**, cadastre:
-- Azul Marinho — 480
-- Cinza Semi Acetinado — 660
-- Cinza Mescla Claro — 580
-- (e os demais do seu catálogo)
+### Fluxo
+1. **Trajes e valores** — cadastre o catálogo (ex.: Azul Marinho R$ 480)
+2. **Registrar conversa** — cole o histórico do atendimento
+3. O sistema identifica nome, evento, traje e **valor potencial**
+4. Classifique: **Ganhamos**, **Perdemos** ou **Em aberto**
+5. Veja a **Análise de valores** (por resultado e por traje)
 
-### 2) Salvar contato
-1. Copie a conversa no WhatsApp  
-2. **Colar conversa** → cole → **Salvar contato**  
-3. A IA preenche nome/evento/data e, se o traje foi citado, o **valor potencial**
+### Formulário de captura
+Link público em `/captura` para divulgação ou tablet da loja.
 
-### 3) Classificar resultado
-No contato:
-- **Ganhamos** → etiqueta Pago  
-- **Perdemos** → etiqueta Perdido (ex.: já alugou em outro lugar após 1–3 ligações)  
-- **Em aberto** → ainda em andamento  
-
-Dá para ajustar o traje manualmente se a IA errar.
-
-### 4) Pizza de valores
-Aba **Pizza de valores**:
-- Ganhos × Perdidos × Em aberto  
-- Distribuição por traje do catálogo  
-
-### 5) Formulário (opcional)
-`/captura` para bio/tablet.
-
-### Como ligar
+### Como iniciar
 ```powershell
 cd C:\Users\USER\Desktop\socialexpress
 git pull origin cursor/clarial-dashboard-db05
