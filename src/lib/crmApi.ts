@@ -1,11 +1,13 @@
 /**
- * Cliente do crm-bridge (Evolution API atrás do servidor).
+ * Cliente do crm-bridge (Meta Cloud API ou Evolution atrás do servidor).
  * Se VITE_CRM_BRIDGE_URL não existir, o CRM usa o modo simulado local.
  */
 
 import type { CrmBackup, CrmConnectionStatus, CrmLabel, CrmLead, CrmScoreRule } from './crmStore'
 
 const BASE = (import.meta.env.VITE_CRM_BRIDGE_URL || '').replace(/\/$/, '')
+
+export type BridgeProvider = 'meta' | 'evolution' | 'mock'
 
 export type BridgeConnection = {
   status: CrmConnectionStatus
@@ -16,11 +18,13 @@ export type BridgeConnection = {
   qrBase64?: string | null
   pairingCode?: string | null
   lastError?: string | null
-  mode?: string
+  mode?: BridgeProvider | string
   crmOpen?: boolean
   evolutionState?: string | null
   sessionReady?: boolean
   needsConfirm?: boolean
+  webhookUrl?: string
+  tip?: string
 }
 
 export type BridgeSnapshot = {
@@ -55,10 +59,25 @@ async function bridgeFetch<T>(pathname: string, options: RequestInit = {}): Prom
 export async function bridgeHealth() {
   return bridgeFetch<{
     ok: boolean
+    provider?: BridgeProvider
+    metaConfigured?: boolean
     evolutionConfigured: boolean
     instance: string
     publicUrl: string
+    webhookMeta?: string
+    webhookEvolution?: string
   }>('/api/health')
+}
+
+export async function bridgeSimulateMessage(input: {
+  phone?: string
+  pushName?: string
+  text: string
+}) {
+  return bridgeFetch<BridgeSnapshot>('/api/whatsapp/simulate', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
 }
 
 export async function bridgeGetState() {

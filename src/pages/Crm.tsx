@@ -16,11 +16,14 @@ import {
   bridgeCreateBackup,
   bridgeDisconnect,
   bridgeGetState,
+  bridgeHealth,
   bridgeRefreshQr,
   bridgeSetLeadLabel,
+  bridgeSimulateMessage,
   bridgeStatus,
   bridgeSyncConversations,
   crmBridgeEnabled,
+  type BridgeProvider,
 } from '../lib/crmApi'
 import {
   addCrmDemoMessage,
@@ -65,12 +68,16 @@ export function Crm() {
   const [busy, setBusy] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [bridgeError, setBridgeError] = useState<string | null>(null)
+  const [provider, setProvider] = useState<BridgeProvider>('mock')
+  const [webhookUrl, setWebhookUrl] = useState<string | null>(null)
   const [qrBootstrapped, setQrBootstrapped] = useState(false)
   const [qrRenderKey, setQrRenderKey] = useState(0)
   const [sessionReady, setSessionReady] = useState(false)
   const qrFetchRef = useRef(false)
   const didSyncRef = useRef(false)
   const liveBootRef = useRef(false)
+  const isMeta = provider === 'meta'
+  const isEvolution = provider === 'evolution'
 
   const pullOfficialQr = async (forceNew: boolean) => {
     if (qrFetchRef.current) return null
@@ -89,6 +96,9 @@ export function Crm() {
       const connection = (await Promise.race([request, timeout])) as Awaited<
         ReturnType<typeof bridgeRefreshQr>
       > & { sessionReady?: boolean; needsConfirm?: boolean }
+      if (connection.mode === 'meta' || connection.mode === 'evolution') {
+        setProvider(connection.mode)
+      }
       const snapshot = await bridgeGetState()
       hydrateCrmFromBridge({
         ...snapshot,
@@ -128,12 +138,33 @@ export function Crm() {
     ensureCrmSession()
   }, [live])
 
-  // Modo Evolution: ao abrir a página, NÃO entra conectado sozinho
+  // Descobre provedor (Meta > Evolution)
+  useEffect(() => {
+    if (!live) {
+      setProvider('mock')
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const health = await bridgeHealth()
+        if (cancelled) return
+        setProvider((health.provider as BridgeProvider) || 'mock')
+        setWebhookUrl(health.webhookMeta || health.publicUrl || null)
+      } catch {
+        if (!cancelled) setBridgeError('Bridge offline — inicie o crm-bridge (npm start)')
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [live])
+
+  // Modo live: ao abrir a página, não entra conectado sozinho
   useEffect(() => {
     if (!live || liveBootRef.current) return
     liveBootRef.current = true
     disconnectCrm()
-    startCrmConnecting()
     setSessionReady(false)
   }, [live])
 
@@ -154,7 +185,7 @@ export function Crm() {
 
   // Evolution: QR oficial na abertura
   useEffect(() => {
-    if (!live || qrBootstrapped) return
+    if (!live || !isEvolution || qrBootstrapped) return
     if (state.status === 'connected') {
       setQrBootstrapped(true)
       return
@@ -179,11 +210,11 @@ export function Crm() {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [live, qrBootstrapped, state.status])
+  }, [live, isEvolution, qrBootstrapped, state.status])
 
   // Evolution: status + QR automático a cada 45s
   useEffect(() => {
-    if (!live) return
+    if (!live || !isEvolution) return
     if (state.status === 'connected') return
     let cancelled = false
 
@@ -235,11 +266,32 @@ export function Crm() {
       window.clearInterval(statusTimer)
       window.clearInterval(qrTimer)
     }
-  }, [live, state.status])
+  }, [live, isEvolution, state.status])
 
-  // Conectado: busca só mensagens novas a cada 20s (sem histórico antigo)
+  // Meta: atualiza leads enquanto conectado (webhook é o canal principal)
   useEffect(() => {
-    if (!live) return
+    if (!live || !isMeta) return
+    if (state.status !== 'connected') return
+    let cancelled = false
+    const pull = async () => {
+      try {
+        const snapshot = await bridgeGetState()
+        if (!cancelled) hydrateCrmFromBridge(snapshot)
+      } catch {
+        // ignore
+      }
+    }
+    void pull()
+    const timer = window.setInterval(pull, 4000)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [live, isMeta, state.status])
+
+  // Evolution: busca só mensagens novas a cada 20s
+  useEffect(() => {
+    if (!live || !isEvolution) return
     if (state.status !== 'connected') {
       didSyncRef.current = false
       return
@@ -272,7 +324,7 @@ export function Crm() {
     }, 20000)
 
     return () => window.clearInterval(timer)
-  }, [live, state.status])
+  }, [live, isEvolution, state.status])
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { todos: state.leads.length }
@@ -307,12 +359,27 @@ export function Crm() {
       startCrmConnecting()
       return
     }
+    setBusy(true)
     startCrmConnecting()
     try {
+      if (isMeta || !isEvolution) {
+        const connection = await bridgeConnect()
+        const snapshot = await bridgeGetState()
+        hydrateCrmFromBridge({
+          ...snapshot,
+          connection: { ...snapshot.connection, ...connection, crmOpen: true, status: 'connected' },
+        })
+        if (connection.webhookUrl) setWebhookUrl(connection.webhookUrl)
+        setSessionReady(false)
+        setBridgeError(null)
+        return
+      }
       await pullOfficialQr(false)
     } catch (error) {
       setBridgeError(error instanceof Error ? error.message : 'Falha ao conectar')
       disconnectCrm()
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -336,8 +403,8 @@ export function Crm() {
   }
 
   const onRefreshQr = async () => {
-    if (!live) {
-      refreshCrmQr()
+    if (!live || isMeta) {
+      if (!live) refreshCrmQr()
       return
     }
     // Bloqueado enquanto gera; só libera novo clique com QR na tela (ou para tentar de novo após erro)
@@ -362,13 +429,31 @@ export function Crm() {
     }
     disconnectCrm()
     setSessionReady(false)
-    if (live) {
+    if (live && isEvolution) {
       startCrmConnecting()
       try {
         await pullOfficialQr(true)
       } catch {
         // QR pode falhar; usuário clica Novo QR
       }
+    }
+  }
+
+  const onSimulate = async () => {
+    if (!live) return
+    setBusy(true)
+    try {
+      const snapshot = await bridgeSimulateMessage({
+        phone: '5548999887766',
+        pushName: 'Cliente Teste',
+        text: 'Oi! Quero terno azul para casamento no dia 20/10',
+      })
+      hydrateCrmFromBridge(snapshot)
+      setBridgeError(null)
+    } catch (error) {
+      setBridgeError(error instanceof Error ? error.message : 'Falha ao simular')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -380,6 +465,10 @@ export function Crm() {
     setBridgeError(null)
     setSyncing(true)
     try {
+      if (isMeta) {
+        hydrateCrmFromBridge(await bridgeGetState())
+        return
+      }
       await bridgeStatus()
       const synced = await bridgeSyncConversations()
       hydrateCrmFromBridge(synced)
@@ -421,16 +510,20 @@ export function Crm() {
         <ConnectPanel
           status={state.status === 'connecting' || busy ? 'connecting' : 'disconnected'}
           busy={busy}
-          mode={live ? 'evolution' : 'mock'}
+          mode={
+            !live ? 'mock' : isEvolution && !isMeta ? 'evolution' : 'meta'
+          }
           qrToken={state.qrToken}
           qrBase64={state.qrBase64}
           qrRenderKey={qrRenderKey}
           sessionReady={sessionReady}
+          webhookUrl={webhookUrl}
           error={bridgeError || state.lastError}
           onRefreshQr={() => void onRefreshQr()}
           onStart={() => void onStartConnect()}
           onConfirmSession={() => void onConfirmSession()}
           onDisconnectSession={() => void onDisconnect()}
+          onSimulate={() => void onSimulate()}
         />
       </div>
     )
@@ -443,11 +536,14 @@ export function Crm() {
           <div className="crm__account">
             <span className="crm__online">
               <Wifi size={14} strokeWidth={2.25} />
-              {live ? 'WhatsApp real' : 'Demo conectada'}
+              {live ? (isMeta ? 'WhatsApp Cloud API' : 'WhatsApp real') : 'Demo conectada'}
             </span>
             <div>
               <strong>{state.accountName || 'WhatsApp'}</strong>
-              <p>{state.accountPhone || (live ? 'Sessão Evolution' : 'Modo simulado')}</p>
+              <p>
+                {state.accountPhone ||
+                  (live ? (isMeta ? 'Número Business Meta' : 'Sessão Evolution') : 'Modo simulado')}
+              </p>
             </div>
             <span className="crm__sync">Última sync: {formatWhen(state.lastSyncAt)}</span>
           </div>
@@ -484,6 +580,11 @@ export function Crm() {
               <RefreshCcw size={14} strokeWidth={2.25} className={syncing ? 'is-spin' : undefined} />
               {syncing ? 'Buscando…' : 'Atualizar'}
             </button>
+            {live ? (
+              <button type="button" className="crm__ghost" onClick={() => void onSimulate()} disabled={busy}>
+                Msg teste
+              </button>
+            ) : null}
             <button type="button" className="crm__danger" onClick={() => void onDisconnect()}>
               <Unplug size={14} strokeWidth={2.25} />
               Desconectar
@@ -535,7 +636,9 @@ export function Crm() {
                 {filtered.length === 0 ? (
                   <p className="crm__empty">
                     {live
-                      ? 'Nenhum lead ainda. Quando alguém mandar mensagem no WhatsApp, aparece aqui.'
+                      ? isMeta
+                        ? 'Aguardando mensagens novas no WhatsApp Business…'
+                        : 'Nenhum lead ainda. Quando alguém mandar mensagem no WhatsApp, aparece aqui.'
                       : 'Nenhum lead nesta etiqueta.'}
                   </p>
                 ) : (
@@ -597,27 +700,81 @@ function ConnectPanel({
   qrBase64,
   qrRenderKey,
   sessionReady,
+  webhookUrl,
   error,
   onRefreshQr,
   onStart,
   onConfirmSession,
   onDisconnectSession,
+  onSimulate,
 }: {
   status: 'disconnected' | 'connecting'
   busy: boolean
-  mode: 'mock' | 'evolution'
+  mode: 'mock' | 'evolution' | 'meta'
   qrToken: string
   qrBase64: string | null
   qrRenderKey: number
   sessionReady: boolean
+  webhookUrl: string | null
   error: string | null
   onRefreshQr: () => void
   onStart: () => void
   onConfirmSession: () => void
   onDisconnectSession: () => void
+  onSimulate: () => void
 }) {
   const showFakeQr = mode === 'mock' && !qrBase64
   const showOfficialQr = Boolean(qrBase64)
+
+  if (mode === 'meta') {
+    return (
+      <section className="crm__connect">
+        <div className="crm__connect-copy">
+          <span className="crm__badge">
+            <MessageCircle size={14} strokeWidth={2.25} />
+            WhatsApp Cloud API
+          </span>
+          <h2>Conecte pelo WhatsApp oficial (Meta)</h2>
+          <p>
+            Sem QR de celular. As mensagens novas do número Business entram no pipeline pelo sistema
+            da própria Meta.
+          </p>
+          <ul>
+            <li>Canal oficial — mais estável que Evolution/QR</li>
+            <li>Só mensagens novas (sem histórico antigo)</li>
+            <li>IA extrai evento, data, traje e score</li>
+          </ul>
+          {error ? <p className="crm__banner-error">{error}</p> : null}
+          <p className="crm__note">
+            Guia: <code>docs/CRM-WHATSAPP-CLOUD.md</code>
+            {webhookUrl ? (
+              <>
+                <br />
+                Webhook: <code>{webhookUrl}</code>
+              </>
+            ) : null}
+          </p>
+          <div className="crm__pairing-row" style={{ marginTop: '1rem' }}>
+            <button type="button" className="crm__primary" onClick={onStart} disabled={busy}>
+              {busy ? 'Validando token…' : 'Conectar WhatsApp oficial'}
+            </button>
+            <button type="button" className="crm__ghost" onClick={onSimulate} disabled={busy}>
+              Simular mensagem
+            </button>
+          </div>
+        </div>
+        <div className="crm__qr-card">
+          <div className="crm__qr">
+            <div className="crm__qr-loading">
+              <CheckCircle2 size={28} strokeWidth={2.25} />
+              <span>Meta Cloud API</span>
+            </div>
+          </div>
+          <p className="crm__qr-token">Sem QR · número Business</p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="crm__connect">
@@ -628,15 +785,15 @@ function ConnectPanel({
         </span>
         <h2>
           {mode === 'evolution'
-            ? 'Conecte seu WhatsApp com Evolution (Railway)'
+            ? 'Conecte seu WhatsApp com Evolution (legado)'
             : 'Conecte o WhatsApp para montar o pipeline'}
         </h2>
         <p>
           {mode === 'evolution'
             ? sessionReady
-              ? 'Já existe uma sessão WhatsApp ativa na Evolution. O CRM não entra sozinho — confirme abaixo para abrir o pipeline.'
-              : 'Escaneie o QR oficial à direita. Depois da leitura o CRM abre e passa a capturar só mensagens novas (sem histórico antigo).'
-            : 'Modo demo (simulado). Para WhatsApp real, configure o bridge — veja docs/CRM-EVOLUTION-RAILWAY.md.'}
+              ? 'Já existe uma sessão WhatsApp ativa na Evolution. Confirme abaixo para abrir o pipeline.'
+              : 'Escaneie o QR à direita (legado). O caminho recomendado agora é a Cloud API da Meta.'
+            : 'Modo demo. Para WhatsApp real, configure a Cloud API — docs/CRM-WHATSAPP-CLOUD.md.'}
         </p>
         <ul>
           <li>Abas por etiqueta: Pago, Sem resposta, Agendamento…</li>
@@ -646,8 +803,8 @@ function ConnectPanel({
         {error ? <p className="crm__banner-error">{error}</p> : null}
         {mode === 'mock' ? (
           <p className="crm__note">
-            Sem <code>VITE_CRM_BRIDGE_URL</code> o CRM roda em demo. Siga o guia Railway + Evolution para o QR
-            real.
+            Sem <code>VITE_CRM_BRIDGE_URL</code> o CRM roda em demo. Preferido:{' '}
+            <code>docs/CRM-WHATSAPP-CLOUD.md</code>.
           </p>
         ) : sessionReady ? (
           <div className="crm__pairing">
@@ -675,10 +832,7 @@ function ConnectPanel({
             </div>
           </div>
         ) : (
-          <p className="crm__note">
-            Escaneie o QR oficial. Ele renova automaticamente a cada 45 segundos. Clique em{' '}
-            <strong>Novo QR</strong> para atualizar agora.
-          </p>
+          <p className="crm__note">Escaneie o QR. Ou migre para Meta Cloud API (mais estável).</p>
         )}
       </div>
 
@@ -694,7 +848,7 @@ function ConnectPanel({
               <img
                 key={`${qrRenderKey}-${qrBase64!.slice(-24)}`}
                 src={qrBase64!}
-                alt="QR Code WhatsApp oficial"
+                alt="QR Code WhatsApp"
                 className="crm__qr-image"
               />
               {busy ? (
@@ -709,13 +863,12 @@ function ConnectPanel({
           ) : (
             <div className="crm__qr-loading">
               <RefreshCcw size={22} strokeWidth={2.25} className="is-spin" />
-              <span>Carregando QR oficial…</span>
+              <span>Carregando QR…</span>
             </div>
           )}
         </div>
         <p className="crm__qr-token">
-          {mode === 'evolution' ? 'QR oficial Evolution' : 'Demo'} · {qrToken.slice(-8).toUpperCase()}
-          {qrRenderKey > 0 ? ` · #${qrRenderKey}` : ''}
+          {mode === 'evolution' ? 'QR Evolution (legado)' : 'Demo'} · {qrToken.slice(-8).toUpperCase()}
         </p>
         <div className="crm__qr-actions crm__qr-actions--single">
           {mode === 'evolution' ? (
@@ -736,11 +889,7 @@ function ConnectPanel({
                 disabled={busy || (!showOfficialQr && !error)}
               >
                 <QrCode size={15} strokeWidth={2.25} />
-                {busy
-                  ? 'Aguarde o QR…'
-                  : showOfficialQr
-                    ? 'Novo QR'
-                    : 'Tentar de novo'}
+                {busy ? 'Aguarde o QR…' : showOfficialQr ? 'Novo QR' : 'Tentar de novo'}
               </button>
             )
           ) : (
