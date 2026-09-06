@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   PieChart,
   Plus,
+  Search,
   Tags,
   UserPlus,
   XCircle,
@@ -28,6 +29,10 @@ function outcomeLabel(outcome: CrmOutcome) {
   return 'Em aberto'
 }
 
+function digitsOnly(value: string) {
+  return String(value || '').replace(/\D/g, '')
+}
+
 type CrmView = 'board' | 'novo' | 'catalog' | 'values'
 
 export function Crm() {
@@ -37,6 +42,7 @@ export function Crm() {
   const [view, setView] = useState<CrmView>('board')
   const [draftSuits, setDraftSuits] = useState<CrmSuitItem[]>(state.suits)
   const [toast, setToast] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -70,8 +76,21 @@ export function Crm() {
     if (tab === 'open') list = list.filter((lead) => (lead.outcome || 'open') === 'open')
     if (tab === 'won') list = list.filter((lead) => lead.outcome === 'won')
     if (tab === 'lost') list = list.filter((lead) => lead.outcome === 'lost')
+
+    const q = query.trim().toLocaleLowerCase('pt-BR')
+    const qDigits = digitsOnly(query)
+    if (q) {
+      list = list.filter((lead) => {
+        const nameHit = lead.name.toLocaleLowerCase('pt-BR').includes(q)
+        const phoneHit = qDigits
+          ? digitsOnly(lead.phone).includes(qDigits)
+          : lead.phone.toLocaleLowerCase('pt-BR').includes(q)
+        return nameHit || phoneHit
+      })
+    }
+
     return list.sort((a, b) => b.updatedAt - a.updatedAt)
-  }, [state.leads, tab])
+  }, [state.leads, tab, query])
 
   const counts = useMemo(
     () => ({
@@ -114,7 +133,8 @@ export function Crm() {
     setEventDate('')
     setSuitId('')
     setView('board')
-    setToast('Contato adicionado — potencial atualizado')
+    setQuery('')
+    setToast('Contato adicionado')
     if (leadId) setSelectedId(leadId)
   }
 
@@ -145,11 +165,11 @@ export function Crm() {
             </button>
             <button
               type="button"
-              className={`crm__chip${view === 'novo' ? ' is-active' : ''}`}
-              onClick={() => setView('novo')}
+              className={`crm__chip${view === 'values' ? ' is-active' : ''}`}
+              onClick={() => setView('values')}
             >
-              <UserPlus size={14} strokeWidth={2.25} />
-              Novo contato
+              <PieChart size={14} strokeWidth={2.25} />
+              Análise
             </button>
             <button
               type="button"
@@ -161,11 +181,11 @@ export function Crm() {
             </button>
             <button
               type="button"
-              className={`crm__chip${view === 'values' ? ' is-active' : ''}`}
-              onClick={() => setView('values')}
+              className={`crm__chip${view === 'novo' ? ' is-active' : ''}`}
+              onClick={() => setView('novo')}
             >
-              <PieChart size={14} strokeWidth={2.25} />
-              Análise
+              <UserPlus size={14} strokeWidth={2.25} />
+              Novo contato
             </button>
           </div>
         </header>
@@ -177,9 +197,7 @@ export function Crm() {
             <div className="crm__panel-head">
               <div>
                 <h3>Novo contato</h3>
-                <p>
-                  Preencha os dados. O valor estimado vem do traje e atualiza o potencial na hora.
-                </p>
+                <p>Nome, número, dia do evento e traje. O valor estimado atualiza na hora.</p>
               </div>
             </div>
 
@@ -247,7 +265,7 @@ export function Crm() {
             onChange={setDraftSuits}
             onSave={() => {
               updateCrmSuits(draftSuits)
-              setToast('Catálogo salvo — valores atualizados')
+              setToast('Catálogo salvo')
             }}
           />
         ) : null}
@@ -256,6 +274,18 @@ export function Crm() {
 
         {view === 'board' ? (
           <>
+            <div className="crm__toolbar">
+              <label className="crm__search">
+                <Search size={16} strokeWidth={2.25} aria-hidden />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Buscar por nome ou telefone…"
+                  aria-label="Buscar contato por nome ou telefone"
+                />
+              </label>
+            </div>
+
             <nav className="crm__tabs" aria-label="Filtro de resultado">
               {(
                 [
@@ -281,7 +311,11 @@ export function Crm() {
               <aside className="crm__list">
                 {filtered.length === 0 ? (
                   <div className="crm__empty-box">
-                    <p className="crm__empty">Nenhum contato neste filtro.</p>
+                    <p className="crm__empty">
+                      {query.trim()
+                        ? 'Nenhum contato encontrado para essa busca.'
+                        : 'Nenhum contato neste filtro.'}
+                    </p>
                     <button type="button" className="crm__primary" onClick={() => setView('novo')}>
                       Novo contato
                     </button>
@@ -329,9 +363,9 @@ export function Crm() {
                       setCrmLeadOutcome(selected.id, outcome)
                       setToast(
                         outcome === 'won'
-                          ? 'Classificado como ganho — análise atualizada'
+                          ? 'Classificado como ganho'
                           : outcome === 'lost'
-                            ? 'Classificado como perdido — análise atualizada'
+                            ? 'Classificado como perdido'
                             : 'Retornado para em aberto',
                       )
                     }}
