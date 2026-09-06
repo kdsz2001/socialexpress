@@ -197,7 +197,7 @@
 }
 
 .agenda__month-cell:hover {
-  background: #f8f9fb;
+  background: #cfe6ff;
 }
 
 .agenda__month-cell.is-outside {
@@ -205,7 +205,7 @@
 }
 
 .agenda__month-cell.is-outside:hover {
-  background: #f5f6f8;
+  background: #d9ecff;
 }
 
 .agenda__month-cell.is-today {
