@@ -31,7 +31,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/clientes': 'Clientes',
   '/clientes/cadastrar': 'Cadastro de clientes',
   '/meu-perfil': 'Meu perfil',
-  '/crm': 'CRM Comercial',
+  '/crm': 'CRM',
   '/agenda': 'Agenda',
   '/eventos': 'Eventos',
   '/produtos': 'Produtos',

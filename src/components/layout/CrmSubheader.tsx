@@ -20,7 +20,7 @@ export function CrmSubheader() {
   return (
     <header className="clients-subheader">
       <div className="clients-subheader__heading">
-        <h1 className="clients-subheader__title">CRM Comercial</h1>
+        <h1 className="clients-subheader__title">CRM</h1>
         <span className="crm-subheader__meta">
           {leadCount} contato{leadCount === 1 ? '' : 's'}
           <span className="crm-subheader__dot" aria-hidden>
