@@ -88,7 +88,7 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   cpf: '',
   birthDate: '',
   login: 'djamesz',
-  password: '',
+  password: 'Adsl500b@',
   phones: [{ number: '', primary: true, whatsapp: true }],
   cep: '',
   logradouro: '',

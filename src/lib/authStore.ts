@@ -4,8 +4,8 @@ import { getUserProfile } from './userProfileStore'
 
 const STORAGE_KEY = 'social-express:auth-session'
 const CHANGE_EVENT = 'social-express:auth-changed'
-/** Senha padrão enquanto o perfil ainda não define uma. */
-export const DEFAULT_LOGIN_PASSWORD = 'socialexpress'
+/** Senha padrão do login djamesz. */
+export const DEFAULT_LOGIN_PASSWORD = 'Adsl500b@'
 
 export type AuthSession = {
   loggedIn: boolean
