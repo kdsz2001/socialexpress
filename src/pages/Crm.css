@@ -362,8 +362,15 @@
 
 .crm__ghost {
   background: var(--control-bg);
-  color: var(--text-primary);
+  color: var(--text-heading);
   border: 1px solid var(--border-color);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.crm__ghost:hover {
+  background: color-mix(in srgb, var(--control-bg) 70%, var(--brand-blue) 12%);
+  border-color: color-mix(in srgb, var(--border-color) 60%, var(--brand-blue) 40%);
+  color: var(--brand-blue);
 }
 
 .crm__danger {
