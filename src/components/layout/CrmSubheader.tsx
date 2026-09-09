@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { getCrmState, subscribeCrm, formatMoneyBr, getCrmValueStats } from '../../lib/crmStore'
 import './ClientsSubheader.css'
 import './CrmSubheader.css'
 
@@ -12,33 +10,19 @@ function titleFromTab(tab: string | null) {
   return 'Contatos'
 }
 
+function subtitleFromTab(tab: string | null) {
+  if (tab === 'novo') return 'Cadastre nome, número, data e traje'
+  if (tab === 'analise') return 'Visão de ganhos, perdas e potencial'
+  if (tab === 'sequencias') return 'Rechamadas no WhatsApp para leads sem resposta'
+  if (tab === 'trajes') return 'Catálogo e valores estimados'
+  return 'Lista e acompanhamento dos leads'
+}
+
 export function CrmSubheader() {
   const [searchParams] = useSearchParams()
   const tab = searchParams.get('tab')
   const title = titleFromTab(tab)
-  const [leadCount, setLeadCount] = useState(() => getCrmState().leads.length)
-  const [potential, setPotential] = useState(() => getCrmValueStats().totals.all)
-
-  useEffect(() => {
-    const sync = () => {
-      const state = getCrmState()
-      setLeadCount(state.leads.length)
-      setPotential(getCrmValueStats(state).totals.all)
-    }
-    sync()
-    return subscribeCrm(sync)
-  }, [])
-
-  const subtitle =
-    tab === 'novo'
-      ? 'Cadastre nome, número, data e traje'
-      : tab === 'analise'
-        ? `potencial ${formatMoneyBr(potential)}`
-        : tab === 'sequencias'
-          ? 'Rechamadas no WhatsApp para leads sem resposta'
-          : tab === 'trajes'
-            ? 'Catálogo e valores estimados'
-            : `${leadCount} contato${leadCount === 1 ? '' : 's'}`
+  const subtitle = subtitleFromTab(tab)
 
   return (
     <header className="clients-subheader">
