@@ -157,21 +157,6 @@ export function Crm() {
   return (
     <div className="crm">
       <section className="crm__shell">
-        <header className="crm__top">
-          <div className="crm__account">
-            <div>
-              <strong>Pipeline comercial</strong>
-              <p>
-                {state.leads.length} contato{state.leads.length === 1 ? '' : 's'} · potencial{' '}
-                {formatMoneyBr(stats.totals.all)}
-              </p>
-            </div>
-            <span className="crm__sync">
-              Ganhos {formatMoneyBr(stats.totals.won)} · Perdidos {formatMoneyBr(stats.totals.lost)}
-            </span>
-          </div>
-        </header>
-
         {toast ? <p className="crm__banner-ok">{toast}</p> : null}
 
         {view === 'novo' ? (

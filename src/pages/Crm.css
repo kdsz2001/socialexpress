@@ -775,7 +775,7 @@
 }
 
 .crm__banner-ok {
-  margin: 0 1.25rem 0.85rem;
+  margin: 1rem 1.25rem 0.85rem;
   padding: 0.7rem 0.9rem;
   border-radius: 0.5rem;
   background: var(--success-soft-bg);
@@ -884,7 +884,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.85rem 1.25rem 0.25rem;
+  padding: 1.15rem 1.25rem 0.25rem;
 }
 
 .crm__search {

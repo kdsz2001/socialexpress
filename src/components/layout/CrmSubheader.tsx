@@ -33,12 +33,12 @@ export function CrmSubheader() {
     tab === 'novo'
       ? 'Cadastre nome, número, data e traje'
       : tab === 'analise'
-        ? `${leadCount} contato${leadCount === 1 ? '' : 's'} · potencial ${formatMoneyBr(potential)}`
+        ? `potencial ${formatMoneyBr(potential)}`
         : tab === 'sequencias'
           ? 'Rechamadas no WhatsApp para leads sem resposta'
           : tab === 'trajes'
             ? 'Catálogo e valores estimados'
-            : `${leadCount} contato${leadCount === 1 ? '' : 's'} · potencial ${formatMoneyBr(potential)}`
+            : `${leadCount} contato${leadCount === 1 ? '' : 's'}`
 
   return (
     <header className="clients-subheader">
