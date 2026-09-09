@@ -252,16 +252,7 @@ export function Crm() {
           />
         ) : null}
 
-        {view === 'values' ? (
-          <ValuesPanel
-            stats={stats}
-            leads={state.leads}
-            onOpenLead={(leadId) => {
-              setSelectedId(leadId)
-              goView('board')
-            }}
-          />
-        ) : null}
+        {view === 'values' ? <ValuesPanel stats={stats} /> : null}
 
         {view === 'followup' ? (
           <FollowupPanel
@@ -625,28 +616,12 @@ function CatalogPanel({
   )
 }
 
-function ValuesPanel({
-  stats,
-  leads,
-  onOpenLead,
-}: {
-  stats: ReturnType<typeof getCrmValueStats>
-  leads: CrmLead[]
-  onOpenLead: (leadId: string) => void
-}) {
+function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) {
   const outcomeSlices = stats.outcomeSlices.map((slice) => ({
     name: slice.label,
     value: slice.value,
     color: slice.color,
   }))
-
-  const history = useMemo(
-    () =>
-      leads
-        .slice()
-        .sort((a, b) => b.updatedAt - a.updatedAt),
-    [leads],
-  )
 
   return (
     <div className="crm__panel">
@@ -715,46 +690,6 @@ function ValuesPanel({
           ))}
         </ul>
       )}
-
-      <div className="crm__history">
-        <div className="crm__history-head">
-          <div>
-            <h4>Histórico de contatos</h4>
-            <p>Nome, classificação e valor. Clique para abrir o detalhe.</p>
-          </div>
-          <span>{history.length} registro{history.length === 1 ? '' : 's'}</span>
-        </div>
-
-        {history.length === 0 ? (
-          <p className="crm__empty">Nenhum contato cadastrado ainda.</p>
-        ) : (
-          <ul className="crm__history-list">
-            <li className="crm__history-list-head">
-              <strong>Cliente</strong>
-              <span>Classificação</span>
-              <em>Valor</em>
-            </li>
-            {history.map((lead) => (
-              <li key={lead.id}>
-                <button
-                  type="button"
-                  className="crm__history-row"
-                  onClick={() => onOpenLead(lead.id)}
-                >
-                  <div className="crm__history-client">
-                    <strong>{lead.name}</strong>
-                    <span>{lead.phone}</span>
-                  </div>
-                  <span className={`crm__outcome-pill is-${lead.outcome || 'open'}`}>
-                    {outcomeLabel(lead.outcome || 'open')}
-                  </span>
-                  <em>{formatMoneyBr(lead.potentialValue || 0)}</em>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
     </div>
   )
 }

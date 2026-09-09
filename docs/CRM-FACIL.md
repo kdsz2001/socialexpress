@@ -5,7 +5,7 @@ Fluxo simples e intuitivo:
 1. **Novo contato** → Nome, Número, Dia do evento, Traje  
 2. O **valor estimado** vem do catálogo e atualiza o potencial na hora  
 3. Classifique: **Ganho**, **Perdido** ou **Em aberto**  
-4. A aba **Análise** (pizza) atualiza em tempo real e mostra o **histórico** dos contatos  
+4. A aba **Análise** (pizza) atualiza em tempo real  
 5. A aba **Sequências** configura 3 chamadas de reengajamento no WhatsApp  
 
 ### Navegação
