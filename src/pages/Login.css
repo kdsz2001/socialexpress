@@ -183,18 +183,18 @@
 }
 
 .login__password input {
-  padding-right: 2.85rem;
+  padding-right: 3.1rem;
 }
 
 .login__eye {
   position: absolute;
-  right: 0.4rem;
+  right: 0.45rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.45rem;
+  height: 2.45rem;
   border: 0;
-  border-radius: 0.4rem;
+  border-radius: 0.45rem;
   background: transparent;
   color: var(--se-muted);
   display: grid;
@@ -221,14 +221,14 @@
 }
 
 .login__submit {
-  margin-top: 0.55rem;
-  height: 3.05rem;
+  margin-top: 0.7rem;
+  height: 3.45rem;
   border: 0;
-  border-radius: 0.55rem;
+  border-radius: 0.6rem;
   background: linear-gradient(90deg, #0077c8 0%, var(--se-blue) 55%, var(--se-blue-soft) 100%);
   color: #fff;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
