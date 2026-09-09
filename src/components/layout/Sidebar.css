@@ -34,7 +34,6 @@
   flex-shrink: 0;
   background: var(--sidebar-brand-bg);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
   transition:
     height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
     padding 0.45s cubic-bezier(0.22, 1, 0.36, 1),
