@@ -610,13 +610,6 @@ function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) 
 
   return (
     <div className="crm__panel crm__panel--analysis">
-      <div className="crm__panel-head">
-        <div>
-          <h3>Análise de valores</h3>
-          <p>Atualiza em tempo real quando você cadastra ou classifica um contato.</p>
-        </div>
-      </div>
-
       <div className="crm__stats-grid">
         <div className="crm__stat-card is-won">
           <span className="crm__stat-card__label">Ganhos</span>
