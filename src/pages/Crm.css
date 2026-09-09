@@ -1057,15 +1057,17 @@
 
 .crm__pie-legend--pro {
   margin-top: auto;
-  gap: 0.45rem;
+  gap: 0.65rem;
 }
 
 .crm__pie-legend--pro li {
-  grid-template-columns: 12px 1fr auto;
+  grid-template-columns: 14px 1fr auto;
   align-items: center;
-  padding: 0.55rem 0.65rem;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  min-height: 3.6rem;
   border: 1px solid var(--border-color);
-  border-radius: 0.55rem;
+  border-radius: 0.65rem;
   background: var(--surface-muted);
   border-bottom: 1px solid var(--border-color);
 }
@@ -1083,28 +1085,34 @@
 .crm__pie-legend--pro div {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.2rem;
   min-width: 0;
 }
 
 .crm__pie-legend--pro span {
   color: var(--text-heading);
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 1rem;
 }
 
 .crm__pie-legend--pro em {
   font-style: normal;
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.88rem;
   font-weight: 600;
 }
 
 .crm__pie-legend--pro strong {
   color: var(--text-heading);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.crm__pie-legend--pro i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }
 
 .crm__suit-table-wrap {
