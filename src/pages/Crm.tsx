@@ -21,16 +21,13 @@ import {
   type CrmOutcome,
   type CrmSuitItem,
 } from '../lib/crmStore'
+import { phoneMatchesQuery } from '../lib/whatsappPhone'
 import './Crm.css'
 
 function outcomeLabel(outcome: CrmOutcome) {
   if (outcome === 'won') return 'Ganho'
   if (outcome === 'lost') return 'Perdido'
   return 'Em aberto'
-}
-
-function digitsOnly(value: string) {
-  return String(value || '').replace(/\D/g, '')
 }
 
 type CrmView = 'board' | 'novo' | 'catalog' | 'values'
@@ -78,13 +75,10 @@ export function Crm() {
     if (tab === 'lost') list = list.filter((lead) => lead.outcome === 'lost')
 
     const q = query.trim().toLocaleLowerCase('pt-BR')
-    const qDigits = digitsOnly(query)
     if (q) {
       list = list.filter((lead) => {
         const nameHit = lead.name.toLocaleLowerCase('pt-BR').includes(q)
-        const phoneHit = qDigits
-          ? digitsOnly(lead.phone).includes(qDigits)
-          : lead.phone.toLocaleLowerCase('pt-BR').includes(q)
+        const phoneHit = phoneMatchesQuery(lead.phone, query)
         return nameHit || phoneHit
       })
     }

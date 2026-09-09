@@ -117,5 +117,78 @@ export function phoneCharHint(raw: string) {
   return `${Math.min(local.length, MAX_LOCAL)}/${MAX_LOCAL}`
 }
 
+/** Variantes úteis para busca (com/sem 55, com/sem 9 do celular). */
+export function phoneSearchVariants(raw: string): string[] {
+  const variants = new Set<string>()
+  const add = (value: string) => {
+    const digits = digitsOnly(value)
+    if (digits) variants.add(digits)
+  }
+
+  add(raw)
+  const local = toLocalBrazilDigits(raw)
+  add(local)
+
+  if (local.length >= 10) {
+    const ddd = local.slice(0, 2)
+    const rest = local.slice(2)
+    add(rest)
+
+    if (rest.startsWith('9') && rest.length === 9) {
+      const withoutNine = rest.slice(1)
+      add(withoutNine)
+      add(`${ddd}${withoutNine}`)
+    } else if (rest.length === 8) {
+      add(`9${rest}`)
+      add(`${ddd}9${rest}`)
+    }
+  }
+
+  return [...variants]
+}
+
+function isDigitSubsequence(haystack: string, needle: string) {
+  let index = 0
+  for (const digit of haystack) {
+    if (digit === needle[index]) index += 1
+    if (index >= needle.length) return true
+  }
+  return false
+}
+
+/** Busca tolerante a máscara, DDI 55 e 9º dígito do celular. */
+export function phoneMatchesQuery(phone: string, query: string) {
+  const qDigits = digitsOnly(query)
+  if (!qDigits) return false
+
+  const phoneVariants = phoneSearchVariants(phone)
+  const queryVariants = phoneSearchVariants(query)
+
+  for (const phoneDigits of phoneVariants) {
+    if (phoneDigits.includes(qDigits)) return true
+    for (const queryDigits of queryVariants) {
+      if (phoneDigits.includes(queryDigits) || queryDigits.includes(phoneDigits)) {
+        return true
+      }
+    }
+  }
+
+  const local = toLocalBrazilDigits(phone)
+  if (local.length >= 10 && qDigits.length >= 3 && qDigits.slice(0, 2) === local.slice(0, 2)) {
+    const qRest = qDigits.slice(2)
+    const pRest = local.slice(2)
+    const flex = [pRest]
+    if (pRest.startsWith('9') && pRest.length === 9) flex.push(pRest.slice(1))
+    if (flex.some((rest) => rest.includes(qRest))) return true
+  }
+
+  // Aceita digitação parcial que “pula” o 9 do celular (ex.: 489827 ≈ 48 9 8927…)
+  if (qDigits.length >= 5 && phoneVariants.some((digits) => isDigitSubsequence(digits, qDigits))) {
+    return true
+  }
+
+  return false
+}
+
 export const PHONE_MAX_DIGITS = MAX_LOCAL
 export const PHONE_E164_MAX = MAX_E164_BR
