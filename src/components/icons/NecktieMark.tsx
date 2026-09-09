@@ -6,14 +6,14 @@ type NecktieMarkProps = SVGProps<SVGSVGElement> & {
 }
 
 const BRAND_GRAY = '#7E8299'
-const BRAND_GRAY_SOFT = '#A1A5B7'
+const BRAND_GRAY_HOVER = '#A1A5B7'
 const BRAND_GRAY_DEEP = '#5E6278'
 const TIE_PATH =
   'M8.5 4.5Q20 16.5 31.5 4.5L28.8 14.5 27.8 21 28.6 31 29.2 44 20 58 10.8 44 11.4 31 12.2 21 11.2 14.5Z'
 
 /**
  * Gravata / seta estilo Clarial.
- * Aberta: idle cinza + ponta cinza suave; hover com fade na mesma intensidade.
+ * Aberta: idle cinza (ponta = mesma cor da logo); hover com fade na mesma intensidade.
  * Fechada: cinza com fade na ponta, encaixe sob a gola.
  */
 export function NecktieMark({
@@ -57,7 +57,7 @@ export function NecktieMark({
           </linearGradient>
         ) : (
           <>
-            {/* Idle: corpo cinza, ponta cinza um pouco mais visível */}
+            {/* Idle: corpo cinza, ponta na mesma cor da logo (#7E8299) */}
             <linearGradient
               id={idleGid}
               x1="20"
@@ -68,8 +68,8 @@ export function NecktieMark({
             >
               <stop offset="0%" stopColor={BRAND_GRAY_DEEP} stopOpacity="0.42" />
               <stop offset="50%" stopColor={BRAND_GRAY_DEEP} stopOpacity="0.38" />
-              <stop offset="72%" stopColor={BRAND_GRAY} stopOpacity="0.72" />
-              <stop offset="100%" stopColor={BRAND_GRAY_SOFT} stopOpacity="1" />
+              <stop offset="72%" stopColor={BRAND_GRAY} stopOpacity="0.85" />
+              <stop offset="100%" stopColor={BRAND_GRAY} stopOpacity="1" />
             </linearGradient>
             {/* Hover: cinza mais claro se espalhando pelo corpo (mesma intensidade) */}
             <linearGradient
@@ -82,8 +82,8 @@ export function NecktieMark({
             >
               <stop offset="0%" stopColor="#6B6F84" stopOpacity="0.55" />
               <stop offset="35%" stopColor={BRAND_GRAY} stopOpacity="0.7" />
-              <stop offset="65%" stopColor={BRAND_GRAY_SOFT} stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#C4C5D2" stopOpacity="1" />
+              <stop offset="65%" stopColor={BRAND_GRAY_HOVER} stopOpacity="0.9" />
+              <stop offset="100%" stopColor={BRAND_GRAY_HOVER} stopOpacity="1" />
             </linearGradient>
           </>
         )}
