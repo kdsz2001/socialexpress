@@ -1,14 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  CheckCircle2,
-  MessageCircle,
-  PieChart,
-  Plus,
-  Search,
-  Tags,
-  UserPlus,
-  XCircle,
-} from 'lucide-react'
+import { CheckCircle2, Plus, Search, XCircle } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useCrm } from '../hooks/useCrm'
 import {
   bootEasyCrm,
@@ -41,11 +33,31 @@ function outcomeLabel(outcome: CrmOutcome) {
 
 type CrmView = 'board' | 'novo' | 'catalog' | 'values' | 'followup'
 
+function viewFromTab(tab: string | null): CrmView {
+  if (tab === 'analise') return 'values'
+  if (tab === 'sequencias') return 'followup'
+  if (tab === 'trajes') return 'catalog'
+  if (tab === 'novo') return 'novo'
+  return 'board'
+}
+
+function pathForView(view: CrmView) {
+  if (view === 'values') return '/crm?tab=analise'
+  if (view === 'followup') return '/crm?tab=sequencias'
+  if (view === 'catalog') return '/crm?tab=trajes'
+  if (view === 'novo') return '/crm?tab=novo'
+  return '/crm'
+}
+
 export function Crm() {
   const state = useCrm()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const view = viewFromTab(searchParams.get('tab'))
+  const goView = (next: CrmView) => navigate(pathForView(next))
+
   const [tab, setTab] = useState<'todos' | 'open' | 'won' | 'lost'>('todos')
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [view, setView] = useState<CrmView>('board')
   const [draftSuits, setDraftSuits] = useState<CrmSuitItem[]>(state.suits)
   const [toast, setToast] = useState<string | null>(null)
   const [query, setQuery] = useState('')
@@ -136,7 +148,7 @@ export function Crm() {
     setPhone('')
     setEventDate('')
     setSuitId('')
-    setView('board')
+    goView('board')
     setQuery('')
     setToast('Contato adicionado')
     if (leadId) setSelectedId(leadId)
@@ -157,49 +169,6 @@ export function Crm() {
             <span className="crm__sync">
               Ganhos {formatMoneyBr(stats.totals.won)} · Perdidos {formatMoneyBr(stats.totals.lost)}
             </span>
-          </div>
-
-          <div className="crm__top-actions">
-            <button
-              type="button"
-              className={`crm__chip${view === 'board' ? ' is-active' : ''}`}
-              onClick={() => setView('board')}
-            >
-              Contatos
-            </button>
-            <button
-              type="button"
-              className={`crm__chip${view === 'values' ? ' is-active' : ''}`}
-              onClick={() => setView('values')}
-            >
-              <PieChart size={14} strokeWidth={2.25} />
-              Análise
-            </button>
-            <button
-              type="button"
-              className={`crm__chip${view === 'followup' ? ' is-active' : ''}`}
-              onClick={() => setView('followup')}
-            >
-              <MessageCircle size={14} strokeWidth={2.25} />
-              Sequências
-              {followupDue.length > 0 ? <span className="crm__chip-badge">{followupDue.length}</span> : null}
-            </button>
-            <button
-              type="button"
-              className={`crm__chip${view === 'catalog' ? ' is-active' : ''}`}
-              onClick={() => setView('catalog')}
-            >
-              <Tags size={14} strokeWidth={2.25} />
-              Trajes e valores
-            </button>
-            <button
-              type="button"
-              className={`crm__chip${view === 'novo' ? ' is-active' : ''}`}
-              onClick={() => setView('novo')}
-            >
-              <UserPlus size={14} strokeWidth={2.25} />
-              Novo contato
-            </button>
           </div>
         </header>
 
@@ -265,7 +234,7 @@ export function Crm() {
                 <Plus size={15} strokeWidth={2.25} />
                 Salvar contato
               </button>
-              <button type="button" className="crm__ghost" onClick={() => setView('board')}>
+              <button type="button" className="crm__ghost" onClick={() => goView('board')}>
                 Cancelar
               </button>
             </div>
@@ -289,7 +258,7 @@ export function Crm() {
             leads={state.leads}
             onOpenLead={(leadId) => {
               setSelectedId(leadId)
-              setView('board')
+              goView('board')
             }}
           />
         ) : null}
@@ -321,7 +290,7 @@ export function Crm() {
             }}
             onOpenLead={(leadId) => {
               setSelectedId(leadId)
-              setView('board')
+              goView('board')
             }}
           />
         ) : null}
@@ -370,7 +339,7 @@ export function Crm() {
                         ? 'Nenhum contato encontrado para essa busca.'
                         : 'Nenhum contato neste filtro.'}
                     </p>
-                    <button type="button" className="crm__primary" onClick={() => setView('novo')}>
+                    <button type="button" className="crm__primary" onClick={() => goView('novo')}>
                       Novo contato
                     </button>
                   </div>

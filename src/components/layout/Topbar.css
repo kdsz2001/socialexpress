@@ -43,6 +43,10 @@
   max-width: min(100%, 52rem);
 }
 
+.topbar__tabs--crm {
+  max-width: min(100%, 48rem);
+}
+
 .topbar__tabs--finance {
   max-width: min(100%, 48rem);
 }
@@ -68,7 +72,7 @@
 
 .topbar__tab.is-active {
   color: #3699ff;
-  background: #f3f6f9;
+  background: #e1f0ff;
 }
 
 .topbar__actions {
