@@ -1,12 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
-import {
-  attemptLogin,
-  DEFAULT_LOGIN_PASSWORD,
-  isAuthenticated,
-  subscribeAuth,
-} from '../lib/authStore'
+import { attemptLogin, isAuthenticated, subscribeAuth } from '../lib/authStore'
 import './Login.css'
 
 export function Login() {
@@ -48,12 +43,7 @@ export function Login() {
       <div className="login__card">
         <section className="login__form-pane">
           <div className="login__brand">
-            <img src="/brand-mark-white.png" alt="" className="login__mark" />
-            <div className="login__wordmark">
-              <span>Social</span>
-              <span>Express</span>
-            </div>
-            <p className="login__tagline">Venda e aluguel de trajes finos</p>
+            <img src="/brand-mark-white.png" alt="Social Express" className="login__mark" />
           </div>
 
           <h1 className="login__title">
@@ -100,19 +90,11 @@ export function Login() {
               {submitting ? 'Entrando…' : 'Entrar'}
             </button>
           </form>
-
-          <p className="login__hint">
-            Acesso: <code>djamesz</code> · senha <code>{DEFAULT_LOGIN_PASSWORD}</code>
-          </p>
         </section>
 
         <aside className="login__visual" aria-hidden="true">
           <img src="/login-hero.jpg" alt="" className="login__visual-img" />
           <div className="login__visual-shade" />
-          <div className="login__visual-copy">
-            <strong>Social Express</strong>
-            <span>Elegância sob medida para cada ocasião</span>
-          </div>
         </aside>
       </div>
     </div>
