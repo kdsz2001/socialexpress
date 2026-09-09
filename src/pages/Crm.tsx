@@ -652,35 +652,6 @@ function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) 
           centerValue={String(stats.suitSlices.length)}
         />
       </div>
-
-      {stats.bySuit.length === 0 ? (
-        <p className="crm__empty">Cadastre contatos com traje para montar a análise.</p>
-      ) : (
-        <div className="crm__suit-table-wrap">
-          <div className="crm__suit-table-title">
-            <h4>Detalhe por traje</h4>
-            <p>Abertos, ganhos e perdidos em cada peça do catálogo</p>
-          </div>
-          <ul className="crm__suit-table">
-            <li className="crm__suit-table-head">
-              <strong>Traje</strong>
-              <span>Em aberto</span>
-              <span>Ganho</span>
-              <span>Perdido</span>
-              <em>Total</em>
-            </li>
-            {stats.bySuit.map((row) => (
-              <li key={row.name}>
-                <strong>{row.name}</strong>
-                <span className="is-open">{formatMoneyBr(row.open)}</span>
-                <span className="is-won">{formatMoneyBr(row.won)}</span>
-                <span className="is-lost">{formatMoneyBr(row.lost)}</span>
-                <em>{formatMoneyBr(row.total)}</em>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   )
 }
