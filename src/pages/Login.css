@@ -250,14 +250,14 @@
   position: relative;
   min-height: 100%;
   overflow: hidden;
-  background: #1a1714;
+  background: #011427;
 }
 
 .login__visual-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 58% 22%;
+  object-position: center 30%;
   display: block;
   transform: scale(1.03);
   animation: login-kenburns 16s ease-in-out infinite alternate;
@@ -267,7 +267,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(0, 13, 24, 0.28), transparent 34%);
+  background: linear-gradient(90deg, rgba(0, 13, 24, 0.32), transparent 36%);
 }
 
 @keyframes login-card-in {
@@ -329,7 +329,7 @@
 
   .login__visual-img {
     min-height: 240px;
-    object-position: 55% 18%;
+    object-position: center 25%;
   }
 
   .login__form-pane {
