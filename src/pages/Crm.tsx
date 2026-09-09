@@ -609,7 +609,7 @@ function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) 
   }))
 
   return (
-    <div className="crm__panel">
+    <div className="crm__panel crm__panel--analysis">
       <div className="crm__panel-head">
         <div>
           <h3>Análise de valores</h3>
@@ -619,20 +619,20 @@ function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) 
 
       <div className="crm__stats-grid">
         <div className="crm__stat-card is-won">
+          <span className="crm__stat-card__label">Ganhos</span>
           <strong>{formatMoneyBr(stats.totals.won)}</strong>
-          <span>Ganhos</span>
         </div>
         <div className="crm__stat-card is-lost">
+          <span className="crm__stat-card__label">Perdidos</span>
           <strong>{formatMoneyBr(stats.totals.lost)}</strong>
-          <span>Perdidos</span>
         </div>
         <div className="crm__stat-card is-open">
+          <span className="crm__stat-card__label">Em aberto</span>
           <strong>{formatMoneyBr(stats.totals.open)}</strong>
-          <span>Em aberto</span>
         </div>
-        <div className="crm__stat-card">
+        <div className="crm__stat-card is-all">
+          <span className="crm__stat-card__label">Potencial total</span>
           <strong>{formatMoneyBr(stats.totals.all)}</strong>
-          <span>Potencial total</span>
         </div>
       </div>
 
@@ -656,24 +656,30 @@ function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) 
       {stats.bySuit.length === 0 ? (
         <p className="crm__empty">Cadastre contatos com traje para montar a análise.</p>
       ) : (
-        <ul className="crm__suit-table">
-          <li className="crm__suit-table-head">
-            <strong>Traje</strong>
-            <span>Em aberto</span>
-            <span>Ganho</span>
-            <span>Perdido</span>
-            <em>Total</em>
-          </li>
-          {stats.bySuit.map((row) => (
-            <li key={row.name}>
-              <strong>{row.name}</strong>
-              <span>{formatMoneyBr(row.open)}</span>
-              <span>{formatMoneyBr(row.won)}</span>
-              <span>{formatMoneyBr(row.lost)}</span>
-              <em>{formatMoneyBr(row.total)}</em>
+        <div className="crm__suit-table-wrap">
+          <div className="crm__suit-table-title">
+            <h4>Detalhe por traje</h4>
+            <p>Abertos, ganhos e perdidos em cada peça do catálogo</p>
+          </div>
+          <ul className="crm__suit-table">
+            <li className="crm__suit-table-head">
+              <strong>Traje</strong>
+              <span>Em aberto</span>
+              <span>Ganho</span>
+              <span>Perdido</span>
+              <em>Total</em>
             </li>
-          ))}
-        </ul>
+            {stats.bySuit.map((row) => (
+              <li key={row.name}>
+                <strong>{row.name}</strong>
+                <span className="is-open">{formatMoneyBr(row.open)}</span>
+                <span className="is-won">{formatMoneyBr(row.won)}</span>
+                <span className="is-lost">{formatMoneyBr(row.lost)}</span>
+                <em>{formatMoneyBr(row.total)}</em>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   )
@@ -848,7 +854,9 @@ function DonutBlock({
       <div className="crm__donut-wrap">
         <div
           className="crm__donut"
-          style={{ background: total > 0 ? gradient : '#eef1f6' }}
+          style={{
+            background: total > 0 ? gradient : 'var(--control-bg)',
+          }}
           aria-hidden
         >
           <div className="crm__donut-hole">
@@ -859,7 +867,7 @@ function DonutBlock({
       </div>
       <ul className="crm__pie-legend crm__pie-legend--pro">
         {slices.length === 0 ? (
-          <li>Sem dados ainda</li>
+          <li className="is-empty">Sem dados ainda</li>
         ) : (
           slices.map((slice) => {
             const pct = total > 0 ? Math.round((slice.value / total) * 100) : 0
@@ -884,7 +892,7 @@ function buildConicGradient(
   slices: Array<{ value: number; color: string }>,
   total: number,
 ) {
-  if (!total) return '#eef1f6'
+  if (!total) return 'var(--control-bg)'
   let cursor = 0
   const parts: string[] = []
   for (const slice of slices) {
