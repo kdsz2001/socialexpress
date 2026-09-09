@@ -74,13 +74,8 @@
   cursor: pointer;
 }
 
-.sidebar__lockup--home:hover .sidebar__word {
-  color: var(--brand-mark-hover);
-  filter: brightness(1.08);
-}
-
+.sidebar__lockup--home:hover .sidebar__word,
 .sidebar__lockup--home:hover .sidebar__collar {
-  background-color: var(--brand-mark-hover);
   filter: brightness(1.08);
 }
 
@@ -90,16 +85,14 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brand-mark);
+  color: var(--brand-blue);
   line-height: 1;
   overflow: hidden;
   max-width: 9.5rem;
   opacity: 1;
   transition:
     opacity 0.2s ease,
-    max-width 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.15s ease,
-    filter 0.15s ease;
+    max-width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sidebar__emblem {
@@ -116,17 +109,16 @@
     height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Gola oficial (máscara do brand-mark) em cinza escuro */
+/* Gola oficial (máscara do brand-mark) no azul Clarial */
 .sidebar__collar {
   display: block;
   width: 100%;
   height: 100%;
-  background-color: var(--brand-mark);
+  background-color: var(--brand-blue);
   -webkit-mask: url('/brand-mark-white.png') center / contain no-repeat;
   mask: url('/brand-mark-white.png') center / contain no-repeat;
   user-select: none;
   pointer-events: none;
-  transition: background-color 0.15s ease, filter 0.15s ease;
 }
 
 /* ——— Dock fechado: larguras pares / altura inteira (zoom-stable) ——— */
@@ -151,11 +143,11 @@
 }
 
 .sidebar__dock:hover {
-  background: rgba(126, 130, 153, 0.12);
+  background: rgba(54, 153, 255, 0.08);
 }
 
 .sidebar__dock:focus-visible {
-  outline: 2px solid rgba(126, 130, 153, 0.55);
+  outline: 2px solid rgba(54, 153, 255, 0.55);
   outline-offset: 2px;
 }
 
@@ -202,7 +194,7 @@
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: var(--brand-mark);
+  color: var(--brand-blue);
   background: transparent;
   /* translateX antes do rotate sobe a gravata na horizontal (alinha com a logo) */
   transform: rotate(90deg) translateX(-1px);
@@ -219,7 +211,7 @@
 }
 
 .sidebar__tie-toggle:focus-visible {
-  outline: 2px solid rgba(126, 130, 153, 0.55);
+  outline: 2px solid rgba(54, 153, 255, 0.55);
   outline-offset: 2px;
 }
 

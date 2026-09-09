@@ -8,8 +8,6 @@
   --sidebar-active-color: #3699ff;
   --sidebar-scroll-thumb: #637099;
   --brand-blue: #3699ff;
-  --brand-mark: #7e8299;
-  --brand-mark-hover: #a1a5b7;
 
   --main-bg: #f3f6f9;
   --topbar-bg: #ffffff;
@@ -174,27 +172,17 @@ html.theme-dark .profile-drawer__close {
   color: #a1a5b7;
 }
 
-html.theme-dark .profile-drawer__theme {
-  background: #1b1b28;
-  border-color: #2b2b40;
-}
-
-html.theme-dark .profile-drawer__theme-copy strong {
-  color: #e4e6ef;
-}
-
-html.theme-dark .profile-drawer__theme-toggle {
-  background: #151521;
-  border-color: #2b2b40;
-}
-
-html.theme-dark .profile-drawer__theme-btn:hover {
-  background: #2b2b40;
-  color: #e4e6ef;
-}
-
 html.theme-dark .profile-drawer__item:hover {
   background: #1b1b28;
+}
+
+html.theme-dark .topbar__theme {
+  color: #a1a5b7;
+}
+
+html.theme-dark .topbar__theme:hover {
+  background: #2b2b40;
+  color: #e4e6ef;
 }
 
 html.theme-dark .profile-drawer__item-label {

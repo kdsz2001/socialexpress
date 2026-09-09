@@ -101,6 +101,21 @@
   color: #3699ff;
 }
 
+.topbar__theme {
+  color: #7e8299;
+  width: 36px;
+  height: 36px;
+  border-radius: 0.42rem;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.topbar__theme:hover {
+  background: #f3f6f9;
+  color: #3699ff;
+}
+
 .topbar__search-panel {
   position: fixed;
   z-index: 1300;

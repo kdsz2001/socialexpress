@@ -1,9 +1,15 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Search, Menu, UserRound, X } from 'lucide-react'
+import { Moon, Search, Menu, Sun, UserRound, X } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useClients } from '../../hooks/useClients'
 import { getClientDisplayName } from '../../lib/clientsStore'
+import {
+  getTheme,
+  subscribeTheme,
+  toggleTheme,
+  type AppTheme,
+} from '../../lib/themeStore'
 import {
   getUserDisplayName,
   getUserProfile,
@@ -57,12 +63,15 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [userProfile, setUserProfile] = useState<UserProfile>(() => getUserProfile())
+  const [theme, setThemeState] = useState<AppTheme>(() => getTheme())
   const [query, setQuery] = useState('')
   const [panelPos, setPanelPos] = useState({ top: 0, left: 0, width: PANEL_WIDTH })
   const buttonRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const searchId = useId()
+
+  useEffect(() => subscribeTheme(() => setThemeState(getTheme())), [])
 
   const isClientsSection = location.pathname.startsWith('/clientes')
   const isProductsSection = location.pathname.startsWith('/produtos')
@@ -474,6 +483,20 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           </button>
           {searchPanel}
         </div>
+
+        <button
+          type="button"
+          className="topbar__theme"
+          aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+          title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+          onClick={() => setThemeState(toggleTheme())}
+        >
+          {theme === 'dark' ? (
+            <Sun size={18} strokeWidth={2} />
+          ) : (
+            <Moon size={18} strokeWidth={2} />
+          )}
+        </button>
 
         <button
           type="button"
