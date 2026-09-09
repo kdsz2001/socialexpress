@@ -1,7 +1,8 @@
 import { useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import { User, Wallet, X } from 'lucide-react'
+import { User, X } from 'lucide-react'
+import { logout } from '../../lib/authStore'
 import {
   getUserDisplayName,
   getUserProfile,
@@ -21,12 +22,6 @@ const menuItems = [
     label: 'Meu perfil',
     description: 'Informações da sua conta',
     icon: User,
-  },
-  {
-    id: 'assinatura' as const,
-    label: 'Assinatura',
-    description: 'Informações da sua assinatura',
-    icon: Wallet,
   },
 ]
 
@@ -63,6 +58,12 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
     if (id === 'meu-perfil') {
       navigate('/meu-perfil')
     }
+  }
+
+  const onLogout = () => {
+    onClose()
+    logout()
+    navigate('/login', { replace: true })
   }
 
   if (typeof document === 'undefined') return null
@@ -110,7 +111,7 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
           <div className="profile-drawer__meta">
             <p className="profile-drawer__name">{displayName}</p>
             <p className="profile-drawer__role">Master</p>
-            <button type="button" className="profile-drawer__logout">
+            <button type="button" className="profile-drawer__logout" onClick={onLogout}>
               Sair
             </button>
           </div>

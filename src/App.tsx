@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
+import { RequireAuth } from './components/auth/RequireAuth'
 import { Dashboard } from './pages/Dashboard'
 import { Clients } from './pages/Clients'
 import { ClientCreate } from './pages/ClientCreate'
@@ -17,6 +18,7 @@ import { Settings } from './pages/Settings'
 import { History } from './pages/History'
 import { Crm } from './pages/Crm'
 import { CrmCapture } from './pages/CrmCapture'
+import { Login } from './pages/Login'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 
 const pages = [{ path: '/orcamentos', title: 'Orçamentos' }] as const
@@ -24,8 +26,15 @@ const pages = [{ path: '/orcamentos', title: 'Orçamentos' }] as const
 export default function App() {
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
       <Route path="/captura" element={<CrmCapture />} />
-      <Route element={<AppLayout />}>
+      <Route
+        element={
+          <RequireAuth>
+            <AppLayout />
+          </RequireAuth>
+        }
+      >
         <Route index element={<Dashboard />} />
         <Route path="/clientes" element={<Clients />} />
         <Route path="/clientes/cadastrar" element={<ClientCreate />} />
