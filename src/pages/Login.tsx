@@ -102,8 +102,7 @@ export function Login() {
           </form>
 
           <p className="login__hint">
-            Dica: use o login do perfil. Se ainda não definiu senha, a inicial é{' '}
-            <code>{DEFAULT_LOGIN_PASSWORD}</code>.
+            Acesso: <code>djamesz</code> · senha <code>{DEFAULT_LOGIN_PASSWORD}</code>
           </p>
         </section>
 
