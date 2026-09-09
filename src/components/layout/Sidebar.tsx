@@ -18,7 +18,7 @@ import { TieIcon } from '../icons/TieIcon'
 import { NecktieMark } from '../icons/NecktieMark'
 import './Sidebar.css'
 
-const navItems = [
+const mainNavItems = [
   { to: '/', label: 'Dashboard', icon: Monitor },
   { to: '/clientes', label: 'Clientes', icon: User },
   { to: '/agenda', label: 'Agenda', icon: Calendar },
@@ -30,6 +30,9 @@ const navItems = [
   { to: '/financeiro', label: 'Financeiro', icon: Banknote },
   { to: '/fornecedores', label: 'Fornecedores', icon: Shirt },
   { to: '/relatorios', label: 'Relatórios', icon: Activity },
+] as const
+
+const footerNavItems = [
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
   { to: '/historicos', label: 'Históricos', icon: BookOpen },
 ] as const
@@ -48,6 +51,41 @@ function BrandMark() {
       </div>
       <span className="sidebar__word sidebar__word--express">Express</span>
     </>
+  )
+}
+
+function NavItem({
+  to,
+  label,
+  icon: Icon,
+  footer = false,
+}: {
+  to: string
+  label: string
+  icon: (typeof mainNavItems)[number]['icon'] | (typeof footerNavItems)[number]['icon']
+  footer?: boolean
+}) {
+  const isDashboard = to === '/'
+  return (
+    <li>
+      <NavLink
+        to={to}
+        end={isDashboard}
+        className={({ isActive }) =>
+          [
+            'sidebar__link',
+            footer ? 'sidebar__link--footer' : '',
+            isDashboard ? 'sidebar__link--dashboard' : '',
+            !isDashboard && isActive ? 'is-active' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')
+        }
+      >
+        <Icon className="sidebar__icon" size={18} strokeWidth={1.5} />
+        <span className="sidebar__label">{label}</span>
+      </NavLink>
+    </li>
   )
 }
 
@@ -132,30 +170,23 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         }}
       >
         <ul>
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isDashboard = item.to === '/'
-            return (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  end={isDashboard}
-                  className={({ isActive }) =>
-                    [
-                      'sidebar__link',
-                      isDashboard ? 'sidebar__link--dashboard' : '',
-                      !isDashboard && isActive ? 'is-active' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')
-                  }
-                >
-                  <Icon className="sidebar__icon" size={18} strokeWidth={1.5} />
-                  <span className="sidebar__label">{item.label}</span>
-                </NavLink>
-              </li>
-            )
-          })}
+          {mainNavItems.map((item) => (
+            <NavItem key={item.to} {...item} />
+          ))}
+        </ul>
+      </nav>
+
+      <nav
+        className="sidebar__footer"
+        aria-label="Configurações"
+        onMouseEnter={() => {
+          if (pinnedClosed) setHoverOpen(true)
+        }}
+      >
+        <ul>
+          {footerNavItems.map((item) => (
+            <NavItem key={item.to} {...item} footer />
+          ))}
         </ul>
       </nav>
     </aside>

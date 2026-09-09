@@ -8,6 +8,8 @@
   --sidebar-active-color: #3699ff;
   --sidebar-scroll-thumb: #637099;
   --brand-blue: #3699ff;
+  --brand-mark: #7e8299;
+  --brand-mark-hover: #a1a5b7;
 
   --main-bg: #f3f6f9;
   --topbar-bg: #ffffff;
@@ -117,4 +119,96 @@ img {
 
 .app-content::-webkit-scrollbar-thumb:hover {
   background: #a1a5b7;
+}
+
+/* ——— Tema escuro (conteúdo principal) ——— */
+html.theme-dark {
+  color-scheme: dark;
+  --main-bg: #151521;
+  --topbar-bg: #1e1e2d;
+  --card-bg: #1e1e2d;
+  --card-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.35);
+  --value-box-bg: #1b1b28;
+  --text-primary: #e4e6ef;
+  --text-secondary: #a1a5b7;
+  --text-muted: #7e8299;
+  --today-bg: #1b2a3f;
+  --today-text: #3699ff;
+}
+
+html.theme-dark body {
+  background: var(--main-bg);
+  color: var(--text-primary);
+}
+
+html.theme-dark .clients-subheader,
+html.theme-dark .topbar {
+  background: var(--topbar-bg);
+  border-bottom-color: #2b2b40;
+}
+
+html.theme-dark .clients-subheader__title,
+html.theme-dark .profile-drawer__title,
+html.theme-dark .profile-drawer__name {
+  color: #e4e6ef;
+}
+
+html.theme-dark .clients-subheader__subtitle,
+html.theme-dark .profile-drawer__role,
+html.theme-dark .profile-drawer__item-desc {
+  color: #7e8299;
+}
+
+html.theme-dark .profile-drawer {
+  background: #1e1e2d;
+  box-shadow: 0 0 50px 0 rgba(0, 0, 0, 0.45);
+}
+
+html.theme-dark .profile-drawer__header,
+html.theme-dark .profile-drawer__nav {
+  border-color: #2b2b40;
+}
+
+html.theme-dark .profile-drawer__close {
+  background: #2b2b40;
+  color: #a1a5b7;
+}
+
+html.theme-dark .profile-drawer__theme {
+  background: #1b1b28;
+  border-color: #2b2b40;
+}
+
+html.theme-dark .profile-drawer__theme-copy strong {
+  color: #e4e6ef;
+}
+
+html.theme-dark .profile-drawer__theme-toggle {
+  background: #151521;
+  border-color: #2b2b40;
+}
+
+html.theme-dark .profile-drawer__theme-btn:hover {
+  background: #2b2b40;
+  color: #e4e6ef;
+}
+
+html.theme-dark .profile-drawer__item:hover {
+  background: #1b1b28;
+}
+
+html.theme-dark .profile-drawer__item-label {
+  color: #e4e6ef;
+}
+
+html.theme-dark .profile-drawer__item-icon {
+  background: #1b2a3f;
+}
+
+html.theme-dark .app-content {
+  scrollbar-color: #4a4a65 transparent;
+}
+
+html.theme-dark .app-content::-webkit-scrollbar-thumb {
+  background: #4a4a65;
 }

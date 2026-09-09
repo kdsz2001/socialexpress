@@ -1,8 +1,14 @@
 import { useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import { User, X } from 'lucide-react'
+import { Moon, Sun, User, X } from 'lucide-react'
 import { logout } from '../../lib/authStore'
+import {
+  getTheme,
+  setTheme,
+  subscribeTheme,
+  type AppTheme,
+} from '../../lib/themeStore'
 import {
   getUserDisplayName,
   getUserProfile,
@@ -29,12 +35,15 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
   const titleId = useId()
   const navigate = useNavigate()
   const [profile, setProfile] = useState<UserProfile>(() => getUserProfile())
+  const [theme, setThemeState] = useState<AppTheme>(() => getTheme())
   const displayName = getUserDisplayName(profile)
 
   useEffect(() => {
     setProfile(getUserProfile())
     return subscribeUserProfile(() => setProfile(getUserProfile()))
   }, [])
+
+  useEffect(() => subscribeTheme(() => setThemeState(getTheme())), [])
 
   useEffect(() => {
     if (!open) return
@@ -64,6 +73,11 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
     onClose()
     logout()
     navigate('/login', { replace: true })
+  }
+
+  const onThemeChange = (next: AppTheme) => {
+    setTheme(next)
+    setThemeState(next)
   }
 
   if (typeof document === 'undefined') return null
@@ -113,6 +127,33 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
             <p className="profile-drawer__role">Master</p>
             <button type="button" className="profile-drawer__logout" onClick={onLogout}>
               Sair
+            </button>
+          </div>
+        </div>
+
+        <div className="profile-drawer__theme" role="group" aria-label="Aparência">
+          <div className="profile-drawer__theme-copy">
+            <strong>Aparência</strong>
+            <span>Escolha o modo claro ou escuro</span>
+          </div>
+          <div className="profile-drawer__theme-toggle">
+            <button
+              type="button"
+              className={`profile-drawer__theme-btn${theme === 'light' ? ' is-active' : ''}`}
+              onClick={() => onThemeChange('light')}
+              aria-pressed={theme === 'light'}
+            >
+              <Sun size={15} strokeWidth={2.25} />
+              Claro
+            </button>
+            <button
+              type="button"
+              className={`profile-drawer__theme-btn${theme === 'dark' ? ' is-active' : ''}`}
+              onClick={() => onThemeChange('dark')}
+              aria-pressed={theme === 'dark'}
+            >
+              <Moon size={15} strokeWidth={2.25} />
+              Escuro
             </button>
           </div>
         </div>
