@@ -8,6 +8,9 @@ Fluxo simples e intuitivo:
 4. A aba **Análise** (pizza) atualiza em tempo real e mostra o **histórico** dos contatos  
 5. A aba **Sequências** configura 3 chamadas de reengajamento no WhatsApp  
 
+### Navegação
+As abas ficam no **topo** (estilo Produtos): Contatos · Análise · Sequências · Trajes e valores · Novo contato.
+
 ### Sequência de chamadas
 Para leads **em aberto** que param de responder:
 - Defina 1ª, 2ª e 3ª chamada (dias de espera + texto com `{NOME}`)
