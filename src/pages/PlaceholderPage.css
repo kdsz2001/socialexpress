@@ -11,7 +11,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #181c32;
+  color: var(--text-heading);
 }
 
 .placeholder-page p {

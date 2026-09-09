@@ -1,7 +1,7 @@
 .topbar {
   height: var(--topbar-height);
   background: var(--topbar-bg);
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -54,7 +54,7 @@
 .topbar__tab {
   border: 0;
   background: transparent;
-  color: #7e8299;
+  color: var(--text-secondary);
   font-family: inherit;
   font-size: 1rem;
   font-weight: 500;
@@ -72,7 +72,7 @@
 
 .topbar__tab.is-active {
   color: #3699ff;
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
 }
 
 .topbar__actions {
@@ -97,12 +97,12 @@
 
 .topbar__search:hover,
 .topbar__search.is-open {
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
   color: #3699ff;
 }
 
 .topbar__theme {
-  color: #7e8299;
+  color: var(--text-secondary);
   width: 36px;
   height: 36px;
   border-radius: 0.42rem;
@@ -112,14 +112,14 @@
 }
 
 .topbar__theme:hover {
-  background: #f3f6f9;
+  background: var(--surface-muted);
   color: #3699ff;
 }
 
 .topbar__search-panel {
   position: fixed;
   z-index: 1300;
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 0.65rem;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
   padding: 1rem 0 0.65rem;
@@ -138,11 +138,11 @@
 }
 
 .topbar__search-panel.has-result .topbar__search-form {
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .topbar__search-panel-icon {
-  color: #b5b5c3;
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
@@ -155,16 +155,16 @@
   font-family: inherit;
   font-size: 1rem;
   font-weight: 500;
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .topbar__search-input::placeholder {
-  color: #b5b5c3;
+  color: var(--text-muted);
   font-weight: 400;
 }
 
 .topbar__search-clear {
-  color: #b5b5c3;
+  color: var(--text-muted);
   width: 24px;
   height: 24px;
   border-radius: 4px;
@@ -174,7 +174,7 @@
 }
 
 .topbar__search-clear:hover {
-  color: #7e8299;
+  color: var(--text-secondary);
 }
 
 .topbar__search-results {
@@ -215,7 +215,7 @@
 
 .topbar__search-item:hover,
 .topbar__search-item:focus-visible {
-  background: #f3f6f9;
+  background: var(--surface-muted);
 }
 
 .topbar__search-avatar {
@@ -233,7 +233,7 @@
   min-width: 0;
   font-size: 1rem;
   font-weight: 400;
-  color: #3f4254;
+  color: var(--text-primary);
   line-height: 1.35;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -244,7 +244,7 @@
   margin: 1rem 1.5rem 0.5rem;
   font-size: 1rem;
   font-weight: 400;
-  color: #b5b5c3;
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
@@ -261,7 +261,7 @@
 
 .topbar__user:hover,
 .topbar__user.is-open {
-  background: #f3f6f9;
+  background: var(--surface-muted);
 }
 
 .topbar__greeting {
@@ -274,13 +274,13 @@
 /* Clarial: "Olá," cinza claro */
 .topbar__greeting-hi {
   font-weight: 400;
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 /* Clarial: nome em cinza-ardósia mais forte */
 .topbar__greeting-name {
   font-weight: 500;
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .topbar__avatar {

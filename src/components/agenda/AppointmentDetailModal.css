@@ -26,7 +26,7 @@
   max-height: min(90vh, 620px);
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 0.475rem;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
   animation: apt-detail-dialog-in 0.18s ease both;
@@ -39,7 +39,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.35rem 1.5rem 1.05rem;
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -52,7 +52,7 @@
   margin: 0;
   font-size: 1.35rem;
   font-weight: 500;
-  color: #181c32;
+  color: var(--text-heading);
   line-height: 1.3;
   letter-spacing: -0.01em;
 }
@@ -74,7 +74,7 @@
   border-radius: 0.35rem;
   display: grid;
   place-items: center;
-  color: #b5b5c3;
+  color: var(--text-muted);
   background: transparent;
   flex-shrink: 0;
   cursor: pointer;
@@ -82,8 +82,8 @@
 }
 
 .apt-detail__close:hover {
-  background: #f3f6f9;
-  color: #7e8299;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
 }
 
 .apt-detail__body {
@@ -102,7 +102,7 @@
   min-height: 4.35rem;
   padding: 1rem 1.15rem;
   border-radius: 0.475rem;
-  background: #f3f6f9;
+  background: var(--surface-muted);
 }
 
 .apt-detail__schedule-text {
@@ -115,14 +115,14 @@
 .apt-detail__schedule-text strong {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #3f4254;
+  color: var(--text-primary);
   line-height: 1.3;
 }
 
 .apt-detail__schedule-text span {
   font-size: 0.92rem;
   font-weight: 400;
-  color: #7e8299;
+  color: var(--text-secondary);
   line-height: 1.35;
   text-transform: lowercase;
 }
@@ -146,7 +146,7 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: #181c32;
+  color: var(--text-heading);
   line-height: 1.3;
 }
 
@@ -154,7 +154,7 @@
   margin: 0;
   font-size: 0.95rem;
   font-weight: 400;
-  color: #3f4254;
+  color: var(--text-primary);
   line-height: 1.5;
   white-space: pre-wrap;
 }
@@ -175,9 +175,9 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem 1.5rem 1.2rem;
-  border-top: 1px solid #ebedf3;
+  border-top: 1px solid var(--border-color);
   flex-shrink: 0;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .apt-detail__actions {
@@ -223,7 +223,7 @@
 }
 
 .apt-detail__btn--pending {
-  background: #ffe2e5;
+  background: var(--danger-soft-bg);
   color: #f64e60;
 }
 
@@ -250,8 +250,8 @@
 }
 
 .apt-detail__btn--close {
-  background: #e4e6ef;
-  color: #3f4254;
+  background: var(--border-color);
+  color: var(--text-primary);
 }
 
 .apt-detail__btn--close:hover {

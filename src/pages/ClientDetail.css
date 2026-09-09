@@ -7,9 +7,9 @@
 }
 
 .client-detail__profile {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 6px;
-  border: 1px solid #ebedf3;
+  border: 1px solid var(--border-color);
   box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05);
   padding: 22px 18px;
 }
@@ -18,7 +18,7 @@
   margin: 0 0 14px;
   font-size: 1.35rem;
   font-weight: 600;
-  color: #181c32;
+  color: var(--text-heading);
   line-height: 1.3;
   word-break: break-word;
 }
@@ -30,7 +30,7 @@
   margin-bottom: 10px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: #c9f7f5;
+  background: var(--success-soft-bg);
   color: #0bb7af;
   font-size: 0.9rem;
   font-weight: 500;
@@ -49,7 +49,7 @@
 .client-detail__email {
   display: block;
   margin: 0 0 18px;
-  color: #3f4254;
+  color: var(--text-primary);
   font-size: 0.925rem;
   font-weight: 400;
   line-height: 1.45;
@@ -72,7 +72,7 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: #3f4254;
+  color: var(--text-primary);
   font-size: 0.925rem;
   font-weight: 500;
   font-family: inherit;
@@ -82,18 +82,18 @@
 }
 
 .client-detail__menu-item:hover {
-  background: #f3f6f9;
+  background: var(--surface-muted);
 }
 
 .client-detail__menu-item.is-active {
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
   color: #3699ff;
 }
 
 .client-detail__panel {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 6px;
-  border: 1px solid #ebedf3;
+  border: 1px solid var(--border-color);
   box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05);
   overflow: hidden;
   min-width: 0;
@@ -106,20 +106,20 @@
   gap: 16px;
   flex-wrap: wrap;
   padding: 18px 22px;
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .client-detail__panel-title {
   margin: 0 0 4px;
   font-size: 1.15rem;
   font-weight: 600;
-  color: #181c32;
+  color: var(--text-heading);
 }
 
 .client-detail__panel-sub {
   margin: 0;
   font-size: 0.925rem;
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 .client-detail__panel-body {
@@ -130,7 +130,7 @@
   display: flex;
   justify-content: flex-end;
   padding: 14px 22px 20px;
-  border-top: 1px solid #ebedf3;
+  border-top: 1px solid var(--border-color);
 }
 
 .client-detail__save {
@@ -156,7 +156,7 @@
 }
 
 .client-detail__save:disabled {
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
   color: #ffffff;
   cursor: not-allowed;
   opacity: 0.65;
@@ -179,7 +179,7 @@
 .client-detail__status-text {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #7e8299;
+  color: var(--text-secondary);
 }
 
 .client-detail__status-text.is-on {

@@ -10,8 +10,8 @@
   width: 120px;
   height: 120px;
   border-radius: 6px;
-  background: #f3f6f9;
-  border: 1px solid #ebedf3;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -84,14 +84,14 @@
   margin: 0;
   font-size: 0.85rem;
   font-weight: 400;
-  color: #b5b5c3;
+  color: var(--text-muted);
   line-height: 1.45;
   max-width: 320px;
 }
 
 .my-profile__empty {
   padding: 2rem 0;
-  color: #b5b5c3;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
@@ -105,8 +105,8 @@
   margin: 0 0 10px;
   padding: 6px 12px;
   border-radius: 4px;
-  background: #f3f6f9;
-  color: #3f4254;
+  background: var(--surface-muted);
+  color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.3;
@@ -129,6 +129,6 @@
 .my-profile__shortcut-label {
   font-size: 0.95rem;
   font-weight: 400;
-  color: #3f4254;
+  color: var(--text-primary);
   line-height: 1.35;
 }

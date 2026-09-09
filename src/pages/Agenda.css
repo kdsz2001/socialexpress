@@ -9,8 +9,8 @@
   flex-direction: column;
   flex: 1;
   min-height: 34rem;
-  background: #fff;
-  border: 1px solid #ebedf3;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 0.55rem;
   box-shadow: var(--card-shadow);
   overflow: hidden;
@@ -23,7 +23,7 @@
   gap: 0.65rem;
   padding: 0.7rem 1rem 0.65rem;
   border-bottom: 1px solid #eef0f4;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .agenda__nav {
@@ -57,7 +57,7 @@
 }
 
 .agenda__nav-btn:hover {
-  background: #f3f6f9;
+  background: var(--surface-muted);
   color: #5e6278;
 }
 
@@ -74,8 +74,8 @@
 }
 
 .agenda__today:hover {
-  background: #f3f6f9;
-  color: #3f4254;
+  background: var(--surface-muted);
+  color: var(--text-primary);
 }
 
 .agenda__range {
@@ -103,7 +103,7 @@
   padding: 0 0.7rem;
   border: 0;
   background: transparent;
-  color: #7e8299;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 500;
   transition: background 0.15s ease, color 0.15s ease;
@@ -119,7 +119,7 @@
 }
 
 .agenda__view-btn:hover {
-  background: #f3f6f9;
+  background: var(--surface-muted);
   color: #5e6278;
 }
 
@@ -146,7 +146,7 @@
 .agenda__month-head {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
   background: #fafbfc;
 }
 
@@ -155,7 +155,7 @@
   text-align: center;
   font-size: 0.78rem;
   font-weight: 500;
-  color: #7e8299;
+  color: var(--text-secondary);
   text-transform: lowercase;
 }
 
@@ -177,7 +177,7 @@
   border: 0;
   border-right: 1px solid #eef0f4;
   border-bottom: 1px solid #eef0f4;
-  background: #fff;
+  background: var(--card-bg);
   text-align: left;
   cursor: pointer;
   transition: background 0.12s ease;
@@ -233,7 +233,7 @@
 .agenda__month-cell.is-past:hover,
 .agenda__month-cell.is-past:active,
 .agenda__month-cell.is-past:focus {
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .agenda__month-cell.is-outside.is-past,
@@ -295,7 +295,7 @@
 
 .agenda__month-chip.is-completed {
   background: #e8fff3;
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .agenda__month-chip.is-completed .agenda__month-chip-dot {
@@ -320,8 +320,8 @@
   max-width: 12rem;
   padding: 0.4rem 0.65rem;
   border-radius: 0.3rem;
-  background: #fff;
-  color: #3f4254;
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 500;
   line-height: 1.3;
@@ -341,7 +341,7 @@
   top: 100%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: #fff;
+  border-top-color: var(--card-bg);
 }
 
 .agenda__month-chip.has-tip:hover .agenda__details-tip,
@@ -362,7 +362,7 @@
 .agenda__timegrid {
   flex: 1;
   overflow: visible;
-  background: #fff;
+  background: var(--card-bg);
   position: relative;
 }
 
@@ -383,17 +383,17 @@
   justify-content: center;
   padding: 0.35rem 0.25rem;
   border-right: 1px solid #eef0f4;
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
   font-size: 0.82rem;
   font-weight: 500;
-  color: #7e8299;
+  color: var(--text-secondary);
   text-transform: lowercase;
   text-align: center;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .agenda__col-head--gutter {
-  border-right: 1px solid #ebedf3;
+  border-right: 1px solid var(--border-color);
 }
 
 .agenda__col-head:last-child {
@@ -418,9 +418,9 @@
   align-items: center;
   justify-content: flex-end;
   padding: 0.2rem 0.7rem 0.2rem 0.25rem;
-  border-right: 1px solid #ebedf3;
+  border-right: 1px solid var(--border-color);
   border-bottom: 1px solid #d7dae3;
-  background: #fff;
+  background: var(--card-bg);
   box-sizing: border-box;
   z-index: 1;
   overflow: visible;
@@ -439,7 +439,7 @@
 .agenda__allday {
   border-right: 1px solid #eef0f4;
   border-bottom: 1px solid #d7dae3;
-  background: #fff;
+  background: var(--card-bg);
   box-sizing: border-box;
   z-index: 1;
   overflow: visible;
@@ -466,8 +466,8 @@
 .agenda__hours {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #ebedf3;
-  background: #fff;
+  border-right: 1px solid var(--border-color);
+  background: var(--card-bg);
   grid-column: 1;
   position: relative;
   z-index: 6;
@@ -489,7 +489,7 @@
   display: block;
   transform: translateY(-50%);
   padding: 0 0.12rem;
-  background: #fff;
+  background: var(--card-bg);
   font-size: 0.88rem;
   font-weight: 500;
   color: #5e6278;
@@ -512,7 +512,7 @@
 .agenda__day-col {
   position: relative;
   border-right: 1px solid #eef0f4;
-  background: #fff;
+  background: var(--card-bg);
   overflow: visible;
   z-index: 0;
 }
@@ -543,7 +543,7 @@
 }
 
 .agenda__slot.is-last {
-  border-bottom: 1px solid #e4e6ef;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .agenda__slot.is-selected {
@@ -661,7 +661,7 @@
   gap: 0.3rem;
   margin-bottom: -0.7rem;
   padding: 0.35rem 0.75rem 0.42rem;
-  border: 2px solid #fff;
+  border: 2px solid var(--card-bg);
   border-radius: 999px;
   background: #187de4;
   color: #fff;
@@ -833,7 +833,7 @@
 
 .agenda__event.is-completed {
   background: #e8fff3;
-  color: #3f4254;
+  color: var(--text-primary);
   box-shadow: none;
 }
 
@@ -880,7 +880,7 @@
 .agenda__list {
   flex: 1;
   min-height: 28rem;
-  background: #fff;
+  background: var(--card-bg);
   overflow: visible;
 }
 
@@ -889,10 +889,10 @@
   min-height: 28rem;
   display: grid;
   place-items: center;
-  color: #7e8299;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   font-weight: 400;
-  background: #f3f6f9;
+  background: var(--surface-muted);
 }
 
 .agenda__list-group + .agenda__list-group {
@@ -905,15 +905,15 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.7rem 1rem;
-  background: #f3f6f9;
-  border-bottom: 1px solid #ebedf3;
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .agenda__list-day strong {
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .agenda__list-day span {
@@ -979,7 +979,7 @@
 
 .agenda__list-title {
   font-size: 0.92rem;
-  color: #3f4254;
+  color: var(--text-primary);
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;

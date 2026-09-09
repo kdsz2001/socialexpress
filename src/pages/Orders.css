@@ -4,9 +4,9 @@
 }
 
 .orders__card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 0.75rem;
-  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
+  box-shadow: var(--card-shadow);
   padding: 1.5rem;
 }
 
@@ -24,12 +24,12 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 600;
-  color: #181c32;
+  color: var(--text-heading);
 }
 
 .orders__card--placeholder p {
   margin: 0;
-  color: #b5b5c3;
+  color: var(--text-muted);
   font-size: 1rem;
 }
 
@@ -39,7 +39,7 @@
   gap: 0.85rem;
   flex-wrap: wrap;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .orders__search {
@@ -51,9 +51,9 @@
   min-width: 0;
   height: 40px;
   padding: 0 0.9rem;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 0.42rem;
-  background: #ffffff;
+  background: var(--card-bg);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -63,7 +63,7 @@
 }
 
 .orders__search-icon {
-  color: #b5b5c3;
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
@@ -75,11 +75,11 @@
   background: transparent;
   font-family: inherit;
   font-size: 1rem;
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .orders__search-input::placeholder {
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 .orders__select-wrap {
@@ -92,10 +92,10 @@
   width: 100%;
   height: 40px;
   padding: 0 2.2rem 0 0.9rem;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 0.42rem;
-  background: #ffffff;
-  color: #7e8299;
+  background: var(--card-bg);
+  color: var(--text-secondary);
   font-family: inherit;
   font-size: 0.95rem;
   appearance: none;
@@ -106,7 +106,7 @@
   outline: none;
   border-color: #3699ff;
   box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.12);
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .orders__select-icon {
@@ -114,7 +114,7 @@
   right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #b5b5c3;
+  color: var(--text-muted);
   pointer-events: none;
 }
 
@@ -162,20 +162,20 @@
 .orders__pager-size {
   height: 32px;
   padding: 0 28px 0 10px;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background: #fff
+  background: var(--card-bg)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237E8299' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E")
     no-repeat right 10px center;
   appearance: none;
-  color: #3f4254;
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 0.875rem;
 }
 
 .orders__pager-info {
   font-size: 0.875rem;
-  color: #7e8299;
+  color: var(--text-secondary);
 }
 
 .orders__pager-nav {
@@ -192,8 +192,8 @@
   justify-content: center;
   border: 0;
   border-radius: 4px;
-  background: #f3f6f9;
-  color: #b5b5c3;
+  background: var(--surface-muted);
+  color: var(--text-muted);
   cursor: pointer;
 }
 
@@ -224,16 +224,16 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #b5b5c3;
-  border-bottom: 1px solid #ebedf3;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
 }
 
 .orders__table td {
   padding: 1rem 1.1rem;
   font-size: 1rem;
-  color: #3f4254;
-  border-bottom: 1px solid #ebedf3;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
 }
 
@@ -294,7 +294,7 @@
 
 .orders__client-name {
   font-weight: 600;
-  color: #3f4254;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -302,7 +302,7 @@
 
 .orders__client-meta {
   font-size: 0.9rem;
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 .orders__status {
@@ -317,22 +317,22 @@
 }
 
 .orders__status.is-canceled {
-  background: #e4e6ef;
-  color: #7e8299;
+  background: var(--border-color);
+  color: var(--text-secondary);
 }
 
 .orders__status.is-open {
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
   color: #3699ff;
 }
 
 .orders__status.is-confirmed {
-  background: #c9f7f5;
+  background: var(--success-soft-bg);
   color: #1bc5bd;
 }
 
 .orders__status.is-done {
-  background: #c9f7f5;
+  background: var(--success-soft-bg);
   color: #0bb783;
 }
 
@@ -349,13 +349,13 @@
   margin-left: 0.25rem;
   border: 0;
   border-radius: 0.35rem;
-  background: #f3f6f9;
+  background: var(--surface-muted);
   color: #3699ff;
   cursor: pointer;
 }
 
 .orders__icon-btn:hover {
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
 }
 
 .orders__icon-btn.is-danger {
@@ -363,14 +363,14 @@
 }
 
 .orders__icon-btn.is-danger:hover {
-  background: #ffe2e5;
+  background: var(--danger-soft-bg);
 }
 
 .orders__empty {
   text-align: center;
   padding: 3.5rem 1rem !important;
   font-size: 1rem;
-  color: #b5b5c3;
+  color: var(--text-muted);
   border-bottom: 0 !important;
 }
 
@@ -386,7 +386,7 @@
 
 .orders-modal__dialog {
   width: min(100%, 480px);
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 0.55rem;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.2);
   overflow: hidden;
@@ -398,14 +398,14 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.1rem 1.25rem;
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .orders-modal__header h2 {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 600;
-  color: #181c32;
+  color: var(--text-heading);
 }
 
 .orders-modal__close {
@@ -415,8 +415,8 @@
   height: 32px;
   border: 0;
   border-radius: 0.35rem;
-  background: #f3f6f9;
-  color: #7e8299;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
@@ -433,7 +433,7 @@
   gap: 0.4rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .orders-modal__req {
@@ -443,10 +443,10 @@
 .orders-modal__input {
   height: 40px;
   padding: 0 0.85rem;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 0.42rem;
-  background: #fff;
-  color: #3f4254;
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 1rem;
 }
@@ -481,8 +481,8 @@
 }
 
 .orders-modal__cancel {
-  background: #f3f6f9;
-  color: #3f4254;
+  background: var(--surface-muted);
+  color: var(--text-primary);
 }
 
 .orders-modal__save {

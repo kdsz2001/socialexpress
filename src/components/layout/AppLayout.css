@@ -119,13 +119,13 @@
   width: 100%;
   max-width: 100%;
   margin-top: auto;
-  background: #ffffff;
+  background: var(--card-bg);
   padding: 14px 0;
   font-size: 0.95rem;
   font-weight: 400;
-  color: #b5b5c3;
+  color: var(--text-muted);
   border-bottom: 0;
-  border-top: 1px solid #ebedf3;
+  border-top: 1px solid var(--border-color);
   box-sizing: border-box;
 }
 
@@ -133,7 +133,7 @@
   position: fixed;
   inset: 0;
   z-index: 35;
-  background: rgba(30, 30, 45, 0.45);
+  background: var(--overlay-bg);
   border: none;
   cursor: pointer;
   animation: overlay-in 0.2s ease both;

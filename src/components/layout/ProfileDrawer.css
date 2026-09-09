@@ -15,7 +15,7 @@
   z-index: 1210;
   width: min(360px, 100vw);
   height: 100%;
-  background: #ffffff;
+  background: var(--card-bg);
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -42,7 +42,7 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 600;
-  color: #181c32;
+  color: var(--text-heading);
 }
 
 .profile-drawer__close {
@@ -51,14 +51,14 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #7e8299;
-  background: #f3f6f9;
+  color: var(--text-secondary);
+  background: var(--surface-muted);
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .profile-drawer__close:hover {
-  background: #e4e6ef;
-  color: #3f4254;
+  background: var(--border-color);
+  color: var(--text-primary);
 }
 
 .profile-drawer__user {
@@ -103,7 +103,7 @@
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
-  color: #181c32;
+  color: var(--text-heading);
   line-height: 1.35;
 }
 
@@ -111,7 +111,7 @@
   margin: 0.15rem 0 0.65rem;
   font-size: 0.95rem;
   font-weight: 400;
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 .profile-drawer__logout {
@@ -134,7 +134,7 @@
 .profile-drawer__nav {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid #ebedf3;
+  border-top: 1px solid var(--border-color);
   padding: 0.5rem 0;
 }
 
@@ -150,14 +150,14 @@
 }
 
 .profile-drawer__item:hover {
-  background: #f3f6f9;
+  background: var(--surface-muted);
 }
 
 .profile-drawer__item-icon {
   width: 40px;
   height: 40px;
   border-radius: 0.55rem;
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
   color: #3699ff;
   display: grid;
   place-items: center;
@@ -174,13 +174,13 @@
 .profile-drawer__item-label {
   font-size: 1rem;
   font-weight: 500;
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .profile-drawer__item-desc {
   font-size: 0.9rem;
   font-weight: 400;
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 @keyframes profile-overlay-in {

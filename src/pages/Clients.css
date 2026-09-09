@@ -4,9 +4,9 @@
 }
 
 .clients__card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 0.75rem;
-  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
+  box-shadow: var(--card-shadow);
   padding: 1.5rem;
 }
 
@@ -17,7 +17,7 @@
   gap: 1rem;
   flex-wrap: wrap;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .clients__search {
@@ -29,9 +29,9 @@
   min-width: 0;
   height: 40px;
   padding: 0 0.9rem;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 0.42rem;
-  background: #ffffff;
+  background: var(--card-bg);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -41,7 +41,7 @@
 }
 
 .clients__search-icon {
-  color: #b5b5c3;
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
@@ -54,11 +54,11 @@
   font-family: inherit;
   font-size: 1rem;
   font-weight: 400;
-  color: #3f4254;
+  color: var(--text-primary);
 }
 
 .clients__search-input::placeholder {
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 .clients__add {
@@ -96,11 +96,11 @@
   min-width: 0;
   height: 40px;
   padding: 0 0.9rem;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--border-color);
   border-right: 0;
   border-radius: 0.42rem 0 0 0.42rem;
-  background: #ffffff;
-  color: #3f4254;
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 1rem;
   font-weight: 400;
@@ -113,9 +113,9 @@
   height: 40px;
   display: grid;
   place-items: center;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 0 0.42rem 0.42rem 0;
-  background: #f3f6f9;
+  background: var(--surface-muted);
   color: #3699ff;
   flex-shrink: 0;
   transition: border-color 0.15s ease, background 0.15s ease;
@@ -133,7 +133,7 @@
 }
 
 .clients__date-cal.is-open {
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
 }
 
 .clients__date-menu {
@@ -143,7 +143,7 @@
   right: 40px;
   min-width: 200px;
   padding: 0.45rem 0;
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 0.55rem;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
   z-index: 40;
@@ -167,19 +167,19 @@
   font-family: inherit;
   font-size: 1rem;
   font-weight: 400;
-  color: #3f4254;
+  color: var(--text-primary);
   line-height: 1.35;
   cursor: pointer;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
 .clients__date-option:hover {
-  background: #f3f6f9;
+  background: var(--surface-muted);
   color: #3699ff;
 }
 
 .clients__date-option.is-active {
-  background: #e1f0ff;
+  background: var(--info-soft-bg);
   color: #3699ff;
 }
 
@@ -190,7 +190,7 @@
 }
 
 .clients__th-sort svg {
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 .clients__table-wrap {
@@ -211,8 +211,8 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #b5b5c3;
-  border-bottom: 1px solid #ebedf3;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
 }
 
@@ -261,14 +261,14 @@
   padding: 3.5rem 1rem;
   font-size: 1rem;
   font-weight: 400;
-  color: #b5b5c3;
+  color: var(--text-muted);
   border: 0;
 }
 
 .clients__empty-panel {
   padding: 3.5rem 1.5rem;
   text-align: center;
-  color: #b5b5c3;
+  color: var(--text-muted);
   font-size: 1rem;
 }
 
@@ -300,20 +300,20 @@
 .clients__pager-size {
   height: 32px;
   padding: 0 28px 0 10px;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background: #fff
+  background: var(--card-bg)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237E8299' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E")
     no-repeat right 10px center;
   appearance: none;
-  color: #3f4254;
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 0.875rem;
 }
 
 .clients__pager-info {
   font-size: 0.875rem;
-  color: #7e8299;
+  color: var(--text-secondary);
 }
 
 .clients__pager-nav {
@@ -330,8 +330,8 @@
   justify-content: center;
   border: 0;
   border-radius: 4px;
-  background: #f3f6f9;
-  color: #b5b5c3;
+  background: var(--surface-muted);
+  color: var(--text-muted);
   cursor: pointer;
 }
 
@@ -347,7 +347,7 @@
 
 .clients__row td {
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #ebedf3;
+  border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
 }
 
@@ -362,7 +362,7 @@
 .clients__person-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #3f4254;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -370,7 +370,7 @@
 
 .clients__person-doc {
   font-size: 0.875rem;
-  color: #7e8299;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -392,14 +392,14 @@
 .clients__birthday-date {
   font-size: 0.95rem;
   font-weight: 400;
-  color: #3f4254;
+  color: var(--text-primary);
   line-height: 1.4;
 }
 
 .clients__birthday-age {
   font-size: 0.85rem;
   font-weight: 400;
-  color: #b5b5c3;
+  color: var(--text-muted);
   line-height: 1.35;
 }
 
@@ -409,7 +409,7 @@
   gap: 8px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: #c9f7f5;
+  background: var(--success-soft-bg);
   color: #0bb7af;
   font-size: 0.9rem;
   font-weight: 500;
@@ -427,7 +427,7 @@
 }
 
 .clients__phone-empty {
-  color: #b5b5c3;
+  color: var(--text-muted);
 }
 
 .clients__actions {
@@ -450,7 +450,7 @@
 }
 
 .clients__action--view {
-  background: #e4e6ef;
+  background: var(--border-color);
   color: #3699ff;
 }
 
@@ -492,7 +492,7 @@
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: #181c32;
+  border-top-color: var(--text-heading);
 }
 
 .clients__action:hover .clients__action-tip,

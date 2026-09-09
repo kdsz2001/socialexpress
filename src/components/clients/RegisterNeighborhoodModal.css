@@ -22,7 +22,7 @@
   position: relative;
   z-index: 1;
   width: min(420px, 100%);
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 8px;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
   padding: 28px 28px 24px;
@@ -46,18 +46,18 @@
   margin: 0 0 10px;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #181c32;
+  color: var(--text-heading);
 }
 
 .bairro-modal__text {
   margin: 0 0 18px;
   font-size: 0.975rem;
   line-height: 1.55;
-  color: #7e8299;
+  color: var(--text-secondary);
 }
 
 .bairro-modal__text strong {
-  color: #3f4254;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -67,8 +67,8 @@
   padding: 0 14px;
   border: 1px solid #69b3ff;
   border-radius: 4px;
-  background: #fff;
-  color: #3f4254;
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-size: 0.975rem;
   font-family: inherit;
   outline: none;
@@ -106,8 +106,8 @@
 }
 
 .bairro-modal__btn--cancel {
-  background: #e4e6ef;
-  color: #3f4254;
+  background: var(--border-color);
+  color: var(--text-primary);
 }
 
 .bairro-modal__btn--cancel:hover {

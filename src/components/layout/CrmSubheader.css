@@ -5,7 +5,7 @@
   margin-left: 0;
   padding: 0.3rem 0.75rem;
   border-radius: 0.45rem;
-  background: #f3f6f9;
+  background: var(--surface-muted);
   color: #5e6278;
   font-size: 0.8rem;
   font-weight: 600;
@@ -13,6 +13,6 @@
 }
 
 .crm-subheader__dot {
-  color: #b5b5c3;
+  color: var(--text-muted);
   font-weight: 500;
 }
