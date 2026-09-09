@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  margin-left: 0.85rem;
+  margin-left: 0;
   padding: 0.3rem 0.75rem;
   border-radius: 0.45rem;
   background: #f3f6f9;
@@ -15,11 +15,4 @@
 .crm-subheader__dot {
   color: #b5b5c3;
   font-weight: 500;
-}
-
-.clients-subheader__heading {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.35rem 0;
 }

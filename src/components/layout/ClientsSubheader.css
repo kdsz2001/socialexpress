@@ -33,6 +33,7 @@
   height: 16px;
   background: #e4e6ef;
   flex-shrink: 0;
+  margin: 0 0.15rem;
 }
 
 .clients-subheader__subtitle {
