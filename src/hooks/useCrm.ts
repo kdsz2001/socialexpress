@@ -21,6 +21,10 @@ function getServerSnapshot(): CrmState {
     leads: [],
     suits: [],
     scoreRules: [],
+    followup: {
+      enabled: true,
+      steps: [],
+    },
     backups: [],
     lastSyncAt: null,
   }

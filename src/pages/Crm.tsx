@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   CheckCircle2,
+  MessageCircle,
   PieChart,
   Plus,
   Search,
@@ -11,12 +12,20 @@ import {
 import { useCrm } from '../hooks/useCrm'
 import {
   bootEasyCrm,
+  buildLeadWhatsappLink,
   createQuickLead,
   formatMoneyBr,
+  getCrmFollowupDue,
   getCrmValueStats,
+  markLeadFollowupSent,
+  renderFollowupMessage,
+  resetLeadFollowup,
   setCrmLeadOutcome,
+  setLeadFollowupEnabled,
+  updateCrmFollowupConfig,
   updateCrmLeadBasics,
   updateCrmSuits,
+  type CrmFollowupStep,
   type CrmLead,
   type CrmOutcome,
   type CrmSuitItem,
@@ -30,7 +39,7 @@ function outcomeLabel(outcome: CrmOutcome) {
   return 'Em aberto'
 }
 
-type CrmView = 'board' | 'novo' | 'catalog' | 'values'
+type CrmView = 'board' | 'novo' | 'catalog' | 'values' | 'followup'
 
 export function Crm() {
   const state = useCrm()
@@ -61,6 +70,7 @@ export function Crm() {
   }, [toast])
 
   const stats = useMemo(() => getCrmValueStats(state), [state])
+  const followupDue = useMemo(() => getCrmFollowupDue(state), [state])
 
   const selectedSuit = useMemo(
     () => state.suits.find((suit) => suit.id === suitId && suit.enabled) || null,
@@ -167,6 +177,15 @@ export function Crm() {
             </button>
             <button
               type="button"
+              className={`crm__chip${view === 'followup' ? ' is-active' : ''}`}
+              onClick={() => setView('followup')}
+            >
+              <MessageCircle size={14} strokeWidth={2.25} />
+              Sequências
+              {followupDue.length > 0 ? <span className="crm__chip-badge">{followupDue.length}</span> : null}
+            </button>
+            <button
+              type="button"
               className={`crm__chip${view === 'catalog' ? ' is-active' : ''}`}
               onClick={() => setView('catalog')}
             >
@@ -264,7 +283,48 @@ export function Crm() {
           />
         ) : null}
 
-        {view === 'values' ? <ValuesPanel stats={stats} /> : null}
+        {view === 'values' ? (
+          <ValuesPanel
+            stats={stats}
+            leads={state.leads}
+            onOpenLead={(leadId) => {
+              setSelectedId(leadId)
+              setView('board')
+            }}
+          />
+        ) : null}
+
+        {view === 'followup' ? (
+          <FollowupPanel
+            enabled={state.followup.enabled}
+            steps={state.followup.steps}
+            due={followupDue}
+            onToggleEnabled={(enabled) => {
+              updateCrmFollowupConfig({ enabled })
+              setToast(enabled ? 'Sequência ativada' : 'Sequência pausada')
+            }}
+            onSaveSteps={(steps) => {
+              updateCrmFollowupConfig({ steps })
+              setToast('Sequência salva')
+            }}
+            onSend={(leadId, step, message) => {
+              const lead = state.leads.find((item) => item.id === leadId)
+              if (!lead) return
+              const link = buildLeadWhatsappLink(lead.phone, message)
+              if (!link) {
+                setToast('Telefone inválido para WhatsApp')
+                return
+              }
+              window.open(link, '_blank', 'noopener,noreferrer')
+              markLeadFollowupSent(leadId, step.order)
+              setToast(`Chamada ${step.order} aberta no WhatsApp`)
+            }}
+            onOpenLead={(leadId) => {
+              setSelectedId(leadId)
+              setView('board')
+            }}
+          />
+        ) : null}
 
         {view === 'board' ? (
           <>
@@ -363,6 +423,14 @@ export function Crm() {
                             : 'Retornado para em aberto',
                       )
                     }}
+                    onToggleFollowup={(enabled) => {
+                      setLeadFollowupEnabled(selected.id, enabled)
+                      setToast(enabled ? 'Sequência ligada neste lead' : 'Sequência pausada neste lead')
+                    }}
+                    onResetFollowup={() => {
+                      resetLeadFollowup(selected.id)
+                      setToast('Sequência reiniciada')
+                    }}
                   />
                 ) : (
                   <p className="crm__empty">Selecione um contato ou cadastre um novo.</p>
@@ -382,12 +450,16 @@ function ContactDetail({
   onSuit,
   onEventDate,
   onOutcome,
+  onToggleFollowup,
+  onResetFollowup,
 }: {
   lead: CrmLead
   suits: CrmSuitItem[]
   onSuit: (suitId: string | null) => void
   onEventDate: (eventDate: string) => void
   onOutcome: (outcome: CrmOutcome) => void
+  onToggleFollowup: (enabled: boolean) => void
+  onResetFollowup: () => void
 }) {
   return (
     <div className="crm__detail-inner">
@@ -459,6 +531,33 @@ function ContactDetail({
         <Fact label="Status" value={outcomeLabel(lead.outcome || 'open')} />
         <Fact label="Traje" value={lead.suitInterest || '—'} />
         <Fact label="Potencial" value={formatMoneyBr(lead.potentialValue || 0)} />
+      </div>
+
+      <div className="crm__followup-card">
+        <div className="crm__followup-card-head">
+          <div>
+            <strong>Sequência de chamadas</strong>
+            <p>
+              {(lead.outcome || 'open') !== 'open'
+                ? 'Pausada automaticamente (ganho/perdido).'
+                : lead.followupEnabled
+                  ? `Próxima: chamada ${Math.min(3, (lead.followupLastStep || 0) + 1)} · já enviadas: ${lead.followupLastStep || 0}/3`
+                  : 'Pausada neste lead.'}
+            </p>
+          </div>
+          <label className="crm__switch">
+            <input
+              type="checkbox"
+              checked={Boolean(lead.followupEnabled) && (lead.outcome || 'open') === 'open'}
+              disabled={(lead.outcome || 'open') !== 'open'}
+              onChange={(event) => onToggleFollowup(event.target.checked)}
+            />
+            <span>Ativa</span>
+          </label>
+        </div>
+        <button type="button" className="crm__ghost" onClick={onResetFollowup}>
+          Reiniciar sequência
+        </button>
       </div>
     </div>
   )
@@ -557,12 +656,28 @@ function CatalogPanel({
   )
 }
 
-function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) {
+function ValuesPanel({
+  stats,
+  leads,
+  onOpenLead,
+}: {
+  stats: ReturnType<typeof getCrmValueStats>
+  leads: CrmLead[]
+  onOpenLead: (leadId: string) => void
+}) {
   const outcomeSlices = stats.outcomeSlices.map((slice) => ({
     name: slice.label,
     value: slice.value,
     color: slice.color,
   }))
+
+  const history = useMemo(
+    () =>
+      leads
+        .slice()
+        .sort((a, b) => b.updatedAt - a.updatedAt),
+    [leads],
+  )
 
   return (
     <div className="crm__panel">
@@ -631,6 +746,190 @@ function ValuesPanel({ stats }: { stats: ReturnType<typeof getCrmValueStats> }) 
           ))}
         </ul>
       )}
+
+      <div className="crm__history">
+        <div className="crm__history-head">
+          <div>
+            <h4>Histórico de contatos</h4>
+            <p>Nome, classificação e valor. Clique para abrir o detalhe.</p>
+          </div>
+          <span>{history.length} registro{history.length === 1 ? '' : 's'}</span>
+        </div>
+
+        {history.length === 0 ? (
+          <p className="crm__empty">Nenhum contato cadastrado ainda.</p>
+        ) : (
+          <ul className="crm__history-list">
+            <li className="crm__history-list-head">
+              <strong>Cliente</strong>
+              <span>Classificação</span>
+              <em>Valor</em>
+            </li>
+            {history.map((lead) => (
+              <li key={lead.id}>
+                <button
+                  type="button"
+                  className="crm__history-row"
+                  onClick={() => onOpenLead(lead.id)}
+                >
+                  <div className="crm__history-client">
+                    <strong>{lead.name}</strong>
+                    <span>{lead.phone}</span>
+                  </div>
+                  <span className={`crm__outcome-pill is-${lead.outcome || 'open'}`}>
+                    {outcomeLabel(lead.outcome || 'open')}
+                  </span>
+                  <em>{formatMoneyBr(lead.potentialValue || 0)}</em>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function FollowupPanel({
+  enabled,
+  steps,
+  due,
+  onToggleEnabled,
+  onSaveSteps,
+  onSend,
+  onOpenLead,
+}: {
+  enabled: boolean
+  steps: CrmFollowupStep[]
+  due: ReturnType<typeof getCrmFollowupDue>
+  onToggleEnabled: (enabled: boolean) => void
+  onSaveSteps: (steps: CrmFollowupStep[]) => void
+  onSend: (leadId: string, step: CrmFollowupStep, message: string) => void
+  onOpenLead: (leadId: string) => void
+}) {
+  const [draft, setDraft] = useState(() => steps.map((step) => ({ ...step })))
+
+  useEffect(() => {
+    setDraft(steps.map((step) => ({ ...step })))
+  }, [steps])
+
+  const patchStep = (order: number, patch: Partial<CrmFollowupStep>) => {
+    setDraft((current) =>
+      current.map((step) => (step.order === order ? { ...step, ...patch } : step)),
+    )
+  }
+
+  return (
+    <div className="crm__panel">
+      <div className="crm__panel-head">
+        <div>
+          <h3>Sequência de chamadas</h3>
+          <p>
+            Configure até 3 mensagens automáticas de rechamada. Quando o lead parar de responder,
+            abra o WhatsApp com o texto pronto e marque como enviada.
+          </p>
+        </div>
+        <label className="crm__switch">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(event) => onToggleEnabled(event.target.checked)}
+          />
+          <span>{enabled ? 'Ativa' : 'Pausada'}</span>
+        </label>
+      </div>
+
+      <div className="crm__followup-steps">
+        {draft.map((step) => (
+          <div key={step.id} className="crm__followup-step">
+            <div className="crm__followup-step-top">
+              <strong>Chamada {step.order}</strong>
+              <label className="crm__switch crm__switch--small">
+                <input
+                  type="checkbox"
+                  checked={step.enabled}
+                  onChange={(event) => patchStep(step.order, { enabled: event.target.checked })}
+                />
+                <span>Usar</span>
+              </label>
+            </div>
+            <label className="crm__label-field">
+              Dias após a etapa anterior (ou cadastro)
+              <input
+                type="number"
+                min={1}
+                max={90}
+                value={step.delayDays}
+                onChange={(event) =>
+                  patchStep(step.order, {
+                    delayDays: Math.max(1, Number(event.target.value) || 1),
+                  })
+                }
+              />
+            </label>
+            <label className="crm__label-field">
+              Mensagem (use {'{NOME}'} para o nome do cliente)
+              <textarea
+                rows={4}
+                value={step.message}
+                onChange={(event) => patchStep(step.order, { message: event.target.value })}
+              />
+            </label>
+          </div>
+        ))}
+      </div>
+
+      <div className="crm__form-actions">
+        <button type="button" className="crm__primary" onClick={() => onSaveSteps(draft)}>
+          Salvar sequência
+        </button>
+      </div>
+
+      <div className="crm__history">
+        <div className="crm__history-head">
+          <div>
+            <h4>Fila para enviar agora</h4>
+            <p>Leads em aberto cuja próxima chamada já venceu o prazo.</p>
+          </div>
+          <span>{due.length} pendente{due.length === 1 ? '' : 's'}</span>
+        </div>
+
+        {!enabled ? (
+          <p className="crm__empty">Ative a sequência para liberar a fila.</p>
+        ) : due.length === 0 ? (
+          <p className="crm__empty">Nenhuma chamada vencida no momento.</p>
+        ) : (
+          <ul className="crm__due-list">
+            {due.map((item) => {
+              const message = renderFollowupMessage(item.step.message, item.lead.name)
+              return (
+                <li key={`${item.lead.id}-${item.step.order}`} className="crm__due-item">
+                  <button
+                    type="button"
+                    className="crm__due-main"
+                    onClick={() => onOpenLead(item.lead.id)}
+                  >
+                    <strong>{item.lead.name}</strong>
+                    <span>
+                      Chamada {item.step.order} · há {item.step.delayDays} dia
+                      {item.step.delayDays === 1 ? '' : 's'}
+                      {item.daysOverdue > 0 ? ` · atrasada ${item.daysOverdue}d` : ''}
+                    </span>
+                    <p>{message}</p>
+                  </button>
+                  <button
+                    type="button"
+                    className="crm__primary"
+                    onClick={() => onSend(item.lead.id, item.step, message)}
+                  >
+                    Enviar no WhatsApp
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }

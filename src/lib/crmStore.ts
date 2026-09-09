@@ -30,6 +30,20 @@ export type CrmScoreHit = {
 /** Resultado comercial do lead */
 export type CrmOutcome = 'open' | 'won' | 'lost'
 
+/** Etapa da sequência de rechamada (estilo follow-up WhatsApp) */
+export type CrmFollowupStep = {
+  id: string
+  order: number
+  delayDays: number
+  message: string
+  enabled: boolean
+}
+
+export type CrmFollowupConfig = {
+  enabled: boolean
+  steps: CrmFollowupStep[]
+}
+
 /** Traje do catálogo CRM com valor potencial */
 export type CrmSuitItem = {
   id: string
@@ -54,6 +68,12 @@ export type CrmLead = {
   scoreHits: CrmScoreHit[]
   aiSummary: string
   messages: CrmMessage[]
+  /** Participa da sequência de chamadas */
+  followupEnabled: boolean
+  /** Última etapa já enviada (0 = nenhuma) */
+  followupLastStep: number
+  /** Quando a última etapa foi marcada como enviada */
+  followupLastSentAt: number | null
   createdAt: number
   updatedAt: number
 }
@@ -88,6 +108,7 @@ export type CrmState = {
   leads: CrmLead[]
   suits: CrmSuitItem[]
   scoreRules: CrmScoreRule[]
+  followup: CrmFollowupConfig
   backups: CrmBackup[]
   lastSyncAt: number | null
 }
@@ -122,6 +143,38 @@ export const DEFAULT_SUITS: CrmSuitItem[] = [
   { id: 'suit-preto', name: 'Preto Clássico', price: 450, enabled: true },
 ]
 
+export const DEFAULT_FOLLOWUP: CrmFollowupConfig = {
+  enabled: true,
+  steps: [
+    {
+      id: 'followup-1',
+      order: 1,
+      delayDays: 3,
+      message:
+        'Bom dia {NOME}! Tudo bem?\n\nPassando para saber se ainda podemos te ajudar com o traje. Qualquer dúvida é só responder por aqui 😊',
+      enabled: true,
+    },
+    {
+      id: 'followup-2',
+      order: 2,
+      delayDays: 5,
+      message:
+        'Oi {NOME}, tudo certo?\n\nNotei que ficamos sem retorno e queria checar se o evento segue e se ainda tem interesse. Estamos à disposição!',
+      enabled: true,
+    },
+    {
+      id: 'followup-3',
+      order: 3,
+      delayDays: 7,
+      message:
+        'Olá {NOME}!\n\nÚltima mensagem por aqui — se quiser retomar o atendimento ou tirar alguma dúvida sobre o traje, é só chamar. Será um prazer ajudar.',
+      enabled: true,
+    },
+  ],
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
 function emptyState(): CrmState {
   return {
     status: 'disconnected',
@@ -138,6 +191,10 @@ function emptyState(): CrmState {
     leads: [],
     suits: DEFAULT_SUITS.map((item) => ({ ...item })),
     scoreRules: DEFAULT_SCORE_RULES.map((item) => ({ ...item })),
+    followup: {
+      enabled: DEFAULT_FOLLOWUP.enabled,
+      steps: DEFAULT_FOLLOWUP.steps.map((step) => ({ ...step })),
+    },
     backups: [],
     lastSyncAt: null,
   }
@@ -153,6 +210,39 @@ function normalizeSuit(raw: Partial<CrmSuitItem> | null | undefined): CrmSuitIte
     name: typeof raw?.name === 'string' ? raw.name : 'Traje',
     price: Number(raw?.price) || 0,
     enabled: raw?.enabled !== false,
+  }
+}
+
+function normalizeFollowupStep(raw: Partial<CrmFollowupStep> | null | undefined, index: number): CrmFollowupStep {
+  const fallback = DEFAULT_FOLLOWUP.steps[index] || DEFAULT_FOLLOWUP.steps[0]
+  return {
+    id: typeof raw?.id === 'string' ? raw.id : fallback.id,
+    order: Number(raw?.order) > 0 ? Math.floor(Number(raw?.order)) : fallback.order,
+    delayDays: Math.max(1, Number(raw?.delayDays) || fallback.delayDays),
+    message: typeof raw?.message === 'string' && raw.message.trim() ? raw.message : fallback.message,
+    enabled: raw?.enabled !== false,
+  }
+}
+
+function normalizeFollowup(raw: Partial<CrmFollowupConfig> | null | undefined): CrmFollowupConfig {
+  const stepsRaw = Array.isArray(raw?.steps) ? raw!.steps! : []
+  const steps =
+    stepsRaw.length > 0
+      ? stepsRaw
+          .slice(0, 3)
+          .map((step, index) => normalizeFollowupStep(step, index))
+          .sort((a, b) => a.order - b.order)
+          .map((step, index) => ({ ...step, order: index + 1 }))
+      : DEFAULT_FOLLOWUP.steps.map((step) => ({ ...step }))
+
+  while (steps.length < 3) {
+    const index = steps.length
+    steps.push({ ...DEFAULT_FOLLOWUP.steps[index], id: `followup-${index + 1}` })
+  }
+
+  return {
+    enabled: raw?.enabled !== false,
+    steps: steps.slice(0, 3),
   }
 }
 
@@ -175,6 +265,11 @@ function normalizeLead(raw: Partial<CrmLead> | null | undefined): CrmLead {
     scoreHits: Array.isArray(raw?.scoreHits) ? raw!.scoreHits! : [],
     aiSummary: typeof raw?.aiSummary === 'string' ? raw.aiSummary : '',
     messages: Array.isArray(raw?.messages) ? raw!.messages! : [],
+    followupEnabled:
+      typeof raw?.followupEnabled === 'boolean' ? raw.followupEnabled : outcome === 'open',
+    followupLastStep: Math.max(0, Math.min(3, Math.floor(Number(raw?.followupLastStep) || 0))),
+    followupLastSentAt:
+      typeof raw?.followupLastSentAt === 'number' ? raw.followupLastSentAt : null,
     createdAt: typeof raw?.createdAt === 'number' ? raw.createdAt : Date.now(),
     updatedAt: typeof raw?.updatedAt === 'number' ? raw.updatedAt : Date.now(),
   }
@@ -244,6 +339,7 @@ function normalizeState(raw: unknown): CrmState {
         : base.suits,
     scoreRules:
       Array.isArray(item.scoreRules) && item.scoreRules.length ? item.scoreRules : base.scoreRules,
+    followup: normalizeFollowup(item.followup),
     backups: Array.isArray(item.backups) ? item.backups : [],
     lastSyncAt: typeof item.lastSyncAt === 'number' ? item.lastSyncAt : null,
   }
@@ -525,6 +621,9 @@ export function createQuickLead(input: {
         .filter(Boolean)
         .join(' · '),
       messages: [],
+      followupEnabled: true,
+      followupLastStep: 0,
+      followupLastSentAt: null,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     }
@@ -671,6 +770,9 @@ export function ingestChatPaste(input: {
       scoreHits: analyzed.scoreHits,
       aiSummary: analyzed.aiSummary,
       messages,
+      followupEnabled: true,
+      followupLastStep: 0,
+      followupLastSentAt: null,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     }
@@ -740,6 +842,126 @@ export function buildCaptureWhatsappLink(input: {
   return `https://wa.me/${e164}?text=${encodeURIComponent(text)}`
 }
 
+export function renderFollowupMessage(template: string, leadName: string) {
+  const name = (leadName || 'tudo bem').trim() || 'tudo bem'
+  return String(template || '')
+    .replace(/\{\{\s*nome\s*\}\}/gi, name)
+    .replace(/\{nome\}/gi, name)
+}
+
+export function buildLeadWhatsappLink(phone: string, text: string) {
+  const digits = String(phone || '').replace(/\D/g, '')
+  if (!digits || digits === '') return null
+  let e164 = digits
+  if (digits.length === 10 || digits.length === 11) e164 = `55${digits}`
+  else if (!digits.startsWith('55')) e164 = `55${digits}`
+  return `https://wa.me/${e164}?text=${encodeURIComponent(text)}`
+}
+
+export function updateCrmFollowupConfig(input: Partial<CrmFollowupConfig> & { steps?: CrmFollowupStep[] }) {
+  return update((current) => ({
+    ...current,
+    followup: normalizeFollowup({
+      ...current.followup,
+      ...input,
+      steps: input.steps || current.followup.steps,
+    }),
+    lastSyncAt: Date.now(),
+  }))
+}
+
+export function setLeadFollowupEnabled(leadId: string, enabled: boolean) {
+  return update((current) => ({
+    ...current,
+    leads: current.leads.map((lead) =>
+      lead.id === leadId
+        ? {
+            ...lead,
+            followupEnabled: enabled,
+            followupLastSentAt: enabled ? lead.followupLastSentAt ?? Date.now() : lead.followupLastSentAt,
+            updatedAt: Date.now(),
+          }
+        : lead,
+    ),
+    lastSyncAt: Date.now(),
+  }))
+}
+
+export function resetLeadFollowup(leadId: string) {
+  return update((current) => ({
+    ...current,
+    leads: current.leads.map((lead) =>
+      lead.id === leadId
+        ? {
+            ...lead,
+            followupEnabled: true,
+            followupLastStep: 0,
+            followupLastSentAt: null,
+            updatedAt: Date.now(),
+          }
+        : lead,
+    ),
+    lastSyncAt: Date.now(),
+  }))
+}
+
+export function markLeadFollowupSent(leadId: string, stepOrder: number) {
+  return update((current) => ({
+    ...current,
+    leads: current.leads.map((lead) => {
+      if (lead.id !== leadId) return lead
+      return {
+        ...lead,
+        followupLastStep: Math.max(lead.followupLastStep, stepOrder),
+        followupLastSentAt: Date.now(),
+        labelId: lead.labelId === 'novo' ? 'sem-resposta' : lead.labelId,
+        updatedAt: Date.now(),
+      }
+    }),
+    lastSyncAt: Date.now(),
+  }))
+}
+
+export type CrmFollowupDueItem = {
+  lead: CrmLead
+  step: CrmFollowupStep
+  dueAt: number
+  daysOverdue: number
+}
+
+export function getCrmFollowupDue(state?: CrmState, now = Date.now()): CrmFollowupDueItem[] {
+  const current = state || readState()
+  if (!current.followup.enabled) return []
+
+  const steps = current.followup.steps
+    .filter((step) => step.enabled)
+    .slice()
+    .sort((a, b) => a.order - b.order)
+
+  const due: CrmFollowupDueItem[] = []
+
+  for (const lead of current.leads) {
+    if ((lead.outcome || 'open') !== 'open') continue
+    if (!lead.followupEnabled) continue
+
+    const nextStep = steps.find((step) => step.order === lead.followupLastStep + 1)
+    if (!nextStep) continue
+
+    const anchor = lead.followupLastSentAt ?? lead.createdAt
+    const dueAt = anchor + nextStep.delayDays * DAY_MS
+    if (now < dueAt) continue
+
+    due.push({
+      lead,
+      step: nextStep,
+      dueAt,
+      daysOverdue: Math.floor((now - dueAt) / DAY_MS),
+    })
+  }
+
+  return due.sort((a, b) => a.dueAt - b.dueAt)
+}
+
 export function loadDemoLeads() {
   return update((current) => ({
     ...current,
@@ -795,11 +1017,17 @@ export function setCrmLeadOutcome(leadId: string, outcome: CrmOutcome, note = ''
       if (outcome === 'won') labelId = 'pago'
       else if (outcome === 'lost') labelId = 'perdido'
       else if (lead.labelId === 'pago' || lead.labelId === 'perdido') labelId = 'acompanhar'
+      const closed = outcome === 'won' || outcome === 'lost'
       return {
         ...lead,
         outcome,
         outcomeNote: note.trim() || lead.outcomeNote || '',
         labelId,
+        followupEnabled: closed ? false : true,
+        followupLastStep: closed ? lead.followupLastStep : lead.followupLastStep,
+        followupLastSentAt: closed
+          ? lead.followupLastSentAt
+          : lead.followupLastSentAt ?? Date.now(),
         updatedAt: Date.now(),
       }
     }),
@@ -1032,6 +1260,11 @@ export function analyzeConversation(
     scoreHits: [],
     aiSummary: parts.join(' · '),
     messages,
+    followupEnabled:
+      typeof base?.followupEnabled === 'boolean' ? base.followupEnabled : true,
+    followupLastStep: Number(base?.followupLastStep) || 0,
+    followupLastSentAt:
+      typeof base?.followupLastSentAt === 'number' ? base.followupLastSentAt : null,
     createdAt: base?.createdAt ?? Date.now(),
     updatedAt: Date.now(),
   }
