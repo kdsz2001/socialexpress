@@ -57,10 +57,10 @@
 .login__card {
   position: relative;
   z-index: 1;
-  width: min(980px, 100%);
+  width: min(1080px, 100%);
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  min-height: min(640px, 90vh);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  min-height: min(700px, 92vh);
   border-radius: 1.15rem;
   overflow: hidden;
   background: rgba(0, 16, 32, 0.88);
@@ -75,7 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(1.75rem, 4.5vw, 3rem);
+  padding: clamp(2rem, 5vw, 3.5rem);
   background:
     linear-gradient(180deg, rgba(0, 43, 75, 0.35), transparent 40%),
     #000d18;
@@ -83,7 +83,7 @@
 
 .login__form-inner {
   width: 100%;
-  max-width: 22.5rem;
+  max-width: 28rem;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -93,23 +93,23 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 2.35rem;
+  margin-bottom: 2.6rem;
 }
 
 .login__mark {
-  width: 3.4rem;
+  width: 4.25rem;
   height: auto;
   display: block;
-  filter: drop-shadow(0 0 16px rgba(0, 144, 232, 0.45));
+  filter: drop-shadow(0 0 18px rgba(0, 144, 232, 0.5));
 }
 
 .login__intro {
-  margin-bottom: 1.65rem;
+  margin-bottom: 1.9rem;
 }
 
 .login__title {
   margin: 0;
-  font-size: clamp(1.6rem, 2.5vw, 1.95rem);
+  font-size: clamp(1.85rem, 2.8vw, 2.35rem);
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.02em;
@@ -118,33 +118,33 @@
 
 .login__title-dot {
   display: inline-block;
-  width: 0.42rem;
-  height: 0.42rem;
-  margin-left: 0.4rem;
-  border-radius: 0.12rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: 0.45rem;
+  border-radius: 0.14rem;
   background: var(--se-blue);
   vertical-align: middle;
   box-shadow: 0 0 12px rgba(0, 144, 232, 0.7);
 }
 
 .login__lead {
-  margin: 0.55rem 0 0;
+  margin: 0.65rem 0 0;
   color: var(--se-muted);
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.45;
 }
 
 .login__form {
   display: flex;
   flex-direction: column;
-  gap: 1.05rem;
+  gap: 1.2rem;
 }
 
 .login__field {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  font-size: 0.74rem;
+  gap: 0.5rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--se-muted);
   letter-spacing: 0.06em;
@@ -153,14 +153,14 @@
 
 .login__field input {
   width: 100%;
-  height: 3rem;
-  border-radius: 0.55rem;
+  height: 3.45rem;
+  border-radius: 0.6rem;
   border: 1px solid var(--se-line);
   background: rgba(0, 30, 55, 0.55);
   color: #fff;
-  padding: 0 1rem;
+  padding: 0 1.1rem;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
