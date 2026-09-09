@@ -18,7 +18,7 @@ import { TieIcon } from '../icons/TieIcon'
 import { NecktieMark } from '../icons/NecktieMark'
 import './Sidebar.css'
 
-const mainNavItems = [
+const navItems = [
   { to: '/', label: 'Dashboard', icon: Monitor },
   { to: '/clientes', label: 'Clientes', icon: User },
   { to: '/agenda', label: 'Agenda', icon: Calendar },
@@ -30,9 +30,6 @@ const mainNavItems = [
   { to: '/financeiro', label: 'Financeiro', icon: Banknote },
   { to: '/fornecedores', label: 'Fornecedores', icon: Shirt },
   { to: '/relatorios', label: 'Relatórios', icon: Activity },
-] as const
-
-const footerNavItems = [
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
   { to: '/historicos', label: 'Históricos', icon: BookOpen },
 ] as const
@@ -58,12 +55,10 @@ function NavItem({
   to,
   label,
   icon: Icon,
-  footer = false,
 }: {
   to: string
   label: string
-  icon: (typeof mainNavItems)[number]['icon'] | (typeof footerNavItems)[number]['icon']
-  footer?: boolean
+  icon: (typeof navItems)[number]['icon']
 }) {
   const isDashboard = to === '/'
   return (
@@ -74,7 +69,6 @@ function NavItem({
         className={({ isActive }) =>
           [
             'sidebar__link',
-            footer ? 'sidebar__link--footer' : '',
             isDashboard ? 'sidebar__link--dashboard' : '',
             !isDashboard && isActive ? 'is-active' : '',
           ]
@@ -170,22 +164,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         }}
       >
         <ul>
-          {mainNavItems.map((item) => (
+          {navItems.map((item) => (
             <NavItem key={item.to} {...item} />
-          ))}
-        </ul>
-      </nav>
-
-      <nav
-        className="sidebar__footer"
-        aria-label="Configurações"
-        onMouseEnter={() => {
-          if (pinnedClosed) setHoverOpen(true)
-        }}
-      >
-        <ul>
-          {footerNavItems.map((item) => (
-            <NavItem key={item.to} {...item} footer />
           ))}
         </ul>
       </nav>

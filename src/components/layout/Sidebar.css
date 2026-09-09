@@ -351,50 +351,6 @@
   color: #cfcfd8;
 }
 
-.sidebar__footer {
-  flex-shrink: 0;
-  margin-top: auto;
-  padding: 10px 0 12px;
-  background: #eef0f4;
-  border-top: 1px solid #e1e3ea;
-}
-
-.sidebar__footer .sidebar__link,
-.sidebar__link--footer {
-  color: #3f4254;
-}
-
-.sidebar__footer .sidebar__link svg,
-.sidebar__link--footer svg {
-  color: #5e6278;
-}
-
-.sidebar__footer .sidebar__link:hover,
-.sidebar__link--footer:hover {
-  background: #e4e6ef;
-  color: #181c32;
-}
-
-.sidebar__footer .sidebar__link:hover svg,
-.sidebar__link--footer:hover svg {
-  color: #181c32;
-}
-
-.sidebar__footer .sidebar__link.is-active,
-.sidebar__link--footer.is-active {
-  background: #e1e3ea;
-  color: #181c32;
-}
-
-.sidebar__footer .sidebar__link.is-active svg,
-.sidebar__link--footer.is-active svg {
-  color: #181c32;
-}
-
-.sidebar.is-collapsed:not(.is-hover-open) .sidebar__footer {
-  padding: 8px 0;
-}
-
 @media (max-width: 900px) {
   .sidebar {
     transform: translateX(-100%);
