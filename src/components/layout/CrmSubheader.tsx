@@ -4,7 +4,6 @@ import './CrmSubheader.css'
 
 function titleFromTab(tab: string | null) {
   if (tab === 'analise') return 'Análise'
-  if (tab === 'sequencias') return 'Sequências'
   if (tab === 'trajes') return 'Trajes e valores'
   if (tab === 'novo') return 'Novo contato'
   return 'Contatos'
@@ -13,7 +12,6 @@ function titleFromTab(tab: string | null) {
 function subtitleFromTab(tab: string | null) {
   if (tab === 'novo') return 'Cadastre nome, número, data e traje'
   if (tab === 'analise') return 'Visão de ganhos, perdas e potencial'
-  if (tab === 'sequencias') return 'Rechamadas no WhatsApp para leads sem resposta'
   if (tab === 'trajes') return 'Catálogo e valores estimados'
   return 'Lista e acompanhamento dos leads'
 }

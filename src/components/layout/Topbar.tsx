@@ -27,7 +27,7 @@ type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
 type EmployeesTab = 'lista' | 'permissoes'
 type FinanceTab = 'caixa' | 'pagar' | 'receber' | 'dre'
-type CrmTab = 'contatos' | 'analise' | 'sequencias' | 'trajes' | 'novo'
+type CrmTab = 'novo' | 'contatos' | 'analise' | 'trajes'
 
 const SEARCH_LIMIT = 8
 const PANEL_WIDTH = 420
@@ -41,11 +41,10 @@ const PRODUCTS_TABS: { id: ProductsTab; label: string; path: string }[] = [
 ]
 
 const CRM_TABS: { id: CrmTab; label: string; path: string }[] = [
+  { id: 'novo', label: 'Novo contato', path: '/crm?tab=novo' },
   { id: 'contatos', label: 'Contatos', path: '/crm' },
   { id: 'analise', label: 'Análise', path: '/crm?tab=analise' },
-  { id: 'sequencias', label: 'Sequências', path: '/crm?tab=sequencias' },
   { id: 'trajes', label: 'Trajes e valores', path: '/crm?tab=trajes' },
-  { id: 'novo', label: 'Novo contato', path: '/crm?tab=novo' },
 ]
 
 const FINANCE_TABS: { id: FinanceTab; label: string; path: string }[] = [
@@ -108,15 +107,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             : 'todos'
   const crmTab: CrmTab | null = !isCrmSection
     ? null
-    : paramTab === 'analise'
-      ? 'analise'
-      : paramTab === 'sequencias'
-        ? 'sequencias'
+    : paramTab === 'novo'
+      ? 'novo'
+      : paramTab === 'analise'
+        ? 'analise'
         : paramTab === 'trajes'
           ? 'trajes'
-          : paramTab === 'novo'
-            ? 'novo'
-            : 'contatos'
+          : 'contatos'
   const employeesTab: EmployeesTab | null = !isEmployeesSection
     ? null
     : paramTab === 'permissoes'
