@@ -116,11 +116,13 @@
 
 .app-footer {
   flex-shrink: 0;
-  width: 100%;
-  max-width: 100%;
+  width: calc(100% + (2 * var(--app-content-pad-x, 30px)));
+  max-width: none;
   margin-top: auto;
+  margin-left: calc(-1 * var(--app-content-pad-x, 30px));
+  margin-right: calc(-1 * var(--app-content-pad-x, 30px));
   background: var(--card-bg);
-  padding: 14px 0;
+  padding: 15px var(--app-content-pad-x, 30px);
   font-size: 0.95rem;
   font-weight: 400;
   color: var(--text-muted);
@@ -207,6 +209,13 @@
   .app-footer {
     width: 100%;
     max-width: none;
+  }
+
+  .app-footer {
+    width: calc(100% + 30px);
+    margin-left: -15px;
+    margin-right: -15px;
+    padding: 12px 15px;
   }
 
   .app-content__inner > .clients,
