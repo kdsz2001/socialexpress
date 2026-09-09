@@ -309,13 +309,13 @@
 }
 
 .history__diff--remove {
-  background: var(--danger-soft-bg);
-  color: var(--text-primary);
+  background: var(--diff-remove-bg);
+  color: var(--diff-remove-text);
 }
 
 .history__diff--add {
-  background: #ccffcc;
-  color: var(--text-primary);
+  background: var(--diff-add-bg);
+  color: var(--diff-add-text);
 }
 
 .history__date-cell {
