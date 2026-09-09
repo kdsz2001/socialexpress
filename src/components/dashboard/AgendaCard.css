@@ -1,0 +1,42 @@
+.agenda-card {
+  background: var(--card-bg);
+  border-radius: 0.75rem;
+  box-shadow: var(--card-shadow);
+  padding: 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.agenda-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.agenda-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.agenda-card__icon {
+  color: #1bc5bd;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.agenda-card__empty {
+  text-align: left;
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  padding: 0.25rem 0 0.35rem;
+  line-height: 1.5;
+  margin: 0;
+}

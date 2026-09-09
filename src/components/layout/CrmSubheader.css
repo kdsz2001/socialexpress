@@ -1,0 +1,18 @@
+.crm-subheader__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.45rem;
+  background: var(--surface-muted);
+  color: #5e6278;
+  font-size: 0.8rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.crm-subheader__dot {
+  color: var(--text-muted);
+  font-weight: 500;
+}

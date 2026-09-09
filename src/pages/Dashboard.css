@@ -1,0 +1,80 @@
+.dashboard {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+  transition: padding 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: dashboard-in 0.35s ease both;
+}
+
+/*
+  Cards com teto de 350px:
+  - encolhem só se faltar espaço (sem estourar a tela)
+  - ao fechar o menu, padding simétrico (mesmo delta do sidebar)
+    centraliza sem translateX — evita cortar pra fora
+*/
+.dashboard__grid {
+  --dashboard-card: 350px;
+  --dashboard-gap: 25px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, var(--dashboard-card)));
+  gap: var(--dashboard-gap);
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+  justify-content: start;
+  box-sizing: border-box;
+}
+
+.app-shell.is-collapsed .dashboard {
+  padding-left: calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2);
+  padding-right: calc((var(--sidebar-width) - var(--sidebar-collapsed)) / 2);
+}
+
+.dashboard__grid > * {
+  width: 100%;
+  max-width: var(--dashboard-card);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@keyframes dashboard-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1200px) {
+  .dashboard__grid {
+    grid-template-columns: repeat(2, minmax(0, var(--dashboard-card)));
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard {
+    padding-left: 0;
+    padding-right: 0;
+    transition: none;
+  }
+
+  .app-shell.is-collapsed .dashboard {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .dashboard__grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }
+
+  .dashboard__grid > * {
+    max-width: none;
+  }
+}
