@@ -63,7 +63,7 @@
   padding: 0.85rem 1rem;
   border-radius: 0.5rem;
   background: var(--surface-muted);
-  color: #5e6278 !important;
+  color: var(--text-secondary) !important;
   font-size: 0.9rem !important;
 }
 
@@ -417,7 +417,7 @@
 }
 
 .crm__tab.is-active {
-  background: color-mix(in srgb, var(--tab-color, #3699ff) 16%, #fff);
+  background: color-mix(in srgb, var(--tab-color, #3699ff) 16%, var(--card-bg));
   color: var(--tab-color, #3699ff);
 }
 
@@ -1039,7 +1039,7 @@
   font: inherit;
   font-weight: 500;
   color: var(--text-heading);
-  background: var(--surface-muted);
+  background: var(--control-bg);
   width: 100%;
 }
 
