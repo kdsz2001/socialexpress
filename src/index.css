@@ -19,6 +19,7 @@
   --border-color: #ebedf3;
   --input-bg: #ffffff;
   --input-border: #e4e6ef;
+  --control-bg: #f3f6f9;
   --overlay-bg: rgba(30, 30, 45, 0.45);
 
   --text-heading: #181c32;
@@ -150,6 +151,7 @@ html.theme-dark {
   --border-color: #2b2b40;
   --input-bg: #1b1b28;
   --input-border: #323248;
+  --control-bg: #2b2b40;
   --overlay-bg: rgba(10, 10, 20, 0.55);
   --text-heading: #e4e6ef;
   --text-primary: #e4e6ef;
