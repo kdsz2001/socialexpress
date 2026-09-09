@@ -215,23 +215,23 @@
 
 .client-create__input.is-invalid {
   border-color: #f64e60;
-  background: #fff5f8;
+  background: var(--danger-soft-bg);
 }
 
 .client-create__input.is-invalid:focus {
   border-color: #f64e60;
-  background: #fff5f8;
+  background: var(--danger-soft-bg);
   box-shadow: 0 0 0 3px rgba(246, 78, 96, 0.15);
 }
 
 .client-create__select.is-invalid {
   border-color: #f64e60;
-  background: #fff5f8;
+  background: var(--danger-soft-bg);
 }
 
 .client-create__select.is-invalid:focus {
   border-color: #f64e60;
-  background: #fff5f8;
+  background: var(--danger-soft-bg);
   box-shadow: 0 0 0 3px rgba(246, 78, 96, 0.15);
 }
 

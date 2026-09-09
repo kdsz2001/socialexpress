@@ -55,7 +55,7 @@
 }
 
 .avatar-crop__close:hover:not(:disabled) {
-  background: #eef0f4;
+  background: var(--border-color);
   color: var(--text-primary);
 }
 
@@ -175,7 +175,7 @@
 }
 
 .avatar-crop__btn--ghost:hover:not(:disabled) {
-  background: #eef0f4;
+  background: var(--border-color);
 }
 
 .avatar-crop__btn--primary {

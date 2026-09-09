@@ -35,6 +35,12 @@
   --success-soft-bg: #c9f7f5;
   --danger-soft-bg: #ffe2e5;
   --info-soft-bg: #e1f0ff;
+  --warning-soft-bg: #fff4de;
+  --calendar-outside-bg: #fcfcfd;
+  --calendar-hover-bg: #cfe6ff;
+  --calendar-selected-bg: #e8f4ff;
+  --calendar-today-bg: #fce4e2;
+  --calendar-today-hover-bg: #f8d5d1;
 
   --accent-teal: #1bc5bd;
   --accent-red: #f64e60;
@@ -154,6 +160,12 @@ html.theme-dark {
   --success-soft-bg: #1a3332;
   --danger-soft-bg: #3a1d24;
   --info-soft-bg: #1b2a3f;
+  --warning-soft-bg: #3a2f1a;
+  --calendar-outside-bg: #171723;
+  --calendar-hover-bg: #1f2f4a;
+  --calendar-selected-bg: #1b2a3f;
+  --calendar-today-bg: #3a2428;
+  --calendar-today-hover-bg: #4a2c32;
 }
 
 html.theme-dark body {

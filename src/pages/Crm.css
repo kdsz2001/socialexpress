@@ -114,7 +114,7 @@
   gap: 0.2rem;
   padding: 0.85rem 1rem;
   border-radius: 0.65rem;
-  background: #e8fff3;
+  background: var(--success-soft-bg);
   border: 1px solid #c9f7e5;
 }
 
@@ -161,7 +161,7 @@
   padding: 1.25rem;
   border: 1px solid var(--border-color);
   border-radius: 0.75rem;
-  background: #fafbfc;
+  background: var(--surface-muted);
 }
 
 .crm__qr {
@@ -338,7 +338,7 @@
 
 .crm__chip.is-active {
   border-color: #3699ff;
-  background: #f1f8ff;
+  background: var(--info-soft-bg);
   color: #3699ff;
 }
 
@@ -445,7 +445,7 @@
 
 .crm__lead:hover,
 .crm__lead.is-active {
-  background: #f8faff;
+  background: var(--surface-muted);
 }
 
 .crm__lead-top {
@@ -499,12 +499,12 @@
 }
 
 .crm__score.is-hot {
-  background: #e8fff3;
+  background: var(--success-soft-bg);
   color: #0bb783;
 }
 
 .crm__score.is-warm {
-  background: #fff4de;
+  background: var(--warning-soft-bg);
   color: #ffa800;
 }
 
@@ -747,7 +747,7 @@
   gap: 0.15rem;
   padding: 0.8rem 0.95rem;
   border-radius: 0.5rem;
-  background: #f8f9fb;
+  background: var(--surface-muted);
 }
 
 .crm__backups strong {
@@ -770,7 +770,7 @@
   margin: 0 1.25rem 0.85rem;
   padding: 0.7rem 0.9rem;
   border-radius: 0.5rem;
-  background: #e8fff3;
+  background: var(--success-soft-bg);
   color: #0bb783;
   font-size: 0.9rem;
   font-weight: 600;
@@ -804,7 +804,7 @@
   font: inherit;
   font-weight: 500;
   color: var(--text-heading);
-  background: #fafbff;
+  background: var(--surface-muted);
 }
 
 .crm__form-actions {
@@ -846,7 +846,7 @@
   font: inherit;
   font-weight: 500;
   color: var(--text-heading);
-  background: #fafbff;
+  background: var(--surface-muted);
 }
 
 .crm__estimate {
@@ -856,7 +856,7 @@
   margin: 1rem 0.25rem 0.25rem;
   padding: 0.95rem 1.1rem;
   border-radius: 0.65rem;
-  background: linear-gradient(135deg, #f1f8ff 0%, #eefbf7 100%);
+  background: linear-gradient(135deg, var(--info-soft-bg) 0%, #eefbf7 100%);
   border: 1px solid #e1f0ff;
 }
 
@@ -887,7 +887,7 @@
   padding: 0.55rem 0.85rem;
   border: 1px solid var(--border-color);
   border-radius: 0.55rem;
-  background: #fafbff;
+  background: var(--surface-muted);
   color: #a1a5b7;
 }
 
@@ -942,7 +942,7 @@
 }
 
 .crm__pie-block--pro {
-  background: #fafbff;
+  background: var(--surface-muted);
   border: 1px solid var(--border-color);
   border-radius: 0.85rem;
   padding: 1.1rem 1.15rem 1.15rem;
@@ -1038,7 +1038,7 @@
   font: inherit;
   font-weight: 500;
   color: var(--text-heading);
-  background: #fafbff;
+  background: var(--surface-muted);
   width: 100%;
 }
 
@@ -1075,12 +1075,12 @@
 }
 
 .crm__outcome-pill.is-won {
-  background: #e8fff3;
+  background: var(--success-soft-bg);
   color: #0bb783;
 }
 
 .crm__outcome-pill.is-lost {
-  background: #fff5f8;
+  background: var(--danger-soft-bg);
   color: #f64e60;
 }
 
@@ -1114,14 +1114,14 @@
 .crm__outcome-btn.is-active.is-won,
 .crm__outcome-btn.is-won:hover {
   border-color: #0bb783;
-  background: #e8fff3;
+  background: var(--success-soft-bg);
   color: #0bb783;
 }
 
 .crm__outcome-btn.is-active.is-lost,
 .crm__outcome-btn.is-lost:hover {
   border-color: #f64e60;
-  background: #fff5f8;
+  background: var(--danger-soft-bg);
   color: #f64e60;
 }
 
@@ -1245,7 +1245,7 @@
   gap: 0.75rem;
   align-items: center;
   padding: 0.65rem 0.75rem;
-  background: #fafbff;
+  background: var(--surface-muted);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   font-size: 0.85rem;
@@ -1373,7 +1373,7 @@
 }
 
 .crm__history-row:hover {
-  background: #f1f8ff;
+  background: var(--info-soft-bg);
 }
 
 .crm__history-client {
@@ -1406,7 +1406,7 @@
   padding: 0.9rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: 0.6rem;
-  background: #fafbff;
+  background: var(--surface-muted);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -1463,7 +1463,7 @@
 .crm__followup-step {
   border: 1px solid var(--border-color);
   border-radius: 0.65rem;
-  background: #fafbff;
+  background: var(--surface-muted);
   padding: 0.9rem;
   display: flex;
   flex-direction: column;

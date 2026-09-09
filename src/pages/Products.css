@@ -235,7 +235,7 @@
   flex-shrink: 0;
   padding: 0.15rem 0.45rem;
   border-radius: 0.3rem;
-  background: #fff4de;
+  background: var(--warning-soft-bg);
   color: #ffa800;
   font-size: 0.75rem;
   font-weight: 500;
@@ -328,7 +328,7 @@
 }
 
 .products-modal__close:hover {
-  background: #eef1f5;
+  background: var(--surface-muted);
   color: var(--text-primary);
 }
 
@@ -398,7 +398,7 @@
 }
 
 .products-modal__cancel:hover {
-  background: #eef1f5;
+  background: var(--surface-muted);
 }
 
 .products-modal__save {

@@ -22,7 +22,7 @@
   background:
     radial-gradient(circle at 50% 38%, #b5b5c3 0 18%, transparent 19%),
     radial-gradient(ellipse 55% 42% at 50% 78%, #b5b5c3 0 48%, transparent 49%),
-    #eef0f4;
+    var(--border-color);
 }
 
 .my-profile__avatar-image {

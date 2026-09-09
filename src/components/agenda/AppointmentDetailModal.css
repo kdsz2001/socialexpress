@@ -228,7 +228,7 @@
 }
 
 .apt-detail__btn--pending:hover {
-  background: #ffc5cb;
+  background: var(--danger-soft-bg);
 }
 
 .apt-detail__btn--delete {

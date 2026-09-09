@@ -36,7 +36,7 @@
 
 .bairro-select__trigger.is-invalid {
   border-color: #f64e60;
-  background: #fff5f8;
+  background: var(--danger-soft-bg);
 }
 
 .bairro-select__trigger.is-invalid.is-open,

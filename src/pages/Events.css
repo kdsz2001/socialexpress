@@ -331,7 +331,7 @@
 }
 
 .events-modal__close:hover {
-  background: #eef1f5;
+  background: var(--surface-muted);
   color: var(--text-primary);
 }
 
@@ -401,7 +401,7 @@
 }
 
 .events-modal__cancel:hover {
-  background: #eef1f5;
+  background: var(--surface-muted);
 }
 
 .events-modal__save {
