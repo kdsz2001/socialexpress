@@ -104,6 +104,16 @@
   background: #187de4;
 }
 
+.import-modal__download--soft {
+  background: #e1f0ff;
+  color: #3699ff;
+}
+
+.import-modal__download--soft:hover {
+  background: #d4e8ff;
+  color: #187de4;
+}
+
 .import-modal__file {
   position: relative;
   display: flex;
