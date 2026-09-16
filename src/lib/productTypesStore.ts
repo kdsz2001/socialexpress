@@ -5,17 +5,31 @@ export type ProductType = {
 }
 
 const STORAGE_KEY = 'social-express:product-types'
+const DEFAULT_TYPES = ['01 - Calça']
 
 let cache: ProductType[] | null = null
+
+function seedDefaults(): ProductType[] {
+  const now = Date.now()
+  return DEFAULT_TYPES.map((name, index) => ({
+    id: `ptype-${index + 1}`,
+    name,
+    createdAt: new Date(now - index * 1000).toISOString(),
+  }))
+}
 
 function readAll(): ProductType[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
+    if (!raw) {
+      const seeded = seedDefaults()
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
+      return seeded
+    }
     const parsed = JSON.parse(raw) as ProductType[]
-    return Array.isArray(parsed) ? parsed : []
+    return Array.isArray(parsed) ? parsed : seedDefaults()
   } catch {
-    return []
+    return seedDefaults()
   }
 }
 

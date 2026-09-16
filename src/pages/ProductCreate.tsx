@@ -1,10 +1,13 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { ArrowLeft, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { CreatableSelect } from '../components/products/CreatableSelect'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
+import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
+import { formatMoneyBrPrefix, maskMoneyBr } from '../lib/moneyMask'
 import { addProduct } from '../lib/productsStore'
-import './Products.css'
+import { addProductType } from '../lib/productTypesStore'
 import './ProductCreate.css'
 
 export function ProductCreate() {
@@ -19,6 +22,7 @@ export function ProductCreate() {
 
   const [productType, setProductType] = useState('')
   const [fullCode, setFullCode] = useState('')
+  const [customId, setCustomId] = useState(false)
   const [storeCode, setStoreCode] = useState('')
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('1')
@@ -36,15 +40,33 @@ export function ProductCreate() {
   const [cfop, setCfop] = useState('')
   const [cfopInter, setCfopInter] = useState('')
   const [commission, setCommission] = useState('')
+  const [photoName, setPhotoName] = useState<string | null>(null)
+  const [description, setDescription] = useState('')
+  const [consigned, setConsigned] = useState('')
+  const [consignedCommission, setConsignedCommission] = useState('')
+  const [serviceFee, setServiceFee] = useState('')
+  const [productState, setProductState] = useState('')
   const [touched, setTouched] = useState(false)
 
   const missingType = !productType
   const missingName = !name.trim()
   const missingRental = !rental.trim()
 
+  const typeOptions = useMemo(() => types.map((item) => item.name), [types])
+  const colorOptions = useMemo(() => colors.map((item) => item.name), [colors])
+  const sizeOptions = useMemo(() => sizes.map((item) => item.name), [sizes])
+  const modelOptions = useMemo(() => models.map((item) => item.name), [models])
+  const brandOptions = useMemo(() => brands.map((item) => item.name), [brands])
+  const stylistOptions = useMemo(() => stylists.map((item) => item.name), [stylists])
+  const eventOptions = useMemo(() => events.map((item) => item.name), [events])
+
   const attributeSummary = useMemo(() => {
     return [color, size, model, brand, stylist, eventType].filter(Boolean).join(', ')
   }, [color, size, model, brand, stylist, eventType])
+
+  const createAttr = (kind: ProductAttributeKind, value: string) => {
+    addProductAttribute(kind, value)
+  }
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -54,7 +76,7 @@ export function ProductCreate() {
     addProduct({
       name,
       type: productType,
-      rental: rental.startsWith('R$') ? rental : `R$ ${rental}`,
+      rental: formatMoneyBrPrefix(rental),
       attributes: attributeSummary,
       status: 'ativo',
     })
@@ -72,42 +94,41 @@ export function ProductCreate() {
               className="product-create__back"
               onClick={() => navigate('/produtos')}
             >
-              <ArrowLeft size={16} strokeWidth={2.25} />
+              <ArrowLeft size={14} strokeWidth={2.25} />
               Voltar
             </button>
             <button type="submit" className="product-create__save">
-              <Check size={16} strokeWidth={2.5} />
+              <Check size={14} strokeWidth={2.5} />
               Cadastrar
             </button>
           </div>
         </header>
 
         <div className="product-create__body">
-          <Field
-            label="Tipo de produto"
-            required
-            invalid={touched && missingType}
-          >
-            <select
+          <Field label="Tipo de produto" required invalid={touched && missingType}>
+            <CreatableSelect
               value={productType}
-              onChange={(event) => setProductType(event.target.value)}
-            >
-              <option value="">Selecione um tipo de produto</option>
-              {types.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              options={typeOptions}
+              placeholder="Selecione um tipo de produto"
+              createLabel="Cadastrar novo tipo de produto"
+              invalid={touched && missingType}
+              onChange={setProductType}
+              onCreate={(value) => addProductType(value)}
+            />
           </Field>
 
           <Field label="Código completo">
             <input
               type="text"
               value={fullCode}
+              disabled={!customId}
               onChange={(event) => setFullCode(event.target.value)}
             />
-            <button type="button" className="product-create__link">
+            <button
+              type="button"
+              className="product-create__link"
+              onClick={() => setCustomId(true)}
+            >
               Clique aqui se você quiser escolher um ID específico para o produto.
             </button>
           </Field>
@@ -120,7 +141,7 @@ export function ProductCreate() {
             />
             <p className="product-create__help">
               É um código identificador alternativo ao código gerado pelo sistema.{' '}
-              <button type="button" className="product-create__link">
+              <button type="button" className="product-create__link product-create__link--inline">
                 Clique aqui para saber mais
               </button>
             </p>
@@ -144,116 +165,88 @@ export function ProductCreate() {
           </Field>
 
           <Field label="Cor">
-            <select value={color} onChange={(event) => setColor(event.target.value)}>
-              <option value="">Selecione uma cor</option>
-              {colors.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            <CreatableSelect
+              value={color}
+              options={colorOptions}
+              placeholder="Selecione uma cor"
+              createLabel="Cadastrar nova cor"
+              onChange={setColor}
+              onCreate={(value) => createAttr('cor', value)}
+            />
           </Field>
 
           <Field label="Tamanho">
-            <select value={size} onChange={(event) => setSize(event.target.value)}>
-              <option value="">Selecione uma tamanho</option>
-              {sizes.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            <CreatableSelect
+              value={size}
+              options={sizeOptions}
+              placeholder="Selecione uma tamanho"
+              createLabel="Cadastrar novo tamanho"
+              onChange={setSize}
+              onCreate={(value) => createAttr('tamanho', value)}
+            />
           </Field>
 
           <Field label="Modelo">
-            <select value={model} onChange={(event) => setModel(event.target.value)}>
-              <option value="">Selecione um modelo</option>
-              {models.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            <CreatableSelect
+              value={model}
+              options={modelOptions}
+              placeholder="Selecione um modelo"
+              createLabel="Cadastrar novo modelo"
+              onChange={setModel}
+              onCreate={(value) => createAttr('modelo', value)}
+            />
           </Field>
 
           <Field label="Marca">
-            <select value={brand} onChange={(event) => setBrand(event.target.value)}>
-              <option value="">Selecione uma marca</option>
-              {brands.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            <CreatableSelect
+              value={brand}
+              options={brandOptions}
+              placeholder="Selecione uma marca"
+              createLabel="Cadastrar nova marca"
+              onChange={setBrand}
+              onCreate={(value) => createAttr('marca', value)}
+            />
           </Field>
 
           <Field label="Estilista">
-            <select value={stylist} onChange={(event) => setStylist(event.target.value)}>
-              <option value="">Selecione um estilista</option>
-              {stylists.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            <CreatableSelect
+              value={stylist}
+              options={stylistOptions}
+              placeholder="Selecione um estilista"
+              createLabel="Cadastrar novo estilista"
+              onChange={setStylist}
+              onCreate={(value) => createAttr('estilista', value)}
+            />
           </Field>
 
           <Field label="Tipos de evento">
-            <select value={eventType} onChange={(event) => setEventType(event.target.value)}>
-              <option value="">Selecione um tipo de evento</option>
-              {events.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            <CreatableSelect
+              value={eventType}
+              options={eventOptions}
+              placeholder="Selecione um tipo de evento"
+              createLabel="Cadastrar novo tipo de evento"
+              onChange={setEventType}
+              onCreate={(value) => createAttr('evento', value)}
+            />
           </Field>
 
           <Field label="Custo">
-            <div className="product-create__money">
-              <span>R$</span>
-              <input
-                type="text"
-                value={cost}
-                onChange={(event) => setCost(event.target.value)}
-              />
-            </div>
+            <MoneyInput value={cost} onChange={setCost} />
           </Field>
 
           <Field label="Aluguel" required invalid={touched && missingRental}>
-            <div className="product-create__money">
-              <span>R$</span>
-              <input
-                type="text"
-                value={rental}
-                onChange={(event) => setRental(event.target.value)}
-              />
-            </div>
+            <MoneyInput value={rental} onChange={setRental} invalid={touched && missingRental} />
           </Field>
 
           <Field label="Preço primeiro aluguel">
-            <div className="product-create__money">
-              <span>R$</span>
-              <input
-                type="text"
-                value={firstRental}
-                onChange={(event) => setFirstRental(event.target.value)}
-              />
-            </div>
+            <MoneyInput value={firstRental} onChange={setFirstRental} />
             <p className="product-create__help">
               Esse valor será considerado somente quando for a sua primeira locação.
             </p>
           </Field>
 
           <Field label="Preço de venda">
-            <div className="product-create__money">
-              <span>R$</span>
-              <input
-                type="text"
-                value={salePrice}
-                onChange={(event) => setSalePrice(event.target.value)}
-              />
-            </div>
+            <MoneyInput value={salePrice} onChange={setSalePrice} />
           </Field>
 
           <Field label="Código NCM">
@@ -273,16 +266,79 @@ export function ProductCreate() {
           </Field>
 
           <Field label="Comissão vendedor">
-            <div className="product-create__money product-create__money--pct">
+            <PercentInput value={commission} onChange={setCommission} />
+            <p className="product-create__help">
+              Este commissionamento poderá sobrescrever o commissionamento de vendedores.
+            </p>
+          </Field>
+
+          <Field label="Foto do produto">
+            <label className="product-create__file">
+              <span className={photoName ? 'has-file' : undefined}>
+                {photoName ?? 'Escolher arquivo'}
+              </span>
+              <em>Browse</em>
               <input
-                type="text"
-                value={commission}
-                onChange={(event) => setCommission(event.target.value)}
+                type="file"
+                accept=".jpg,.jpeg,image/jpeg"
+                onChange={(event) => {
+                  const file = event.target.files?.[0]
+                  setPhotoName(file ? file.name : null)
+                }}
               />
-              <span>%</span>
-            </div>
+            </label>
+            <p className="product-create__help">
+              Somente arquivos até 5MB e no formato JPG ou JPEG são aceitos.
+            </p>
+          </Field>
+
+          <Field label="Descrição">
+            <textarea
+              rows={4}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+          </Field>
+
+          <Field label="Consignado">
+            <select value={consigned} onChange={(event) => setConsigned(event.target.value)}>
+              <option value="">Selecione</option>
+              <option value="Não">Não</option>
+              <option value="Sim">Sim</option>
+            </select>
+          </Field>
+
+          <Field label="Comissão do consignado">
+            <PercentInput value={consignedCommission} onChange={setConsignedCommission} />
+          </Field>
+
+          <Field label="Taxa de serviço">
+            <MoneyInput value={serviceFee} onChange={setServiceFee} />
+          </Field>
+
+          <Field label="Estado do produto">
+            <input
+              type="text"
+              value={productState}
+              onChange={(event) => setProductState(event.target.value)}
+            />
           </Field>
         </div>
+
+        <footer className="product-create__footer">
+          <button
+            type="button"
+            className="product-create__back"
+            onClick={() => navigate('/produtos')}
+          >
+            <ArrowLeft size={14} strokeWidth={2.25} />
+            Voltar
+          </button>
+          <button type="submit" className="product-create__save">
+            <Check size={14} strokeWidth={2.5} />
+            Cadastrar
+          </button>
+        </footer>
       </form>
     </div>
   )
@@ -300,12 +356,56 @@ function Field({
   children: ReactNode
 }) {
   return (
-    <label className={`product-create__row${invalid ? ' is-invalid' : ''}`}>
-      <span className="product-create__label">
+    <div className={`product-create__row${invalid ? ' is-invalid' : ''}`}>
+      <div className="product-create__label">
         {label}
         {required ? <em>*</em> : null}
-      </span>
+      </div>
       <div className="product-create__control">{children}</div>
-    </label>
+    </div>
+  )
+}
+
+function MoneyInput({
+  value,
+  onChange,
+  invalid,
+}: {
+  value: string
+  onChange: (value: string) => void
+  invalid?: boolean
+}) {
+  return (
+    <div className={`product-create__addon${invalid ? ' is-invalid' : ''}`}>
+      <span>R$</span>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={value}
+        onChange={(event) => onChange(maskMoneyBr(event.target.value))}
+        placeholder="0,00"
+      />
+    </div>
+  )
+}
+
+function PercentInput({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <div className="product-create__addon product-create__addon--suffix">
+      <input
+        type="text"
+        inputMode="numeric"
+        value={value}
+        onChange={(event) => onChange(maskMoneyBr(event.target.value))}
+        placeholder="0,00"
+      />
+      <span>%</span>
+    </div>
   )
 }

@@ -5,7 +5,7 @@
 
 .products__card {
   background: var(--card-bg);
-  border-radius: 0.75rem;
+  border-radius: 5.46px;
   box-shadow: var(--card-shadow);
   padding: 1.5rem;
 }
@@ -49,10 +49,10 @@
   flex: 1 1 200px;
   max-width: 280px;
   min-width: 0;
-  height: 40px;
-  padding: 0 0.9rem;
+  height: 38px;
+  padding: 0 13px;
   border: 1px solid var(--border-color);
-  border-radius: 0.42rem;
+  border-radius: 5.46px;
   background: var(--card-bg);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -74,7 +74,7 @@
   outline: none;
   background: transparent;
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 13px;
   font-weight: 400;
   color: var(--text-primary);
 }
@@ -91,14 +91,14 @@
 
 .products__select {
   width: 100%;
-  height: 40px;
-  padding: 0 2.2rem 0 0.9rem;
+  height: 38px;
+  padding: 0 2.2rem 0 13px;
   border: 1px solid var(--border-color);
-  border-radius: 0.42rem;
+  border-radius: 5.46px;
   background: var(--card-bg);
   color: var(--text-secondary);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 13px;
   appearance: none;
   cursor: pointer;
 }
@@ -123,17 +123,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  height: 40px;
-  padding: 0 1.15rem;
+  gap: 0.35rem;
+  height: 38px;
+  padding: 8.45px 13px;
   margin-left: auto;
   border: 0;
-  border-radius: 0.42rem;
+  border-radius: 5.46px;
   background: #3699ff;
   color: #ffffff;
   font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 400;
   white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -156,8 +156,8 @@
 
 .products__table th {
   text-align: left;
-  padding: 1rem 1.25rem;
-  font-size: 0.85rem;
+  padding: 12px 13px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -167,8 +167,8 @@
 }
 
 .products__table td {
-  padding: 1rem 1.25rem;
-  font-size: 1rem;
+  padding: 12px 13px;
+  font-size: 13px;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
