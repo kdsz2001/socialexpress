@@ -705,6 +705,7 @@ html[data-theme='dark'] .products__period-btn {
   border-radius: 999px;
   background: #e4e6ef;
   pointer-events: none;
+  z-index: 0;
 }
 
 html[data-theme='dark'] .products__dual-range-rail {
@@ -718,6 +719,7 @@ html[data-theme='dark'] .products__dual-range-rail {
   border-radius: 999px;
   background: #3699ff;
   pointer-events: none;
+  z-index: 1;
 }
 
 .products__dual-range-thumb {
