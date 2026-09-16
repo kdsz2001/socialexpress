@@ -315,7 +315,8 @@ html[data-theme='dark'] .products__alert--warn {
 }
 
 .products__col-name { width: 30%; min-width: 160px; }
-.products__col-type { width: 16%; min-width: 100px; }
+.products__col-type { width: 16%; min-width: 100px; text-align: center; }
+.products__type-cell { text-align: center; }
 .products__col-rental { width: 14%; min-width: 90px; }
 .products__col-attrs { width: 28%; min-width: 120px; }
 .products__col-actions {

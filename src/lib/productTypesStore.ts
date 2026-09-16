@@ -69,6 +69,13 @@ export function formatProductTypeCode(code: number): string {
   return String(code).padStart(2, '0')
 }
 
+/** Display name only (e.g. "02 - Sapato" → "Sapato") for list columns. */
+export function productTypeDisplayName(typeLabel: string): string {
+  return String(typeLabel || '')
+    .replace(/^\d+\s*-\s*/, '')
+    .trim() || String(typeLabel || '').trim()
+}
+
 export function nextProductTypeCode(): number {
   const codes = readAll().map((item) => item.code)
   return codes.length === 0 ? 1 : Math.max(...codes) + 1

@@ -45,6 +45,7 @@ import {
   formatProductTypeCode,
   formatProductTypeLabel,
   nextProductTypeCode,
+  productTypeDisplayName,
   updateProductType,
   type ProductType,
 } from '../lib/productTypesStore'
@@ -287,7 +288,7 @@ function ProductsList() {
                           {codes ? <span className="products__codes">{codes}</span> : null}
                         </div>
                       </td>
-                      <td>{item.type || '—'}</td>
+                      <td className="products__type-cell">{productTypeDisplayName(item.type) || '—'}</td>
                       <td>{item.rental || '—'}</td>
                       <td>
                         {chips.length > 0 ? (

@@ -6,10 +6,8 @@ import {
   ProductPhotoField,
   ProductSwitch,
 } from '../components/products/ProductFormControls'
-import { ProductTypeModal } from '../components/products/ProductTypeModal'
 import { SaveToast } from '../components/ui/SaveToast'
 import { useProductAttributes } from '../hooks/useProductAttributes'
-import { useProductTypes } from '../hooks/useProductTypes'
 import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
 import { formatMoneyBrPrefix, maskMoneyBr } from '../lib/moneyMask'
 import {
@@ -19,11 +17,6 @@ import {
   updateProduct,
   type Product,
 } from '../lib/productsStore'
-import {
-  addProductType,
-  formatProductTypeLabel,
-  nextProductTypeCode,
-} from '../lib/productTypesStore'
 import './ProductCreate.css'
 
 const SAVED_TOAST_KEY = 'social-express:product-saved-toast'
@@ -36,7 +29,6 @@ function stripMoneyPrefix(value: string) {
 
 function hydrateForm(product: Product) {
   return {
-    productType: product.type,
     storeCode: product.storeCode,
     name: product.name,
     quantity: product.quantity || '1',
@@ -68,7 +60,6 @@ function hydrateForm(product: Product) {
 export function ProductEdit() {
   const { productId = '' } = useParams()
   const navigate = useNavigate()
-  const types = useProductTypes()
   const colors = useProductAttributes('cor')
   const sizes = useProductAttributes('tamanho')
   const models = useProductAttributes('modelo')
@@ -77,7 +68,6 @@ export function ProductEdit() {
   const events = useProductAttributes('evento')
 
   const [product, setProduct] = useState<Product | null>(() => getProduct(productId))
-  const [productType, setProductType] = useState('')
   const [storeCode, setStoreCode] = useState('')
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('1')
@@ -105,9 +95,6 @@ export function ProductEdit() {
   const [statusAtivo, setStatusAtivo] = useState(true)
   const [touched, setTouched] = useState(false)
   const [toastOpen, setToastOpen] = useState(false)
-  const [typeModalOpen, setTypeModalOpen] = useState(false)
-  const [typeModalName, setTypeModalName] = useState('')
-  const [typeModalDescription, setTypeModalDescription] = useState('')
   const closeToast = useCallback(() => setToastOpen(false), [])
 
   useEffect(() => {
@@ -126,7 +113,6 @@ export function ProductEdit() {
     setProduct(current)
     if (!current) return
     const form = hydrateForm(current)
-    setProductType(form.productType)
     setStoreCode(form.storeCode)
     setName(form.name)
     setQuantity(form.quantity)
@@ -155,11 +141,9 @@ export function ProductEdit() {
     setTouched(false)
   }, [productId])
 
-  const missingType = !productType
   const missingName = !name.trim()
   const missingRental = !rental.trim()
 
-  const typeOptions = useMemo(() => types.map((item) => formatProductTypeLabel(item)), [types])
   const colorOptions = useMemo(() => colors.map((item) => item.name), [colors])
   const sizeOptions = useMemo(() => sizes.map((item) => item.name), [sizes])
   const modelOptions = useMemo(() => models.map((item) => item.name), [models])
@@ -169,19 +153,6 @@ export function ProductEdit() {
 
   const createAttr = (kind: ProductAttributeKind, value: string) => {
     addProductAttribute(kind, value)
-  }
-
-  const openTypeModal = (draftName: string) => {
-    setTypeModalName(draftName)
-    setTypeModalDescription('')
-    setTypeModalOpen(true)
-  }
-
-  const saveTypeModal = () => {
-    if (!typeModalName.trim()) return
-    const created = addProductType(typeModalName, typeModalDescription)
-    setProductType(formatProductTypeLabel(created))
-    setTypeModalOpen(false)
   }
 
   if (!product) {
@@ -214,11 +185,12 @@ export function ProductEdit() {
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()
     setTouched(true)
-    if (missingType || missingName || missingRental) return
+    if (missingName || missingRental) return
 
     const updated = updateProduct(product.id, {
       name,
-      type: productType,
+      // Tipo e código completo ficam travados após o cadastro (Clarial)
+      type: product.type,
       rental: formatMoneyBrPrefix(rental),
       attributes: buildAttributeSummary({ color, size, model, brand, stylist, eventType }),
       status: statusAtivo ? 'ativo' : 'inativo',
@@ -288,19 +260,6 @@ export function ProductEdit() {
         </header>
 
         <div className="product-create__body">
-          <Field label="Tipo de produto" required invalid={touched && missingType}>
-            <CreatableSelect
-              value={productType}
-              options={typeOptions}
-              placeholder="Selecione um tipo de produto"
-              createLabel="Cadastrar novo tipo de produto"
-              invalid={touched && missingType}
-              selectOnCreate={false}
-              onChange={setProductType}
-              onCreate={openTypeModal}
-            />
-          </Field>
-
           <Field label="Código completo" required>
             <input type="text" value={product.fullCode} disabled readOnly />
             <p className="product-create__help product-create__help--warn">
@@ -511,24 +470,6 @@ export function ProductEdit() {
           </button>
         </footer>
       </form>
-
-      {typeModalOpen ? (
-        <ProductTypeModal
-          title="Novo tipo de produto"
-          tip={
-            <>
-              O código deste novo tipo será <strong>{nextProductTypeCode()}</strong>.
-            </>
-          }
-          name={typeModalName}
-          description={typeModalDescription}
-          saveLabel="Cadastrar"
-          onNameChange={setTypeModalName}
-          onDescriptionChange={setTypeModalDescription}
-          onClose={() => setTypeModalOpen(false)}
-          onSave={saveTypeModal}
-        />
-      ) : null}
     </div>
   )
 }
