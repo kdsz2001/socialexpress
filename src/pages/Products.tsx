@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { createPortal } from 'react-dom'
 import {
   ArrowUp,
   Calendar,
@@ -102,8 +103,13 @@ function ProductsList() {
     if (!modalOpen) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeModal()
+    }
+    document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
     }
   }, [modalOpen])
 
@@ -295,103 +301,111 @@ function ProductsList() {
         </div>
       </section>
 
-      {modalOpen ? (
-        <div className="products-modal" role="presentation" onMouseDown={closeModal}>
-          <div
-            className="products-modal__dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="products-modal-title"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <header className="products-modal__header">
-              <h2 id="products-modal-title">Editar produto</h2>
+      {modalOpen
+        ? createPortal(
+            <div className="products-modal" role="presentation">
               <button
                 type="button"
-                className="products-modal__close"
+                className="products-modal__overlay"
                 aria-label="Fechar"
                 onClick={closeModal}
+              />
+              <div
+                className="products-modal__dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="products-modal-title"
               >
-                <X size={16} strokeWidth={2.25} />
-              </button>
-            </header>
+                <header className="products-modal__header">
+                  <h2 id="products-modal-title">Editar produto</h2>
+                  <button
+                    type="button"
+                    className="products-modal__close"
+                    aria-label="Fechar"
+                    onClick={closeModal}
+                  >
+                    <X size={16} strokeWidth={2.25} />
+                  </button>
+                </header>
 
-            <div className="products-modal__body">
-              <label className="products-modal__field">
-                <span>
-                  Nome do produto <span className="products-modal__req">*</span>
-                </span>
-                <input
-                  type="text"
-                  className={`products-modal__input${touched && missingName ? ' is-invalid' : ''}`}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  autoFocus
-                />
-              </label>
+                <div className="products-modal__body">
+                  <label className="products-modal__field">
+                    <span>
+                      Nome do produto <span className="products-modal__req">*</span>
+                    </span>
+                    <input
+                      type="text"
+                      className={`products-modal__input${touched && missingName ? ' is-invalid' : ''}`}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      autoFocus
+                    />
+                  </label>
 
-              <label className="products-modal__field">
-                <span>Tipo</span>
-                <select
-                  className="products-modal__input"
-                  value={type}
-                  onChange={(event) => setType(event.target.value)}
-                >
-                  <option value="">Selecione um tipo de produto</option>
-                  {typeOptions.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  <label className="products-modal__field">
+                    <span>Tipo</span>
+                    <select
+                      className="products-modal__input"
+                      value={type}
+                      onChange={(event) => setType(event.target.value)}
+                    >
+                      <option value="">Selecione um tipo de produto</option>
+                      {typeOptions.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-              <label className="products-modal__field">
-                <span>Aluguel</span>
-                <input
-                  type="text"
-                  className="products-modal__input"
-                  value={rental}
-                  onChange={(event) => setRental(event.target.value)}
-                  placeholder="R$ 0,00"
-                />
-              </label>
+                  <label className="products-modal__field">
+                    <span>Aluguel</span>
+                    <input
+                      type="text"
+                      className="products-modal__input"
+                      value={rental}
+                      onChange={(event) => setRental(event.target.value)}
+                      placeholder="R$ 0,00"
+                    />
+                  </label>
 
-              <label className="products-modal__field">
-                <span>Atributos</span>
-                <input
-                  type="text"
-                  className="products-modal__input"
-                  value={attributes}
-                  onChange={(event) => setAttributes(event.target.value)}
-                />
-              </label>
+                  <label className="products-modal__field">
+                    <span>Atributos</span>
+                    <input
+                      type="text"
+                      className="products-modal__input"
+                      value={attributes}
+                      onChange={(event) => setAttributes(event.target.value)}
+                    />
+                  </label>
 
-              <label className="products-modal__field">
-                <span>Status</span>
-                <select
-                  className="products-modal__input"
-                  value={status}
-                  onChange={(event) => setStatus(event.target.value as ProductStatus)}
-                >
-                  <option value="ativo">Ativo</option>
-                  <option value="inativo">Inativo</option>
-                </select>
-              </label>
-            </div>
+                  <label className="products-modal__field">
+                    <span>Status</span>
+                    <select
+                      className="products-modal__input"
+                      value={status}
+                      onChange={(event) => setStatus(event.target.value as ProductStatus)}
+                    >
+                      <option value="ativo">Ativo</option>
+                      <option value="inativo">Inativo</option>
+                    </select>
+                  </label>
+                </div>
 
-            <footer className="products-modal__footer">
-              <button type="button" className="products-modal__cancel" onClick={closeModal}>
-                Cancelar
-              </button>
-              <button type="button" className="products-modal__save" onClick={saveProduct}>
-                <Check size={15} strokeWidth={2.5} />
-                Salvar
-              </button>
-            </footer>
-          </div>
-        </div>
-      ) : null}
+                <footer className="products-modal__footer">
+                  <button type="button" className="products-modal__cancel" onClick={closeModal}>
+                    Cancelar
+                  </button>
+                  <button type="button" className="products-modal__save" onClick={saveProduct}>
+                    <Check size={15} strokeWidth={2.5} />
+                    Salvar
+                  </button>
+                </footer>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
 
       <ConfirmDeleteModal
         open={Boolean(deleting)}
@@ -1515,18 +1529,28 @@ function NameModal({
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
     }
-  }, [])
+  }, [onClose])
 
-  return (
-    <div className="products-modal" role="presentation" onMouseDown={onClose}>
+  return createPortal(
+    <div className="products-modal" role="presentation">
+      <button
+        type="button"
+        className="products-modal__overlay"
+        aria-label="Fechar"
+        onClick={onClose}
+      />
       <div
         className="products-modal__dialog products-modal__dialog--sm"
         role="dialog"
         aria-modal="true"
-        onMouseDown={(event) => event.stopPropagation()}
       >
         <header className="products-modal__header">
           <h2>{title}</h2>
@@ -1558,7 +1582,8 @@ function NameModal({
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -1584,18 +1609,28 @@ function TypeModal({
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
     }
-  }, [])
+  }, [onClose])
 
-  return (
-    <div className="products-modal" role="presentation" onMouseDown={onClose}>
+  return createPortal(
+    <div className="products-modal" role="presentation">
+      <button
+        type="button"
+        className="products-modal__overlay"
+        aria-label="Fechar"
+        onClick={onClose}
+      />
       <div
         className="products-modal__dialog products-modal__dialog--sm"
         role="dialog"
         aria-modal="true"
-        onMouseDown={(event) => event.stopPropagation()}
       >
         <header className="products-modal__header">
           <h2>{title}</h2>
@@ -1637,6 +1672,7 @@ function TypeModal({
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

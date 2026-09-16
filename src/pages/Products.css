@@ -822,41 +822,56 @@ html[data-theme='dark'] .products__dual-range-values span {
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: #3699ff;
   flex-shrink: 0;
   appearance: none;
   -webkit-appearance: none;
-  border: 1.5px solid #b5b5c3;
-  background: var(--card-bg);
+  border: 1.5px solid #d1d3e0;
+  background: #eef0f8;
   box-shadow: none;
   outline: none;
+  cursor: pointer;
 }
 
 .products__check input {
   border-radius: 3px;
+  background-color: #eef0f8;
 }
 
 .products__radio input {
   border-radius: 50%;
+  background-color: #eef0f8;
 }
 
-.products__check input:checked,
+.products__check input:checked {
+  border-color: #3699ff;
+  background-color: #3699ff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M2.5 6.5l2.5 2.5 4.5-5'/%3E%3C/svg%3E");
+  background-size: 10px 10px;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: none;
+}
+
 .products__radio input:checked {
   border-color: #3699ff;
-  background: #3699ff;
-  box-shadow: inset 0 0 0 3px var(--card-bg);
+  background-color: #3699ff;
+  box-shadow: inset 0 0 0 3px #fff;
 }
 
 html[data-theme='dark'] .products__check input,
 html[data-theme='dark'] .products__radio input {
   border-color: #5e6278;
-  background: transparent;
+  background-color: transparent;
 }
 
-html[data-theme='dark'] .products__check input:checked,
+html[data-theme='dark'] .products__check input:checked {
+  border-color: #3699ff;
+  background-color: #3699ff;
+}
+
 html[data-theme='dark'] .products__radio input:checked {
   border-color: #3699ff;
-  background: #3699ff;
+  background-color: #3699ff;
   box-shadow: inset 0 0 0 3px var(--card-bg);
 }
 
@@ -891,18 +906,28 @@ html[data-theme='dark'] .products__radio input:checked {
   line-height: 1.5;
 }
 
-/* Modal */
+/* Modal — portal no body, overlay fullscreen como no Clarial */
 .products-modal {
   position: fixed;
   inset: 0;
-  z-index: 110;
-  display: grid;
-  place-items: center;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 1.25rem;
-  /* overlay sólido o bastante para não “vazar” linhas da tabela atrás */
-  background: rgba(24, 28, 50, 0.55);
-  -webkit-backdrop-filter: blur(1.5px);
-  backdrop-filter: blur(1.5px);
+  pointer-events: none;
+}
+
+.products-modal__overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  /* overlay uniforme do Clarial — sem blur (blur gera banding) */
+  background: rgba(0, 0, 0, 0.5);
+  cursor: default;
+  pointer-events: auto;
 }
 
 .products-modal__dialog {
@@ -910,23 +935,36 @@ html[data-theme='dark'] .products__radio input:checked {
   z-index: 1;
   width: min(100%, 480px);
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: 0;
   border-radius: var(--p-radius);
-  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.28);
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.25);
   overflow: hidden;
+  pointer-events: auto;
+  animation: products-modal-in 0.16s ease both;
 }
 
-html[data-theme='dark'] .products-modal {
-  background: rgba(10, 10, 18, 0.72);
+html[data-theme='dark'] .products-modal__overlay {
+  background: rgba(0, 0, 0, 0.65);
 }
 
 html[data-theme='dark'] .products-modal__dialog {
-  border-color: #2b2b40;
+  border: 1px solid #2b2b40;
   box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.55);
 }
 
 .products-modal__dialog--sm {
   width: min(100%, 420px);
+}
+
+@keyframes products-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .products-modal__header {
