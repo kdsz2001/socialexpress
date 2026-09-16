@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ConfirmDeleteModal } from '../components/products/ConfirmDeleteModal'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { useProducts } from '../hooks/useProducts'
@@ -30,6 +31,9 @@ import {
 import {
   addProductType,
   deleteProductType,
+  formatProductTypeCode,
+  formatProductTypeLabel,
+  nextProductTypeCode,
   updateProductType,
   type ProductType,
 } from '../lib/productTypesStore'
@@ -45,6 +49,7 @@ const STATUS_OPTIONS: { id: 'todos' | ProductStatus; label: string }[] = [
 ]
 
 const ATTRIBUTE_KINDS = Object.keys(ATTRIBUTE_KIND_META) as ProductAttributeKind[]
+const PAGE_SIZES = [5, 10, 20, 30, 50, 100]
 
 function tabFromParam(value: string | null): ProductsTab {
   if (value === 'consulta') return 'consulta'
@@ -77,6 +82,7 @@ function ProductsList() {
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Product | null>(null)
+  const [deleting, setDeleting] = useState<Product | null>(null)
   const [name, setName] = useState('')
   const [type, setType] = useState('')
   const [rental, setRental] = useState('')
@@ -85,7 +91,7 @@ function ProductsList() {
   const [touched, setTouched] = useState(false)
 
   const typeOptions = useMemo(() => {
-    const fromTypes = types.map((item) => item.name)
+    const fromTypes = types.map((item) => formatProductTypeLabel(item))
     const fromProducts = products.map((item) => item.type).filter(Boolean)
     return Array.from(new Set([...fromTypes, ...fromProducts])).sort((a, b) =>
       a.localeCompare(b, 'pt-BR'),
@@ -248,6 +254,7 @@ function ProductsList() {
                       <button
                         type="button"
                         className="products__icon-btn is-edit"
+                        title="Editar"
                         aria-label={`Editar ${item.name}`}
                         onClick={() => openEdit(item)}
                       >
@@ -256,8 +263,9 @@ function ProductsList() {
                       <button
                         type="button"
                         className="products__icon-btn is-danger"
+                        title="Excluir"
                         aria-label={`Excluir ${item.name}`}
-                        onClick={() => deleteProduct(item.id)}
+                        onClick={() => setDeleting(item)}
                       >
                         <Trash2 size={15} strokeWidth={2} />
                       </button>
@@ -360,12 +368,32 @@ function ProductsList() {
                 Cancelar
               </button>
               <button type="button" className="products-modal__save" onClick={saveProduct}>
+                <Check size={15} strokeWidth={2.5} />
                 Salvar
               </button>
             </footer>
           </div>
         </div>
       ) : null}
+
+      <ConfirmDeleteModal
+        open={Boolean(deleting)}
+        title="Excluir produto"
+        message={
+          <>
+            Você está prestes remover um produto. Os pedidos que contêm este produto{' '}
+            <strong>não</strong> serão alterados e esta ação não poderá ser desfeita.
+          </>
+        }
+        question={
+          deleting ? <>Deseja realmente excluir {deleting.name}?</> : undefined
+        }
+        onCancel={() => setDeleting(null)}
+        onConfirm={() => {
+          if (deleting) deleteProduct(deleting.id)
+          setDeleting(null)
+        }}
+      />
     </div>
   )
 }
@@ -409,14 +437,46 @@ function ProductsConsulta() {
 
       <section className="products__card products__consulta">
         <div className="products__consulta-grid">
-          <MultiDummy label="Produtos" placeholder="Selecione um ou mais produtos" options={products.map((p) => p.name)} />
-          <MultiDummy label="Tipos" placeholder="Selecione um ou mais tipos" options={types.map((t) => t.name)} />
-          <MultiDummy label="Tamanhos" placeholder="Selecione um ou mais tamanhos" options={sizes.map((s) => s.name)} />
-          <MultiDummy label="Cores" placeholder="Selecione uma ou mais cores" options={colors.map((c) => c.name)} />
-          <MultiDummy label="Marcas" placeholder="Selecione uma ou mais marcas" options={brands.map((b) => b.name)} />
-          <MultiDummy label="Modelos" placeholder="Selecione um ou mais modelos" options={models.map((m) => m.name)} />
-          <MultiDummy label="Estilistas" placeholder="Selecione uma ou mais estilistas" options={stylists.map((s) => s.name)} />
-          <MultiDummy label="Eventos" placeholder="Selecione um ou mais eventos" options={events.map((e) => e.name)} />
+          <MultiDummy
+            label="Produtos"
+            placeholder="Selecione um ou mais produtos"
+            options={products.map((p) => p.name)}
+          />
+          <MultiDummy
+            label="Tipos"
+            placeholder="Selecione um ou mais tipos"
+            options={types.map((t) => formatProductTypeLabel(t))}
+          />
+          <MultiDummy
+            label="Tamanhos"
+            placeholder="Selecione um ou mais tamanhos"
+            options={sizes.map((s) => s.name)}
+          />
+          <MultiDummy
+            label="Cores"
+            placeholder="Selecione uma ou mais cores"
+            options={colors.map((c) => c.name)}
+          />
+          <MultiDummy
+            label="Marcas"
+            placeholder="Selecione uma ou mais marcas"
+            options={brands.map((b) => b.name)}
+          />
+          <MultiDummy
+            label="Modelos"
+            placeholder="Selecione um ou mais modelos"
+            options={models.map((m) => m.name)}
+          />
+          <MultiDummy
+            label="Estilistas"
+            placeholder="Selecione uma ou mais estilistas"
+            options={stylists.map((s) => s.name)}
+          />
+          <MultiDummy
+            label="Eventos"
+            placeholder="Selecione um ou mais eventos"
+            options={events.map((e) => e.name)}
+          />
 
           <label className="products__consulta-field">
             <span>Termo</span>
@@ -548,6 +608,7 @@ function ProductsAtributos() {
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<ProductAttribute | null>(null)
+  const [deleting, setDeleting] = useState<ProductAttribute | null>(null)
   const [name, setName] = useState('')
 
   useEffect(() => {
@@ -591,6 +652,10 @@ function ProductsAtributos() {
 
   return (
     <div className="products">
+      <header className="products__page-head">
+        <h1>{meta.title}</h1>
+      </header>
+
       <section className="products__card products__card--flush products__attrs">
         <aside className="products__attrs-nav" aria-label="Tipos de atributo">
           {ATTRIBUTE_KINDS.map((item) => (
@@ -607,7 +672,6 @@ function ProductsAtributos() {
 
         <div className="products__attrs-main">
           <div className="products__attrs-toolbar">
-            <h2>{meta.title}</h2>
             <label className="products__search">
               <Search size={16} strokeWidth={2} className="products__search-icon" />
               <input
@@ -636,7 +700,7 @@ function ProductsAtributos() {
               }}
               aria-label="Itens por página"
             >
-              {[10, 25, 50].map((size) => (
+              {PAGE_SIZES.map((size) => (
                 <option key={size} value={size}>
                   {size}
                 </option>
@@ -685,6 +749,7 @@ function ProductsAtributos() {
                         <button
                           type="button"
                           className="products__icon-btn is-edit"
+                          title="Editar"
                           aria-label={`Editar ${item.name}`}
                           onClick={() => openEdit(item)}
                         >
@@ -693,8 +758,9 @@ function ProductsAtributos() {
                         <button
                           type="button"
                           className="products__icon-btn is-danger"
+                          title="Excluir valor"
                           aria-label={`Excluir ${item.name}`}
-                          onClick={() => deleteProductAttribute(item.id)}
+                          onClick={() => setDeleting(item)}
                         >
                           <Trash2 size={15} strokeWidth={2} />
                         </button>
@@ -708,7 +774,7 @@ function ProductsAtributos() {
 
           <div className="products__pagination">
             {Array.from({ length: totalPages }, (_, index) => index + 1)
-              .slice(0, 5)
+              .slice(Math.max(0, currentPage - 3), currentPage + 2)
               .map((num) => (
                 <button
                   key={num}
@@ -725,13 +791,25 @@ function ProductsAtributos() {
 
       {modalOpen ? (
         <NameModal
-          title={editing ? `Editar ${meta.singular}` : meta.createLabel}
+          title={editing ? meta.updateModalTitle : meta.createModalTitle}
+          fieldLabel={meta.fieldLabel}
           value={name}
           onChange={setName}
           onClose={() => setModalOpen(false)}
           onSave={save}
         />
       ) : null}
+
+      <ConfirmDeleteModal
+        open={Boolean(deleting)}
+        title={meta.deleteTitle}
+        message={meta.deleteMessage}
+        onCancel={() => setDeleting(null)}
+        onConfirm={() => {
+          if (deleting) deleteProductAttribute(deleting.id)
+          setDeleting(null)
+        }}
+      />
     </div>
   )
 }
@@ -739,30 +817,41 @@ function ProductsAtributos() {
 function ProductsTipos() {
   const types = useProductTypes()
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [pageSize, setPageSize] = useState(10)
+  const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<ProductType | null>(null)
+  const [deleting, setDeleting] = useState<ProductType | null>(null)
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
 
   const sorted = useMemo(
     () =>
       types.slice().sort((a, b) => {
-        const cmp = a.name.localeCompare(b.name, 'pt-BR')
+        const cmp = a.code - b.code || a.name.localeCompare(b.name, 'pt-BR')
         return sortDir === 'asc' ? cmp : -cmp
       }),
     [types, sortDir],
   )
 
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
+  const currentPage = Math.min(page, totalPages)
+  const start = (currentPage - 1) * pageSize
+  const pageItems = sorted.slice(start, start + pageSize)
+
   const statusLabel =
     types.length === 0
-      ? 'Nenhum tipo de produto cadastrado'
+      ? 'Nenhum tipo cadastrado'
       : types.length === 1
-        ? '1 tipo de produto cadastrado'
-        : `${types.length} tipos de produtos cadastrados`
+        ? '1 tipo cadastrado'
+        : `${types.length} tipos cadastrados`
+
+  const nextCode = nextProductTypeCode()
 
   const save = () => {
     if (!name.trim()) return
-    if (editing) updateProductType(editing.id, name)
-    else addProductType(name)
+    if (editing) updateProductType(editing.id, name, description)
+    else addProductType(name, description)
     setModalOpen(false)
   }
 
@@ -783,12 +872,35 @@ function ProductsTipos() {
             onClick={() => {
               setEditing(null)
               setName('')
+              setDescription('')
               setModalOpen(true)
             }}
           >
             <Plus size={14} strokeWidth={2.5} />
             Adicionar tipo
           </button>
+        </div>
+
+        <div className="products__pager">
+          <select
+            value={pageSize}
+            onChange={(event) => {
+              setPageSize(Number(event.target.value))
+              setPage(1)
+            }}
+            aria-label="Itens por página"
+          >
+            {PAGE_SIZES.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+          <span>
+            {sorted.length === 0
+              ? 'Mostrando 0 do total de 0'
+              : `Mostrando ${start + 1} - ${Math.min(start + pageSize, sorted.length)} do total de ${sorted.length}`}
+          </span>
         </div>
 
         <div className="products__table-wrap">
@@ -814,25 +926,27 @@ function ProductsTipos() {
               </tr>
             </thead>
             <tbody>
-              {sorted.length === 0 ? (
+              {pageItems.length === 0 ? (
                 <tr>
                   <td className="products__empty" colSpan={3}>
                     Nenhum resultado encontrado
                   </td>
                 </tr>
               ) : (
-                sorted.map((item, index) => (
+                pageItems.map((item) => (
                   <tr key={item.id}>
-                    <td>{index + 1}</td>
+                    <td>{formatProductTypeCode(item.code)}</td>
                     <td>{item.name}</td>
                     <td className="products__actions-cell">
                       <button
                         type="button"
                         className="products__icon-btn is-edit"
+                        title="Editar"
                         aria-label={`Editar ${item.name}`}
                         onClick={() => {
                           setEditing(item)
                           setName(item.name)
+                          setDescription(item.description)
                           setModalOpen(true)
                         }}
                       >
@@ -841,8 +955,9 @@ function ProductsTipos() {
                       <button
                         type="button"
                         className="products__icon-btn is-danger"
+                        title="Excluir"
                         aria-label={`Excluir ${item.name}`}
-                        onClick={() => deleteProductType(item.id)}
+                        onClick={() => setDeleting(item)}
                       >
                         <Trash2 size={15} strokeWidth={2} />
                       </button>
@@ -853,17 +968,56 @@ function ProductsTipos() {
             </tbody>
           </table>
         </div>
+
+        <div className="products__pagination">
+          {Array.from({ length: totalPages }, (_, index) => index + 1).map((num) => (
+            <button
+              key={num}
+              type="button"
+              className={num === currentPage ? 'is-active' : undefined}
+              onClick={() => setPage(num)}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
       </section>
 
       {modalOpen ? (
-        <NameModal
-          title={editing ? 'Editar tipo' : 'Adicionar tipo'}
-          value={name}
-          onChange={setName}
+        <TypeModal
+          title={editing ? 'Atualizando tipo de produto' : 'Novo tipo de produto'}
+          tip={
+            editing
+              ? undefined
+              : `O código deste novo tipo será ${nextCode}.`
+          }
+          name={name}
+          description={description}
+          onNameChange={setName}
+          onDescriptionChange={setDescription}
           onClose={() => setModalOpen(false)}
           onSave={save}
         />
       ) : null}
+
+      <ConfirmDeleteModal
+        open={Boolean(deleting)}
+        title="Excluir produto"
+        message={
+          <>
+            Você está prestes remover um produto. Os pedidos que contêm este produto{' '}
+            <strong>não</strong> serão alterados e esta ação não poderá ser desfeita.
+          </>
+        }
+        question={
+          deleting ? <>Deseja realmente excluir {deleting.name}?</> : undefined
+        }
+        onCancel={() => setDeleting(null)}
+        onConfirm={() => {
+          if (deleting) deleteProductType(deleting.id)
+          setDeleting(null)
+        }}
+      />
     </div>
   )
 }
@@ -907,13 +1061,22 @@ function ProductsBulk() {
       if (cor && !item.attributes.toLocaleLowerCase('pt-BR').includes(cor.toLocaleLowerCase('pt-BR'))) {
         return false
       }
-      if (tamanho && !item.attributes.toLocaleLowerCase('pt-BR').includes(tamanho.toLocaleLowerCase('pt-BR'))) {
+      if (
+        tamanho &&
+        !item.attributes.toLocaleLowerCase('pt-BR').includes(tamanho.toLocaleLowerCase('pt-BR'))
+      ) {
         return false
       }
-      if (marca && !item.attributes.toLocaleLowerCase('pt-BR').includes(marca.toLocaleLowerCase('pt-BR'))) {
+      if (
+        marca &&
+        !item.attributes.toLocaleLowerCase('pt-BR').includes(marca.toLocaleLowerCase('pt-BR'))
+      ) {
         return false
       }
-      if (modelo && !item.attributes.toLocaleLowerCase('pt-BR').includes(modelo.toLocaleLowerCase('pt-BR'))) {
+      if (
+        modelo &&
+        !item.attributes.toLocaleLowerCase('pt-BR').includes(modelo.toLocaleLowerCase('pt-BR'))
+      ) {
         return false
       }
       if (!q) return true
@@ -960,8 +1123,8 @@ function ProductsBulk() {
             <select value={tipo} onChange={(event) => setTipo(event.target.value)}>
               <option value="">Selecione</option>
               {types.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
+                <option key={item.id} value={formatProductTypeLabel(item)}>
+                  {formatProductTypeLabel(item)}
                 </option>
               ))}
             </select>
@@ -1053,12 +1216,14 @@ function ProductsBulk() {
 
 function NameModal({
   title,
+  fieldLabel,
   value,
   onChange,
   onClose,
   onSave,
 }: {
   title: string
+  fieldLabel: string
   value: string
   onChange: (value: string) => void
   onClose: () => void
@@ -1080,13 +1245,86 @@ function NameModal({
         </header>
         <div className="products-modal__body">
           <label className="products-modal__field">
-            <span>Nome</span>
+            <span>
+              {fieldLabel} <span className="products-modal__req">*</span>
+            </span>
             <input
               type="text"
               className="products-modal__input"
               value={value}
               onChange={(event) => onChange(event.target.value)}
               autoFocus
+            />
+          </label>
+        </div>
+        <footer className="products-modal__footer">
+          <button type="button" className="products-modal__cancel" onClick={onClose}>
+            Cancelar
+          </button>
+          <button type="button" className="products-modal__save" onClick={onSave}>
+            <Check size={15} strokeWidth={2.5} />
+            Salvar
+          </button>
+        </footer>
+      </div>
+    </div>
+  )
+}
+
+function TypeModal({
+  title,
+  tip,
+  name,
+  description,
+  onNameChange,
+  onDescriptionChange,
+  onClose,
+  onSave,
+}: {
+  title: string
+  tip?: string
+  name: string
+  description: string
+  onNameChange: (value: string) => void
+  onDescriptionChange: (value: string) => void
+  onClose: () => void
+  onSave: () => void
+}) {
+  return (
+    <div className="products-modal" role="presentation" onMouseDown={onClose}>
+      <div
+        className="products-modal__dialog products-modal__dialog--sm"
+        role="dialog"
+        aria-modal="true"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="products-modal__header">
+          <h2>{title}</h2>
+          <button type="button" className="products-modal__close" aria-label="Fechar" onClick={onClose}>
+            <X size={16} strokeWidth={2.25} />
+          </button>
+        </header>
+        <div className="products-modal__body">
+          {tip ? <p className="products-modal__tip">{tip}</p> : null}
+          <label className="products-modal__field">
+            <span>
+              Nome <span className="products-modal__req">*</span>
+            </span>
+            <input
+              type="text"
+              className="products-modal__input"
+              value={name}
+              onChange={(event) => onNameChange(event.target.value)}
+              autoFocus
+            />
+          </label>
+          <label className="products-modal__field">
+            <span>Descrição</span>
+            <textarea
+              className="products-modal__input products-modal__textarea"
+              value={description}
+              onChange={(event) => onDescriptionChange(event.target.value)}
+              rows={3}
             />
           </label>
         </div>

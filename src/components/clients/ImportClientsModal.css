@@ -116,8 +116,11 @@
 }
 
 .import-modal__download--soft {
+  height: 33px;
+  padding: 7.15px 9.75px;
   background: #e1f0ff;
   color: #3699ff;
+  font-size: 12.025px;
 }
 
 .import-modal__download--soft:hover {

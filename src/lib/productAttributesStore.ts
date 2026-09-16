@@ -15,43 +15,89 @@ export type ProductAttribute = {
 
 export const ATTRIBUTE_KIND_META: Record<
   ProductAttributeKind,
-  { nav: string; title: string; singular: string; createLabel: string }
+  {
+    nav: string
+    title: string
+    singular: string
+    createLabel: string
+    fieldLabel: string
+    createModalTitle: string
+    updateModalTitle: string
+    deleteTitle: string
+    deleteMessage: string
+  }
 > = {
   cor: {
     nav: 'Cor',
     title: 'Cores de produtos',
     singular: 'cor',
     createLabel: 'Nova cor',
+    fieldLabel: 'Cor',
+    createModalTitle: 'Cadastrar nova cor de produto',
+    updateModalTitle: 'Atualizando cor',
+    deleteTitle: 'Excluir cor',
+    deleteMessage:
+      'Você está prestes a excluir uma cor. Os produtos com esse atributo não serão alterados.',
   },
   estilista: {
     nav: 'Estilista',
     title: 'Estilistas',
     singular: 'estilista',
     createLabel: 'Novo estilista',
+    fieldLabel: 'Estilista',
+    createModalTitle: 'Cadastrar novo estilista',
+    updateModalTitle: 'Atualizando estilista',
+    deleteTitle: 'Excluir estilista',
+    deleteMessage:
+      'Você está prestes a excluir um estilista. Os produtos com esse atributo não serão alterados.',
   },
   evento: {
     nav: 'Evento',
     title: 'Tipos de evento',
     singular: 'evento',
     createLabel: 'Novo evento',
+    fieldLabel: 'Evento',
+    createModalTitle: 'Cadastrar novo tipo de evento',
+    updateModalTitle: 'Atualizando evento',
+    deleteTitle: 'Excluir evento',
+    deleteMessage:
+      'Você está prestes a excluir um evento. Os produtos com esse atributo não serão alterados.',
   },
   marca: {
     nav: 'Marca',
     title: 'Marcas',
     singular: 'marca',
     createLabel: 'Nova marca',
+    fieldLabel: 'Marca',
+    createModalTitle: 'Cadastrar nova marca',
+    updateModalTitle: 'Atualizando marca',
+    deleteTitle: 'Excluir marca',
+    deleteMessage:
+      'Você está prestes a excluir uma marca. Os produtos com esse atributo não serão alterados.',
   },
   modelo: {
     nav: 'Modelo',
     title: 'Modelos',
     singular: 'modelo',
     createLabel: 'Novo modelo',
+    fieldLabel: 'Modelo',
+    createModalTitle: 'Cadastrar novo modelo',
+    updateModalTitle: 'Atualizando modelo',
+    deleteTitle: 'Excluir modelo',
+    deleteMessage:
+      'Você está prestes a excluir um modelo. Os produtos com esse atributo não serão alterados.',
   },
   tamanho: {
     nav: 'Tamanho',
     title: 'Tamanhos',
     singular: 'tamanho',
     createLabel: 'Novo tamanho',
+    fieldLabel: 'Tamanho',
+    createModalTitle: 'Cadastrar novo tamanho',
+    updateModalTitle: 'Atualizando tamanho',
+    deleteTitle: 'Excluir tamanho',
+    deleteMessage:
+      'Você está prestes a excluir um tamanho. Os produtos com esse atributo não serão alterados.',
   },
 }
 

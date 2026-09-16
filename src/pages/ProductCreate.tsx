@@ -7,7 +7,7 @@ import { useProductTypes } from '../hooks/useProductTypes'
 import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
 import { formatMoneyBrPrefix, maskMoneyBr } from '../lib/moneyMask'
 import { addProduct } from '../lib/productsStore'
-import { addProductType } from '../lib/productTypesStore'
+import { addProductType, formatProductTypeLabel } from '../lib/productTypesStore'
 import './ProductCreate.css'
 
 export function ProductCreate() {
@@ -52,7 +52,7 @@ export function ProductCreate() {
   const missingName = !name.trim()
   const missingRental = !rental.trim()
 
-  const typeOptions = useMemo(() => types.map((item) => item.name), [types])
+  const typeOptions = useMemo(() => types.map((item) => formatProductTypeLabel(item)), [types])
   const colorOptions = useMemo(() => colors.map((item) => item.name), [colors])
   const sizeOptions = useMemo(() => sizes.map((item) => item.name), [sizes])
   const modelOptions = useMemo(() => models.map((item) => item.name), [models])
