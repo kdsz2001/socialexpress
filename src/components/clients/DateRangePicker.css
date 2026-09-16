@@ -112,7 +112,7 @@
 .daterange__grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 0;
 }
 
 .daterange__day {
@@ -141,6 +141,24 @@
   background: var(--info-soft-bg);
   color: #3699ff;
   border-radius: 0;
+}
+
+.daterange__day.is-in-range + .daterange__day.is-in-range {
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .daterange {
+  box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme='dark'] .daterange__day.is-in-range,
+html[data-theme='dark'] .daterange__day.is-selected {
+  background: rgba(54, 153, 255, 0.22);
+  color: #3699ff;
+}
+
+html[data-theme='dark'] .daterange__preset.is-active {
+  background: rgba(54, 153, 255, 0.18);
 }
 
 .daterange__day.is-selected {

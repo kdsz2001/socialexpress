@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowUp,
   Calendar,
@@ -11,6 +11,12 @@ import {
   X,
 } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import {
+  DateRangePicker,
+  formatBr,
+  rangeForPreset,
+  type DatePreset,
+} from '../components/clients/DateRangePicker'
 import { ConfirmDeleteModal } from '../components/products/ConfirmDeleteModal'
 import { SaveToast } from '../components/ui/SaveToast'
 import { useProductAttributes } from '../hooks/useProductAttributes'
@@ -416,6 +422,31 @@ function ProductsConsulta() {
   const [priceMax, setPriceMax] = useState(300)
   const [onlyAvailable, setOnlyAvailable] = useState(false)
   const [onlyUnavailable, setOnlyUnavailable] = useState(false)
+  const [periodOpen, setPeriodOpen] = useState(false)
+  const [periodActive, setPeriodActive] = useState(false)
+  const [periodPreset, setPeriodPreset] = useState<DatePreset>('mes')
+  const initialRange = rangeForPreset('mes')
+  const [rangeStart, setRangeStart] = useState(initialRange.start)
+  const [rangeEnd, setRangeEnd] = useState(initialRange.end)
+  const periodRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!periodOpen) return
+    const onPointer = (event: MouseEvent) => {
+      if (!periodRef.current?.contains(event.target as Node)) {
+        setPeriodOpen(false)
+      }
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPeriodOpen(false)
+    }
+    document.addEventListener('mousedown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [periodOpen])
 
   const results = useMemo(() => {
     const q = termo.trim().toLocaleLowerCase('pt-BR')
@@ -436,6 +467,9 @@ function ProductsConsulta() {
   const span = 500
   const leftPct = (lo / span) * 100
   const rightPct = (hi / span) * 100
+  const periodLabel = periodActive
+    ? `${formatBr(rangeStart)} - ${formatBr(rangeEnd)}`
+    : 'Selecione um intervalo...'
 
   return (
     <div className="products">
@@ -496,47 +530,82 @@ function ProductsConsulta() {
             />
           </label>
 
-          <label className="products__consulta-field">
+          <div className="products__consulta-field">
             <span>Período</span>
-            <span className="products__period">
-              <Calendar size={15} strokeWidth={2} className="products__period-icon" />
-              <input type="text" readOnly placeholder="Selecione um intervalo..." />
-            </span>
-          </label>
+            <div className="products__period" ref={periodRef}>
+              <button
+                type="button"
+                className={`products__period-btn${periodOpen ? ' is-open' : ''}${periodActive ? ' has-value' : ''}`}
+                aria-expanded={periodOpen}
+                onClick={() => setPeriodOpen((open) => !open)}
+              >
+                <Calendar size={15} strokeWidth={2} className="products__period-icon" />
+                <span className="products__period-text">{periodLabel}</span>
+              </button>
+              {periodOpen ? (
+                <div className="products__period-popover">
+                  <DateRangePicker
+                    start={rangeStart}
+                    end={rangeEnd}
+                    preset={periodPreset}
+                    onCancel={() => setPeriodOpen(false)}
+                    onApply={({ start, end, preset }) => {
+                      setRangeStart(start)
+                      setRangeEnd(end)
+                      setPeriodPreset(preset)
+                      setPeriodActive(true)
+                      setPeriodOpen(false)
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
 
           <div className="products__consulta-field">
             <span>Faixa de preço</span>
             <div className="products__dual-range">
-              <div className="products__dual-range-track">
-                <div
+              <div className="products__dual-range-track" aria-hidden="true">
+                <span className="products__dual-range-rail" />
+                <span
                   className="products__dual-range-fill"
-                  style={{ left: `${leftPct}%`, width: `${rightPct - leftPct}%` }}
-                />
-                <input
-                  type="range"
-                  min={0}
-                  max={500}
-                  value={lo}
-                  aria-label="Preço mínimo"
-                  onChange={(event) => {
-                    const next = Number(event.target.value)
-                    setPriceMin(Math.min(next, hi))
-                    setPriceMax(hi)
-                  }}
-                />
-                <input
-                  type="range"
-                  min={0}
-                  max={500}
-                  value={hi}
-                  aria-label="Preço máximo"
-                  onChange={(event) => {
-                    const next = Number(event.target.value)
-                    setPriceMax(Math.max(next, lo))
-                    setPriceMin(lo)
-                  }}
+                  style={{ left: `${leftPct}%`, width: `${Math.max(0, rightPct - leftPct)}%` }}
                 />
               </div>
+              <input
+                type="range"
+                className="products__dual-range-input is-min"
+                min={0}
+                max={500}
+                step={1}
+                value={lo}
+                aria-label="Preço mínimo"
+                onChange={(event) => {
+                  const next = Number(event.target.value)
+                  if (next <= hi) setPriceMin(next)
+                  else {
+                    setPriceMin(hi)
+                    setPriceMax(next)
+                  }
+                }}
+              />
+              <input
+                type="range"
+                className="products__dual-range-input is-max"
+                min={0}
+                max={500}
+                step={1}
+                value={hi}
+                aria-label="Preço máximo"
+                onChange={(event) => {
+                  const next = Number(event.target.value)
+                  if (next >= lo) setPriceMax(next)
+                  else {
+                    setPriceMax(lo)
+                    setPriceMin(next)
+                  }
+                }}
+              />
               <div className="products__dual-range-values">
                 <span style={{ left: `${leftPct}%` }}>{lo}</span>
                 <span style={{ left: `${rightPct}%` }}>{hi}</span>

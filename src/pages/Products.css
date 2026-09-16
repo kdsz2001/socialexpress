@@ -550,6 +550,9 @@ html[data-theme='dark'] .products__pager select {
 /* Consulta */
 .products__consulta {
   padding: 1.35rem;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
 }
 
 .products__consulta-grid {
@@ -597,6 +600,13 @@ html[data-theme='dark'] .products__pager select {
   box-shadow: 0 0 0 0.2rem rgba(54, 153, 255, 0.18);
 }
 
+html[data-theme='dark'] .products__consulta-field input,
+html[data-theme='dark'] .products__consulta-field select,
+html[data-theme='dark'] .products__period-btn {
+  border-color: #3f4254;
+  background: var(--card-bg);
+}
+
 .products__consulta-field--view {
   grid-column: 1 / 2;
 }
@@ -604,114 +614,194 @@ html[data-theme='dark'] .products__pager select {
 .products__period {
   position: relative;
   display: block;
+  z-index: 5;
+}
+
+.products__period-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px 0 12px;
+  border: 1px solid var(--p-border-soft);
+  border-radius: var(--p-radius);
+  background: var(--card-bg);
+  color: var(--p-muted);
+  font-family: inherit;
+  font-size: var(--p-font);
+  text-align: left;
+  cursor: pointer;
+}
+
+.products__period-btn.has-value {
+  color: var(--text-primary);
+}
+
+.products__period-btn.is-open,
+.products__period-btn:focus-visible {
+  outline: none;
+  border-color: #3699ff;
+  box-shadow: 0 0 0 0.2rem rgba(54, 153, 255, 0.18);
 }
 
 .products__period-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
   color: var(--p-muted);
-  pointer-events: none;
 }
 
-.products__period input {
-  padding-left: 34px;
+.products__period-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.products__period-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
 }
 
 .products__dual-range {
-  padding-top: 10px;
-  padding-bottom: 2px;
+  position: relative;
+  height: 52px;
+  padding-top: 8px;
+  /* evita “caixa” cinza residual no dark/light */
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  outline: none;
 }
 
 .products__dual-range-track {
-  position: relative;
-  height: 18px;
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 14px;
+  height: 4px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.products__dual-range-track::before {
-  content: '';
+.products__dual-range-rail {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 4px;
-  transform: translateY(-50%);
+  inset: 0;
   border-radius: 999px;
-  background: #e4e6ef;
+  background: var(--p-border-soft);
+}
+
+html[data-theme='dark'] .products__dual-range-rail {
+  background: #3f4254;
 }
 
 .products__dual-range-fill {
   position: absolute;
-  top: 50%;
-  height: 4px;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
   border-radius: 999px;
   background: #3699ff;
-  z-index: 1;
-  pointer-events: none;
 }
 
-.products__dual-range-track input[type='range'] {
+.products__dual-range-input {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 18px;
+  left: 8px;
+  width: calc(100% - 16px);
+  top: 6px;
+  height: 20px;
   margin: 0;
   padding: 0;
-  background: transparent;
+  background: transparent !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  appearance: none;
+  -webkit-appearance: none;
   pointer-events: none;
-  appearance: none;
-  -webkit-appearance: none;
   z-index: 2;
+  /* Chrome às vezes pinta a trilha nativa mesmo com background transparent */
+  color: transparent;
 }
 
-.products__dual-range-track input[type='range']::-webkit-slider-thumb {
+.products__dual-range-input.is-max {
+  z-index: 3;
+}
+
+.products__dual-range-input:focus,
+.products__dual-range-input:focus-visible {
+  outline: none !important;
+}
+
+.products__dual-range-input::-webkit-slider-runnable-track {
+  height: 4px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: transparent !important;
+}
+
+.products__dual-range-input::-moz-range-track {
+  height: 4px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.products__dual-range-input::-moz-range-progress {
+  height: 4px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.products__dual-range-input::-ms-track {
+  height: 4px;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+.products__dual-range-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   pointer-events: auto;
   width: 16px;
   height: 16px;
+  margin-top: -6px;
   border-radius: 50%;
   background: #fff;
   border: 2px solid #3699ff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  position: relative;
+  z-index: 4;
 }
 
-.products__dual-range-track input[type='range']::-moz-range-thumb {
+.products__dual-range-input::-moz-range-thumb {
   pointer-events: auto;
   width: 16px;
   height: 16px;
   border-radius: 50%;
   background: #fff;
   border: 2px solid #3699ff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   cursor: pointer;
-}
-
-.products__dual-range-track input[type='range']::-webkit-slider-runnable-track {
-  height: 4px;
-  background: transparent;
-}
-
-.products__dual-range-track input[type='range']::-moz-range-track {
-  height: 4px;
-  background: transparent;
 }
 
 .products__dual-range-values {
-  position: relative;
-  height: 26px;
-  margin-top: 8px;
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 30px;
+  height: 24px;
 }
 
 .products__dual-range-values span {
   position: absolute;
   top: 0;
   transform: translateX(-50%);
-  min-width: 36px;
-  height: 24px;
+  min-width: 34px;
+  height: 22px;
   padding: 0 6px;
   display: inline-flex;
   align-items: center;
@@ -721,8 +811,14 @@ html[data-theme='dark'] .products__pager select {
   background: var(--card-bg);
   color: var(--text-primary);
   font-size: 12px;
-  font-style: normal;
+  line-height: 1;
   white-space: nowrap;
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .products__dual-range-values span {
+  border-color: #3f4254;
+  background: var(--card-bg);
 }
 
 .products__checks,
