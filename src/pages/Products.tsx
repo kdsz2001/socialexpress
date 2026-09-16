@@ -341,25 +341,25 @@ function ProductsList() {
                 aria-label="Fechar"
                 onClick={() => setImagePreview(null)}
               />
+              <header className="products-image-modal__header">
+                <h2>
+                  {[imagePreview.fullCode, imagePreview.name].filter(Boolean).join(' | ')}
+                </h2>
+                <button
+                  type="button"
+                  className="products-image-modal__close"
+                  aria-label="Fechar"
+                  onClick={() => setImagePreview(null)}
+                >
+                  <X size={18} strokeWidth={2.25} />
+                </button>
+              </header>
               <div
                 className="products-image-modal__dialog"
                 role="dialog"
                 aria-modal="true"
                 aria-label="Imagem do produto"
               >
-                <header className="products-image-modal__header">
-                  <h2>
-                    {[imagePreview.fullCode, imagePreview.name].filter(Boolean).join(' | ')}
-                  </h2>
-                  <button
-                    type="button"
-                    className="products-image-modal__close"
-                    aria-label="Fechar"
-                    onClick={() => setImagePreview(null)}
-                  >
-                    <X size={18} strokeWidth={2.25} />
-                  </button>
-                </header>
                 <div className="products-image-modal__body">
                   <img src={imagePreview.photoDataUrl} alt={imagePreview.name} />
                 </div>
