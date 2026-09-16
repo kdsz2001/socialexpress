@@ -260,13 +260,10 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   }
 
   const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
-  /** Igual ao Clarial: só na lista "Todos produtos" (e enquanto a própria aba estiver ativa). */
-  const isProductDetail =
-    isProductsSection &&
-    location.pathname !== '/produtos' &&
-    location.pathname !== '/produtos/cadastrar'
+  /** Igual ao Clarial: Alteração em massa só na lista Todos produtos. */
   const showBulkTab =
-    !isProductDetail && (productsTab === 'todos' || productsTab === 'alteracao')
+    location.pathname === '/produtos' &&
+    (productsTab === 'todos' || productsTab === 'alteracao')
 
   const searchPanel =
     searchOpen && typeof document !== 'undefined'
