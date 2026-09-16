@@ -471,8 +471,8 @@ export function ProductCreate() {
         onClose={() => setStoreCodeInfoOpen(false)}
       >
         <p>
-          O campo &apos;código loja&apos; permite que o usuário cadastre um código próprio para o
-          produto, alternativo àquele informado no sistema.
+          O campo &apos;<strong>código loja</strong>&apos; permite que o usuário cadastre um código
+          próprio para o produto, alternativo àquele informado no sistema.
         </p>
         <p>
           Esta opção torna-se útil especialmente para lojas que trabalham com seus próprios códigos

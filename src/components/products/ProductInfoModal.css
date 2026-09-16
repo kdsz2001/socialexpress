@@ -75,6 +75,11 @@ html[data-theme='dark'] .p-info__overlay {
   margin-bottom: 0;
 }
 
+.p-info__body strong {
+  font-weight: 700;
+  color: var(--text-heading, #181c32);
+}
+
 .p-info__continue {
   display: inline-flex;
   align-items: center;
