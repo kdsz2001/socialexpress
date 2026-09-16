@@ -1,0 +1,374 @@
+:root {
+  --sidebar-bg: #1e1e2d;
+  --sidebar-brand-bg: #1e1e2d;
+  --sidebar-text: #a2a3b7;
+  --sidebar-text-active: #ffffff;
+  --sidebar-hover: rgba(255, 255, 255, 0.04);
+  --sidebar-active-bg: rgba(55, 125, 255, 0.12);
+  --sidebar-active-color: #3699ff;
+  --sidebar-scroll-thumb: #637099;
+  --brand-blue: #3699ff;
+
+  --main-bg: #f3f6f9;
+  --topbar-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.08);
+  --card-radius: 0.75rem;
+  --value-box-bg: #f3f6f9;
+  --surface-muted: #f3f6f9;
+  --border-color: #ebedf3;
+  --input-bg: #ffffff;
+  --input-border: #e4e6ef;
+  --control-bg: #f3f6f9;
+  --overlay-bg: rgba(30, 30, 45, 0.45);
+
+  --text-heading: #181c32;
+  --text-primary: #3f4254;
+  --text-secondary: #7e8299;
+  --text-muted: #b5b5c3;
+
+  --overdue-bg: #ffe2e5;
+  --overdue-text: #f64e60;
+  --today-bg: #e1f0ff;
+  --today-text: #3699ff;
+  --upcoming-bg: #c9f7f5;
+  --upcoming-text: #1bc5bd;
+  --success-soft-bg: #c9f7f5;
+  --danger-soft-bg: #ffe2e5;
+  --info-soft-bg: #e1f0ff;
+  --warning-soft-bg: #fff4de;
+  --diff-add-bg: #ccffcc;
+  --diff-add-text: #1b5e3b;
+  --diff-remove-bg: #ffcccc;
+  --diff-remove-text: #8a1c28;
+  --calendar-outside-bg: #fcfcfd;
+  --calendar-hover-bg: #cfe6ff;
+  --calendar-selected-bg: #e8f4ff;
+  --calendar-today-bg: #fce4e2;
+  --calendar-today-hover-bg: #f8d5d1;
+
+  --accent-teal: #1bc5bd;
+  --accent-red: #f64e60;
+
+  --sidebar-width: 265px;
+  --sidebar-collapsed: 70px;
+  --topbar-height: 65px;
+  --app-content-pad-x: 30px;
+  /* Largura do miolo com menu aberto (conteúdo já dentro do padding) */
+  --app-panel-max: calc(
+    100vw - var(--sidebar-width) - (2 * var(--app-content-pad-x))
+  );
+
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--text-primary);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 100%;
+}
+
+html {
+  font-size: 13px !important;
+}
+
+body {
+  background: var(--main-bg);
+  overflow: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Scrollbar principal (fina, estilo Metronic/Clarial) */
+.app-content {
+  scrollbar-width: thin;
+  scrollbar-color: #c4c4d4 transparent;
+}
+
+.app-content::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.app-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  background: #c4c4d4;
+  border-radius: 999px;
+}
+
+.app-content::-webkit-scrollbar-thumb:hover {
+  background: #a1a5b7;
+}
+
+/* ——— Tema escuro (tokens) ——— */
+html.theme-dark {
+  color-scheme: dark;
+  --main-bg: #151521;
+  --topbar-bg: #1e1e2d;
+  --card-bg: #1e1e2d;
+  --card-shadow: 0 0 24px 0 rgba(0, 0, 0, 0.35);
+  --value-box-bg: #1b1b28;
+  --surface-muted: #1b1b28;
+  --border-color: #2b2b40;
+  --input-bg: #1b1b28;
+  --input-border: #323248;
+  --control-bg: #2b2b40;
+  --overlay-bg: rgba(10, 10, 20, 0.55);
+  --text-heading: #e4e6ef;
+  --text-primary: #e4e6ef;
+  --text-secondary: #a1a5b7;
+  --text-muted: #7e8299;
+  --overdue-bg: #3a1d24;
+  --overdue-text: #f1416c;
+  --today-bg: #1b2a3f;
+  --today-text: #3699ff;
+  --upcoming-bg: #1a3332;
+  --upcoming-text: #1bc5bd;
+  --success-soft-bg: #1a3332;
+  --danger-soft-bg: #3a1d24;
+  --info-soft-bg: #1b2a3f;
+  --warning-soft-bg: #3a2f1a;
+  --diff-add-bg: #16352f;
+  --diff-add-text: #7ee2b8;
+  --diff-remove-bg: #3a1d24;
+  --diff-remove-text: #f1aeb5;
+  --calendar-outside-bg: #171723;
+  --calendar-hover-bg: #1f2f4a;
+  --calendar-selected-bg: #1b2a3f;
+  --calendar-today-bg: #3a2428;
+  --calendar-today-hover-bg: #4a2c32;
+}
+
+html.theme-dark body {
+  background: var(--main-bg);
+  color: var(--text-primary);
+}
+
+/* Shell / chrome */
+html.theme-dark .clients-subheader,
+html.theme-dark .topbar {
+  background: var(--topbar-bg);
+  border-bottom-color: var(--border-color);
+}
+
+html.theme-dark .clients-subheader__title,
+html.theme-dark .profile-drawer__title,
+html.theme-dark .profile-drawer__name {
+  color: var(--text-heading);
+}
+
+html.theme-dark .clients-subheader__subtitle,
+html.theme-dark .profile-drawer__role,
+html.theme-dark .profile-drawer__item-desc {
+  color: var(--text-muted);
+}
+
+html.theme-dark .app-footer {
+  background: var(--card-bg);
+  border-top-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+html.theme-dark .app-overlay {
+  background: var(--overlay-bg);
+}
+
+html.theme-dark .scrolltop {
+  opacity: 0.55;
+}
+
+html.theme-dark .profile-drawer {
+  background: var(--card-bg);
+  box-shadow: 0 0 50px 0 rgba(0, 0, 0, 0.45);
+}
+
+html.theme-dark .profile-drawer__header,
+html.theme-dark .profile-drawer__nav {
+  border-color: var(--border-color);
+}
+
+html.theme-dark .profile-drawer__close {
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+}
+
+html.theme-dark .profile-drawer__item:hover {
+  background: var(--surface-muted);
+}
+
+html.theme-dark .profile-drawer__item-label {
+  color: var(--text-heading);
+}
+
+html.theme-dark .profile-drawer__item-icon {
+  background: var(--info-soft-bg);
+}
+
+html.theme-dark .topbar__theme {
+  color: var(--text-secondary);
+}
+
+html.theme-dark .topbar__theme:hover {
+  background: var(--surface-muted);
+  color: var(--brand-blue);
+}
+
+html.theme-dark .topbar__tab:hover {
+  color: var(--brand-blue);
+}
+
+html.theme-dark .topbar__tab.is-active {
+  color: var(--brand-blue);
+  background: var(--info-soft-bg);
+}
+
+html.theme-dark .topbar__search:hover,
+html.theme-dark .topbar__search.is-open {
+  background: var(--info-soft-bg);
+}
+
+html.theme-dark .topbar__search-panel {
+  background: var(--card-bg);
+  box-shadow: 0 0 50px 0 rgba(0, 0, 0, 0.45);
+}
+
+html.theme-dark .topbar__user:hover,
+html.theme-dark .topbar__user.is-open {
+  background: var(--surface-muted);
+}
+
+html.theme-dark .topbar__greeting-hi {
+  color: var(--text-muted);
+}
+
+html.theme-dark .topbar__greeting-name {
+  color: var(--text-heading);
+}
+
+/* Dashboard accent rows / chips */
+html.theme-dark .status-card--overdue .status-card__item {
+  background-color: var(--overdue-bg);
+  color: var(--overdue-text);
+}
+
+html.theme-dark .status-card--today .status-card__item {
+  background-color: var(--today-bg);
+  color: var(--today-text);
+}
+
+html.theme-dark .status-card--upcoming .status-card__item {
+  background-color: var(--upcoming-bg);
+  color: var(--upcoming-text);
+}
+
+html.theme-dark .accounts-card--payable .accounts-card__metric-icon,
+html.theme-dark .results-card__icon {
+  background: var(--success-soft-bg);
+}
+
+html.theme-dark .accounts-card--payable .accounts-card__metric-icon {
+  background: var(--danger-soft-bg);
+  color: var(--overdue-text);
+}
+
+html.theme-dark .accounts-card--receivable .accounts-card__metric-icon,
+html.theme-dark .results-card__icon {
+  background: var(--success-soft-bg);
+  color: var(--upcoming-text);
+}
+
+html.theme-dark .accounts-card__value,
+html.theme-dark .results-card__value {
+  background: var(--value-box-bg);
+}
+
+/* Common soft accent chips / active states across pages */
+html.theme-dark .clients-subheader__btn.is-active,
+html.theme-dark .topbar__pager-btn.is-active,
+html.theme-dark [class*='__pager-btn'].is-active,
+html.theme-dark [class*='__page'].is-active {
+  background: var(--info-soft-bg);
+}
+
+html.theme-dark .app-content {
+  scrollbar-color: #4a4a65 transparent;
+}
+
+html.theme-dark .app-content::-webkit-scrollbar-thumb {
+  background: #4a4a65;
+}
+
+/* Inputs / selects / search fields that still use light borders */
+html.theme-dark input:not([type='checkbox']):not([type='radio']):not([type='range']),
+html.theme-dark select,
+html.theme-dark textarea {
+  color: var(--text-primary);
+}
+
+html.theme-dark input::placeholder,
+html.theme-dark textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Tables: header/row separators stay readable */
+html.theme-dark table th,
+html.theme-dark table td {
+  border-color: var(--border-color);
+}
+
+html.theme-dark table th {
+  color: var(--text-secondary);
+}
+
+/* Soft blue/red chips that remain pastel in dark mode */
+html.theme-dark [class*='__action--view'],
+html.theme-dark [class*='__badge--info'],
+html.theme-dark .clients__pager-btn:not(.is-active),
+html.theme-dark [class*='__pager-btn']:not(.is-active):not(:disabled) {
+  background: var(--surface-muted);
+}
+
+html.theme-dark .clients__pager-btn.is-active,
+html.theme-dark [class*='__pager-btn'].is-active {
+  background: var(--brand-blue);
+  color: #ffffff;
+}
