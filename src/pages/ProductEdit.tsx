@@ -283,15 +283,6 @@ export function ProductEdit() {
             />
           </Field>
 
-          <Field label="Quantidade">
-            <input
-              type="number"
-              min={1}
-              value={quantity}
-              onChange={(event) => setQuantity(event.target.value)}
-            />
-          </Field>
-
           <Field label="Cor">
             <CreatableSelect
               value={color}
