@@ -21,12 +21,20 @@
   z-index: 1;
   width: min(560px, 100%);
   background: var(--card-bg);
-  border-radius: 0.65rem;
+  border-radius: 5.46px;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.2);
   display: flex;
   flex-direction: column;
   max-height: min(90vh, 720px);
   animation: import-dialog-in 0.2s ease both;
+  font-size: 13px;
+}
+
+.import-modal__title {
+  margin: 0;
+  font-size: 16.575px;
+  font-weight: 500;
+  color: var(--text-heading);
 }
 
 .import-modal__header {
@@ -37,13 +45,6 @@
   padding: 1.15rem 1.35rem;
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
-}
-
-.import-modal__title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--text-heading);
 }
 
 .import-modal__close {
@@ -70,16 +71,26 @@
   margin-top: 1.5rem;
 }
 
+.import-modal__download,
+.import-modal__cancel,
+.import-modal__submit {
+  height: 38px;
+  padding: 8.45px 13px;
+  border-radius: 5.46px;
+  font-size: 13px;
+  font-weight: 400;
+}
+
 .import-modal__step-title {
   margin: 0 0 0.45rem;
-  font-size: 1.05rem;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-heading);
 }
 
 .import-modal__step-text {
   margin: 0 0 0.9rem;
-  font-size: 0.95rem;
+  font-size: 13px;
   font-weight: 400;
   color: var(--text-secondary);
   line-height: 1.55;
@@ -90,13 +101,13 @@
   align-items: center;
   gap: 0.45rem;
   height: 38px;
-  padding: 0 1rem;
-  border-radius: 0.42rem;
+  padding: 8.45px 13px;
+  border-radius: 5.46px;
   background: #3699ff;
   color: #ffffff;
   font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 400;
   transition: background 0.15s ease;
 }
 
@@ -119,9 +130,9 @@
   display: flex;
   align-items: stretch;
   width: 100%;
-  min-height: 40px;
+  min-height: 38px;
   border: 1px solid var(--border-color);
-  border-radius: 0.42rem;
+  border-radius: 5.46px;
   overflow: hidden;
   cursor: pointer;
   background: var(--card-bg);
@@ -136,8 +147,8 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  padding: 0 0.9rem;
-  font-size: 0.95rem;
+  padding: 0 13px;
+  font-size: 13px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -151,11 +162,11 @@
 .import-modal__file-browse {
   display: grid;
   place-items: center;
-  padding: 0 1rem;
+  padding: 0 13px;
   background: var(--surface-muted);
   border-left: 1px solid var(--border-color);
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 13px;
   font-weight: 500;
   flex-shrink: 0;
 }

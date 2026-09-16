@@ -39,9 +39,9 @@ type SortDir = 'asc' | 'desc'
 type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
 
 const STATUS_OPTIONS: { id: 'todos' | ProductStatus; label: string }[] = [
-  { id: 'todos', label: 'Filtro por status' },
-  { id: 'ativo', label: 'Ativo' },
-  { id: 'inativo', label: 'Inativo' },
+  { id: 'todos', label: 'Mostrar todos' },
+  { id: 'ativo', label: 'Ativos' },
+  { id: 'inativo', label: 'Inativos' },
 ]
 
 const ATTRIBUTE_KINDS = Object.keys(ATTRIBUTE_KIND_META) as ProductAttributeKind[]
@@ -61,19 +61,7 @@ export function Products() {
   if (tab === 'consulta') return <ProductsConsulta />
   if (tab === 'atributos') return <ProductsAtributos />
   if (tab === 'tipos') return <ProductsTipos />
-  if (tab === 'alteracao') {
-    return (
-      <div className="products">
-        <header className="products__page-head">
-          <h1>Alteração em massa</h1>
-        </header>
-        <section className="products__card products__card--placeholder">
-          <h2>Alteração em massa</h2>
-          <p>Nenhum resultado encontrado</p>
-        </section>
-      </div>
-    )
-  }
+  if (tab === 'alteracao') return <ProductsBulk />
 
   return <ProductsList />
 }
@@ -166,24 +154,24 @@ function ProductsList() {
             />
           </label>
 
-          <label className="products__select-wrap">
+          <label className="products__select-wrap products__select-wrap--type">
             <select
               className="products__select"
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value)}
               aria-label="Filtro por tipo de produto"
             >
-              <option value="todos">Filtro por tipo de produto</option>
+              <option value="todos">Todos tipos de produto</option>
               {typeOptions.map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>
               ))}
             </select>
-            <ChevronDown size={16} strokeWidth={2} className="products__select-icon" />
+            <ChevronDown size={14} strokeWidth={2} className="products__select-icon" />
           </label>
 
-          <label className="products__select-wrap">
+          <label className="products__select-wrap products__select-wrap--status">
             <select
               className="products__select"
               value={statusFilter}
@@ -198,7 +186,7 @@ function ProductsList() {
                 </option>
               ))}
             </select>
-            <ChevronDown size={16} strokeWidth={2} className="products__select-icon" />
+            <ChevronDown size={14} strokeWidth={2} className="products__select-icon" />
           </label>
 
           <button
@@ -206,7 +194,7 @@ function ProductsList() {
             className="products__add"
             onClick={() => navigate('/produtos/cadastrar')}
           >
-            <Plus size={16} strokeWidth={2.5} />
+            <Plus size={14} strokeWidth={2.5} />
             Novo produto
           </button>
         </div>
@@ -603,7 +591,7 @@ function ProductsAtributos() {
 
   return (
     <div className="products">
-      <section className="products__card products__attrs">
+      <section className="products__card products__card--flush products__attrs">
         <aside className="products__attrs-nav" aria-label="Tipos de atributo">
           {ATTRIBUTE_KINDS.map((item) => (
             <button
@@ -634,7 +622,7 @@ function ProductsAtributos() {
               />
             </label>
             <button type="button" className="products__add" onClick={openCreate}>
-              <Plus size={16} strokeWidth={2.5} />
+              <Plus size={14} strokeWidth={2.5} />
               {meta.createLabel}
             </button>
           </div>
@@ -798,7 +786,7 @@ function ProductsTipos() {
               setModalOpen(true)
             }}
           >
-            <Plus size={16} strokeWidth={2.5} />
+            <Plus size={14} strokeWidth={2.5} />
             Adicionar tipo
           </button>
         </div>
@@ -875,6 +863,189 @@ function ProductsTipos() {
           onClose={() => setModalOpen(false)}
           onSave={save}
         />
+      ) : null}
+    </div>
+  )
+}
+
+function ProductsBulk() {
+  const products = useProducts()
+  const types = useProductTypes()
+  const colors = useProductAttributes('cor')
+  const sizes = useProductAttributes('tamanho')
+  const brands = useProductAttributes('marca')
+  const models = useProductAttributes('modelo')
+
+  const [busca, setBusca] = useState('')
+  const [tipo, setTipo] = useState('')
+  const [tamanho, setTamanho] = useState('')
+  const [cor, setCor] = useState('')
+  const [status, setStatus] = useState('')
+  const [marca, setMarca] = useState('')
+  const [modelo, setModelo] = useState('')
+  const [searched, setSearched] = useState(false)
+  const [results, setResults] = useState<typeof products>([])
+
+  const clear = () => {
+    setBusca('')
+    setTipo('')
+    setTamanho('')
+    setCor('')
+    setStatus('')
+    setMarca('')
+    setModelo('')
+    setSearched(false)
+    setResults([])
+  }
+
+  const search = () => {
+    const q = busca.trim().toLocaleLowerCase('pt-BR')
+    const list = products.filter((item) => {
+      if (tipo && item.type !== tipo) return false
+      if (status === 'ativo' && item.status !== 'ativo') return false
+      if (status === 'inativo' && item.status !== 'inativo') return false
+      if (cor && !item.attributes.toLocaleLowerCase('pt-BR').includes(cor.toLocaleLowerCase('pt-BR'))) {
+        return false
+      }
+      if (tamanho && !item.attributes.toLocaleLowerCase('pt-BR').includes(tamanho.toLocaleLowerCase('pt-BR'))) {
+        return false
+      }
+      if (marca && !item.attributes.toLocaleLowerCase('pt-BR').includes(marca.toLocaleLowerCase('pt-BR'))) {
+        return false
+      }
+      if (modelo && !item.attributes.toLocaleLowerCase('pt-BR').includes(modelo.toLocaleLowerCase('pt-BR'))) {
+        return false
+      }
+      if (!q) return true
+      return (
+        item.name.toLocaleLowerCase('pt-BR').includes(q) ||
+        item.type.toLocaleLowerCase('pt-BR').includes(q)
+      )
+    })
+    setResults(list)
+    setSearched(true)
+  }
+
+  return (
+    <div className="products">
+      <header className="products__page-head">
+        <h1>Alteração em massa</h1>
+      </header>
+
+      <p className="products__alert products__alert--info">
+        Campos em branco não alteram os produtos.
+      </p>
+      <p className="products__alert products__alert--warn">
+        Atenção: esta tela altera vários produtos de uma vez. Antes de salvar, o sistema
+        exibirá uma confirmação com o antes/depois. A operação não possui reversão automática.
+      </p>
+
+      <section className="products__card">
+        <div className="products__section-head">
+          <h2>1. Filtrar produtos</h2>
+        </div>
+
+        <div className="products__bulk-grid">
+          <label className="products__consulta-field">
+            <span>Busca</span>
+            <input
+              type="text"
+              value={busca}
+              onChange={(event) => setBusca(event.target.value)}
+              placeholder="Buscar produtos"
+            />
+          </label>
+          <label className="products__consulta-field">
+            <span>Tipos</span>
+            <select value={tipo} onChange={(event) => setTipo(event.target.value)}>
+              <option value="">Selecione</option>
+              {types.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="products__consulta-field">
+            <span>Tamanhos</span>
+            <select value={tamanho} onChange={(event) => setTamanho(event.target.value)}>
+              <option value="">Selecione</option>
+              {sizes.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="products__consulta-field">
+            <span>Cores</span>
+            <select value={cor} onChange={(event) => setCor(event.target.value)}>
+              <option value="">Selecione</option>
+              {colors.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="products__consulta-field">
+            <span>Status</span>
+            <select value={status} onChange={(event) => setStatus(event.target.value)}>
+              <option value="">Selecione</option>
+              <option value="ativo">Ativos</option>
+              <option value="inativo">Inativos</option>
+            </select>
+          </label>
+          <label className="products__consulta-field">
+            <span>Marcas</span>
+            <select value={marca} onChange={(event) => setMarca(event.target.value)}>
+              <option value="">Selecione</option>
+              {brands.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="products__consulta-field">
+            <span>Modelos</span>
+            <select value={modelo} onChange={(event) => setModelo(event.target.value)}>
+              <option value="">Selecione</option>
+              {models.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className="products__bulk-actions">
+          <button type="button" className="products__ghost" onClick={clear}>
+            Limpar
+          </button>
+          <button type="button" className="products__add" onClick={search}>
+            Buscar produtos
+          </button>
+        </div>
+
+        <p className="products__bulk-note">
+          Use os filtros acima e clique em Buscar produtos para carregar a lista. Nenhum
+          produto será carregado automaticamente ao abrir esta tela.
+        </p>
+      </section>
+
+      {searched ? (
+        <section className="products__card" style={{ marginTop: '1rem' }}>
+          <div className="products__section-head">
+            <h2>2. Resultados</h2>
+          </div>
+          <p className="products__consulta-empty">
+            {results.length === 0
+              ? 'Nenhum resultado foi encontrado.'
+              : `${results.length} produto${results.length === 1 ? '' : 's'} encontrado${results.length === 1 ? '' : 's'}.`}
+          </p>
+        </section>
       ) : null}
     </div>
   )

@@ -39,8 +39,11 @@
   overflow-x: auto;
 }
 
-.topbar__tabs--products {
-  max-width: min(100%, 52rem);
+.topbar__tabs--products .topbar__tab {
+  font-size: 13px;
+  font-weight: 400;
+  padding: 0.45rem 0.85rem;
+  border-radius: 5.46px;
 }
 
 .topbar__tabs--crm {
