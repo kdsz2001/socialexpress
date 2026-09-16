@@ -7,6 +7,7 @@ import {
   ProductSwitch,
 } from '../components/products/ProductFormControls'
 import { ProductTypeModal } from '../components/products/ProductTypeModal'
+import { ProductInfoModal } from '../components/products/ProductInfoModal'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
@@ -61,6 +62,7 @@ export function ProductCreate() {
   const [typeModalOpen, setTypeModalOpen] = useState(false)
   const [typeModalName, setTypeModalName] = useState('')
   const [typeModalDescription, setTypeModalDescription] = useState('')
+  const [storeCodeInfoOpen, setStoreCodeInfoOpen] = useState(false)
 
   const missingType = !productType
   const missingName = !name.trim()
@@ -238,11 +240,15 @@ export function ProductCreate() {
               onChange={(event) => setStoreCode(event.target.value)}
             />
             <p className="product-create__help">
-              É um código identificador alternativo ao código gerado pelo sistema.{' '}
-              <button type="button" className="product-create__link product-create__link--inline">
-                Clique aqui para saber mais
-              </button>
+              É um código identificador alternativo ao código gerado pelo sistema.
             </p>
+            <button
+              type="button"
+              className="product-create__link"
+              onClick={() => setStoreCodeInfoOpen(true)}
+            >
+              Clique aqui para saber mais.
+            </button>
           </Field>
 
           <Field label="Nome" required invalid={touched && missingName}>
@@ -458,6 +464,21 @@ export function ProductCreate() {
           onSave={saveTypeModal}
         />
       ) : null}
+
+      <ProductInfoModal
+        open={storeCodeInfoOpen}
+        title="Código loja"
+        onClose={() => setStoreCodeInfoOpen(false)}
+      >
+        <p>
+          O campo &apos;código loja&apos; permite que o usuário cadastre um código próprio para o
+          produto, alternativo àquele informado no sistema.
+        </p>
+        <p>
+          Esta opção torna-se útil especialmente para lojas que trabalham com seus próprios códigos
+          de produtos, a fim de localizá-los dentro do sistema de forma mais prática e rápida.
+        </p>
+      </ProductInfoModal>
     </div>
   )
 }
