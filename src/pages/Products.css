@@ -439,7 +439,11 @@ html[data-theme='dark'] .products__icon-btn.is-edit {
 
 .products__attrs-nav-btn.is-active {
   color: #3699ff;
-  background: var(--p-soft);
+  background: #e1f0ff;
+}
+
+html[data-theme='dark'] .products__attrs-nav-btn.is-active {
+  background: rgba(54, 153, 255, 0.16);
 }
 
 .products__attrs-main {
