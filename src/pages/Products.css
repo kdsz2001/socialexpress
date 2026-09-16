@@ -632,6 +632,7 @@ html[data-theme='dark'] .products__period-btn {
   font-size: var(--p-font);
   text-align: left;
   cursor: pointer;
+  box-shadow: none;
 }
 
 .products__period-btn.has-value {
@@ -642,7 +643,7 @@ html[data-theme='dark'] .products__period-btn {
 .products__period-btn:focus-visible {
   outline: none;
   border-color: #3699ff;
-  box-shadow: 0 0 0 0.2rem rgba(54, 153, 255, 0.18);
+  box-shadow: none;
 }
 
 .products__period-icon {
@@ -661,35 +662,44 @@ html[data-theme='dark'] .products__period-btn {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  z-index: 40;
+  z-index: 60;
 }
 
 .products__dual-range {
   position: relative;
   height: 52px;
   padding-top: 8px;
-  /* evita “caixa” cinza residual no dark/light */
   background: transparent;
   border: 0;
   box-shadow: none;
   outline: none;
+  isolation: isolate;
 }
 
 .products__dual-range-track {
   position: absolute;
   left: 8px;
   right: 8px;
-  top: 14px;
-  height: 4px;
-  pointer-events: none;
+  top: 8px;
+  height: 20px;
   z-index: 0;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .products__dual-range-rail {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: 8px;
+  height: 4px;
   border-radius: 999px;
-  background: var(--p-border-soft);
+  background: #e4e6ef;
+  pointer-events: none;
 }
 
 html[data-theme='dark'] .products__dual-range-rail {
@@ -698,94 +708,44 @@ html[data-theme='dark'] .products__dual-range-rail {
 
 .products__dual-range-fill {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 8px;
+  height: 4px;
   border-radius: 999px;
   background: #3699ff;
+  pointer-events: none;
 }
 
-.products__dual-range-input {
+.products__dual-range-thumb {
   position: absolute;
-  left: 8px;
-  width: calc(100% - 16px);
-  top: 6px;
-  height: 20px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
   margin: 0;
   padding: 0;
-  background: transparent !important;
-  border: 0 !important;
-  outline: none !important;
-  box-shadow: none !important;
+  border-radius: 50%;
+  border: 2px solid #3699ff;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  transform: translateX(-50%);
+  cursor: grab;
+  touch-action: none;
+  z-index: 2;
   appearance: none;
   -webkit-appearance: none;
-  pointer-events: none;
-  z-index: 2;
-  /* Chrome às vezes pinta a trilha nativa mesmo com background transparent */
-  color: transparent;
 }
 
-.products__dual-range-input.is-max {
+.products__dual-range-thumb.is-max {
   z-index: 3;
 }
 
-.products__dual-range-input:focus,
-.products__dual-range-input:focus-visible {
-  outline: none !important;
-}
-
-.products__dual-range-input::-webkit-slider-runnable-track {
-  height: 4px !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: transparent !important;
-}
-
-.products__dual-range-input::-moz-range-track {
-  height: 4px !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.products__dual-range-input::-moz-range-progress {
-  height: 4px !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-.products__dual-range-input::-ms-track {
-  height: 4px;
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-
-.products__dual-range-input::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  pointer-events: auto;
-  width: 16px;
-  height: 16px;
-  margin-top: -6px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #3699ff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  position: relative;
+.products__dual-range-thumb.is-active {
+  cursor: grabbing;
   z-index: 4;
 }
 
-.products__dual-range-input::-moz-range-thumb {
-  pointer-events: auto;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #3699ff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
+.products__dual-range-thumb:focus-visible {
+  outline: 2px solid rgba(54, 153, 255, 0.45);
+  outline-offset: 2px;
 }
 
 .products__dual-range-values {
@@ -794,6 +754,7 @@ html[data-theme='dark'] .products__dual-range-rail {
   right: 8px;
   top: 30px;
   height: 24px;
+  pointer-events: none;
 }
 
 .products__dual-range-values span {

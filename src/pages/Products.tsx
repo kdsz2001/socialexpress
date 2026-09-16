@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import {
   ArrowUp,
   Calendar,
@@ -406,6 +406,176 @@ function ProductsList() {
   )
 }
 
+function parseRentalValue(rental: string): number | null {
+  const digits = rental.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+  if (!digits) return null
+  const value = Number(digits)
+  return Number.isFinite(value) ? value : null
+}
+
+function DualPriceRange({
+  min = 0,
+  max = 500,
+  valueMin,
+  valueMax,
+  onChange,
+}: {
+  min?: number
+  max?: number
+  valueMin: number
+  valueMax: number
+  onChange: (nextMin: number, nextMax: number) => void
+}) {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<'min' | 'max' | null>(null)
+  const [dragging, setDragging] = useState<'min' | 'max' | null>(null)
+
+  const lo = Math.min(valueMin, valueMax)
+  const hi = Math.max(valueMin, valueMax)
+  const span = Math.max(1, max - min)
+  const leftPct = ((lo - min) / span) * 100
+  const rightPct = ((hi - min) / span) * 100
+
+  const valueFromClientX = (clientX: number) => {
+    const el = trackRef.current
+    if (!el) return min
+    const rect = el.getBoundingClientRect()
+    if (rect.width <= 0) return min
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width))
+    return Math.round(min + ratio * span)
+  }
+
+  const applyDrag = (which: 'min' | 'max', clientX: number) => {
+    const next = valueFromClientX(clientX)
+    if (which === 'min') onChange(Math.min(next, hi), hi)
+    else onChange(lo, Math.max(next, lo))
+  }
+
+  const startDrag = (which: 'min' | 'max', event: ReactPointerEvent<HTMLElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    dragRef.current = which
+    setDragging(which)
+    event.currentTarget.setPointerCapture(event.pointerId)
+    applyDrag(which, event.clientX)
+  }
+
+  const moveDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    const which = dragRef.current
+    if (!which) return
+    applyDrag(which, event.clientX)
+  }
+
+  const endDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    if (!dragRef.current) return
+    dragRef.current = null
+    setDragging(null)
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    } catch {
+      /* already released */
+    }
+  }
+
+  const onTrackPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget && !(event.target as HTMLElement).dataset.rail) {
+      return
+    }
+    const next = valueFromClientX(event.clientX)
+    const distLo = Math.abs(next - lo)
+    const distHi = Math.abs(next - hi)
+    const which = distLo <= distHi ? 'min' : 'max'
+    startDrag(which, event)
+  }
+
+  const nudge = (which: 'min' | 'max', delta: number) => {
+    if (which === 'min') onChange(Math.min(Math.max(min, lo + delta), hi), hi)
+    else onChange(lo, Math.max(Math.min(max, hi + delta), lo))
+  }
+
+  return (
+    <div className="products__dual-range">
+      <div
+        className="products__dual-range-track"
+        ref={trackRef}
+        onPointerDown={onTrackPointerDown}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
+        <span className="products__dual-range-rail" data-rail="1" />
+        <span
+          className="products__dual-range-fill"
+          data-rail="1"
+          style={{ left: `${leftPct}%`, width: `${Math.max(0, rightPct - leftPct)}%` }}
+        />
+        <button
+          type="button"
+          className={`products__dual-range-thumb is-min${dragging === 'min' ? ' is-active' : ''}`}
+          style={{ left: `${leftPct}%` }}
+          aria-label="Preço mínimo"
+          role="slider"
+          aria-valuemin={min}
+          aria-valuemax={hi}
+          aria-valuenow={lo}
+          onPointerDown={(event) => startDrag('min', event)}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+              event.preventDefault()
+              nudge('min', -1)
+            } else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+              event.preventDefault()
+              nudge('min', 1)
+            } else if (event.key === 'Home') {
+              event.preventDefault()
+              onChange(min, hi)
+            } else if (event.key === 'End') {
+              event.preventDefault()
+              onChange(hi, hi)
+            }
+          }}
+        />
+        <button
+          type="button"
+          className={`products__dual-range-thumb is-max${dragging === 'max' ? ' is-active' : ''}`}
+          style={{ left: `${rightPct}%` }}
+          aria-label="Preço máximo"
+          role="slider"
+          aria-valuemin={lo}
+          aria-valuemax={max}
+          aria-valuenow={hi}
+          onPointerDown={(event) => startDrag('max', event)}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+              event.preventDefault()
+              nudge('max', -1)
+            } else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+              event.preventDefault()
+              nudge('max', 1)
+            } else if (event.key === 'Home') {
+              event.preventDefault()
+              onChange(lo, lo)
+            } else if (event.key === 'End') {
+              event.preventDefault()
+              onChange(lo, max)
+            }
+          }}
+        />
+      </div>
+      <div className="products__dual-range-values">
+        <span style={{ left: `${leftPct}%` }}>{lo}</span>
+        <span style={{ left: `${rightPct}%` }}>{hi}</span>
+      </div>
+    </div>
+  )
+}
+
 function ProductsConsulta() {
   const products = useProducts()
   const types = useProductTypes()
@@ -448,25 +618,50 @@ function ProductsConsulta() {
     }
   }, [periodOpen])
 
+  const lo = Math.min(priceMin, priceMax)
+  const hi = Math.max(priceMin, priceMax)
+
   const results = useMemo(() => {
     const q = termo.trim().toLocaleLowerCase('pt-BR')
+    const from = new Date(rangeStart)
+    from.setHours(0, 0, 0, 0)
+    const to = new Date(rangeEnd)
+    to.setHours(23, 59, 59, 999)
+
     return products.filter((item) => {
       if (onlyAvailable && item.status !== 'ativo') return false
       if (onlyUnavailable && item.status !== 'inativo') return false
+
+      if (periodActive) {
+        const created = new Date(item.createdAt).getTime()
+        if (Number.isNaN(created) || created < from.getTime() || created > to.getTime()) {
+          return false
+        }
+      }
+
+      const price = parseRentalValue(item.rental)
+      if (price != null && (price < lo || price > hi)) return false
+
       if (!q) return true
       return (
         item.name.toLocaleLowerCase('pt-BR').includes(q) ||
         item.type.toLocaleLowerCase('pt-BR').includes(q) ||
-        item.attributes.toLocaleLowerCase('pt-BR').includes(q)
+        item.attributes.toLocaleLowerCase('pt-BR').includes(q) ||
+        item.rental.toLocaleLowerCase('pt-BR').includes(q)
       )
     })
-  }, [products, termo, onlyAvailable, onlyUnavailable])
+  }, [
+    products,
+    termo,
+    onlyAvailable,
+    onlyUnavailable,
+    periodActive,
+    rangeStart,
+    rangeEnd,
+    lo,
+    hi,
+  ])
 
-  const lo = Math.min(priceMin, priceMax)
-  const hi = Math.max(priceMin, priceMax)
-  const span = 500
-  const leftPct = (lo / span) * 100
-  const rightPct = (hi / span) * 100
   const periodLabel = periodActive
     ? `${formatBr(rangeStart)} - ${formatBr(rangeEnd)}`
     : 'Selecione um intervalo...'
@@ -537,13 +732,17 @@ function ProductsConsulta() {
                 type="button"
                 className={`products__period-btn${periodOpen ? ' is-open' : ''}${periodActive ? ' has-value' : ''}`}
                 aria-expanded={periodOpen}
+                aria-haspopup="dialog"
                 onClick={() => setPeriodOpen((open) => !open)}
               >
                 <Calendar size={15} strokeWidth={2} className="products__period-icon" />
                 <span className="products__period-text">{periodLabel}</span>
               </button>
               {periodOpen ? (
-                <div className="products__period-popover">
+                <div
+                  className="products__period-popover"
+                  onMouseDown={(event) => event.stopPropagation()}
+                >
                   <DateRangePicker
                     start={rangeStart}
                     end={rangeEnd}
@@ -564,53 +763,14 @@ function ProductsConsulta() {
 
           <div className="products__consulta-field">
             <span>Faixa de preço</span>
-            <div className="products__dual-range">
-              <div className="products__dual-range-track" aria-hidden="true">
-                <span className="products__dual-range-rail" />
-                <span
-                  className="products__dual-range-fill"
-                  style={{ left: `${leftPct}%`, width: `${Math.max(0, rightPct - leftPct)}%` }}
-                />
-              </div>
-              <input
-                type="range"
-                className="products__dual-range-input is-min"
-                min={0}
-                max={500}
-                step={1}
-                value={lo}
-                aria-label="Preço mínimo"
-                onChange={(event) => {
-                  const next = Number(event.target.value)
-                  if (next <= hi) setPriceMin(next)
-                  else {
-                    setPriceMin(hi)
-                    setPriceMax(next)
-                  }
-                }}
-              />
-              <input
-                type="range"
-                className="products__dual-range-input is-max"
-                min={0}
-                max={500}
-                step={1}
-                value={hi}
-                aria-label="Preço máximo"
-                onChange={(event) => {
-                  const next = Number(event.target.value)
-                  if (next >= lo) setPriceMax(next)
-                  else {
-                    setPriceMax(lo)
-                    setPriceMin(next)
-                  }
-                }}
-              />
-              <div className="products__dual-range-values">
-                <span style={{ left: `${leftPct}%` }}>{lo}</span>
-                <span style={{ left: `${rightPct}%` }}>{hi}</span>
-              </div>
-            </div>
+            <DualPriceRange
+              valueMin={priceMin}
+              valueMax={priceMax}
+              onChange={(nextMin, nextMax) => {
+                setPriceMin(nextMin)
+                setPriceMax(nextMax)
+              }}
+            />
           </div>
 
           <div className="products__consulta-field">
