@@ -138,6 +138,47 @@ function nextSequentialCode(existing: Product[]) {
   return String(max + 1).padStart(6, '0')
 }
 
+/** Extracts the type prefix from a label like "03 - Sapato". */
+export function extractProductTypePrefix(typeLabel: string): string {
+  const match = String(typeLabel || '')
+    .trim()
+    .match(/^(\d+)\s*-/)
+  if (!match) return ''
+  return match[1].padStart(2, '0')
+}
+
+/**
+ * Next código completo for a product type: type prefix + sequential ID
+ * (e.g. prefix "03", sequence "0001" → fullCode "030001").
+ */
+export function nextFullCodeForType(typeLabel: string): {
+  prefix: string
+  sequence: string
+  fullCode: string
+} {
+  const prefix = extractProductTypePrefix(typeLabel)
+  if (!prefix) {
+    return { prefix: '', sequence: '', fullCode: '' }
+  }
+
+  const existing = listProducts()
+  let maxSeq = 0
+  for (const item of existing) {
+    const compact = item.fullCode.replace(/\s+/g, '')
+    const match = compact.match(new RegExp(`^${prefix}[-|]?(\\d+)$`, 'i'))
+    if (!match) continue
+    const n = Number(match[1])
+    if (Number.isFinite(n) && n > maxSeq) maxSeq = n
+  }
+
+  const sequence = String(maxSeq + 1).padStart(4, '0')
+  return {
+    prefix,
+    sequence,
+    fullCode: `${prefix}${sequence}`,
+  }
+}
+
 function normalizeProduct(raw: Partial<Product> & { id?: string }): Product | null {
   if (!raw || typeof raw.id !== 'string' || !raw.id) return null
   const createdAt =
@@ -280,10 +321,11 @@ export function addProduct(input: ProductInput): Product {
   const now = new Date().toISOString()
   const who = actorName()
   const fields = fromInput(input)
+  const autoFromType = nextFullCodeForType(fields.type).fullCode
   const item: Product = {
     id: crypto.randomUUID(),
     ...fields,
-    fullCode: fields.fullCode || nextSequentialCode(existing),
+    fullCode: fields.fullCode || autoFromType || nextSequentialCode(existing),
     createdAt: now,
     updatedAt: now,
     createdBy: who,

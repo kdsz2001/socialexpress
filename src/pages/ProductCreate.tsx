@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { ArrowLeft, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { CreatableSelect } from '../components/products/CreatableSelect'
@@ -6,12 +6,17 @@ import {
   ProductPhotoField,
   ProductSwitch,
 } from '../components/products/ProductFormControls'
+import { ProductTypeModal } from '../components/products/ProductTypeModal'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
 import { formatMoneyBrPrefix, maskMoneyBr } from '../lib/moneyMask'
-import { addProduct } from '../lib/productsStore'
-import { addProductType, formatProductTypeLabel } from '../lib/productTypesStore'
+import { addProduct, nextFullCodeForType } from '../lib/productsStore'
+import {
+  addProductType,
+  formatProductTypeLabel,
+  nextProductTypeCode,
+} from '../lib/productTypesStore'
 import './ProductCreate.css'
 
 export function ProductCreate() {
@@ -25,8 +30,8 @@ export function ProductCreate() {
   const events = useProductAttributes('evento')
 
   const [productType, setProductType] = useState('')
-  const [fullCode, setFullCode] = useState('')
   const [customId, setCustomId] = useState(false)
+  const [customSequence, setCustomSequence] = useState('')
   const [storeCode, setStoreCode] = useState('')
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('1')
@@ -53,6 +58,9 @@ export function ProductCreate() {
   const [productState, setProductState] = useState('')
   const [statusAtivo, setStatusAtivo] = useState(true)
   const [touched, setTouched] = useState(false)
+  const [typeModalOpen, setTypeModalOpen] = useState(false)
+  const [typeModalName, setTypeModalName] = useState('')
+  const [typeModalDescription, setTypeModalDescription] = useState('')
 
   const missingType = !productType
   const missingName = !name.trim()
@@ -66,12 +74,42 @@ export function ProductCreate() {
   const stylistOptions = useMemo(() => stylists.map((item) => item.name), [stylists])
   const eventOptions = useMemo(() => events.map((item) => item.name), [events])
 
+  const autoCode = useMemo(() => nextFullCodeForType(productType), [productType, types])
+  const codePrefix = autoCode.prefix
+  const codeSequence = customId ? customSequence : autoCode.sequence
+  const resolvedFullCode =
+    codePrefix && codeSequence ? `${codePrefix}${codeSequence.replace(/\D/g, '')}` : ''
+
+  useEffect(() => {
+    if (!customId) return
+    setCustomSequence(autoCode.sequence)
+  }, [productType, customId, autoCode.sequence])
+
   const attributeSummary = useMemo(() => {
     return [color, size, model, brand, stylist, eventType].filter(Boolean).join(', ')
   }, [color, size, model, brand, stylist, eventType])
 
   const createAttr = (kind: ProductAttributeKind, value: string) => {
     addProductAttribute(kind, value)
+  }
+
+  const openTypeModal = (draftName: string) => {
+    setTypeModalName(draftName)
+    setTypeModalDescription('')
+    setTypeModalOpen(true)
+  }
+
+  const saveTypeModal = () => {
+    if (!typeModalName.trim()) return
+    const created = addProductType(typeModalName, typeModalDescription)
+    setProductType(formatProductTypeLabel(created))
+    setCustomId(false)
+    setTypeModalOpen(false)
+  }
+
+  const onProductTypeChange = (value: string) => {
+    setProductType(value)
+    setCustomId(false)
   }
 
   const onSubmit = (event: FormEvent) => {
@@ -85,7 +123,7 @@ export function ProductCreate() {
       rental: formatMoneyBrPrefix(rental),
       attributes: attributeSummary,
       status: statusAtivo ? 'ativo' : 'inativo',
-      fullCode: customId ? fullCode : undefined,
+      fullCode: resolvedFullCode || undefined,
       storeCode,
       quantity,
       color,
@@ -111,6 +149,8 @@ export function ProductCreate() {
     })
     navigate('/produtos')
   }
+
+  const nextTypeCode = nextProductTypeCode()
 
   return (
     <div className="product-create">
@@ -141,25 +181,54 @@ export function ProductCreate() {
               placeholder="Selecione um tipo de produto"
               createLabel="Cadastrar novo tipo de produto"
               invalid={touched && missingType}
-              onChange={setProductType}
-              onCreate={(value) => addProductType(value)}
+              selectOnCreate={false}
+              onChange={onProductTypeChange}
+              onCreate={openTypeModal}
             />
           </Field>
 
           <Field label="Código completo">
-            <input
-              type="text"
-              value={fullCode}
-              disabled={!customId}
-              onChange={(event) => setFullCode(event.target.value)}
-            />
-            <button
-              type="button"
-              className="product-create__link"
-              onClick={() => setCustomId(true)}
-            >
-              Clique aqui se você quiser escolher um ID específico para o produto.
-            </button>
+            <div className={`product-create__code${customId ? ' is-custom' : ''}`}>
+              <span className="product-create__code-prefix" aria-label="Prefixo do tipo">
+                {codePrefix || '—'}
+              </span>
+              {customId ? (
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="product-create__code-seq"
+                  value={customSequence}
+                  onChange={(event) =>
+                    setCustomSequence(event.target.value.replace(/\D/g, '').slice(0, 8))
+                  }
+                  aria-label="ID do produto"
+                />
+              ) : (
+                <span className="product-create__code-seq" aria-label="ID do produto">
+                  {codeSequence || '—'}
+                </span>
+              )}
+            </div>
+            {!customId ? (
+              <button
+                type="button"
+                className="product-create__link"
+                onClick={() => {
+                  setCustomSequence(autoCode.sequence || '0001')
+                  setCustomId(true)
+                }}
+              >
+                Clique aqui se você quiser escolher um ID específico para o produto.
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="product-create__link"
+                onClick={() => setCustomId(false)}
+              >
+                Usar ID gerado automaticamente.
+              </button>
+            )}
           </Field>
 
           <Field label="Código loja">
@@ -304,9 +373,9 @@ export function ProductCreate() {
           <Field label="Foto do produto">
             <ProductPhotoField
               photoDataUrl={photoDataUrl}
-              onChange={({ dataUrl, name }) => {
+              onChange={({ dataUrl, name: fileName }) => {
                 setPhotoDataUrl(dataUrl)
-                setPhotoName(name || null)
+                setPhotoName(fileName || null)
               }}
             />
           </Field>
@@ -371,6 +440,24 @@ export function ProductCreate() {
           </button>
         </footer>
       </form>
+
+      {typeModalOpen ? (
+        <ProductTypeModal
+          title="Novo tipo de produto"
+          tip={
+            <>
+              O código deste novo tipo será <strong>{nextTypeCode}</strong>.
+            </>
+          }
+          name={typeModalName}
+          description={typeModalDescription}
+          saveLabel="Cadastrar"
+          onNameChange={setTypeModalName}
+          onDescriptionChange={setTypeModalDescription}
+          onClose={() => setTypeModalOpen(false)}
+          onSave={saveTypeModal}
+        />
+      ) : null}
     </div>
   )
 }

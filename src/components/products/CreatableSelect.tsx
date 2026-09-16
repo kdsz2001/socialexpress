@@ -8,6 +8,8 @@ type CreatableSelectProps = {
   placeholder: string
   createLabel: string
   invalid?: boolean
+  /** When false, only calls onCreate (e.g. open a modal) without selecting the raw name. Default true. */
+  selectOnCreate?: boolean
   onChange: (value: string) => void
   onCreate: (name: string) => void
 }
@@ -18,6 +20,7 @@ export function CreatableSelect({
   placeholder,
   createLabel,
   invalid,
+  selectOnCreate = true,
   onChange,
   onCreate,
 }: CreatableSelectProps) {
@@ -90,8 +93,9 @@ export function CreatableSelect({
               onKeyDown={(event) => {
                 if (event.key === 'Enter' && canCreate) {
                   event.preventDefault()
-                  onCreate(query.trim())
-                  onChange(query.trim())
+                  const name = query.trim()
+                  onCreate(name)
+                  if (selectOnCreate) onChange(name)
                   setOpen(false)
                 }
               }}
@@ -120,7 +124,7 @@ export function CreatableSelect({
                   onClick={() => {
                     const name = query.trim()
                     onCreate(name)
-                    onChange(name)
+                    if (selectOnCreate) onChange(name)
                     setOpen(false)
                   }}
                 >

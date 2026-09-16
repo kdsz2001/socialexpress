@@ -6,6 +6,7 @@ import {
   ProductPhotoField,
   ProductSwitch,
 } from '../components/products/ProductFormControls'
+import { ProductTypeModal } from '../components/products/ProductTypeModal'
 import { SaveToast } from '../components/ui/SaveToast'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
@@ -18,7 +19,11 @@ import {
   updateProduct,
   type Product,
 } from '../lib/productsStore'
-import { addProductType, formatProductTypeLabel } from '../lib/productTypesStore'
+import {
+  addProductType,
+  formatProductTypeLabel,
+  nextProductTypeCode,
+} from '../lib/productTypesStore'
 import './ProductCreate.css'
 
 const SAVED_TOAST_KEY = 'social-express:product-saved-toast'
@@ -100,6 +105,9 @@ export function ProductEdit() {
   const [statusAtivo, setStatusAtivo] = useState(true)
   const [touched, setTouched] = useState(false)
   const [toastOpen, setToastOpen] = useState(false)
+  const [typeModalOpen, setTypeModalOpen] = useState(false)
+  const [typeModalName, setTypeModalName] = useState('')
+  const [typeModalDescription, setTypeModalDescription] = useState('')
   const closeToast = useCallback(() => setToastOpen(false), [])
 
   useEffect(() => {
@@ -161,6 +169,19 @@ export function ProductEdit() {
 
   const createAttr = (kind: ProductAttributeKind, value: string) => {
     addProductAttribute(kind, value)
+  }
+
+  const openTypeModal = (draftName: string) => {
+    setTypeModalName(draftName)
+    setTypeModalDescription('')
+    setTypeModalOpen(true)
+  }
+
+  const saveTypeModal = () => {
+    if (!typeModalName.trim()) return
+    const created = addProductType(typeModalName, typeModalDescription)
+    setProductType(formatProductTypeLabel(created))
+    setTypeModalOpen(false)
   }
 
   if (!product) {
@@ -274,8 +295,9 @@ export function ProductEdit() {
               placeholder="Selecione um tipo de produto"
               createLabel="Cadastrar novo tipo de produto"
               invalid={touched && missingType}
+              selectOnCreate={false}
               onChange={setProductType}
-              onCreate={(value) => addProductType(value)}
+              onCreate={openTypeModal}
             />
           </Field>
 
@@ -489,6 +511,24 @@ export function ProductEdit() {
           </button>
         </footer>
       </form>
+
+      {typeModalOpen ? (
+        <ProductTypeModal
+          title="Novo tipo de produto"
+          tip={
+            <>
+              O código deste novo tipo será <strong>{nextProductTypeCode()}</strong>.
+            </>
+          }
+          name={typeModalName}
+          description={typeModalDescription}
+          saveLabel="Cadastrar"
+          onNameChange={setTypeModalName}
+          onDescriptionChange={setTypeModalDescription}
+          onClose={() => setTypeModalOpen(false)}
+          onSave={saveTypeModal}
+        />
+      ) : null}
     </div>
   )
 }

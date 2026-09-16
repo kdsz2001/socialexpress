@@ -1317,6 +1317,11 @@ html[data-theme='dark'] .products-modal__tip {
   color: #fff;
 }
 
+.products-modal__save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .products-modal__save:hover {
   background: #187de4;
 }
