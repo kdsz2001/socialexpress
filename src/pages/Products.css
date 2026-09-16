@@ -958,7 +958,7 @@ html[data-theme='dark'] .products__radio input:checked + .products__radio-mark {
   --pm-pad-y: 8.45px;
   --pm-pad-x: 13px;
   --pm-label: #3f4254;
-  --pm-border: #e4e6ef;
+  --pm-border: #d7d9de;
   --pm-soft: #f3f6f9;
   --pm-back: #eaeff5;
   --pm-back-text: #7e8299;
