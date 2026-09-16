@@ -107,7 +107,7 @@ export function ImportProductsModal({ open, onClose }: ImportProductsModalProps)
               <span
                 className={`import-modal__file-name${sheetName ? ' has-file' : ''}`}
               >
-                {sheetName ?? 'Anexe arquivo XLSX'}
+                {sheetName ?? 'Anexar arquivo XLSX'}
               </span>
               <span className="import-modal__file-browse">Browse</span>
               <input
@@ -135,7 +135,7 @@ export function ImportProductsModal({ open, onClose }: ImportProductsModalProps)
               <span
                 className={`import-modal__file-name${zipName ? ' has-file' : ''}`}
               >
-                {zipName ?? 'Anexe arquivo ZIP'}
+                {zipName ?? 'Anexar arquivo ZIP'}
               </span>
               <span className="import-modal__file-browse">Browse</span>
               <input
