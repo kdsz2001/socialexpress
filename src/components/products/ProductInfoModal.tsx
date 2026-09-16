@@ -43,7 +43,7 @@ export function ProductInfoModal({
       />
       <div className="p-info__dialog" role="dialog" aria-modal="true" aria-label={title}>
         <div className="p-info__icon" aria-hidden="true">
-          i
+          <span>i</span>
         </div>
         <h2 className="p-info__title">{title}</h2>
         <div className="p-info__body">{children}</div>
