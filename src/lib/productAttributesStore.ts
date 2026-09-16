@@ -156,16 +156,106 @@ const DEFAULT_COLORS = [
   'Vinho',
 ]
 
+/** Tamanhos padrão do Clarial (conta iarak). */
+const DEFAULT_SIZES = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '10',
+  '12',
+  '14',
+  '16',
+  '18',
+  '20',
+  '21',
+  '22',
+  '23',
+  '24',
+  '25',
+  '26',
+  '27',
+  '28',
+  '29',
+  '30',
+  '31',
+  '32',
+  '33',
+  '34',
+  '35',
+  '36',
+  '37',
+  '38',
+  '39',
+  '40',
+  '41',
+  '42',
+  '43',
+  '44',
+  '45',
+  '46',
+  '48',
+  '50',
+  '52',
+  '54',
+  '56',
+  '58',
+  '60',
+  '62',
+  '64',
+  '66',
+  '68',
+  '70',
+  '72',
+  '74',
+  '100',
+  '222',
+  '65 cm',
+  'PP',
+  'P',
+  'M',
+  'G',
+  'GG',
+  'XG',
+  'S',
+  'XL',
+  'XXL',
+  'Único',
+]
+
 let cache: ProductAttribute[] | null = null
+
+function makeSeeded(
+  kind: ProductAttributeKind,
+  names: string[],
+  idPrefix: string,
+  baseTime: number,
+): ProductAttribute[] {
+  return names.map((name, index) => ({
+    id: `${idPrefix}-${index + 1}`,
+    kind,
+    name,
+    createdAt: new Date(baseTime - index * 1000).toISOString(),
+  }))
+}
 
 function seedDefaults(): ProductAttribute[] {
   const now = Date.now()
-  return DEFAULT_COLORS.map((name, index) => ({
-    id: `attr-cor-${index + 1}`,
-    kind: 'cor' as const,
-    name,
-    createdAt: new Date(now - index * 1000).toISOString(),
-  }))
+  return [
+    ...makeSeeded('cor', DEFAULT_COLORS, 'attr-cor', now),
+    ...makeSeeded('tamanho', DEFAULT_SIZES, 'attr-tamanho', now - 100_000),
+  ]
+}
+
+/** Garante tamanhos padrão mesmo em bases antigas que só tinham cores. */
+function ensureDefaultSizes(items: ProductAttribute[]): ProductAttribute[] {
+  if (items.some((item) => item.kind === 'tamanho')) return items
+  const now = Date.now()
+  return [...items, ...makeSeeded('tamanho', DEFAULT_SIZES, 'attr-tamanho', now)]
 }
 
 function readAll(): ProductAttribute[] {
@@ -177,7 +267,16 @@ function readAll(): ProductAttribute[] {
       return seeded
     }
     const parsed = JSON.parse(raw) as ProductAttribute[]
-    return Array.isArray(parsed) ? parsed : seedDefaults()
+    if (!Array.isArray(parsed)) {
+      const seeded = seedDefaults()
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
+      return seeded
+    }
+    const withSizes = ensureDefaultSizes(parsed)
+    if (withSizes !== parsed) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(withSizes))
+    }
+    return withSizes
   } catch {
     return seedDefaults()
   }

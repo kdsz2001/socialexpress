@@ -156,18 +156,21 @@
   color: #3699ff;
   border-radius: 0;
   outline: none;
-  box-shadow: -6px 0 0 var(--info-soft-bg), 6px 0 0 var(--info-soft-bg);
+  box-shadow: none;
+  /* overlap de 1px elimina hairline subpixel entre células */
+  margin-left: -1px;
+  width: calc(100% + 1px);
   z-index: 0;
 }
 
 .daterange__day.is-in-range:nth-child(7n + 1) {
   border-radius: 0.35rem 0 0 0.35rem;
-  box-shadow: 6px 0 0 var(--info-soft-bg);
+  margin-left: 0;
+  width: 100%;
 }
 
 .daterange__day.is-in-range:nth-child(7n) {
   border-radius: 0 0.35rem 0.35rem 0;
-  box-shadow: -6px 0 0 var(--info-soft-bg);
 }
 
 html[data-theme='dark'] .daterange {
@@ -176,20 +179,12 @@ html[data-theme='dark'] .daterange {
 }
 
 html[data-theme='dark'] .daterange__day.is-in-range {
-  background: rgba(54, 153, 255, 0.22);
-  box-shadow: -6px 0 0 rgba(54, 153, 255, 0.22), 6px 0 0 rgba(54, 153, 255, 0.22);
-}
-
-html[data-theme='dark'] .daterange__day.is-in-range:nth-child(7n + 1) {
-  box-shadow: 6px 0 0 rgba(54, 153, 255, 0.22);
-}
-
-html[data-theme='dark'] .daterange__day.is-in-range:nth-child(7n) {
-  box-shadow: -6px 0 0 rgba(54, 153, 255, 0.22);
+  background: #1b2a3f;
+  box-shadow: none;
 }
 
 html[data-theme='dark'] .daterange__day.is-selected {
-  background: rgba(54, 153, 255, 0.32);
+  background: #243752;
 }
 
 html[data-theme='dark'] .daterange__preset.is-active {
@@ -203,6 +198,9 @@ html[data-theme='dark'] .daterange__preset.is-active {
   border-radius: 0.35rem;
   z-index: 1;
   outline: none;
+  box-shadow: none;
+  margin-left: 0;
+  width: 100%;
 }
 
 .daterange__footer {

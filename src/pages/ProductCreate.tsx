@@ -179,7 +179,7 @@ export function ProductCreate() {
             <CreatableSelect
               value={size}
               options={sizeOptions}
-              placeholder="Selecione uma tamanho"
+              placeholder="Selecione um tamanho"
               createLabel="Cadastrar novo tamanho"
               onChange={setSize}
               onCreate={(value) => createAttr('tamanho', value)}

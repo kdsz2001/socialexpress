@@ -98,6 +98,15 @@ function ProductsList() {
   const [status, setStatus] = useState<ProductStatus>('ativo')
   const [touched, setTouched] = useState(false)
 
+  useEffect(() => {
+    if (!modalOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [modalOpen])
+
   const typeOptions = useMemo(() => {
     const fromTypes = types.map((item) => formatProductTypeLabel(item))
     const fromProducts = products.map((item) => item.type).filter(Boolean)
@@ -1503,6 +1512,14 @@ function NameModal({
   onClose: () => void
   onSave: () => void
 }) {
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
   return (
     <div className="products-modal" role="presentation" onMouseDown={onClose}>
       <div
@@ -1564,6 +1581,14 @@ function TypeModal({
   onClose: () => void
   onSave: () => void
 }) {
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
   return (
     <div className="products-modal" role="presentation" onMouseDown={onClose}>
       <div
