@@ -226,8 +226,8 @@ html[data-theme='dark'] .product-create__code {
 }
 
 .product-create__code-prefix {
-  flex: 0 0 72px;
-  width: 72px;
+  flex: 0 0 64px;
+  width: 64px;
   border-right: 1px solid #e4e6ef;
   background: #f3f6f9;
 }

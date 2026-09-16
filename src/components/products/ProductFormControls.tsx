@@ -48,14 +48,16 @@ export function ProductPhotoField({
       >
         <SquarePen size={13} strokeWidth={2} />
       </button>
-      <button
-        type="button"
-        className="product-photo__btn product-photo__btn--remove"
-        aria-label="Remover foto"
-        onClick={() => onChange({ dataUrl: '', name: '' })}
-      >
-        <X size={13} strokeWidth={2.25} />
-      </button>
+      {photoDataUrl ? (
+        <button
+          type="button"
+          className="product-photo__btn product-photo__btn--remove"
+          aria-label="Remover foto"
+          onClick={() => onChange({ dataUrl: '', name: '' })}
+        >
+          <X size={13} strokeWidth={2.25} />
+        </button>
+      ) : null}
       <input
         ref={inputRef}
         type="file"

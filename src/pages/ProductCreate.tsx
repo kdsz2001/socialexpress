@@ -190,7 +190,7 @@ export function ProductCreate() {
           <Field label="Código completo">
             <div className={`product-create__code${customId ? ' is-custom' : ''}`}>
               <span className="product-create__code-prefix" aria-label="Prefixo do tipo">
-                {codePrefix || '-'}
+                {codePrefix}
               </span>
               {customId ? (
                 <input
@@ -205,7 +205,7 @@ export function ProductCreate() {
                 />
               ) : (
                 <span className="product-create__code-seq" aria-label="ID do produto">
-                  {codeSequence || '-'}
+                  {codeSequence}
                 </span>
               )}
             </div>
