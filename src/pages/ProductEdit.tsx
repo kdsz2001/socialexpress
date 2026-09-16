@@ -2,6 +2,10 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNo
 import { ArrowLeft, Check } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CreatableSelect } from '../components/products/CreatableSelect'
+import {
+  ProductPhotoField,
+  ProductSwitch,
+} from '../components/products/ProductFormControls'
 import { SaveToast } from '../components/ui/SaveToast'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
@@ -44,12 +48,13 @@ function hydrateForm(product: Product) {
     cfopInter: product.cfopInter,
     commission: product.commission,
     photoName: product.photoName || null,
+    photoDataUrl: product.photoDataUrl || '',
     description: product.description,
-    consigned: product.consigned,
+    consigned: product.consigned === 'Sim',
     consignedCommission: product.consignedCommission,
     serviceFee: stripMoneyPrefix(product.serviceFee),
     productState: product.productState,
-    status: product.status,
+    statusAtivo: product.status !== 'inativo',
   }
 }
 
@@ -84,12 +89,13 @@ export function ProductEdit() {
   const [cfopInter, setCfopInter] = useState('')
   const [commission, setCommission] = useState('')
   const [photoName, setPhotoName] = useState<string | null>(null)
+  const [photoDataUrl, setPhotoDataUrl] = useState('')
   const [description, setDescription] = useState('')
-  const [consigned, setConsigned] = useState('')
+  const [consigned, setConsigned] = useState(false)
   const [consignedCommission, setConsignedCommission] = useState('')
   const [serviceFee, setServiceFee] = useState('')
   const [productState, setProductState] = useState('')
-  const [status, setStatus] = useState<'ativo' | 'inativo'>('ativo')
+  const [statusAtivo, setStatusAtivo] = useState(true)
   const [touched, setTouched] = useState(false)
   const [toastOpen, setToastOpen] = useState(false)
   const closeToast = useCallback(() => setToastOpen(false), [])
@@ -118,12 +124,13 @@ export function ProductEdit() {
     setCfopInter(form.cfopInter)
     setCommission(form.commission)
     setPhotoName(form.photoName)
+    setPhotoDataUrl(form.photoDataUrl)
     setDescription(form.description)
     setConsigned(form.consigned)
     setConsignedCommission(form.consignedCommission)
     setServiceFee(form.serviceFee)
     setProductState(form.productState)
-    setStatus(form.status)
+    setStatusAtivo(form.statusAtivo)
     setTouched(false)
   }, [productId])
 
@@ -180,7 +187,7 @@ export function ProductEdit() {
       type: productType,
       rental: formatMoneyBrPrefix(rental),
       attributes: buildAttributeSummary({ color, size, model, brand, stylist, eventType }),
-      status,
+      status: statusAtivo ? 'ativo' : 'inativo',
       storeCode,
       quantity,
       color,
@@ -197,11 +204,12 @@ export function ProductEdit() {
       cfopInter,
       commission,
       description,
-      consigned,
+      consigned: consigned ? 'Sim' : 'Não',
       consignedCommission,
       serviceFee: formatMoneyBrPrefix(serviceFee),
       productState,
       photoName: photoName ?? '',
+      photoDataUrl,
     })
     if (updated) {
       setProduct(updated)
@@ -394,23 +402,13 @@ export function ProductEdit() {
           </Field>
 
           <Field label="Foto do produto">
-            <label className="product-create__file">
-              <span className={photoName ? 'has-file' : undefined}>
-                {photoName ?? 'Escolher arquivo'}
-              </span>
-              <em>Browse</em>
-              <input
-                type="file"
-                accept=".jpg,.jpeg,image/jpeg"
-                onChange={(event) => {
-                  const file = event.target.files?.[0]
-                  setPhotoName(file ? file.name : null)
-                }}
-              />
-            </label>
-            <p className="product-create__help">
-              Somente arquivos até 5MB e no formato JPG ou JPEG são aceitos.
-            </p>
+            <ProductPhotoField
+              photoDataUrl={photoDataUrl}
+              onChange={({ dataUrl, name }) => {
+                setPhotoDataUrl(dataUrl)
+                setPhotoName(name || null)
+              }}
+            />
           </Field>
 
           <Field label="Descrição">
@@ -422,21 +420,23 @@ export function ProductEdit() {
           </Field>
 
           <Field label="Status">
-            <select
-              value={status}
-              onChange={(event) => setStatus(event.target.value as 'ativo' | 'inativo')}
-            >
-              <option value="ativo">Ativo</option>
-              <option value="inativo">Inativo</option>
-            </select>
+            <ProductSwitch
+              on={statusAtivo}
+              onLabel="Ativo"
+              offLabel="Inativo"
+              ariaLabel="Status do produto"
+              onToggle={() => setStatusAtivo((value) => !value)}
+            />
           </Field>
 
-          <Field label="Consignado">
-            <select value={consigned} onChange={(event) => setConsigned(event.target.value)}>
-              <option value="">Selecione</option>
-              <option value="Não">Não</option>
-              <option value="Sim">Sim</option>
-            </select>
+          <Field label="É um produto consignado?">
+            <ProductSwitch
+              on={consigned}
+              onLabel="Sim"
+              offLabel="Não"
+              ariaLabel="Produto consignado"
+              onToggle={() => setConsigned((value) => !value)}
+            />
           </Field>
 
           <Field label="Comissão do consignado">

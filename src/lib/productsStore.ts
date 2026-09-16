@@ -41,6 +41,7 @@ export type Product = {
   serviceFee: string
   productState: string
   photoName: string
+  photoDataUrl: string
 }
 
 export type ProductInput = {
@@ -71,6 +72,7 @@ export type ProductInput = {
   serviceFee?: string
   productState?: string
   photoName?: string
+  photoDataUrl?: string
 }
 
 const STORAGE_KEY = 'social-express:products'
@@ -182,6 +184,7 @@ function normalizeProduct(raw: Partial<Product> & { id?: string }): Product | nu
     serviceFee: String(raw.serviceFee || '').trim(),
     productState: String(raw.productState || '').trim(),
     photoName: String(raw.photoName || '').trim(),
+    photoDataUrl: String(raw.photoDataUrl || '').trim(),
   }
 }
 
@@ -263,6 +266,7 @@ function fromInput(input: ProductInput, base?: Product): Omit<Product, 'id' | 'c
     serviceFee: String(input.serviceFee ?? base?.serviceFee ?? '').trim(),
     productState: String(input.productState ?? base?.productState ?? '').trim(),
     photoName: String(input.photoName ?? base?.photoName ?? '').trim(),
+    photoDataUrl: String(input.photoDataUrl ?? base?.photoDataUrl ?? '').trim(),
   }
 }
 

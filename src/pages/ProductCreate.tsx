@@ -2,6 +2,10 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { ArrowLeft, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { CreatableSelect } from '../components/products/CreatableSelect'
+import {
+  ProductPhotoField,
+  ProductSwitch,
+} from '../components/products/ProductFormControls'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
@@ -41,11 +45,13 @@ export function ProductCreate() {
   const [cfopInter, setCfopInter] = useState('')
   const [commission, setCommission] = useState('')
   const [photoName, setPhotoName] = useState<string | null>(null)
+  const [photoDataUrl, setPhotoDataUrl] = useState('')
   const [description, setDescription] = useState('')
-  const [consigned, setConsigned] = useState('')
+  const [consigned, setConsigned] = useState(false)
   const [consignedCommission, setConsignedCommission] = useState('')
   const [serviceFee, setServiceFee] = useState('')
   const [productState, setProductState] = useState('')
+  const [statusAtivo, setStatusAtivo] = useState(true)
   const [touched, setTouched] = useState(false)
 
   const missingType = !productType
@@ -78,7 +84,7 @@ export function ProductCreate() {
       type: productType,
       rental: formatMoneyBrPrefix(rental),
       attributes: attributeSummary,
-      status: 'ativo',
+      status: statusAtivo ? 'ativo' : 'inativo',
       fullCode: customId ? fullCode : undefined,
       storeCode,
       quantity,
@@ -96,11 +102,12 @@ export function ProductCreate() {
       cfopInter,
       commission,
       description,
-      consigned,
+      consigned: consigned ? 'Sim' : 'Não',
       consignedCommission,
       serviceFee: formatMoneyBrPrefix(serviceFee),
       productState,
       photoName: photoName ?? '',
+      photoDataUrl,
     })
     navigate('/produtos')
   }
@@ -295,23 +302,13 @@ export function ProductCreate() {
           </Field>
 
           <Field label="Foto do produto">
-            <label className="product-create__file">
-              <span className={photoName ? 'has-file' : undefined}>
-                {photoName ?? 'Escolher arquivo'}
-              </span>
-              <em>Browse</em>
-              <input
-                type="file"
-                accept=".jpg,.jpeg,image/jpeg"
-                onChange={(event) => {
-                  const file = event.target.files?.[0]
-                  setPhotoName(file ? file.name : null)
-                }}
-              />
-            </label>
-            <p className="product-create__help">
-              Somente arquivos até 5MB e no formato JPG ou JPEG são aceitos.
-            </p>
+            <ProductPhotoField
+              photoDataUrl={photoDataUrl}
+              onChange={({ dataUrl, name }) => {
+                setPhotoDataUrl(dataUrl)
+                setPhotoName(name || null)
+              }}
+            />
           </Field>
 
           <Field label="Descrição">
@@ -322,12 +319,24 @@ export function ProductCreate() {
             />
           </Field>
 
-          <Field label="Consignado">
-            <select value={consigned} onChange={(event) => setConsigned(event.target.value)}>
-              <option value="">Selecione</option>
-              <option value="Não">Não</option>
-              <option value="Sim">Sim</option>
-            </select>
+          <Field label="Status">
+            <ProductSwitch
+              on={statusAtivo}
+              onLabel="Ativo"
+              offLabel="Inativo"
+              ariaLabel="Status do produto"
+              onToggle={() => setStatusAtivo((value) => !value)}
+            />
+          </Field>
+
+          <Field label="É um produto consignado?">
+            <ProductSwitch
+              on={consigned}
+              onLabel="Sim"
+              offLabel="Não"
+              ariaLabel="Produto consignado"
+              onToggle={() => setConsigned((value) => !value)}
+            />
           </Field>
 
           <Field label="Comissão do consignado">
