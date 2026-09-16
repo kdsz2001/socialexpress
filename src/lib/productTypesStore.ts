@@ -1,3 +1,5 @@
+import { listProducts } from './productsStore'
+
 export type ProductType = {
   id: string
   code: number
@@ -122,6 +124,25 @@ export function updateProductType(
 
 export function deleteProductType(id: string) {
   writeAll(readAll().filter((item) => item.id !== id))
+}
+
+/** How many products use this type (by label, name, or code prefix). */
+export function countProductsUsingType(type: ProductType): number {
+  const label = formatProductTypeLabel(type)
+  const code = formatProductTypeCode(type.code)
+  const name = type.name.trim().toLocaleLowerCase('pt-BR')
+  return listProducts().filter((item) => {
+    const t = item.type.trim()
+    if (!t) return false
+    if (t === label) return true
+    const display = t.replace(/^\d+\s*-\s*/, '').trim().toLocaleLowerCase('pt-BR')
+    if (display === name) return true
+    const prefix = t.match(/^(\d+)\s*-/)?.[1]
+    if (prefix && prefix.padStart(2, '0') === code) return true
+    const full = item.fullCode.replace(/\s+/g, '')
+    if (full.startsWith(code) && /^\d+$/.test(full)) return true
+    return false
+  }).length
 }
 
 export function subscribeProductTypes(onChange: () => void) {

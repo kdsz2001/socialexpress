@@ -41,6 +41,7 @@ import {
 } from '../lib/productsStore'
 import {
   addProductType,
+  countProductsUsingType,
   deleteProductType,
   formatProductTypeCode,
   formatProductTypeLabel,
@@ -1110,6 +1111,7 @@ function ProductsTipos() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [toast, setToast] = useState<string | null>(null)
+  const [toastVariant, setToastVariant] = useState<'success' | 'danger'>('success')
 
   const sorted = useMemo(
     () =>
@@ -1134,6 +1136,11 @@ function ProductsTipos() {
 
   const nextCode = nextProductTypeCode()
 
+  const showToast = (message: string, variant: 'success' | 'danger' = 'success') => {
+    setToastVariant(variant)
+    setToast(message)
+  }
+
   const openCreate = () => {
     setEditing(null)
     setName('')
@@ -1145,17 +1152,22 @@ function ProductsTipos() {
     if (!name.trim()) return
     if (editing) {
       updateProductType(editing.id, name, description)
-      setToast('Tipo atualizado.')
+      showToast('Tipo atualizado.')
     } else {
       addProductType(name, description)
-      setToast('Novo Tipo cadastrado.')
+      showToast('Novo Tipo cadastrado.')
     }
     setModalOpen(false)
   }
 
   return (
     <div className="products">
-      <SaveToast open={Boolean(toast)} message={toast ?? undefined} onClose={() => setToast(null)} />
+      <SaveToast
+        open={Boolean(toast)}
+        message={toast ?? undefined}
+        variant={toastVariant}
+        onClose={() => setToast(null)}
+      />
 
       <header className="products__page-head products__page-head--actions">
         <div className="products__page-head-left">
@@ -1298,11 +1310,10 @@ function ProductsTipos() {
 
       <ConfirmDeleteModal
         open={Boolean(deleting)}
-        title="Excluir produto"
+        title="Excluir tipo de produto"
         message={
           <>
-            Você está prestes remover um produto. Os pedidos que contêm este produto{' '}
-            <strong>não</strong> serão alterados e esta ação não poderá ser desfeita.
+            Você está prestes a remover um tipo de produto. Esta ação não poderá ser desfeita.
           </>
         }
         question={
@@ -1310,11 +1321,24 @@ function ProductsTipos() {
         }
         onCancel={() => setDeleting(null)}
         onConfirm={() => {
-          if (deleting) {
-            deleteProductType(deleting.id)
-            setToast('Tipo de produto excluído.')
+          if (!deleting) {
+            setDeleting(null)
+            return
           }
+          const linked = countProductsUsingType(deleting)
+          if (linked > 0) {
+            setDeleting(null)
+            showToast(
+              linked === 1
+                ? 'Não é possível excluir: existe 1 produto vinculado a este tipo.'
+                : `Não é possível excluir: existem ${linked} produtos vinculados a este tipo.`,
+              'danger',
+            )
+            return
+          }
+          deleteProductType(deleting.id)
           setDeleting(null)
+          showToast('Tipo de produto excluído.')
         }}
       />
     </div>

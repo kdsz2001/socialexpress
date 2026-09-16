@@ -6,6 +6,8 @@ import './SaveToast.css'
 type SaveToastProps = {
   open: boolean
   message?: string
+  /** success (green) | danger (red) — Clarial-style alerts */
+  variant?: 'success' | 'danger'
   onClose: () => void
   durationMs?: number
 }
@@ -13,6 +15,7 @@ type SaveToastProps = {
 export function SaveToast({
   open,
   message = 'Informações salvas.',
+  variant = 'success',
   onClose,
   durationMs = 4000,
 }: SaveToastProps) {
@@ -25,7 +28,11 @@ export function SaveToast({
   if (!open || typeof document === 'undefined') return null
 
   return createPortal(
-    <div className="save-toast" role="status" aria-live="polite">
+    <div
+      className={`save-toast${variant === 'danger' ? ' save-toast--danger' : ''}`}
+      role="status"
+      aria-live="polite"
+    >
       <span className="save-toast__text">{message}</span>
       <button
         type="button"
