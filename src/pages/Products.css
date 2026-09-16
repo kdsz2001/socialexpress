@@ -264,12 +264,24 @@
   background: var(--info-soft-bg);
 }
 
+.products__icon-btn.is-edit {
+  background: #3699ff;
+  color: #fff;
+}
+
+.products__icon-btn.is-edit:hover {
+  background: #187de4;
+  color: #fff;
+}
+
 .products__icon-btn.is-danger {
-  color: #f64e60;
+  background: #f64e60;
+  color: #fff;
 }
 
 .products__icon-btn.is-danger:hover {
-  background: var(--danger-soft-bg);
+  background: #ee2d41;
+  color: #fff;
 }
 
 .products__empty {
@@ -328,7 +340,6 @@
 }
 
 .products-modal__close:hover {
-  background: var(--surface-muted);
   color: var(--text-primary);
 }
 
@@ -397,10 +408,6 @@
   color: var(--text-primary);
 }
 
-.products-modal__cancel:hover {
-  background: var(--surface-muted);
-}
-
 .products-modal__save {
   background: #3699ff;
   color: #fff;
@@ -421,6 +428,300 @@
   }
 }
 
+.products__page-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  min-width: 0;
+}
+
+.products__page-head h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.products__page-sep {
+  width: 1px;
+  height: 1.1rem;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.products__page-head p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.products__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.products__section-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.products__attrs {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.products__attrs-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 0.75rem;
+  border-right: 1px solid var(--border-color);
+  background: var(--surface-muted);
+}
+
+.products__attrs-nav-btn {
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.42rem;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.products__attrs-nav-btn:hover {
+  color: #3699ff;
+  background: rgba(54, 153, 255, 0.08);
+}
+
+.products__attrs-nav-btn.is-active {
+  color: #3699ff;
+  background: #e1f0ff;
+}
+
+.products__attrs-main {
+  padding: 1.25rem 1.35rem 1.5rem;
+  min-width: 0;
+}
+
+.products__attrs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.products__attrs-toolbar h2 {
+  margin: 0;
+  margin-right: auto;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.products__pager {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.products__pager select {
+  height: 32px;
+  border: 1px solid var(--border-color);
+  border-radius: 0.35rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  padding: 0 0.5rem;
+}
+
+.products__pagination {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.products__pagination button {
+  min-width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.products__pagination button.is-active {
+  background: #3699ff;
+  color: #fff;
+}
+
+.products__consulta {
+  padding: 1.35rem;
+}
+
+.products__consulta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem 1.1rem;
+}
+
+.products__consulta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.products__consulta-field > span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.products__consulta-field input,
+.products__consulta-field select {
+  height: 40px;
+  padding: 0 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.42rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.products__price-range {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.35rem;
+}
+
+.products__price-range input[type='range'] {
+  width: 100%;
+  accent-color: #3699ff;
+}
+
+.products__price-values {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: normal;
+}
+
+.products__price-values em {
+  font-style: normal;
+}
+
+.products__toggles {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.products__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 36px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.products__toggle input {
+  accent-color: #3699ff;
+}
+
+.products__toggle.is-on {
+  background: #e1f0ff;
+  color: #3699ff;
+}
+
+.products__view-mode {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.products__view-mode label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.products__view-mode input {
+  accent-color: #3699ff;
+}
+
+.products__consulta-empty {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.products-modal__dialog--sm {
+  width: min(100%, 420px);
+}
+
+.products-modal__save {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+@media (max-width: 1100px) {
+  .products__consulta-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .products__attrs {
+    grid-template-columns: 1fr;
+  }
+
+  .products__attrs-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .products__consulta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .products__add {
     margin-left: 0;
@@ -431,3 +732,4 @@
     flex: 1 1 100%;
   }
 }
+

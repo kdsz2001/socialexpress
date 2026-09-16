@@ -1,0 +1,88 @@
+.labels-modal__dialog {
+  width: min(640px, 100%);
+}
+
+.labels-modal__section + .labels-modal__section {
+  margin-top: 1.4rem;
+}
+
+.labels-modal__label {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.labels-modal__req {
+  color: #f64e60;
+}
+
+.labels-modal__hint {
+  margin: -0.35rem 0 0.85rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.labels-modal__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.labels-modal__choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 96px;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.55rem;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.labels-modal__choice:hover {
+  border-color: #3699ff;
+  color: #3699ff;
+}
+
+.labels-modal__choice.is-active {
+  border-color: #3699ff;
+  background: #e1f0ff;
+  color: #3699ff;
+}
+
+.labels-modal__checks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem 1.25rem;
+}
+
+.labels-modal__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.labels-modal__check input {
+  width: 16px;
+  height: 16px;
+  accent-color: #3699ff;
+}
+
+@media (max-width: 640px) {
+  .labels-modal__choices,
+  .labels-modal__checks {
+    grid-template-columns: 1fr;
+  }
+}

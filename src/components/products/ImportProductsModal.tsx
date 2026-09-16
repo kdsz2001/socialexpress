@@ -127,7 +127,7 @@ export function ImportProductsModal({ open, onClose }: ImportProductsModalProps)
             <h3 className="import-modal__step-title">Passo 3 (opcional)</h3>
             <p className="import-modal__step-text">
               Anexe o arquivo ZIP contendo as fotos dos produtos, conforme
-              descrito na planilha modelo. Caso desejar, você poderá incluir as
+              descrito na planilha modelo. Caso deseje, você poderá incluir as
               fotos individualmente mais tarde.
             </p>
 
