@@ -797,82 +797,126 @@ html[data-theme='dark'] .products__dual-range-values span {
 .products__radios {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.65rem;
   padding-top: 0.35rem;
   background: transparent;
   border: 0;
   box-shadow: none;
 }
 
+.products__radios {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.15rem 1.5rem;
+}
+
 .products__check,
 .products__radio {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
   color: var(--text-secondary);
   font-size: var(--p-font);
   cursor: pointer;
   background: transparent;
   border: 0;
   box-shadow: none;
+  user-select: none;
+  line-height: 1.2;
 }
 
 .products__check input,
 .products__radio input {
-  width: 16px;
-  height: 16px;
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
   margin: 0;
-  flex-shrink: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  border: 1.5px solid #d1d3e0;
+  pointer-events: none;
+}
+
+.products__check-mark,
+.products__radio-mark {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid #d7d9de;
   background: #eef0f8;
-  box-shadow: none;
-  outline: none;
-  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.products__check input {
+.products__check-mark {
   border-radius: 3px;
-  background-color: #eef0f8;
 }
 
-.products__radio input {
+.products__radio-mark {
   border-radius: 50%;
-  background-color: #eef0f8;
 }
 
-.products__check input:checked {
+.products__check-mark::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M2.2 6.2l2.6 2.6 5-5.2'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M2.2 6.2l2.6 2.6 5-5.2'/%3E%3C/svg%3E") center / contain no-repeat;
+  opacity: 0;
+}
+
+.products__radio-mark::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.products__check input:checked + .products__check-mark {
   border-color: #3699ff;
-  background-color: #3699ff;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M2.5 6.5l2.5 2.5 4.5-5'/%3E%3C/svg%3E");
-  background-size: 10px 10px;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: #3699ff;
+}
+
+.products__check input:checked + .products__check-mark::after {
+  opacity: 1;
+  background: #fff;
+}
+
+.products__radio input:checked + .products__radio-mark {
+  border-color: #3699ff;
+  background: #3699ff;
   box-shadow: none;
 }
 
-.products__radio input:checked {
-  border-color: #3699ff;
-  background-color: #3699ff;
-  box-shadow: inset 0 0 0 3px #fff;
+.products__radio input:checked + .products__radio-mark::after {
+  background: #fff;
 }
 
-html[data-theme='dark'] .products__check input,
-html[data-theme='dark'] .products__radio input {
+.products__radio input:focus-visible + .products__check-mark,
+.products__radio input:focus-visible + .products__radio-mark,
+.products__check input:focus-visible + .products__check-mark {
+  outline: 2px solid rgba(54, 153, 255, 0.35);
+  outline-offset: 2px;
+}
+
+html[data-theme='dark'] .products__check-mark,
+html[data-theme='dark'] .products__radio-mark {
   border-color: #5e6278;
-  background-color: transparent;
+  background: #2b2b40;
 }
 
-html[data-theme='dark'] .products__check input:checked {
+html[data-theme='dark'] .products__check input:checked + .products__check-mark {
   border-color: #3699ff;
-  background-color: #3699ff;
+  background: #3699ff;
 }
 
-html[data-theme='dark'] .products__radio input:checked {
+html[data-theme='dark'] .products__radio input:checked + .products__radio-mark {
   border-color: #3699ff;
-  background-color: #3699ff;
-  box-shadow: inset 0 0 0 3px var(--card-bg);
+  background: #3699ff;
+  box-shadow: none;
 }
 
 .products__consulta-empty {

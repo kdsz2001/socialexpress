@@ -805,6 +805,7 @@ function ProductsConsulta() {
                   checked={onlyAvailable}
                   onChange={(event) => setOnlyAvailable(event.target.checked)}
                 />
+                <span className="products__check-mark" aria-hidden="true" />
                 <span>Disponível</span>
               </label>
               <label className="products__check">
@@ -813,6 +814,7 @@ function ProductsConsulta() {
                   checked={onlyUnavailable}
                   onChange={(event) => setOnlyUnavailable(event.target.checked)}
                 />
+                <span className="products__check-mark" aria-hidden="true" />
                 <span>Indisponível</span>
               </label>
             </div>
@@ -828,6 +830,7 @@ function ProductsConsulta() {
                   checked={view === 'compacta'}
                   onChange={() => setView('compacta')}
                 />
+                <span className="products__radio-mark" aria-hidden="true" />
                 <span>Compacta</span>
               </label>
               <label className="products__radio">
@@ -837,6 +840,7 @@ function ProductsConsulta() {
                   checked={view === 'completa'}
                   onChange={() => setView('completa')}
                 />
+                <span className="products__radio-mark" aria-hidden="true" />
                 <span>Completa</span>
               </label>
             </div>
