@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import {
   ArrowUp,
   Calendar,
+  Camera,
   Check,
   ChevronDown,
   Plus,
@@ -91,6 +92,21 @@ function ProductsList() {
   const [statusFilter, setStatusFilter] = useState<'todos' | ProductStatus>('todos')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [deleting, setDeleting] = useState<Product | null>(null)
+  const [imagePreview, setImagePreview] = useState<Product | null>(null)
+
+  useEffect(() => {
+    if (!imagePreview) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setImagePreview(null)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [imagePreview])
 
   const typeOptions = useMemo(() => {
     const fromTypes = types.map((item) => formatProductTypeLabel(item))
@@ -252,6 +268,19 @@ function ProductsList() {
                         )}
                       </td>
                       <td className="products__actions-cell">
+                        {item.photoDataUrl ? (
+                          <button
+                            type="button"
+                            className="products__icon-btn is-image"
+                            aria-label="Imagem do produto"
+                            onClick={() => setImagePreview(item)}
+                          >
+                            <Camera size={15} strokeWidth={2} />
+                            <span className="products__action-tip" role="tooltip">
+                              Imagem do produto
+                            </span>
+                          </button>
+                        ) : null}
                         <button
                           type="button"
                           className="products__icon-btn is-view"
@@ -302,6 +331,43 @@ function ProductsList() {
           setDeleting(null)
         }}
       />
+
+      {imagePreview && imagePreview.photoDataUrl
+        ? createPortal(
+            <div className="products-image-modal" role="presentation">
+              <button
+                type="button"
+                className="products-image-modal__overlay"
+                aria-label="Fechar"
+                onClick={() => setImagePreview(null)}
+              />
+              <div
+                className="products-image-modal__dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Imagem do produto"
+              >
+                <header className="products-image-modal__header">
+                  <h2>
+                    {[imagePreview.fullCode, imagePreview.name].filter(Boolean).join(' | ')}
+                  </h2>
+                  <button
+                    type="button"
+                    className="products-image-modal__close"
+                    aria-label="Fechar"
+                    onClick={() => setImagePreview(null)}
+                  >
+                    <X size={18} strokeWidth={2.25} />
+                  </button>
+                </header>
+                <div className="products-image-modal__body">
+                  <img src={imagePreview.photoDataUrl} alt={imagePreview.name} />
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
