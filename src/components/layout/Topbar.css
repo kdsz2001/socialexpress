@@ -44,7 +44,15 @@
 }
 
 .topbar__tabs--crm {
-  max-width: min(100%, 48rem);
+  max-width: min(100%, 52rem);
+  gap: 0.5rem;
+}
+
+.topbar__tabs--crm .topbar__tab {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0.7rem 1.25rem;
 }
 
 .topbar__tabs--finance {
@@ -337,6 +345,11 @@
     padding: 0.45rem 0.75rem;
     font-size: 0.95rem;
   }
+
+  .topbar__tabs--crm .topbar__tab {
+    padding: 0.55rem 0.9rem;
+    font-size: 1.05rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -351,5 +364,10 @@
   .topbar__tab {
     padding: 0.4rem 0.55rem;
     font-size: 0.9rem;
+  }
+
+  .topbar__tabs--crm .topbar__tab {
+    padding: 0.45rem 0.7rem;
+    font-size: 1rem;
   }
 }
