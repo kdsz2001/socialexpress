@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { ArrowLeft, Check } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CreatableSelect } from '../components/products/CreatableSelect'
+import { SaveToast } from '../components/ui/SaveToast'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
@@ -90,6 +91,8 @@ export function ProductEdit() {
   const [productState, setProductState] = useState('')
   const [status, setStatus] = useState<'ativo' | 'inativo'>('ativo')
   const [touched, setTouched] = useState(false)
+  const [toastOpen, setToastOpen] = useState(false)
+  const closeToast = useCallback(() => setToastOpen(false), [])
 
   useEffect(() => {
     const current = getProduct(productId)
@@ -200,13 +203,21 @@ export function ProductEdit() {
       productState,
       photoName: photoName ?? '',
     })
-    if (updated) setProduct(updated)
+    if (updated) {
+      setProduct(updated)
+      setToastOpen(true)
+    }
   }
 
   const meta = formatProductRegisteredMeta(product)
 
   return (
     <div className="product-create">
+      <SaveToast
+        open={toastOpen}
+        message="Informações atualizadas."
+        onClose={closeToast}
+      />
       <form className="product-create__card" onSubmit={onSubmit}>
         <header className="product-create__head product-create__head--edit">
           <div className="product-create__head-copy">
