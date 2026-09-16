@@ -567,6 +567,11 @@ html[data-theme='dark'] .products__pager select {
   flex-direction: column;
   gap: 0.4rem;
   min-width: 0;
+  position: relative;
+}
+
+.products__consulta-field:has(.products__period-popover) {
+  z-index: 30;
 }
 
 .products__consulta-field > span {
