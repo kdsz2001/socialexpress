@@ -25,6 +25,8 @@ export const ATTRIBUTE_KIND_META: Record<
     updateModalTitle: string
     deleteTitle: string
     deleteMessage: string
+    toastCreated: string
+    toastUpdated: string
   }
 > = {
   cor: {
@@ -38,6 +40,8 @@ export const ATTRIBUTE_KIND_META: Record<
     deleteTitle: 'Excluir cor',
     deleteMessage:
       'Você está prestes a excluir uma cor. Os produtos com esse atributo não serão alterados.',
+    toastCreated: 'Nova Cor cadastrada.',
+    toastUpdated: 'Cor atualizada.',
   },
   estilista: {
     nav: 'Estilista',
@@ -50,6 +54,8 @@ export const ATTRIBUTE_KIND_META: Record<
     deleteTitle: 'Excluir estilista',
     deleteMessage:
       'Você está prestes a excluir um estilista. Os produtos com esse atributo não serão alterados.',
+    toastCreated: 'Novo Estilista cadastrado.',
+    toastUpdated: 'Estilista atualizado.',
   },
   evento: {
     nav: 'Evento',
@@ -62,6 +68,8 @@ export const ATTRIBUTE_KIND_META: Record<
     deleteTitle: 'Excluir evento',
     deleteMessage:
       'Você está prestes a excluir um evento. Os produtos com esse atributo não serão alterados.',
+    toastCreated: 'Novo Evento cadastrado.',
+    toastUpdated: 'Evento atualizado.',
   },
   marca: {
     nav: 'Marca',
@@ -74,18 +82,22 @@ export const ATTRIBUTE_KIND_META: Record<
     deleteTitle: 'Excluir marca',
     deleteMessage:
       'Você está prestes a excluir uma marca. Os produtos com esse atributo não serão alterados.',
+    toastCreated: 'Nova Marca cadastrada.',
+    toastUpdated: 'Marca atualizada.',
   },
   modelo: {
     nav: 'Modelo',
-    title: 'Modelos',
+    title: 'Modelos de produtos',
     singular: 'modelo',
     createLabel: 'Novo modelo',
     fieldLabel: 'Modelo',
-    createModalTitle: 'Cadastrar novo modelo',
+    createModalTitle: 'Cadastrar novo modelo de produto',
     updateModalTitle: 'Atualizando modelo',
     deleteTitle: 'Excluir modelo',
     deleteMessage:
       'Você está prestes a excluir um modelo. Os produtos com esse atributo não serão alterados.',
+    toastCreated: 'Novo Modelo cadastrado.',
+    toastUpdated: 'Modelo atualizado.',
   },
   tamanho: {
     nav: 'Tamanho',
@@ -98,6 +110,8 @@ export const ATTRIBUTE_KIND_META: Record<
     deleteTitle: 'Excluir tamanho',
     deleteMessage:
       'Você está prestes a excluir um tamanho. Os produtos com esse atributo não serão alterados.',
+    toastCreated: 'Novo Tamanho cadastrado.',
+    toastUpdated: 'Tamanho atualizado.',
   },
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowUp,
+  Calendar,
   Check,
   ChevronDown,
   Plus,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ConfirmDeleteModal } from '../components/products/ConfirmDeleteModal'
+import { SaveToast } from '../components/ui/SaveToast'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { useProducts } from '../hooks/useProducts'
@@ -429,6 +431,12 @@ function ProductsConsulta() {
     })
   }, [products, termo, onlyAvailable, onlyUnavailable])
 
+  const lo = Math.min(priceMin, priceMax)
+  const hi = Math.max(priceMin, priceMax)
+  const span = 500
+  const leftPct = (lo / span) * 100
+  const rightPct = (hi / span) * 100
+
   return (
     <div className="products">
       <header className="products__page-head">
@@ -490,37 +498,56 @@ function ProductsConsulta() {
 
           <label className="products__consulta-field">
             <span>Período</span>
-            <input type="text" readOnly placeholder="Selecione um intervalo de datas" />
+            <span className="products__period">
+              <Calendar size={15} strokeWidth={2} className="products__period-icon" />
+              <input type="text" readOnly placeholder="Selecione um intervalo..." />
+            </span>
           </label>
 
           <div className="products__consulta-field">
             <span>Faixa de preço</span>
-            <div className="products__price-range">
-              <input
-                type="range"
-                min={0}
-                max={500}
-                value={priceMin}
-                onChange={(event) => setPriceMin(Number(event.target.value))}
-              />
-              <input
-                type="range"
-                min={0}
-                max={500}
-                value={priceMax}
-                onChange={(event) => setPriceMax(Number(event.target.value))}
-              />
-              <div className="products__price-values">
-                <em>{Math.min(priceMin, priceMax)}</em>
-                <em>{Math.max(priceMin, priceMax)}</em>
+            <div className="products__dual-range">
+              <div className="products__dual-range-track">
+                <div
+                  className="products__dual-range-fill"
+                  style={{ left: `${leftPct}%`, width: `${rightPct - leftPct}%` }}
+                />
+                <input
+                  type="range"
+                  min={0}
+                  max={500}
+                  value={lo}
+                  aria-label="Preço mínimo"
+                  onChange={(event) => {
+                    const next = Number(event.target.value)
+                    setPriceMin(Math.min(next, hi))
+                    setPriceMax(hi)
+                  }}
+                />
+                <input
+                  type="range"
+                  min={0}
+                  max={500}
+                  value={hi}
+                  aria-label="Preço máximo"
+                  onChange={(event) => {
+                    const next = Number(event.target.value)
+                    setPriceMax(Math.max(next, lo))
+                    setPriceMin(lo)
+                  }}
+                />
+              </div>
+              <div className="products__dual-range-values">
+                <span style={{ left: `${leftPct}%` }}>{lo}</span>
+                <span style={{ left: `${rightPct}%` }}>{hi}</span>
               </div>
             </div>
           </div>
 
           <div className="products__consulta-field">
             <span>Mostrar apenas</span>
-            <div className="products__toggles">
-              <label className={`products__toggle${onlyAvailable ? ' is-on' : ''}`}>
+            <div className="products__checks">
+              <label className="products__check">
                 <input
                   type="checkbox"
                   checked={onlyAvailable}
@@ -528,7 +555,7 @@ function ProductsConsulta() {
                 />
                 <span>Disponível</span>
               </label>
-              <label className={`products__toggle${onlyUnavailable ? ' is-on' : ''}`}>
+              <label className="products__check">
                 <input
                   type="checkbox"
                   checked={onlyUnavailable}
@@ -538,28 +565,30 @@ function ProductsConsulta() {
               </label>
             </div>
           </div>
-        </div>
 
-        <div className="products__view-mode">
-          <span>Visualização</span>
-          <label>
-            <input
-              type="radio"
-              name="view-mode"
-              checked={view === 'compacta'}
-              onChange={() => setView('compacta')}
-            />
-            Compacta
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="view-mode"
-              checked={view === 'completa'}
-              onChange={() => setView('completa')}
-            />
-            Completa
-          </label>
+          <div className="products__consulta-field products__consulta-field--view">
+            <span>Visualização</span>
+            <div className="products__radios">
+              <label className="products__radio">
+                <input
+                  type="radio"
+                  name="view-mode"
+                  checked={view === 'compacta'}
+                  onChange={() => setView('compacta')}
+                />
+                <span>Compacta</span>
+              </label>
+              <label className="products__radio">
+                <input
+                  type="radio"
+                  name="view-mode"
+                  checked={view === 'completa'}
+                  onChange={() => setView('completa')}
+                />
+                <span>Completa</span>
+              </label>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -610,6 +639,7 @@ function ProductsAtributos() {
   const [editing, setEditing] = useState<ProductAttribute | null>(null)
   const [deleting, setDeleting] = useState<ProductAttribute | null>(null)
   const [name, setName] = useState('')
+  const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => {
     setPage(1)
@@ -645,19 +675,26 @@ function ProductsAtributos() {
 
   const save = () => {
     if (!name.trim()) return
-    if (editing) updateProductAttribute(editing.id, name)
-    else addProductAttribute(kind, name)
+    if (editing) {
+      updateProductAttribute(editing.id, name)
+      setToast(meta.toastUpdated)
+    } else {
+      addProductAttribute(kind, name)
+      setToast(meta.toastCreated)
+    }
     setModalOpen(false)
   }
 
   return (
     <div className="products">
+      <SaveToast open={Boolean(toast)} message={toast ?? undefined} onClose={() => setToast(null)} />
+
       <header className="products__page-head">
         <h1>{meta.title}</h1>
       </header>
 
-      <section className="products__card products__card--flush products__attrs">
-        <aside className="products__attrs-nav" aria-label="Tipos de atributo">
+      <section className="products__attrs">
+        <aside className="products__attrs-nav products__card" aria-label="Tipos de atributo">
           {ATTRIBUTE_KINDS.map((item) => (
             <button
               key={item}
@@ -670,7 +707,7 @@ function ProductsAtributos() {
           ))}
         </aside>
 
-        <div className="products__attrs-main">
+        <div className="products__attrs-main products__card">
           <div className="products__attrs-toolbar">
             <label className="products__search">
               <Search size={16} strokeWidth={2} className="products__search-icon" />
@@ -824,6 +861,7 @@ function ProductsTipos() {
   const [deleting, setDeleting] = useState<ProductType | null>(null)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [toast, setToast] = useState<string | null>(null)
 
   const sorted = useMemo(
     () =>
@@ -848,37 +886,44 @@ function ProductsTipos() {
 
   const nextCode = nextProductTypeCode()
 
+  const openCreate = () => {
+    setEditing(null)
+    setName('')
+    setDescription('')
+    setModalOpen(true)
+  }
+
   const save = () => {
     if (!name.trim()) return
-    if (editing) updateProductType(editing.id, name, description)
-    else addProductType(name, description)
+    if (editing) {
+      updateProductType(editing.id, name, description)
+      setToast('Tipo atualizado.')
+    } else {
+      addProductType(name, description)
+      setToast('Novo Tipo cadastrado.')
+    }
     setModalOpen(false)
   }
 
   return (
     <div className="products">
-      <header className="products__page-head">
-        <h1>Tipos de produtos</h1>
-        <span className="products__page-sep" aria-hidden="true" />
-        <p>{statusLabel}</p>
+      <SaveToast open={Boolean(toast)} message={toast ?? undefined} onClose={() => setToast(null)} />
+
+      <header className="products__page-head products__page-head--actions">
+        <div className="products__page-head-left">
+          <h1>Tipos de produtos</h1>
+          <span className="products__page-sep" aria-hidden="true" />
+          <p>{statusLabel}</p>
+        </div>
+        <button type="button" className="products__add" onClick={openCreate}>
+          <Plus size={14} strokeWidth={2.5} />
+          Adicionar tipo
+        </button>
       </header>
 
       <section className="products__card">
         <div className="products__section-head">
           <h2>Tipos cadastrados</h2>
-          <button
-            type="button"
-            className="products__add"
-            onClick={() => {
-              setEditing(null)
-              setName('')
-              setDescription('')
-              setModalOpen(true)
-            }}
-          >
-            <Plus size={14} strokeWidth={2.5} />
-            Adicionar tipo
-          </button>
         </div>
 
         <div className="products__pager">
