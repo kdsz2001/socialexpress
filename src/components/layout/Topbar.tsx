@@ -260,6 +260,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   }
 
   const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
+  /** Igual ao Clarial: só na lista "Todos produtos" (e enquanto a própria aba estiver ativa). */
+  const showBulkTab = productsTab === 'todos' || productsTab === 'alteracao'
 
   const searchPanel =
     searchOpen && typeof document !== 'undefined'
@@ -388,7 +390,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
       {isProductsSection && productsTab ? (
         <div className="topbar__tabs topbar__tabs--products" role="tablist" aria-label="Produtos">
-          {PRODUCTS_TABS.map((item) => (
+          {PRODUCTS_TABS.filter((item) => item.id !== 'alteracao' || showBulkTab).map((item) => (
             <button
               key={item.id}
               type="button"
