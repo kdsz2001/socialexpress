@@ -1,8 +1,8 @@
 .save-toast {
   position: fixed;
-  top: 62px;
+  top: 16px;
   right: 24px;
-  z-index: 1100;
+  z-index: 10050;
   display: inline-flex;
   align-items: center;
   gap: 14px;
@@ -14,6 +14,7 @@
   color: #fff;
   box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.18);
   animation: save-toast-in 0.28s ease both;
+  pointer-events: auto;
 }
 
 .save-toast--danger {

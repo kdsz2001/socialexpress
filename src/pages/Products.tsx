@@ -889,6 +889,7 @@ function ProductsAtributos() {
   const [deleting, setDeleting] = useState<ProductAttribute | null>(null)
   const [name, setName] = useState('')
   const [toast, setToast] = useState<string | null>(null)
+  const [toastKey, setToastKey] = useState(0)
 
   useEffect(() => {
     setPage(1)
@@ -910,6 +911,11 @@ function ProductsAtributos() {
   const start = (currentPage - 1) * pageSize
   const pageItems = filtered.slice(start, start + pageSize)
 
+  const flashToast = (message: string) => {
+    setToast(message)
+    setToastKey((key) => key + 1)
+  }
+
   const openCreate = () => {
     setEditing(null)
     setName('')
@@ -926,17 +932,22 @@ function ProductsAtributos() {
     if (!name.trim()) return
     if (editing) {
       updateProductAttribute(editing.id, name)
-      setToast(meta.toastUpdated)
+      flashToast(meta.toastUpdated)
     } else {
       addProductAttribute(kind, name)
-      setToast(meta.toastCreated)
+      flashToast(meta.toastCreated)
     }
     setModalOpen(false)
   }
 
   return (
     <div className="products">
-      <SaveToast open={Boolean(toast)} message={toast ?? undefined} onClose={() => setToast(null)} />
+      <SaveToast
+        key={toastKey}
+        open={Boolean(toast)}
+        message={toast ?? undefined}
+        onClose={() => setToast(null)}
+      />
 
       <header className="products__page-head">
         <h1>{meta.title}</h1>
@@ -1090,10 +1101,16 @@ function ProductsAtributos() {
         open={Boolean(deleting)}
         title={meta.deleteTitle}
         message={meta.deleteMessage}
+        question={
+          deleting ? <>Deseja realmente excluir {deleting.name}?</> : undefined
+        }
         onCancel={() => setDeleting(null)}
         onConfirm={() => {
-          if (deleting) deleteProductAttribute(deleting.id)
+          const target = deleting
           setDeleting(null)
+          if (!target) return
+          deleteProductAttribute(target.id)
+          flashToast('Atributo removido.')
         }}
       />
     </div>

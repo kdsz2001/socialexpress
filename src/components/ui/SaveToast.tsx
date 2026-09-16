@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import './SaveToast.css'
@@ -17,13 +17,16 @@ export function SaveToast({
   message = 'Informações salvas.',
   variant = 'success',
   onClose,
-  durationMs = 4000,
+  durationMs = 4500,
 }: SaveToastProps) {
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
   useEffect(() => {
     if (!open) return
-    const timer = window.setTimeout(onClose, durationMs)
+    const timer = window.setTimeout(() => onCloseRef.current(), durationMs)
     return () => window.clearTimeout(timer)
-  }, [open, durationMs, onClose])
+  }, [open, durationMs, message])
 
   if (!open || typeof document === 'undefined') return null
 
