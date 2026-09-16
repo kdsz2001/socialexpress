@@ -1200,7 +1200,7 @@ function ProductsTipos() {
           <table className="products__table">
             <thead>
               <tr>
-                <th>
+                <th className="products__col-id">
                   <button
                     type="button"
                     className="products__th-sort"
@@ -1214,7 +1214,7 @@ function ProductsTipos() {
                     />
                   </button>
                 </th>
-                <th>Nome</th>
+                <th className="products__col-type-name">Nome</th>
                 <th className="products__col-actions">Ações</th>
               </tr>
             </thead>
@@ -1228,8 +1228,8 @@ function ProductsTipos() {
               ) : (
                 pageItems.map((item) => (
                   <tr key={item.id}>
-                    <td>{formatProductTypeCode(item.code)}</td>
-                    <td>{item.name}</td>
+                    <td className="products__col-id">{formatProductTypeCode(item.code)}</td>
+                    <td className="products__col-type-name">{item.name}</td>
                     <td className="products__actions-cell">
                       <button
                         type="button"
@@ -1310,7 +1310,10 @@ function ProductsTipos() {
         }
         onCancel={() => setDeleting(null)}
         onConfirm={() => {
-          if (deleting) deleteProductType(deleting.id)
+          if (deleting) {
+            deleteProductType(deleting.id)
+            setToast('Tipo de produto excluído.')
+          }
           setDeleting(null)
         }}
       />
