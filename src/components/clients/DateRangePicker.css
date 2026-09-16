@@ -120,7 +120,6 @@
   grid-template-columns: repeat(7, 1fr);
   gap: 0;
   background: var(--card-bg);
-  overflow: visible;
 }
 
 .daterange__day {
@@ -134,7 +133,7 @@
   font-size: 0.9rem;
   font-weight: 400;
   cursor: pointer;
-  transition: color 0.12s ease;
+  transition: color 0.12s ease, background 0.12s ease;
   box-shadow: none;
   outline: none;
   margin: 0;
@@ -144,16 +143,8 @@
 }
 
 .daterange__day:hover {
-  color: #3699ff;
-}
-
-.daterange__day:hover::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 0.35rem;
   background: var(--surface-muted);
-  z-index: -1;
+  color: #3699ff;
 }
 
 .daterange__day.is-outside {
@@ -161,29 +152,20 @@
 }
 
 .daterange__day.is-in-range {
+  background: var(--info-soft-bg);
   color: #3699ff;
   border-radius: 0;
-  background: transparent;
+  /* outline fecha hairlines subpixel entre células */
+  outline: 1px solid var(--info-soft-bg);
+  outline-offset: -1px;
+  z-index: 0;
 }
 
-.daterange__day.is-in-range::before {
-  content: '';
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: -1px;
-  right: -1px;
-  background: var(--info-soft-bg);
-  z-index: -1;
-}
-
-.daterange__day.is-in-range:nth-child(7n + 1)::before {
-  left: 0;
+.daterange__day.is-in-range:nth-child(7n + 1) {
   border-radius: 0.35rem 0 0 0.35rem;
 }
 
-.daterange__day.is-in-range:nth-child(7n)::before {
-  right: 0;
+.daterange__day.is-in-range:nth-child(7n) {
   border-radius: 0 0.35rem 0.35rem 0;
 }
 
@@ -192,9 +174,13 @@ html[data-theme='dark'] .daterange {
   box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.45);
 }
 
-html[data-theme='dark'] .daterange__day.is-in-range::before,
-html[data-theme='dark'] .daterange__day.is-selected::before {
+html[data-theme='dark'] .daterange__day.is-in-range {
   background: rgba(54, 153, 255, 0.22);
+  outline-color: rgba(54, 153, 255, 0.22);
+}
+
+html[data-theme='dark'] .daterange__day.is-selected {
+  background: rgba(54, 153, 255, 0.32);
 }
 
 html[data-theme='dark'] .daterange__preset.is-active {
@@ -202,20 +188,12 @@ html[data-theme='dark'] .daterange__preset.is-active {
 }
 
 .daterange__day.is-selected {
+  background: var(--info-soft-bg);
   color: #3699ff;
   font-weight: 600;
   border-radius: 0.35rem;
   z-index: 1;
-  background: transparent;
-}
-
-.daterange__day.is-selected::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 0.35rem;
-  background: var(--info-soft-bg);
-  z-index: -1;
+  outline: none;
 }
 
 .daterange__footer {
