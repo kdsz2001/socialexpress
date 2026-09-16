@@ -118,6 +118,13 @@ export function AppLayout() {
       document.title = 'Detalhes do cliente'
       return
     }
+    if (
+      location.pathname.startsWith('/produtos/') &&
+      location.pathname !== '/produtos/cadastrar'
+    ) {
+      document.title = 'Produto'
+      return
+    }
     document.title = PAGE_TITLES[location.pathname] ?? 'Social Express'
   }, [location.pathname])
 

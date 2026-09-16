@@ -33,7 +33,8 @@ import {
 } from '../lib/productAttributesStore'
 import {
   deleteProduct,
-  updateProduct,
+  formatProductCodes,
+  productAttributeChips,
   type Product,
   type ProductStatus,
 } from '../lib/productsStore'
@@ -89,29 +90,7 @@ function ProductsList() {
   const [typeFilter, setTypeFilter] = useState('todos')
   const [statusFilter, setStatusFilter] = useState<'todos' | ProductStatus>('todos')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Product | null>(null)
   const [deleting, setDeleting] = useState<Product | null>(null)
-  const [name, setName] = useState('')
-  const [type, setType] = useState('')
-  const [rental, setRental] = useState('')
-  const [attributes, setAttributes] = useState('')
-  const [status, setStatus] = useState<ProductStatus>('ativo')
-  const [touched, setTouched] = useState(false)
-
-  useEffect(() => {
-    if (!modalOpen) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeModal()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [modalOpen])
 
   const typeOptions = useMemo(() => {
     const fromTypes = types.map((item) => formatProductTypeLabel(item))
@@ -128,10 +107,14 @@ function ProductsList() {
         if (typeFilter !== 'todos' && item.type !== typeFilter) return false
         if (statusFilter !== 'todos' && item.status !== statusFilter) return false
         if (!q) return true
+        const codes = formatProductCodes(item).toLocaleLowerCase('pt-BR')
         return (
           item.name.toLocaleLowerCase('pt-BR').includes(q) ||
           item.type.toLocaleLowerCase('pt-BR').includes(q) ||
-          item.attributes.toLocaleLowerCase('pt-BR').includes(q)
+          item.attributes.toLocaleLowerCase('pt-BR').includes(q) ||
+          codes.includes(q) ||
+          item.fullCode.toLocaleLowerCase('pt-BR').includes(q) ||
+          item.storeCode.toLocaleLowerCase('pt-BR').includes(q)
         )
       })
       .sort((a, b) => {
@@ -139,32 +122,6 @@ function ProductsList() {
         return sortDir === 'asc' ? cmp : -cmp
       })
   }, [products, query, typeFilter, statusFilter, sortDir])
-
-  const openEdit = (item: Product) => {
-    setEditing(item)
-    setName(item.name)
-    setType(item.type)
-    setRental(item.rental)
-    setAttributes(item.attributes)
-    setStatus(item.status)
-    setTouched(false)
-    setModalOpen(true)
-  }
-
-  const closeModal = () => {
-    setModalOpen(false)
-    setEditing(null)
-    setTouched(false)
-  }
-
-  const missingName = !name.trim()
-
-  const saveProduct = () => {
-    setTouched(true)
-    if (missingName || !editing) return
-    updateProduct(editing.id, { name, type, rental, attributes, status })
-    closeModal()
-  }
 
   return (
     <div className="products">
@@ -260,152 +217,72 @@ function ProductsList() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div className="products__name-cell">
-                        <span className="products__name">{item.name}</span>
-                        {item.status === 'inativo' ? (
-                          <span className="products__badge">Inativo</span>
-                        ) : null}
-                      </div>
-                    </td>
-                    <td>{item.type || '—'}</td>
-                    <td>{item.rental || '—'}</td>
-                    <td>{item.attributes || '—'}</td>
-                    <td className="products__actions-cell">
-                      <button
-                        type="button"
-                        className="products__icon-btn is-edit"
-                        title="Editar"
-                        aria-label={`Editar ${item.name}`}
-                        onClick={() => openEdit(item)}
-                      >
-                        <SquarePen size={15} strokeWidth={2} />
-                      </button>
-                      <button
-                        type="button"
-                        className="products__icon-btn is-danger"
-                        title="Excluir"
-                        aria-label={`Excluir ${item.name}`}
-                        onClick={() => setDeleting(item)}
-                      >
-                        <Trash2 size={15} strokeWidth={2} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filtered.map((item) => {
+                  const codes = formatProductCodes(item)
+                  const chips = productAttributeChips(item)
+                  return (
+                    <tr key={item.id}>
+                      <td>
+                        <div className="products__name-cell products__name-cell--stack">
+                          <div className="products__name-row">
+                            <span className="products__name">{item.name}</span>
+                            {item.status === 'inativo' ? (
+                              <span className="products__badge">Inativo</span>
+                            ) : null}
+                          </div>
+                          {codes ? <span className="products__codes">{codes}</span> : null}
+                        </div>
+                      </td>
+                      <td>{item.type || '—'}</td>
+                      <td>{item.rental || '—'}</td>
+                      <td>
+                        {chips.length > 0 ? (
+                          <div className="products__chips">
+                            {chips.map((chip) => (
+                              <span
+                                key={`${chip.label}-${chip.value}`}
+                                className="products__chip"
+                              >
+                                {chip.label ? `${chip.label}: ${chip.value}` : chip.value}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                      <td className="products__actions-cell">
+                        <button
+                          type="button"
+                          className="products__icon-btn is-view"
+                          aria-label="Visualizar produto"
+                          onClick={() => navigate(`/produtos/${item.id}`)}
+                        >
+                          <SquarePen size={15} strokeWidth={2} />
+                          <span className="products__action-tip" role="tooltip">
+                            Visualizar produto
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          className="products__icon-btn is-danger"
+                          aria-label={`Excluir ${item.name}`}
+                          onClick={() => setDeleting(item)}
+                        >
+                          <Trash2 size={15} strokeWidth={2} />
+                          <span className="products__action-tip" role="tooltip">
+                            Excluir
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
         </div>
       </section>
-
-      {modalOpen
-        ? createPortal(
-            <div className="products-modal" role="presentation">
-              <button
-                type="button"
-                className="products-modal__overlay"
-                aria-label="Fechar"
-                onClick={closeModal}
-              />
-              <div
-                className="products-modal__dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="products-modal-title"
-              >
-                <header className="products-modal__header">
-                  <h2 id="products-modal-title">Editar produto</h2>
-                  <button
-                    type="button"
-                    className="products-modal__close"
-                    aria-label="Fechar"
-                    onClick={closeModal}
-                  >
-                    <X size={16} strokeWidth={2.25} />
-                  </button>
-                </header>
-
-                <div className="products-modal__body">
-                  <label className="products-modal__field">
-                    <span>
-                      Nome do produto <span className="products-modal__req">*</span>
-                    </span>
-                    <input
-                      type="text"
-                      className={`products-modal__input${touched && missingName ? ' is-invalid' : ''}`}
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                      autoFocus
-                    />
-                  </label>
-
-                  <label className="products-modal__field">
-                    <span>Tipo</span>
-                    <select
-                      className="products-modal__input"
-                      value={type}
-                      onChange={(event) => setType(event.target.value)}
-                    >
-                      <option value="">Selecione um tipo de produto</option>
-                      {typeOptions.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="products-modal__field">
-                    <span>Aluguel</span>
-                    <input
-                      type="text"
-                      className="products-modal__input"
-                      value={rental}
-                      onChange={(event) => setRental(event.target.value)}
-                      placeholder="R$ 0,00"
-                    />
-                  </label>
-
-                  <label className="products-modal__field">
-                    <span>Atributos</span>
-                    <input
-                      type="text"
-                      className="products-modal__input"
-                      value={attributes}
-                      onChange={(event) => setAttributes(event.target.value)}
-                    />
-                  </label>
-
-                  <label className="products-modal__field">
-                    <span>Status</span>
-                    <select
-                      className="products-modal__input"
-                      value={status}
-                      onChange={(event) => setStatus(event.target.value as ProductStatus)}
-                    >
-                      <option value="ativo">Ativo</option>
-                      <option value="inativo">Inativo</option>
-                    </select>
-                  </label>
-                </div>
-
-                <footer className="products-modal__footer">
-                  <button type="button" className="products-modal__cancel" onClick={closeModal}>
-                    Cancelar
-                  </button>
-                  <button type="button" className="products-modal__save" onClick={saveProduct}>
-                    <Check size={15} strokeWidth={2.5} />
-                    Salvar
-                  </button>
-                </footer>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
 
       <ConfirmDeleteModal
         open={Boolean(deleting)}

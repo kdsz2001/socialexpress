@@ -352,10 +352,56 @@ html[data-theme='dark'] .products__alert--warn {
   min-width: 0;
 }
 
+.products__name-cell--stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+
+.products__name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
 .products__name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
+  color: var(--text-heading, #181c32);
+}
+
+.products__codes {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--p-muted, #b5b5c3);
+}
+
+.products__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-width: 320px;
+}
+
+.products__chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--p-soft, #f3f6f9);
+  color: var(--p-label, #3f4254);
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+html[data-theme='dark'] .products__chip {
+  background: var(--surface-muted);
+  color: var(--text-secondary);
 }
 
 .products__badge {
@@ -379,6 +425,7 @@ html[data-theme='dark'] .products__alert--warn {
 }
 
 .products__icon-btn {
+  position: relative;
   display: inline-grid;
   place-items: center;
   width: 33px;
@@ -403,6 +450,15 @@ html[data-theme='dark'] .products__alert--warn {
   background: #187de4;
 }
 
+.products__icon-btn.is-view {
+  background: var(--p-border-soft, #e4e6ef);
+  color: #3699ff;
+}
+
+.products__icon-btn.is-view:hover {
+  background: #d7dae7;
+}
+
 .products__icon-btn.is-danger {
   background: #f64e60;
   color: #fff;
@@ -415,6 +471,44 @@ html[data-theme='dark'] .products__alert--warn {
 html[data-theme='dark'] .products__icon-btn.is-edit {
   background: #3699ff;
   color: #fff;
+}
+
+html[data-theme='dark'] .products__icon-btn.is-view {
+  background: var(--surface-muted);
+  color: #3699ff;
+}
+
+.products__action-tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #181c32;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 5;
+}
+
+.products__action-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #181c32;
+}
+
+.products__icon-btn:hover .products__action-tip,
+.products__icon-btn:focus-visible .products__action-tip {
+  opacity: 1;
 }
 
 .products__empty {

@@ -5,9 +5,9 @@ import {
   Download,
   Tag,
 } from 'lucide-react'
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useProducts } from '../../hooks/useProducts'
-import { listProducts } from '../../lib/productsStore'
+import { getProduct, listProducts } from '../../lib/productsStore'
 import { ImportProductsModal } from '../products/ImportProductsModal'
 import { PrintLabelsModal } from '../products/PrintLabelsModal'
 import './ClientsSubheader.css'
@@ -81,12 +81,21 @@ export function ProductsSubheader() {
   const products = useProducts()
   const location = useLocation()
   const [searchParams] = useSearchParams()
+  const { productId } = useParams()
   const [importOpen, setImportOpen] = useState(false)
   const [labelsOpen, setLabelsOpen] = useState(false)
 
   const isCreate = location.pathname === '/produtos/cadastrar'
+  const isDetail =
+    Boolean(productId) ||
+    (location.pathname.startsWith('/produtos/') && location.pathname !== '/produtos/cadastrar')
+  const detailProduct = useMemo(() => {
+    if (!isDetail) return null
+    const id = productId || location.pathname.split('/').filter(Boolean)[1]
+    return id ? getProduct(id) : null
+  }, [isDetail, productId, location.pathname, products])
   const tab = searchParams.get('tab')
-  const showListActions = !isCreate && (!tab || tab === 'todos')
+  const showListActions = !isCreate && !isDetail && (!tab || tab === 'todos')
 
   const activeCount = useMemo(
     () => products.filter((item) => item.status === 'ativo').length,
@@ -105,6 +114,24 @@ export function ProductsSubheader() {
       <header className="clients-subheader">
         <div className="clients-subheader__heading">
           <h1 className="clients-subheader__title">Cadastro de produto</h1>
+        </div>
+      </header>
+    )
+  }
+
+  if (isDetail) {
+    return (
+      <header className="clients-subheader">
+        <div className="clients-subheader__heading">
+          <h1 className="clients-subheader__title">
+            {detailProduct?.name || 'Produto'}
+          </h1>
+          {detailProduct?.fullCode ? (
+            <>
+              <span className="clients-subheader__sep" aria-hidden="true" />
+              <p className="clients-subheader__subtitle">{detailProduct.fullCode}</p>
+            </>
+          ) : null}
         </div>
       </header>
     )

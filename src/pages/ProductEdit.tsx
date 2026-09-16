@@ -1,16 +1,59 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { ArrowLeft, Check } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { CreatableSelect } from '../components/products/CreatableSelect'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
 import { formatMoneyBrPrefix, maskMoneyBr } from '../lib/moneyMask'
-import { addProduct } from '../lib/productsStore'
+import {
+  buildAttributeSummary,
+  formatProductRegisteredMeta,
+  getProduct,
+  updateProduct,
+  type Product,
+} from '../lib/productsStore'
 import { addProductType, formatProductTypeLabel } from '../lib/productTypesStore'
 import './ProductCreate.css'
 
-export function ProductCreate() {
+function stripMoneyPrefix(value: string) {
+  return String(value || '')
+    .replace(/R\$\s?/gi, '')
+    .trim()
+}
+
+function hydrateForm(product: Product) {
+  return {
+    productType: product.type,
+    storeCode: product.storeCode,
+    name: product.name,
+    quantity: product.quantity || '1',
+    color: product.color,
+    size: product.size,
+    model: product.model,
+    brand: product.brand,
+    stylist: product.stylist,
+    eventType: product.eventType,
+    cost: stripMoneyPrefix(product.cost),
+    rental: stripMoneyPrefix(product.rental),
+    firstRental: stripMoneyPrefix(product.firstRental),
+    salePrice: stripMoneyPrefix(product.salePrice),
+    ncm: product.ncm,
+    cfop: product.cfop,
+    cfopInter: product.cfopInter,
+    commission: product.commission,
+    photoName: product.photoName || null,
+    description: product.description,
+    consigned: product.consigned,
+    consignedCommission: product.consignedCommission,
+    serviceFee: stripMoneyPrefix(product.serviceFee),
+    productState: product.productState,
+    status: product.status,
+  }
+}
+
+export function ProductEdit() {
+  const { productId = '' } = useParams()
   const navigate = useNavigate()
   const types = useProductTypes()
   const colors = useProductAttributes('cor')
@@ -20,9 +63,8 @@ export function ProductCreate() {
   const stylists = useProductAttributes('estilista')
   const events = useProductAttributes('evento')
 
+  const [product, setProduct] = useState<Product | null>(() => getProduct(productId))
   const [productType, setProductType] = useState('')
-  const [fullCode, setFullCode] = useState('')
-  const [customId, setCustomId] = useState(false)
   const [storeCode, setStoreCode] = useState('')
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('1')
@@ -46,7 +88,41 @@ export function ProductCreate() {
   const [consignedCommission, setConsignedCommission] = useState('')
   const [serviceFee, setServiceFee] = useState('')
   const [productState, setProductState] = useState('')
+  const [status, setStatus] = useState<'ativo' | 'inativo'>('ativo')
   const [touched, setTouched] = useState(false)
+
+  useEffect(() => {
+    const current = getProduct(productId)
+    setProduct(current)
+    if (!current) return
+    const form = hydrateForm(current)
+    setProductType(form.productType)
+    setStoreCode(form.storeCode)
+    setName(form.name)
+    setQuantity(form.quantity)
+    setColor(form.color)
+    setSize(form.size)
+    setModel(form.model)
+    setBrand(form.brand)
+    setStylist(form.stylist)
+    setEventType(form.eventType)
+    setCost(form.cost)
+    setRental(form.rental)
+    setFirstRental(form.firstRental)
+    setSalePrice(form.salePrice)
+    setNcm(form.ncm)
+    setCfop(form.cfop)
+    setCfopInter(form.cfopInter)
+    setCommission(form.commission)
+    setPhotoName(form.photoName)
+    setDescription(form.description)
+    setConsigned(form.consigned)
+    setConsignedCommission(form.consignedCommission)
+    setServiceFee(form.serviceFee)
+    setProductState(form.productState)
+    setStatus(form.status)
+    setTouched(false)
+  }, [productId])
 
   const missingType = !productType
   const missingName = !name.trim()
@@ -60,12 +136,35 @@ export function ProductCreate() {
   const stylistOptions = useMemo(() => stylists.map((item) => item.name), [stylists])
   const eventOptions = useMemo(() => events.map((item) => item.name), [events])
 
-  const attributeSummary = useMemo(() => {
-    return [color, size, model, brand, stylist, eventType].filter(Boolean).join(', ')
-  }, [color, size, model, brand, stylist, eventType])
-
   const createAttr = (kind: ProductAttributeKind, value: string) => {
     addProductAttribute(kind, value)
+  }
+
+  if (!product) {
+    return (
+      <div className="product-create">
+        <section className="product-create__card">
+          <header className="product-create__head">
+            <h2>Produto não encontrado</h2>
+            <div className="product-create__actions">
+              <button
+                type="button"
+                className="product-create__back"
+                onClick={() => navigate('/produtos')}
+              >
+                <ArrowLeft size={14} strokeWidth={2.25} />
+                Voltar
+              </button>
+            </div>
+          </header>
+          <div className="product-create__body">
+            <p className="product-create__help">
+              Este produto pode ter sido excluído ou o link é inválido.
+            </p>
+          </div>
+        </section>
+      </div>
+    )
   }
 
   const onSubmit = (event: FormEvent) => {
@@ -73,13 +172,12 @@ export function ProductCreate() {
     setTouched(true)
     if (missingType || missingName || missingRental) return
 
-    addProduct({
+    const updated = updateProduct(product.id, {
       name,
       type: productType,
       rental: formatMoneyBrPrefix(rental),
-      attributes: attributeSummary,
-      status: 'ativo',
-      fullCode: customId ? fullCode : undefined,
+      attributes: buildAttributeSummary({ color, size, model, brand, stylist, eventType }),
+      status,
       storeCode,
       quantity,
       color,
@@ -102,14 +200,19 @@ export function ProductCreate() {
       productState,
       photoName: photoName ?? '',
     })
-    navigate('/produtos')
+    if (updated) setProduct(updated)
   }
+
+  const meta = formatProductRegisteredMeta(product)
 
   return (
     <div className="product-create">
       <form className="product-create__card" onSubmit={onSubmit}>
-        <header className="product-create__head">
-          <h2>Informações do produto</h2>
+        <header className="product-create__head product-create__head--edit">
+          <div className="product-create__head-copy">
+            <h2>Informações do produto</h2>
+            <p className="product-create__meta">{meta}</p>
+          </div>
           <div className="product-create__actions">
             <button
               type="button"
@@ -121,7 +224,7 @@ export function ProductCreate() {
             </button>
             <button type="submit" className="product-create__save">
               <Check size={14} strokeWidth={2.5} />
-              Cadastrar
+              Atualizar
             </button>
           </div>
         </header>
@@ -139,20 +242,11 @@ export function ProductCreate() {
             />
           </Field>
 
-          <Field label="Código completo">
-            <input
-              type="text"
-              value={fullCode}
-              disabled={!customId}
-              onChange={(event) => setFullCode(event.target.value)}
-            />
-            <button
-              type="button"
-              className="product-create__link"
-              onClick={() => setCustomId(true)}
-            >
-              Clique aqui se você quiser escolher um ID específico para o produto.
-            </button>
+          <Field label="Código completo" required>
+            <input type="text" value={product.fullCode} disabled readOnly />
+            <p className="product-create__help product-create__help--warn">
+              Não é possível alterar o código de um produto já cadastrado.
+            </p>
           </Field>
 
           <Field label="Código loja">
@@ -161,12 +255,6 @@ export function ProductCreate() {
               value={storeCode}
               onChange={(event) => setStoreCode(event.target.value)}
             />
-            <p className="product-create__help">
-              É um código identificador alternativo ao código gerado pelo sistema.{' '}
-              <button type="button" className="product-create__link product-create__link--inline">
-                Clique aqui para saber mais
-              </button>
-            </p>
           </Field>
 
           <Field label="Nome" required invalid={touched && missingName}>
@@ -322,6 +410,16 @@ export function ProductCreate() {
             />
           </Field>
 
+          <Field label="Status">
+            <select
+              value={status}
+              onChange={(event) => setStatus(event.target.value as 'ativo' | 'inativo')}
+            >
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </Field>
+
           <Field label="Consignado">
             <select value={consigned} onChange={(event) => setConsigned(event.target.value)}>
               <option value="">Selecione</option>
@@ -358,7 +456,7 @@ export function ProductCreate() {
           </button>
           <button type="submit" className="product-create__save">
             <Check size={14} strokeWidth={2.5} />
-            Cadastrar
+            Atualizar
           </button>
         </footer>
       </form>
