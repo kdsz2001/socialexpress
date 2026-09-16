@@ -1173,7 +1173,7 @@ html[data-theme='dark'] .products-modal__tip {
   justify-content: flex-end;
   align-items: center;
   gap: 0.55rem;
-  padding: 1rem 1.35rem 1.25rem;
+  padding: 1.05rem 1.35rem 1.35rem;
   border-top: 1px solid var(--pm-divider);
   flex-shrink: 0;
 }
