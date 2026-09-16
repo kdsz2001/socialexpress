@@ -1,0 +1,133 @@
+.p-info {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.p-info__overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(24, 28, 50, 0.55);
+  -webkit-backdrop-filter: blur(1.5px);
+  backdrop-filter: blur(1.5px);
+  cursor: default;
+}
+
+html[data-theme='dark'] .p-info__overlay {
+  background: rgba(10, 10, 18, 0.72);
+}
+
+.p-info__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(360px, 100%);
+  background: var(--card-bg, #fff);
+  border-radius: 5.46px;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.25);
+  padding: 52px 28px 40px;
+  text-align: center;
+  animation: p-info-in 0.16s ease;
+}
+
+.p-info__icon {
+  box-sizing: border-box;
+  width: 5em;
+  height: 5em;
+  margin: 0 auto 1.25em;
+  border-radius: 50%;
+  border: 0.25em solid #8950fc;
+  background: transparent;
+  color: #8950fc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  font-style: normal;
+  line-height: 1;
+}
+
+.p-info__icon span {
+  font-size: 3.75em;
+  font-weight: 700;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  line-height: 1;
+  transform: translateY(-0.04em);
+}
+
+.p-info__title {
+  margin: 0 0 1.1em;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-heading, #181c32);
+}
+
+.p-info__body {
+  margin: 0 auto 2em;
+  max-width: 18.5rem;
+  font-size: 1.025em;
+  line-height: 1.7;
+  color: #54566d;
+}
+
+.p-info__body p {
+  margin: 0 0 1.15em;
+}
+
+.p-info__body p:last-child {
+  margin-bottom: 0;
+}
+
+.p-info__body strong {
+  font-weight: 700;
+  color: var(--text-heading, #181c32);
+}
+
+.p-info__continue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7.5em;
+  height: 2.75em;
+  padding: 0.55em 1.6em;
+  border: 0;
+  border-radius: 0.3125em;
+  background: #eef0f8;
+  color: #3699ff;
+  font-family: inherit;
+  font-size: 1.0625em;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.p-info__continue:hover {
+  background: #e4e6ef;
+  color: #187de4;
+}
+
+html[data-theme='dark'] .p-info__continue {
+  background: var(--surface-muted);
+  color: #3699ff;
+}
+
+@keyframes p-info-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

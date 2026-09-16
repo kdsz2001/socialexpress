@@ -35,6 +35,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/agenda': 'Agenda',
   '/eventos': 'Eventos',
   '/produtos': 'Produtos',
+  '/produtos/cadastrar': 'Cadastro de produto',
   '/funcionarios': 'Funcionários',
   '/pedidos': 'Pedidos',
   '/orcamentos': 'Orçamentos',
@@ -115,6 +116,13 @@ export function AppLayout() {
   useEffect(() => {
     if (location.pathname.startsWith('/clientes/') && location.pathname !== '/clientes/cadastrar') {
       document.title = 'Detalhes do cliente'
+      return
+    }
+    if (
+      location.pathname.startsWith('/produtos/') &&
+      location.pathname !== '/produtos/cadastrar'
+    ) {
+      document.title = 'Produto'
       return
     }
     document.title = PAGE_TITLES[location.pathname] ?? 'Social Express'

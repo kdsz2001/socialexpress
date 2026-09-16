@@ -1,6 +1,7 @@
 .daterange {
   width: min(720px, calc(100vw - 48px));
   background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 0.55rem;
   box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.18);
   overflow: hidden;
@@ -10,6 +11,7 @@
 .daterange__body {
   display: flex;
   min-height: 320px;
+  background: var(--card-bg);
 }
 
 .daterange__presets {
@@ -17,6 +19,7 @@
   flex-shrink: 0;
   padding: 0.75rem 0;
   border-right: 1px solid var(--border-color);
+  background: var(--card-bg);
 }
 
 .daterange__preset {
@@ -50,6 +53,7 @@
   min-width: 0;
   padding: 0.85rem 1rem 1rem;
   position: relative;
+  background: var(--card-bg);
 }
 
 .daterange__nav {
@@ -68,10 +72,12 @@
   height: 28px;
   display: grid;
   place-items: center;
+  border: 0;
   border-radius: 0.35rem;
   color: var(--text-secondary);
   pointer-events: auto;
   background: transparent;
+  cursor: pointer;
 }
 
 .daterange__nav-btn:hover {
@@ -112,11 +118,13 @@
 .daterange__grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 0;
+  background: var(--card-bg);
 }
 
 .daterange__day {
-  aspect-ratio: 1;
+  width: 100%;
+  height: 36px;
   border: 0;
   border-radius: 0.35rem;
   background: transparent;
@@ -125,7 +133,13 @@
   font-size: 0.9rem;
   font-weight: 400;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: color 0.12s ease, background 0.12s ease;
+  box-shadow: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 0;
 }
 
 .daterange__day:hover {
@@ -141,6 +155,40 @@
   background: var(--info-soft-bg);
   color: #3699ff;
   border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  /* overlap de 1px elimina hairline subpixel entre células */
+  margin-left: -1px;
+  width: calc(100% + 1px);
+  z-index: 0;
+}
+
+.daterange__day.is-in-range:nth-child(7n + 1) {
+  border-radius: 0.35rem 0 0 0.35rem;
+  margin-left: 0;
+  width: 100%;
+}
+
+.daterange__day.is-in-range:nth-child(7n) {
+  border-radius: 0 0.35rem 0.35rem 0;
+}
+
+html[data-theme='dark'] .daterange {
+  border-color: #2b2b40;
+  box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme='dark'] .daterange__day.is-in-range {
+  background: #1b2a3f;
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .daterange__day.is-selected {
+  background: #243752;
+}
+
+html[data-theme='dark'] .daterange__preset.is-active {
+  background: rgba(54, 153, 255, 0.18);
 }
 
 .daterange__day.is-selected {
@@ -148,6 +196,11 @@
   color: #3699ff;
   font-weight: 600;
   border-radius: 0.35rem;
+  z-index: 1;
+  outline: none;
+  box-shadow: none;
+  margin-left: 0;
+  width: 100%;
 }
 
 .daterange__footer {
@@ -158,6 +211,7 @@
   padding: 0.85rem 1.15rem;
   border-top: 1px solid var(--border-color);
   flex-wrap: wrap;
+  background: var(--card-bg);
 }
 
 .daterange__summary {
@@ -177,10 +231,12 @@
 .daterange__apply {
   height: 36px;
   padding: 0 1rem;
+  border: 0;
   border-radius: 0.42rem;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 500;
+  cursor: pointer;
 }
 
 .daterange__cancel {

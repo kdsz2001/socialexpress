@@ -9,6 +9,8 @@ import { MyProfile } from './pages/MyProfile'
 import { Agenda } from './pages/Agenda'
 import { Events } from './pages/Events'
 import { Products } from './pages/Products'
+import { ProductCreate } from './pages/ProductCreate'
+import { ProductEdit } from './pages/ProductEdit'
 import { Employees } from './pages/Employees'
 import { Orders } from './pages/Orders'
 import { Financeiro } from './pages/Financeiro'
@@ -44,6 +46,8 @@ export default function App() {
         <Route path="/agenda" element={<Agenda />} />
         <Route path="/eventos" element={<Events />} />
         <Route path="/produtos" element={<Products />} />
+        <Route path="/produtos/cadastrar" element={<ProductCreate />} />
+        <Route path="/produtos/:productId" element={<ProductEdit />} />
         <Route path="/funcionarios" element={<Employees />} />
         <Route path="/pedidos" element={<Orders />} />
         <Route path="/financeiro" element={<Financeiro />} />
