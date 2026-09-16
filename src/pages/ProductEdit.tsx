@@ -21,6 +21,8 @@ import {
 import { addProductType, formatProductTypeLabel } from '../lib/productTypesStore'
 import './ProductCreate.css'
 
+const SAVED_TOAST_KEY = 'social-express:product-saved-toast'
+
 function stripMoneyPrefix(value: string) {
   return String(value || '')
     .replace(/R\$\s?/gi, '')
@@ -99,6 +101,17 @@ export function ProductEdit() {
   const [touched, setTouched] = useState(false)
   const [toastOpen, setToastOpen] = useState(false)
   const closeToast = useCallback(() => setToastOpen(false), [])
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(SAVED_TOAST_KEY) === '1') {
+        sessionStorage.removeItem(SAVED_TOAST_KEY)
+        setToastOpen(true)
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
 
   useEffect(() => {
     const current = getProduct(productId)
@@ -212,8 +225,13 @@ export function ProductEdit() {
       photoDataUrl,
     })
     if (updated) {
-      setProduct(updated)
-      setToastOpen(true)
+      try {
+        sessionStorage.setItem(SAVED_TOAST_KEY, '1')
+      } catch {
+        // ignore storage errors
+      }
+      // Refresh da página (como no Clarial) e mostra o toast após o reload
+      window.location.assign(`/produtos/${updated.id}`)
     }
   }
 
