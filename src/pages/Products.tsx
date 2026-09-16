@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import {
   ArrowUp,
@@ -37,7 +37,6 @@ import {
   formatProductCodes,
   productAttributeChips,
   type Product,
-  type ProductStatus,
 } from '../lib/productsStore'
 import {
   addProductType,
@@ -52,12 +51,26 @@ import './Products.css'
 
 type SortDir = 'asc' | 'desc'
 type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
+type ProductListFilter =
+  | 'todos'
+  | 'ativo'
+  | 'inativo'
+  | 'consignados'
+  | 'nao_consignados'
+  | 'a_venda'
+  | 'vendidos'
 
-const STATUS_OPTIONS: { id: 'todos' | ProductStatus; label: string }[] = [
+const STATUS_OPTIONS: { id: ProductListFilter; label: string }[] = [
   { id: 'todos', label: 'Mostrar todos' },
   { id: 'ativo', label: 'Ativos' },
   { id: 'inativo', label: 'Inativos' },
+  { id: 'consignados', label: 'Consignados' },
+  { id: 'nao_consignados', label: 'Não consignados' },
+  { id: 'a_venda', label: 'À venda' },
+  { id: 'vendidos', label: 'Vendidos' },
 ]
+
+const REMOVED_TOAST_KEY = 'social-express:product-removed-toast'
 
 const ATTRIBUTE_KINDS = Object.keys(ATTRIBUTE_KIND_META) as ProductAttributeKind[]
 const PAGE_SIZES = [5, 10, 20, 30, 50, 100]
@@ -89,10 +102,23 @@ function ProductsList() {
 
   const [query, setQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState('todos')
-  const [statusFilter, setStatusFilter] = useState<'todos' | ProductStatus>('todos')
+  const [statusFilter, setStatusFilter] = useState<ProductListFilter>('todos')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [deleting, setDeleting] = useState<Product | null>(null)
   const [imagePreview, setImagePreview] = useState<Product | null>(null)
+  const [toastOpen, setToastOpen] = useState(false)
+  const closeToast = useCallback(() => setToastOpen(false), [])
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(REMOVED_TOAST_KEY) === '1') {
+        sessionStorage.removeItem(REMOVED_TOAST_KEY)
+        setToastOpen(true)
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
 
   useEffect(() => {
     if (!imagePreview) return
@@ -121,7 +147,15 @@ function ProductsList() {
     return products
       .filter((item) => {
         if (typeFilter !== 'todos' && item.type !== typeFilter) return false
-        if (statusFilter !== 'todos' && item.status !== statusFilter) return false
+        if (statusFilter === 'ativo' && item.status !== 'ativo') return false
+        if (statusFilter === 'inativo' && item.status !== 'inativo') return false
+        if (statusFilter === 'consignados' && item.consigned !== 'Sim') return false
+        if (statusFilter === 'nao_consignados' && item.consigned === 'Sim') return false
+        if (statusFilter === 'a_venda') {
+          const hasSalePrice = Boolean(item.salePrice.trim())
+          if (!hasSalePrice || item.sold) return false
+        }
+        if (statusFilter === 'vendidos' && !item.sold) return false
         if (!q) return true
         const codes = formatProductCodes(item).toLocaleLowerCase('pt-BR')
         return (
@@ -141,6 +175,11 @@ function ProductsList() {
 
   return (
     <div className="products">
+      <SaveToast
+        open={toastOpen}
+        message="Produto removido com sucesso."
+        onClose={closeToast}
+      />
       <section className="products__card">
         <div className="products__toolbar">
           <label className="products__search">
@@ -177,9 +216,7 @@ function ProductsList() {
             <select
               className="products__select"
               value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(event.target.value as 'todos' | ProductStatus)
-              }
+              onChange={(event) => setStatusFilter(event.target.value as ProductListFilter)}
               aria-label="Filtro por status"
             >
               {STATUS_OPTIONS.map((item) => (
@@ -327,8 +364,18 @@ function ProductsList() {
         }
         onCancel={() => setDeleting(null)}
         onConfirm={() => {
-          if (deleting) deleteProduct(deleting.id)
+          if (!deleting) {
+            setDeleting(null)
+            return
+          }
+          deleteProduct(deleting.id)
           setDeleting(null)
+          try {
+            sessionStorage.setItem(REMOVED_TOAST_KEY, '1')
+          } catch {
+            // ignore storage errors
+          }
+          window.location.assign(`${window.location.pathname}${window.location.search}`)
         }}
       />
 

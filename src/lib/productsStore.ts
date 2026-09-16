@@ -42,6 +42,8 @@ export type Product = {
   productState: string
   photoName: string
   photoDataUrl: string
+  /** Produto marcado como vendido. */
+  sold: boolean
 }
 
 export type ProductInput = {
@@ -73,6 +75,7 @@ export type ProductInput = {
   productState?: string
   photoName?: string
   photoDataUrl?: string
+  sold?: boolean
 }
 
 const STORAGE_KEY = 'social-express:products'
@@ -185,6 +188,7 @@ function normalizeProduct(raw: Partial<Product> & { id?: string }): Product | nu
     productState: String(raw.productState || '').trim(),
     photoName: String(raw.photoName || '').trim(),
     photoDataUrl: String(raw.photoDataUrl || '').trim(),
+    sold: Boolean(raw.sold),
   }
 }
 
@@ -267,6 +271,7 @@ function fromInput(input: ProductInput, base?: Product): Omit<Product, 'id' | 'c
     productState: String(input.productState ?? base?.productState ?? '').trim(),
     photoName: String(input.photoName ?? base?.photoName ?? '').trim(),
     photoDataUrl: String(input.photoDataUrl ?? base?.photoDataUrl ?? '').trim(),
+    sold: typeof input.sold === 'boolean' ? input.sold : Boolean(base?.sold),
   }
 }
 
