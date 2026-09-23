@@ -73,6 +73,8 @@ type CreateTarget = {
   hour?: number
   /** Hora em que o intervalo termina, exclusiva. 8 até 11 cobre 08:00–11:00. */
   endHour?: number
+  /** O ponteiro soltou na borda de cima do intervalo. */
+  releaseAtStart?: boolean
 }
 
 type DragPreview = {
@@ -517,7 +519,12 @@ export function Agenda() {
               const hour = hourAt(event)
               const start = Math.min(current.anchor, hour)
               const end = Math.max(current.anchor, hour) + 1
-              setCreateTarget({ date: startOfDay(day), hour: start, endHour: end })
+              setCreateTarget({
+                date: startOfDay(day),
+                hour: start,
+                endHour: end,
+                releaseAtStart: hour < current.anchor,
+              })
             }
 
             const dragging = Boolean(dragPreview && isSameDay(dragPreview.date, day))
@@ -563,6 +570,10 @@ export function Agenda() {
             if (!range) return null
             const rangeTop = (range.start - SLOT_START_HOUR) * HOUR_HEIGHT
             const rangeHeight = (range.end - range.start) * HOUR_HEIGHT
+            const atStart = Boolean(
+              createTarget && isSameDay(createTarget.date, day) && createTarget.releaseAtStart,
+            )
+            const edgeInset = 8
 
             return (
               <div
@@ -571,10 +582,12 @@ export function Agenda() {
                 style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
               >
                 <div
-                  className={`agenda__create-layer${
+                  className={`agenda__create-layer${atStart ? ' is-at-start' : ''}${
                     days.length > 1 && dayIndex === 0 ? ' is-edge-start' : ''
                   }${days.length > 1 && dayIndex === days.length - 1 ? ' is-edge-end' : ''}`}
-                  style={{ top: rangeTop + rangeHeight / 2 }}
+                  style={{
+                    top: atStart ? rangeTop + edgeInset : rangeTop + rangeHeight - edgeInset,
+                  }}
                 >
                   {renderCreateTip(day, range.start, range.end)}
                 </div>

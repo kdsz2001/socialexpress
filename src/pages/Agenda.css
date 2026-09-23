@@ -670,19 +670,31 @@ html.theme-dark .agenda__slot-half {
   position: absolute;
   left: 50%;
   z-index: 1;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -100%);
   pointer-events: none;
+}
+
+.agenda__create-layer.is-at-start {
+  transform: translate(-50%, 0);
 }
 
 .agenda__create-layer.is-edge-start {
   left: 4px;
-  transform: translateY(-50%);
+  transform: translateY(-100%);
+}
+
+.agenda__create-layer.is-edge-start.is-at-start {
+  transform: translateY(0);
 }
 
 .agenda__create-layer.is-edge-end {
   left: auto;
   right: 4px;
-  transform: translateY(-50%);
+  transform: translateY(-100%);
+}
+
+.agenda__create-layer.is-edge-end.is-at-start {
+  transform: translateY(0);
 }
 
 .agenda__create-layer .agenda__create-wrap {
