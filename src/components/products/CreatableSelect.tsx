@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, X } from 'lucide-react'
 import './CreatableSelect.css'
 
 type CreatableSelectProps = {
@@ -73,8 +73,18 @@ export function CreatableSelect({
     setOpen(true)
   }, [openToken])
 
+  const clearValue = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
+    event.preventDefault()
+    event.stopPropagation()
+    onChange('')
+    setOpen(true)
+  }
+
   return (
-    <div className={`cselect${open ? ' is-open' : ''}${invalid ? ' is-invalid' : ''}`} ref={rootRef}>
+    <div
+      className={`cselect${open ? ' is-open' : ''}${invalid ? ' is-invalid' : ''}${value ? ' has-value' : ''}`}
+      ref={rootRef}
+    >
       <button
         type="button"
         className="cselect__trigger"
@@ -88,6 +98,17 @@ export function CreatableSelect({
         </span>
         <ChevronDown size={14} strokeWidth={2} className="cselect__chevron" />
       </button>
+      {value ? (
+        <button
+          type="button"
+          className="cselect__clear"
+          aria-label="Remover opção"
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={clearValue}
+        >
+          <X size={14} strokeWidth={2} />
+        </button>
+      ) : null}
 
       {open ? (
         <div className="cselect__dropdown" id={id} role="listbox">
