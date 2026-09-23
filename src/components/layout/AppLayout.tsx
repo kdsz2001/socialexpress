@@ -174,7 +174,7 @@ export function AppLayout() {
         {location.pathname === '/agenda' && (
           <AgendaSubheader onNewAppointment={() => openNewAppointment()} />
         )}
-        {location.pathname === '/eventos' && <EventsSubheader />}
+        {location.pathname.startsWith('/eventos') && <EventsSubheader />}
         {location.pathname.startsWith('/produtos') && <ProductsSubheader />}
         {location.pathname.startsWith('/funcionarios') && <EmployeesSubheader />}
         {location.pathname === '/pedidos' && <OrdersSubheader />}

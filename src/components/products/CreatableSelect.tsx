@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, X } from 'lucide-react'
 import './CreatableSelect.css'
 
 type CreatableSelectProps = {
@@ -10,6 +10,10 @@ type CreatableSelectProps = {
   invalid?: boolean
   /** When false, only calls onCreate (e.g. open a modal) without selecting the raw name. Default true. */
   selectOnCreate?: boolean
+  /** Increment to open the list from outside the field. */
+  openToken?: number
+  /** When false, the list only filters existing options. Default true. */
+  allowCreate?: boolean
   onChange: (value: string) => void
   onCreate: (name: string) => void
 }
@@ -21,6 +25,8 @@ export function CreatableSelect({
   createLabel,
   invalid,
   selectOnCreate = true,
+  openToken = 0,
+  allowCreate = true,
   onChange,
   onCreate,
 }: CreatableSelectProps) {
@@ -37,10 +43,11 @@ export function CreatableSelect({
   }, [options, query])
 
   const canCreate = useMemo(() => {
+    if (!allowCreate) return false
     const q = query.trim()
     if (!q) return false
     return !options.some((item) => item.toLocaleLowerCase('pt-BR') === q.toLocaleLowerCase('pt-BR'))
-  }, [options, query])
+  }, [allowCreate, options, query])
 
   useEffect(() => {
     if (!open) return
@@ -65,8 +72,23 @@ export function CreatableSelect({
     }
   }, [open])
 
+  useEffect(() => {
+    if (!openToken) return
+    setOpen(true)
+  }, [openToken])
+
+  const clearValue = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
+    event.preventDefault()
+    event.stopPropagation()
+    onChange('')
+    setOpen(true)
+  }
+
   return (
-    <div className={`cselect${open ? ' is-open' : ''}${invalid ? ' is-invalid' : ''}`} ref={rootRef}>
+    <div
+      className={`cselect${open ? ' is-open' : ''}${invalid ? ' is-invalid' : ''}${value ? ' has-value' : ''}`}
+      ref={rootRef}
+    >
       <button
         type="button"
         className="cselect__trigger"
@@ -80,6 +102,17 @@ export function CreatableSelect({
         </span>
         <ChevronDown size={14} strokeWidth={2} className="cselect__chevron" />
       </button>
+      {value ? (
+        <button
+          type="button"
+          className="cselect__clear"
+          aria-label="Remover opção"
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={clearValue}
+        >
+          <X size={14} strokeWidth={2} />
+        </button>
+      ) : null}
 
       {open ? (
         <div className="cselect__dropdown" id={id} role="listbox">

@@ -36,7 +36,7 @@ const PRODUCTS_TABS: { id: ProductsTab; label: string; path: string }[] = [
   { id: 'consulta', label: 'Consulta', path: '/produtos?tab=consulta' },
   { id: 'todos', label: 'Todos produtos', path: '/produtos' },
   { id: 'atributos', label: 'Atributos', path: '/produtos?tab=atributos' },
-  { id: 'tipos', label: 'Tipos', path: '/produtos?tab=tipos' },
+  { id: 'tipos', label: 'Tipos de produtos', path: '/produtos?tab=tipos' },
   { id: 'alteracao', label: 'Alteração em massa', path: '/produtos?tab=alteracao' },
 ]
 
@@ -94,7 +94,10 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           : isClientsSection
             ? 'todos'
             : null
-  const productsTab: ProductsTab | null = !isProductsSection
+  const isProductForm =
+    location.pathname === '/produtos/cadastrar' ||
+    (isProductsSection && location.pathname !== '/produtos')
+  const productsTab: ProductsTab | null = !isProductsSection || isProductForm
     ? null
     : paramTab === 'consulta'
       ? 'consulta'
@@ -390,7 +393,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </div>
       )}
 
-      {isProductsSection && productsTab ? (
+      {isProductsSection ? (
         <div className="topbar__tabs topbar__tabs--products" role="tablist" aria-label="Produtos">
           {PRODUCTS_TABS.filter((item) => item.id !== 'alteracao' || showBulkTab).map((item) => (
             <button

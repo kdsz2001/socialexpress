@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { ArrowLeft, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { CreatableSelect } from '../components/products/CreatableSelect'
@@ -8,6 +8,7 @@ import {
 } from '../components/products/ProductFormControls'
 import { ProductTypeModal } from '../components/products/ProductTypeModal'
 import { ProductInfoModal } from '../components/products/ProductInfoModal'
+import { ProductIdWarningModal } from '../components/products/ProductIdWarningModal'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { addProductAttribute, type ProductAttributeKind } from '../lib/productAttributesStore'
@@ -63,6 +64,9 @@ export function ProductCreate() {
   const [typeModalName, setTypeModalName] = useState('')
   const [typeModalDescription, setTypeModalDescription] = useState('')
   const [storeCodeInfoOpen, setStoreCodeInfoOpen] = useState(false)
+  const [idWarningOpen, setIdWarningOpen] = useState(false)
+  const [typeOpenToken, setTypeOpenToken] = useState(0)
+  const typeSelectRef = useRef<HTMLDivElement>(null)
 
   const missingType = !productType
   const missingName = !name.trim()
@@ -112,6 +116,21 @@ export function ProductCreate() {
   const onProductTypeChange = (value: string) => {
     setProductType(value)
     setCustomId(false)
+  }
+
+  const onChooseSpecificId = () => {
+    if (!productType) {
+      typeSelectRef.current?.scrollIntoView({ block: 'nearest' })
+      setTypeOpenToken((token) => token + 1)
+      return
+    }
+    setIdWarningOpen(true)
+  }
+
+  const confirmSpecificId = () => {
+    setCustomSequence(autoCode.sequence || '0001')
+    setCustomId(true)
+    setIdWarningOpen(false)
   }
 
   const onSubmit = (event: FormEvent) => {
@@ -177,23 +196,28 @@ export function ProductCreate() {
 
         <div className="product-create__body">
           <Field label="Tipo de produto" required invalid={touched && missingType}>
-            <CreatableSelect
-              value={productType}
-              options={typeOptions}
-              placeholder="Selecione um tipo de produto"
-              createLabel="Cadastrar novo tipo de produto"
-              invalid={touched && missingType}
-              selectOnCreate={false}
-              onChange={onProductTypeChange}
-              onCreate={openTypeModal}
-            />
+            <div ref={typeSelectRef}>
+              <CreatableSelect
+                value={productType}
+                options={typeOptions}
+                placeholder="Selecione um tipo de produto"
+                createLabel="Cadastrar novo tipo de produto"
+                invalid={touched && missingType}
+                selectOnCreate={false}
+                openToken={typeOpenToken}
+                onChange={onProductTypeChange}
+                onCreate={openTypeModal}
+              />
+            </div>
           </Field>
 
           <Field label="Código completo">
-            <div className={`product-create__code${customId ? ' is-custom' : ''}`}>
-              <span className="product-create__code-prefix" aria-label="Prefixo do tipo">
-                {codePrefix}
-              </span>
+            <div className={`product-create__code${customId ? ' is-custom' : ''}${codePrefix ? '' : ' is-empty'}`}>
+              {codePrefix ? (
+                <span className="product-create__code-prefix" aria-label="Prefixo do tipo">
+                  {codePrefix}
+                </span>
+              ) : null}
               {customId ? (
                 <input
                   type="text"
@@ -212,14 +236,7 @@ export function ProductCreate() {
               )}
             </div>
             {!customId ? (
-              <button
-                type="button"
-                className="product-create__link"
-                onClick={() => {
-                  setCustomSequence(autoCode.sequence || '0001')
-                  setCustomId(true)
-                }}
-              >
+              <button type="button" className="product-create__link" onClick={onChooseSpecificId}>
                 Clique aqui se você quiser escolher um ID específico para o produto.
               </button>
             ) : (
@@ -464,6 +481,12 @@ export function ProductCreate() {
           onSave={saveTypeModal}
         />
       ) : null}
+
+      <ProductIdWarningModal
+        open={idWarningOpen}
+        onCancel={() => setIdWarningOpen(false)}
+        onContinue={confirmSpecificId}
+      />
 
       <ProductInfoModal
         open={storeCodeInfoOpen}

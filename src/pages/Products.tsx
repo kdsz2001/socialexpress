@@ -39,6 +39,7 @@ import {
   productAttributeChips,
   type Product,
 } from '../lib/productsStore'
+import { useProductsSubheaderAction } from '../lib/productsSubheaderAction'
 import {
   addProductType,
   countProductsUsingType,
@@ -684,10 +685,6 @@ function ProductsConsulta() {
 
   return (
     <div className="products">
-      <header className="products__page-head">
-        <h1>Consulta de produtos</h1>
-      </header>
-
       <section className="products__card products__consulta">
         <div className="products__consulta-grid">
           <MultiDummy
@@ -876,8 +873,21 @@ function MultiDummy({
   )
 }
 
+function kindFromParam(value: string | null): ProductAttributeKind {
+  if (value && value in ATTRIBUTE_KIND_META) return value as ProductAttributeKind
+  return 'cor'
+}
+
 function ProductsAtributos() {
-  const [kind, setKind] = useState<ProductAttributeKind>('cor')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const kind = kindFromParam(searchParams.get('kind'))
+  const setKind = (next: ProductAttributeKind) => {
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set('tab', 'atributos')
+    if (next === 'cor') nextParams.delete('kind')
+    else nextParams.set('kind', next)
+    setSearchParams(nextParams, { replace: true })
+  }
   const items = useProductAttributes(kind)
   const meta = ATTRIBUTE_KIND_META[kind]
   const [query, setQuery] = useState('')
@@ -948,10 +958,6 @@ function ProductsAtributos() {
         message={toast ?? undefined}
         onClose={() => setToast(null)}
       />
-
-      <header className="products__page-head">
-        <h1>{meta.title}</h1>
-      </header>
 
       <section className="products__attrs">
         <aside className="products__attrs-nav products__card" aria-label="Tipos de atributo">
@@ -1144,13 +1150,6 @@ function ProductsTipos() {
   const start = (currentPage - 1) * pageSize
   const pageItems = sorted.slice(start, start + pageSize)
 
-  const statusLabel =
-    types.length === 0
-      ? 'Nenhum tipo cadastrado'
-      : types.length === 1
-        ? '1 tipo cadastrado'
-        : `${types.length} tipos cadastrados`
-
   const nextCode = nextProductTypeCode()
 
   const showToast = (message: string, variant: 'success' | 'danger' = 'success') => {
@@ -1158,12 +1157,14 @@ function ProductsTipos() {
     setToast(message)
   }
 
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setEditing(null)
     setName('')
     setDescription('')
     setModalOpen(true)
-  }
+  }, [])
+
+  useProductsSubheaderAction({ label: 'Adicionar tipo', onClick: openCreate })
 
   const save = () => {
     if (!name.trim()) return
@@ -1185,18 +1186,6 @@ function ProductsTipos() {
         variant={toastVariant}
         onClose={() => setToast(null)}
       />
-
-      <header className="products__page-head products__page-head--actions">
-        <div className="products__page-head-left">
-          <h1>Tipos de produtos</h1>
-          <span className="products__page-sep" aria-hidden="true" />
-          <p>{statusLabel}</p>
-        </div>
-        <button type="button" className="products__add" onClick={openCreate}>
-          <Plus size={14} strokeWidth={2.5} />
-          Adicionar tipo
-        </button>
-      </header>
 
       <section className="products__card">
         <div className="products__section-head">
@@ -1422,7 +1411,9 @@ function ProductsBulk() {
       if (!q) return true
       return (
         item.name.toLocaleLowerCase('pt-BR').includes(q) ||
-        item.type.toLocaleLowerCase('pt-BR').includes(q)
+        item.type.toLocaleLowerCase('pt-BR').includes(q) ||
+        item.fullCode.toLocaleLowerCase('pt-BR').includes(q) ||
+        item.storeCode.toLocaleLowerCase('pt-BR').includes(q)
       )
     })
     setResults(list)
@@ -1431,16 +1422,10 @@ function ProductsBulk() {
 
   return (
     <div className="products">
-      <header className="products__page-head">
-        <h1>Alteração em massa</h1>
-      </header>
-
-      <p className="products__alert products__alert--info">
-        Campos em branco não alteram os produtos.
-      </p>
       <p className="products__alert products__alert--warn">
-        Atenção: esta tela altera vários produtos de uma vez. Antes de salvar, o sistema
-        exibirá uma confirmação com o antes/depois. A operação não possui reversão automática.
+        <strong>Atenção:</strong> esta tela altera vários produtos de uma vez. Antes de salvar, o
+        sistema exibirá uma confirmação com o antes/depois. A operação não possui reversão
+        automática.
       </p>
 
       <section className="products__card">
@@ -1455,13 +1440,13 @@ function ProductsBulk() {
               type="text"
               value={busca}
               onChange={(event) => setBusca(event.target.value)}
-              placeholder="Buscar produtos"
+              placeholder="Nome, código ou código loja"
             />
           </label>
           <label className="products__consulta-field">
             <span>Tipos</span>
             <select value={tipo} onChange={(event) => setTipo(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {types.map((item) => (
                 <option key={item.id} value={formatProductTypeLabel(item)}>
                   {formatProductTypeLabel(item)}
@@ -1472,7 +1457,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Tamanhos</span>
             <select value={tamanho} onChange={(event) => setTamanho(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {sizes.map((item) => (
                 <option key={item.id} value={item.name}>
                   {item.name}
@@ -1483,7 +1468,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Cores</span>
             <select value={cor} onChange={(event) => setCor(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {colors.map((item) => (
                 <option key={item.id} value={item.name}>
                   {item.name}
@@ -1494,7 +1479,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Status</span>
             <select value={status} onChange={(event) => setStatus(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value="">Todos</option>
               <option value="ativo">Ativos</option>
               <option value="inativo">Inativos</option>
             </select>
@@ -1502,7 +1487,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Marcas</span>
             <select value={marca} onChange={(event) => setMarca(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {brands.map((item) => (
                 <option key={item.id} value={item.name}>
                   {item.name}
@@ -1513,7 +1498,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Modelos</span>
             <select value={modelo} onChange={(event) => setModelo(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {models.map((item) => (
                 <option key={item.id} value={item.name}>
                   {item.name}
@@ -1528,14 +1513,10 @@ function ProductsBulk() {
             Limpar
           </button>
           <button type="button" className="products__add" onClick={search}>
+            <Search size={15} strokeWidth={2} />
             Buscar produtos
           </button>
         </div>
-
-        <p className="products__bulk-note">
-          Use os filtros acima e clique em Buscar produtos para carregar a lista. Nenhum
-          produto será carregado automaticamente ao abrir esta tela.
-        </p>
       </section>
 
       {searched ? (

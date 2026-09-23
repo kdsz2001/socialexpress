@@ -75,7 +75,7 @@ export function Reports() {
           return (
             <article key={report.id} className="reports__card">
               <div className="reports__icon" aria-hidden="true">
-                <Icon size={48} strokeWidth={1.5} />
+                <Icon size={172} strokeWidth={1} />
               </div>
               <div className="reports__body">
                 <h2 className="reports__title">{report.title}</h2>

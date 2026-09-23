@@ -8,6 +8,7 @@ import { ClientDetail } from './pages/ClientDetail'
 import { MyProfile } from './pages/MyProfile'
 import { Agenda } from './pages/Agenda'
 import { Events } from './pages/Events'
+import { EventForm } from './pages/EventForm'
 import { Products } from './pages/Products'
 import { ProductCreate } from './pages/ProductCreate'
 import { ProductEdit } from './pages/ProductEdit'
@@ -45,6 +46,8 @@ export default function App() {
         <Route path="/crm" element={<Crm />} />
         <Route path="/agenda" element={<Agenda />} />
         <Route path="/eventos" element={<Events />} />
+        <Route path="/eventos/novo" element={<EventForm />} />
+        <Route path="/eventos/:eventId" element={<EventForm />} />
         <Route path="/produtos" element={<Products />} />
         <Route path="/produtos/cadastrar" element={<ProductCreate />} />
         <Route path="/produtos/:productId" element={<ProductEdit />} />

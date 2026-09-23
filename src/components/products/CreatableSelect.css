@@ -51,7 +51,31 @@ html[data-theme='dark'] .cselect__trigger {
 
 .cselect__chevron {
   flex-shrink: 0;
-  color: #b5b5c3;
+  color: #7e8299;
+}
+
+.cselect.has-value .cselect__value {
+  margin-right: 20px;
+}
+
+.cselect__clear {
+  position: absolute;
+  top: 0;
+  right: 32px;
+  z-index: 2;
+  width: 20px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #7e8299;
+  cursor: pointer;
+}
+
+.cselect__clear:hover {
+  color: #3f4254;
 }
 
 .cselect__dropdown {
