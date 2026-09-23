@@ -181,19 +181,26 @@
 }
 
 .event-form__date-field input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
   border-radius: 5.46px 0 0 5.46px;
+  border-right: 0;
   cursor: pointer;
 }
 
 .event-form__date-btn {
   width: 42px;
   flex-shrink: 0;
+  display: grid;
+  place-items: center;
   border: 1px solid #e4e6ef;
   border-left: 0;
   border-radius: 0 5.46px 5.46px 0;
   background: #f3f6f9;
-  color: #7e8299;
-  cursor: pointer;
+  color: #b5b5c3;
+  pointer-events: none;
+  cursor: default;
 }
 
 .event-form__date-field.is-open input,

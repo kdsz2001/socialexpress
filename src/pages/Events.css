@@ -68,14 +68,14 @@
   min-width: min(100%, 240px);
 }
 
-.events__date-trigger {
-  display: flex;
-  align-items: stretch;
-  width: 100%;
+.events__date-field {
+  flex: 1;
+  min-width: 0;
   height: 38px;
-  padding: 0;
+  padding: 0 0.9rem;
   border: 1px solid var(--border-color);
-  border-radius: 0.42rem;
+  border-right: 0;
+  border-radius: 0.42rem 0 0 0.42rem;
   background: var(--card-bg);
   color: var(--text-primary);
   font-family: inherit;
@@ -83,54 +83,32 @@
   font-weight: 400;
   text-align: left;
   cursor: pointer;
-  overflow: hidden;
-  position: relative;
-  z-index: 1;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.events__date-label {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 0.9rem;
-  pointer-events: none;
-  white-space: nowrap;
 }
 
 .events__date-cal {
   width: 38px;
-  flex-shrink: 0;
+  height: 38px;
   display: grid;
   place-items: center;
-  border-left: 1px solid var(--border-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0 0.42rem 0.42rem 0;
   background: var(--surface-muted);
-  color: #3699ff;
+  color: #b5b5c3;
+  flex-shrink: 0;
   pointer-events: none;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  cursor: default;
 }
 
-.events__date-cal svg {
-  pointer-events: none;
-}
-
-.events__date-trigger.is-open,
-.events__date-trigger:hover {
+.events__date-field.is-open,
+.events__date-field:hover,
+.events__date-field.is-open + .events__date-cal,
+.events__date-field:hover + .events__date-cal {
   border-color: #3699ff;
 }
 
-.events__date-trigger.is-open .events__date-cal,
-.events__date-trigger:hover .events__date-cal {
-  border-left-color: #3699ff;
-}
-
-.events__date-trigger.is-open {
+.events__date-field.is-open {
   box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.12);
-}
-
-.events__date-trigger.is-open .events__date-cal {
-  background: var(--info-soft-bg);
 }
 
 .events__date-menu {
@@ -198,7 +176,7 @@
 }
 
 .events__table-wrap {
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .events__table {
@@ -229,14 +207,15 @@
 }
 
 .events__col-name {
-  width: 52%;
+  width: auto;
 }
 
 .events__col-date {
-  width: 28%;
+  width: 240px;
 }
 
-.events__col-actions {
+.events__table th.events__col-actions,
+.events__actions-cell {
   width: 120px;
   text-align: right;
 }
@@ -257,7 +236,8 @@
 
 .events__col-date,
 .events__date-cell {
-  text-align: center;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .events__event {
@@ -291,18 +271,62 @@
   white-space: nowrap;
 }
 
+.events__actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  vertical-align: middle;
+}
+
 .events__icon-btn {
+  position: relative;
   display: inline-grid;
   place-items: center;
   width: 32px;
   height: 32px;
-  margin-left: 0.25rem;
   border: 0;
   border-radius: 0.35rem;
-  background: var(--surface-muted);
+  background: #f3f6f9;
   color: #3699ff;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+.events__tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: #181c32;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 30;
+  box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.2);
+}
+
+.events__tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #181c32;
+}
+
+.events__icon-btn:hover .events__tip,
+.events__icon-btn:focus-visible .events__tip {
+  opacity: 1;
+  visibility: visible;
 }
 
 .events__icon-btn:hover {
@@ -318,13 +342,39 @@
   background: #d92135;
 }
 
+.events-remove .p-confirm__dialog {
+  width: 416px;
+  padding: 48px 28px 36px;
+}
+
+.events-remove .p-confirm__icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 28px;
+  border-width: 3px;
+  font-size: 36px;
+}
+
+.events-remove .p-confirm__title {
+  margin: 0 0 22px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.events-remove .p-confirm__message {
+  margin: 0 0 36px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #7e8299;
+}
+
 .events__pager {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  padding: 0.85rem 0.25rem;
+  padding: 0.85rem 1.25rem;
 }
 
 .events__pager-left {

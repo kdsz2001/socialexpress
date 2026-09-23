@@ -209,14 +209,9 @@ export function EventForm() {
                   aria-label="Data do evento"
                   onClick={() => setCalendarOpen(true)}
                 />
-                <button
-                  type="button"
-                  className="event-form__date-btn"
-                  aria-label="Abrir calendário"
-                  onClick={() => setCalendarOpen((open) => !open)}
-                >
+                <span className="event-form__date-btn" aria-hidden="true">
                   <CalendarDays size={16} strokeWidth={2} />
-                </button>
+                </span>
               </div>
               {calendarOpen ? (
                 <div className="event-cal" role="dialog" aria-label="Escolher data">

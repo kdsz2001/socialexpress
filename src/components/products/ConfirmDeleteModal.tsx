@@ -10,6 +10,7 @@ type ConfirmDeleteModalProps = {
   question?: ReactNode
   confirmLabel?: string
   cancelLabel?: string
+  className?: string
   onConfirm: () => void
   onCancel: () => void
 }
@@ -21,6 +22,7 @@ export function ConfirmDeleteModal({
   question,
   confirmLabel = 'Excluir',
   cancelLabel = 'Cancelar',
+  className,
   onConfirm,
   onCancel,
 }: ConfirmDeleteModalProps) {
@@ -43,7 +45,7 @@ export function ConfirmDeleteModal({
   if (!open) return null
 
   return createPortal(
-    <div className="p-confirm" role="presentation">
+    <div className={className ? `p-confirm ${className}` : 'p-confirm'} role="presentation">
       <button
         type="button"
         className="p-confirm__overlay"

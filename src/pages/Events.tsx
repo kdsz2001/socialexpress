@@ -17,6 +17,7 @@ import {
   formatBr,
   type DatePreset,
 } from '../components/clients/DateRangePicker'
+import { ConfirmDeleteModal } from '../components/products/ConfirmDeleteModal'
 import { SaveToast } from '../components/ui/SaveToast'
 import { useEvents } from '../hooks/useEvents'
 import { EVENT_TOAST_KEY, deleteEvent, type EventItem } from '../lib/eventsStore'
@@ -68,6 +69,7 @@ export function Events() {
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
   const [toast, setToast] = useState<string | null>(null)
+  const [removing, setRemoving] = useState<EventItem | null>(null)
   const dateWrapRef = useRef<HTMLDivElement>(null)
   const dateMenuId = useId()
 
@@ -193,17 +195,16 @@ export function Events() {
           <div className="events__date" ref={dateWrapRef}>
             <button
               type="button"
-              className={`events__date-trigger${dateOpen ? ' is-open' : ''}`}
+              className={`events__date-field${dateOpen ? ' is-open' : ''}`}
               aria-expanded={dateOpen}
               aria-controls={dateMenuId}
-              aria-label={`Período ${dateLabel}. Abrir calendário`}
               onClick={() => setDateOpen((open) => !open)}
             >
-              <span className="events__date-label">{dateLabel}</span>
-              <span className="events__date-cal" aria-hidden="true">
-                <CalendarDays size={16} strokeWidth={2} />
-              </span>
+              {dateLabel}
             </button>
+            <span className="events__date-cal" aria-hidden="true">
+              <CalendarDays size={16} strokeWidth={2} />
+            </span>
 
             {dateOpen ? (
               <div className="events__date-popover" id={dateMenuId}>
@@ -263,7 +264,12 @@ export function Events() {
                 </tr>
               ) : (
                 pageItems.map((item) => (
-                  <EventRow key={item.id} item={item} onEdit={() => navigate(`/eventos/${item.id}`)} />
+                  <EventRow
+                    key={item.id}
+                    item={item}
+                    onEdit={() => navigate(`/eventos/${item.id}`)}
+                    onRemove={() => setRemoving(item)}
+                  />
                 ))
               )}
             </tbody>
@@ -272,11 +278,38 @@ export function Events() {
 
         {filtered.length > 0 ? pager : null}
       </section>
+
+      <ConfirmDeleteModal
+        className="events-remove"
+        open={removing !== null}
+        title="Remover evento?"
+        message={
+          <>
+            Você está prestes a remover esse evento.
+            <br />
+            Essa ação é irreversível.
+          </>
+        }
+        confirmLabel="Remover"
+        onCancel={() => setRemoving(null)}
+        onConfirm={() => {
+          if (removing) deleteEvent(removing.id)
+          setRemoving(null)
+        }}
+      />
     </div>
   )
 }
 
-function EventRow({ item, onEdit }: { item: EventItem; onEdit: () => void }) {
+function EventRow({
+  item,
+  onEdit,
+  onRemove,
+}: {
+  item: EventItem
+  onEdit: () => void
+  onRemove: () => void
+}) {
   return (
     <tr>
       <td>
@@ -287,22 +320,20 @@ function EventRow({ item, onEdit }: { item: EventItem; onEdit: () => void }) {
       </td>
       <td className="events__date-cell">{formatEventDate(item.date)}</td>
       <td className="events__actions-cell">
-        <button
-          type="button"
-          className="events__icon-btn"
-          aria-label={`Editar ${item.title}`}
-          onClick={onEdit}
-        >
-          <SquarePen size={15} strokeWidth={2} />
-        </button>
-        <button
-          type="button"
-          className="events__icon-btn is-danger"
-          aria-label={`Excluir ${item.title}`}
-          onClick={() => deleteEvent(item.id)}
-        >
-          <Trash2 size={15} strokeWidth={2} />
-        </button>
+        <div className="events__actions">
+          <button type="button" className="events__icon-btn" aria-label="Visualizar detalhes" onClick={onEdit}>
+            <SquarePen size={15} strokeWidth={2} />
+            <span className="events__tip" role="tooltip">
+              Visualizar detalhes
+            </span>
+          </button>
+          <button type="button" className="events__icon-btn is-danger" aria-label="Remover evento" onClick={onRemove}>
+            <Trash2 size={15} strokeWidth={2} />
+            <span className="events__tip" role="tooltip">
+              Remover evento
+            </span>
+          </button>
+        </div>
       </td>
     </tr>
   )
