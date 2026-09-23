@@ -570,6 +570,13 @@ html.theme-dark .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head
   background: var(--card-bg);
   overflow: visible;
   z-index: 0;
+  user-select: none;
+  touch-action: none;
+}
+
+.agenda__day-col.is-dragging,
+.agenda__day-col.is-dragging .agenda__slot {
+  cursor: ns-resize;
 }
 
 .agenda__day-col.has-create {

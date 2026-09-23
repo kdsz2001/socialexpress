@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import {
   type AgendaView,
@@ -71,6 +71,14 @@ const MONTH_LONG = [
 type CreateTarget = {
   date: Date
   hour?: number
+  /** Hora em que o intervalo termina, exclusiva. 8 até 11 cobre 08:00–11:00. */
+  endHour?: number
+}
+
+type DragPreview = {
+  date: Date
+  anchor: number
+  hover: number
 }
 
 function preferredView(): AgendaView {
@@ -145,6 +153,8 @@ export function Agenda() {
   const [now, setNow] = useState(() => new Date())
   const [appointments, setAppointments] = useState(() => getAppointments())
   const [createTarget, setCreateTarget] = useState<CreateTarget | null>(null)
+  const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
+  const dragRef = useRef<DragPreview | null>(null)
   const [activeAppointment, setActiveAppointment] = useState<Appointment | null>(null)
 
   useEffect(() => {
@@ -170,6 +180,8 @@ export function Agenda() {
 
   useEffect(() => {
     setCreateTarget(null)
+    setDragPreview(null)
+    dragRef.current = null
   }, [view, cursor])
 
   useEffect(() => {
@@ -249,17 +261,19 @@ export function Agenda() {
       date: toDateKey(target.date),
     }
     if (target.hour != null) {
+      const endHour = target.endHour ?? Math.min(target.hour + 1, 24)
       defaults.startTime = padTime(target.hour)
-      defaults.endTime = padTime(Math.min(target.hour + 1, 23))
+      defaults.endTime = padTime(Math.min(endHour, 24))
     }
     setCreateTarget(null)
     requestNewAppointment(defaults)
   }
 
-  const renderCreateTip = (day: Date, hour?: number) => {
+  const renderCreateTip = (day: Date, hour?: number, endHour?: number) => {
     const hasTime = hour != null
+    const rangeEnd = endHour ?? (hour != null ? Math.min(hour + 1, 24) : undefined)
     const startLabel = hasTime ? padTime(hour) : ''
-    const endLabel = hasTime ? padTime(Math.min(hour + 1, 23)) : ''
+    const endLabel = rangeEnd != null ? padTime(rangeEnd) : ''
 
     return (
       <span className={`agenda__create-wrap${hasTime ? ' has-time' : ''}`}>
@@ -276,7 +290,7 @@ export function Agenda() {
           className="agenda__create-tip"
           onClick={(event) => {
             event.stopPropagation()
-            openCreateFromTarget({ date: day, hour })
+            openCreateFromTarget({ date: day, hour, endHour: rangeEnd })
           }}
         >
           <span className="agenda__create-tip-line">Criar agendamento para</span>
@@ -292,6 +306,29 @@ export function Agenda() {
     event?.stopPropagation()
     setCreateTarget(null)
     setActiveAppointment(apt)
+  }
+
+  /** Intervalo exclusivo [start, end) da seleção na coluna, em horas cheias. */
+  const timeRangeForDay = (day: Date): { start: number; end: number } | null => {
+    if (dragPreview && isSameDay(dragPreview.date, day)) {
+      return {
+        start: Math.min(dragPreview.anchor, dragPreview.hover),
+        end: Math.max(dragPreview.anchor, dragPreview.hover) + 1,
+      }
+    }
+    if (
+      createTarget &&
+      isSameDay(createTarget.date, day) &&
+      createTarget.hour != null &&
+      canCreateOnTimeSlot(day, createTarget.hour, now)
+    ) {
+      const end = createTarget.endHour ?? createTarget.hour + 1
+      return {
+        start: createTarget.hour,
+        end: Math.max(createTarget.hour + 1, end),
+      }
+    }
+    return null
   }
 
   const renderDetailsTip = (details: string) => {
@@ -435,55 +472,84 @@ export function Agenda() {
 
           {days.map((day, dayIndex) => {
             const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
-            const selectedHour =
-              createTarget &&
-              isSameDay(createTarget.date, day) &&
-              createTarget.hour != null &&
-              canCreateOnTimeSlot(day, createTarget.hour, now)
-                ? createTarget.hour
-                : null
+            const range = timeRangeForDay(day)
+            const bookableDay = canCreateOnTimeSlot(day, SLOT_START_HOUR, now)
+
+            const hourAt = (event: ReactPointerEvent<HTMLDivElement>) => {
+              const rect = event.currentTarget.getBoundingClientRect()
+              const index = Math.floor((event.clientY - rect.top) / HOUR_HEIGHT)
+              const clamped = Math.max(0, Math.min(HOURS.length - 1, index))
+              return HOURS[clamped]
+            }
+
+            const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+              if (event.button !== 0 || !bookableDay) return
+              const target = event.target as HTMLElement
+              if (target.closest('.agenda__event')) return
+              const hour = hourAt(event)
+              const preview = { date: startOfDay(day), anchor: hour, hover: hour }
+              dragRef.current = preview
+              setDragPreview(preview)
+              setCreateTarget(null)
+              event.currentTarget.setPointerCapture(event.pointerId)
+              event.preventDefault()
+            }
+
+            const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+              const current = dragRef.current
+              if (!current || !isSameDay(current.date, day)) return
+              const hour = hourAt(event)
+              if (hour === current.hover) return
+              const next = { ...current, hover: hour }
+              dragRef.current = next
+              setDragPreview(next)
+            }
+
+            const finishDrag = (event: ReactPointerEvent<HTMLDivElement>, commit: boolean) => {
+              const current = dragRef.current
+              if (!current || !isSameDay(current.date, day)) return
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                event.currentTarget.releasePointerCapture(event.pointerId)
+              }
+              dragRef.current = null
+              setDragPreview(null)
+              if (!commit) return
+              const hour = hourAt(event)
+              const start = Math.min(current.anchor, hour)
+              const end = Math.max(current.anchor, hour) + 1
+              setCreateTarget({ date: startOfDay(day), hour: start, endHour: end })
+            }
+
+            const dragging = Boolean(dragPreview && isSameDay(dragPreview.date, day))
 
             return (
               <div
                 key={day.toISOString()}
                 className={`agenda__day-col${isSameDay(day, today) ? ' is-today' : ''}${
-                  selectedHour != null ? ' has-create' : ''
-                }`}
+                  range ? ' has-create' : ''
+                }${dragging ? ' is-dragging' : ''}`}
                 style={{ gridColumn: dayIndex + 2, gridRow: `3 / span ${HOURS.length}` }}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={(event) => finishDrag(event, true)}
+                onPointerCancel={(event) => finishDrag(event, false)}
               >
                 {HOURS.map((hour, hourIndex) => {
                   const bookable = canCreateOnTimeSlot(day, hour, now)
-                  const selected = bookable && isSameCreateTarget(createTarget, day, hour)
+                  const selected = Boolean(range && hour >= range.start && hour < range.end)
                   const slotClass = `agenda__slot${hourIndex === HOURS.length - 1 ? ' is-last' : ''}${
                     selected ? ' is-selected' : ''
                   }${bookable ? ' agenda__slot--bookable' : ' is-past'}`
 
-                  if (!bookable) {
-                    return (
-                      <div
-                        key={hour}
-                        className={slotClass}
-                        style={{ height: HOUR_HEIGHT }}
-                        aria-hidden="true"
-                      >
-                        <span className="agenda__slot-half" />
-                      </div>
-                    )
-                  }
-
                   return (
-                    <button
+                    <div
                       key={hour}
-                      type="button"
                       className={slotClass}
                       style={{ height: HOUR_HEIGHT }}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setCreateTarget({ date: startOfDay(day), hour })
-                      }}
+                      aria-hidden={!bookable}
                     >
                       <span className="agenda__slot-half" />
-                    </button>
+                    </div>
                   )
                 })}
                 {dayApts.map((apt) => renderEventCard(apt, !singleDay))}
@@ -492,14 +558,11 @@ export function Agenda() {
           })}
 
           {days.map((day, dayIndex) => {
-            const selectedHour =
-              createTarget &&
-              isSameDay(createTarget.date, day) &&
-              createTarget.hour != null &&
-              canCreateOnTimeSlot(day, createTarget.hour, now)
-                ? createTarget.hour
-                : null
-            if (selectedHour == null) return null
+            if (dragPreview && isSameDay(dragPreview.date, day)) return null
+            const range = timeRangeForDay(day)
+            if (!range) return null
+            const rangeTop = (range.start - SLOT_START_HOUR) * HOUR_HEIGHT
+            const rangeHeight = (range.end - range.start) * HOUR_HEIGHT
 
             return (
               <div
@@ -511,11 +574,9 @@ export function Agenda() {
                   className={`agenda__create-layer${
                     days.length > 1 && dayIndex === 0 ? ' is-edge-start' : ''
                   }${days.length > 1 && dayIndex === days.length - 1 ? ' is-edge-end' : ''}`}
-                  style={{
-                    top: (selectedHour - SLOT_START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2,
-                  }}
+                  style={{ top: rangeTop + rangeHeight / 2 }}
                 >
-                  {renderCreateTip(day, selectedHour)}
+                  {renderCreateTip(day, range.start, range.end)}
                 </div>
               </div>
             )
