@@ -94,7 +94,10 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           : isClientsSection
             ? 'todos'
             : null
-  const productsTab: ProductsTab | null = !isProductsSection
+  const isProductForm =
+    location.pathname === '/produtos/cadastrar' ||
+    (isProductsSection && location.pathname !== '/produtos')
+  const productsTab: ProductsTab | null = !isProductsSection || isProductForm
     ? null
     : paramTab === 'consulta'
       ? 'consulta'
@@ -390,7 +393,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </div>
       )}
 
-      {isProductsSection && productsTab ? (
+      {isProductsSection ? (
         <div className="topbar__tabs topbar__tabs--products" role="tablist" aria-label="Produtos">
           {PRODUCTS_TABS.filter((item) => item.id !== 'alteracao' || showBulkTab).map((item) => (
             <button
