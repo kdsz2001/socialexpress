@@ -10,6 +10,8 @@ type CreatableSelectProps = {
   invalid?: boolean
   /** When false, only calls onCreate (e.g. open a modal) without selecting the raw name. Default true. */
   selectOnCreate?: boolean
+  /** Increment to open the list from outside the field. */
+  openToken?: number
   onChange: (value: string) => void
   onCreate: (name: string) => void
 }
@@ -21,6 +23,7 @@ export function CreatableSelect({
   createLabel,
   invalid,
   selectOnCreate = true,
+  openToken = 0,
   onChange,
   onCreate,
 }: CreatableSelectProps) {
@@ -64,6 +67,11 @@ export function CreatableSelect({
       window.setTimeout(() => searchRef.current?.focus(), 0)
     }
   }, [open])
+
+  useEffect(() => {
+    if (!openToken) return
+    setOpen(true)
+  }, [openToken])
 
   return (
     <div className={`cselect${open ? ' is-open' : ''}${invalid ? ' is-invalid' : ''}`} ref={rootRef}>
