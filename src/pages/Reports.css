@@ -11,10 +11,10 @@
 
 .reports__card {
   display: flex;
-  align-items: flex-start;
-  gap: 1.35rem;
-  min-height: 168px;
-  padding: 1.5rem 1.5rem 1.35rem;
+  align-items: center;
+  gap: 28px;
+  min-height: 220px;
+  padding: 18px 24px;
   background: var(--card-bg);
   border-radius: 0.55rem;
   box-shadow: var(--card-shadow);
@@ -23,8 +23,8 @@
 
 .reports__icon {
   flex-shrink: 0;
-  width: 64px;
-  height: 64px;
+  width: 172px;
+  height: 172px;
   display: grid;
   place-items: center;
   color: var(--text-primary);
@@ -36,24 +36,24 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.55rem;
+  gap: 6px;
 }
 
 .reports__title {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-heading);
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 .reports__desc {
   margin: 0;
   flex: 1;
-  font-size: 0.95rem;
+  font-size: 13px;
   font-weight: 400;
   color: var(--text-secondary);
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 .reports__btn {
@@ -61,14 +61,14 @@
   align-items: center;
   justify-content: center;
   height: 36px;
-  margin-top: 0.35rem;
-  padding: 0 1.1rem;
+  margin-top: 8px;
+  padding: 0 22px;
   border: 0;
   border-radius: 0.42rem;
   background: #3699ff;
   color: #ffffff;
   font-family: inherit;
-  font-size: 0.925rem;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -104,8 +104,13 @@
   }
 
   .reports__icon {
-    width: 52px;
-    height: 52px;
+    width: 96px;
+    height: 96px;
+  }
+
+  .reports__icon svg {
+    width: 96px;
+    height: 96px;
   }
 
   .reports__btn {
