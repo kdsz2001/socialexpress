@@ -1,16 +1,25 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import {
   ClipboardList,
   CloudUpload,
   Download,
+  Plus,
   Tag,
 } from 'lucide-react'
 import { useLocation, useParams, useSearchParams } from 'react-router-dom'
+import { useProductTypes } from '../../hooks/useProductTypes'
 import { useProducts } from '../../hooks/useProducts'
+import { ATTRIBUTE_KIND_META, type ProductAttributeKind } from '../../lib/productAttributesStore'
+import { useRegisteredProductsSubheaderAction } from '../../lib/productsSubheaderAction'
 import { getProduct, listProducts } from '../../lib/productsStore'
 import { ImportProductsModal } from '../products/ImportProductsModal'
 import { PrintLabelsModal } from '../products/PrintLabelsModal'
 import './ClientsSubheader.css'
+
+function attributeKindFromParam(value: string | null): ProductAttributeKind {
+  if (value && value in ATTRIBUTE_KIND_META) return value as ProductAttributeKind
+  return 'cor'
+}
 
 function exportProductsXls() {
   const rows = listProducts()
@@ -77,13 +86,40 @@ function printCatalog() {
   win.print()
 }
 
+function SubheaderBar({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string
+  subtitle?: string
+  children?: ReactNode
+}) {
+  return (
+    <header className="clients-subheader">
+      <div className="clients-subheader__heading">
+        <h1 className="clients-subheader__title">{title}</h1>
+        {subtitle ? (
+          <>
+            <span className="clients-subheader__sep" aria-hidden="true" />
+            <p className="clients-subheader__subtitle">{subtitle}</p>
+          </>
+        ) : null}
+      </div>
+      {children ? <div className="clients-subheader__actions">{children}</div> : null}
+    </header>
+  )
+}
+
 export function ProductsSubheader() {
   const products = useProducts()
+  const types = useProductTypes()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const { productId } = useParams()
   const [importOpen, setImportOpen] = useState(false)
   const [labelsOpen, setLabelsOpen] = useState(false)
+  const pageAction = useRegisteredProductsSubheaderAction()
 
   const isCreate = location.pathname === '/produtos/cadastrar'
   const isDetail =
@@ -96,6 +132,12 @@ export function ProductsSubheader() {
   }, [isDetail, productId, location.pathname, products])
   const tab = searchParams.get('tab')
   const showListActions = !isCreate && !isDetail && (!tab || tab === 'todos')
+  const typeStatusLabel =
+    types.length === 0
+      ? 'Nenhum tipo cadastrado'
+      : types.length === 1
+        ? '1 tipo cadastrado'
+        : `${types.length} tipos cadastrados`
 
   const activeCount = useMemo(
     () => products.filter((item) => item.status === 'ativo').length,
@@ -134,6 +176,39 @@ export function ProductsSubheader() {
           ) : null}
         </div>
       </header>
+    )
+  }
+
+  if (!isCreate && !isDetail && tab === 'consulta') {
+    return (
+      <SubheaderBar title="Consulta de produtos" />
+    )
+  }
+
+  if (!isCreate && !isDetail && tab === 'atributos') {
+    const kind = attributeKindFromParam(searchParams.get('kind'))
+    return <SubheaderBar title={ATTRIBUTE_KIND_META[kind].title} />
+  }
+
+  if (!isCreate && !isDetail && tab === 'tipos') {
+    return (
+      <SubheaderBar title="Tipos de produtos" subtitle={typeStatusLabel}>
+        {pageAction ? (
+          <button type="button" className="clients-subheader__primary" onClick={pageAction.onClick}>
+            <Plus size={14} strokeWidth={2.5} />
+            {pageAction.label}
+          </button>
+        ) : null}
+      </SubheaderBar>
+    )
+  }
+
+  if (!isCreate && !isDetail && tab === 'alteracao') {
+    return (
+      <SubheaderBar
+        title="Alteração em massa"
+        subtitle="Campos em branco não alteram os produtos."
+      />
     )
   }
 

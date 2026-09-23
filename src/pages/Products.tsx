@@ -39,6 +39,7 @@ import {
   productAttributeChips,
   type Product,
 } from '../lib/productsStore'
+import { useProductsSubheaderAction } from '../lib/productsSubheaderAction'
 import {
   addProductType,
   countProductsUsingType,
@@ -684,10 +685,6 @@ function ProductsConsulta() {
 
   return (
     <div className="products">
-      <header className="products__page-head">
-        <h1>Consulta de produtos</h1>
-      </header>
-
       <section className="products__card products__consulta">
         <div className="products__consulta-grid">
           <MultiDummy
@@ -876,8 +873,21 @@ function MultiDummy({
   )
 }
 
+function kindFromParam(value: string | null): ProductAttributeKind {
+  if (value && value in ATTRIBUTE_KIND_META) return value as ProductAttributeKind
+  return 'cor'
+}
+
 function ProductsAtributos() {
-  const [kind, setKind] = useState<ProductAttributeKind>('cor')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const kind = kindFromParam(searchParams.get('kind'))
+  const setKind = (next: ProductAttributeKind) => {
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set('tab', 'atributos')
+    if (next === 'cor') nextParams.delete('kind')
+    else nextParams.set('kind', next)
+    setSearchParams(nextParams, { replace: true })
+  }
   const items = useProductAttributes(kind)
   const meta = ATTRIBUTE_KIND_META[kind]
   const [query, setQuery] = useState('')
@@ -948,10 +958,6 @@ function ProductsAtributos() {
         message={toast ?? undefined}
         onClose={() => setToast(null)}
       />
-
-      <header className="products__page-head">
-        <h1>{meta.title}</h1>
-      </header>
 
       <section className="products__attrs">
         <aside className="products__attrs-nav products__card" aria-label="Tipos de atributo">
@@ -1144,13 +1150,6 @@ function ProductsTipos() {
   const start = (currentPage - 1) * pageSize
   const pageItems = sorted.slice(start, start + pageSize)
 
-  const statusLabel =
-    types.length === 0
-      ? 'Nenhum tipo cadastrado'
-      : types.length === 1
-        ? '1 tipo cadastrado'
-        : `${types.length} tipos cadastrados`
-
   const nextCode = nextProductTypeCode()
 
   const showToast = (message: string, variant: 'success' | 'danger' = 'success') => {
@@ -1158,12 +1157,14 @@ function ProductsTipos() {
     setToast(message)
   }
 
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setEditing(null)
     setName('')
     setDescription('')
     setModalOpen(true)
-  }
+  }, [])
+
+  useProductsSubheaderAction({ label: 'Adicionar tipo', onClick: openCreate })
 
   const save = () => {
     if (!name.trim()) return
@@ -1185,18 +1186,6 @@ function ProductsTipos() {
         variant={toastVariant}
         onClose={() => setToast(null)}
       />
-
-      <header className="products__page-head products__page-head--actions">
-        <div className="products__page-head-left">
-          <h1>Tipos de produtos</h1>
-          <span className="products__page-sep" aria-hidden="true" />
-          <p>{statusLabel}</p>
-        </div>
-        <button type="button" className="products__add" onClick={openCreate}>
-          <Plus size={14} strokeWidth={2.5} />
-          Adicionar tipo
-        </button>
-      </header>
 
       <section className="products__card">
         <div className="products__section-head">
@@ -1433,12 +1422,6 @@ function ProductsBulk() {
 
   return (
     <div className="products">
-      <header className="products__page-head">
-        <h1>Alteração em massa</h1>
-        <span className="products__page-sep" aria-hidden="true" />
-        <p>Campos em branco não alteram os produtos.</p>
-      </header>
-
       <p className="products__alert products__alert--warn">
         <strong>Atenção:</strong> esta tela altera vários produtos de uma vez. Antes de salvar, o
         sistema exibirá uma confirmação com o antes/depois. A operação não possui reversão
