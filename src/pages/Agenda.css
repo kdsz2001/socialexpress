@@ -165,7 +165,7 @@
 .agenda__month-head {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #dddddd;
   background: var(--card-bg);
 }
 
@@ -181,6 +181,11 @@
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: lowercase;
+  border-right: 1px solid #dddddd;
+}
+
+.agenda__month-weekday:first-child {
+  border-left: 1px solid #dddddd;
 }
 
 .agenda__month-grid {
@@ -204,8 +209,8 @@
   min-height: 234px;
   padding: 12px 9px 8px;
   border: 0;
-  border-right: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
   background: var(--card-bg);
   text-align: left;
   cursor: pointer;
@@ -221,8 +226,16 @@
   z-index: 6;
 }
 
-.agenda__month-cell:nth-child(7n) {
-  border-right: 0;
+.agenda__month-cell:nth-child(7n + 1) {
+  border-left: 1px solid #dddddd;
+}
+
+html.theme-dark .agenda__month-head,
+html.theme-dark .agenda__month-weekday,
+html.theme-dark .agenda__month-weekday:first-child,
+html.theme-dark .agenda__month-cell,
+html.theme-dark .agenda__month-cell:nth-child(7n + 1) {
+  border-color: var(--border-color);
 }
 
 .agenda__month-cell:hover {
