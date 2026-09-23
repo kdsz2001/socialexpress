@@ -193,22 +193,16 @@ export function Events() {
           <div className="events__date" ref={dateWrapRef}>
             <button
               type="button"
-              className={`events__date-field${dateOpen ? ' is-open' : ''}`}
+              className={`events__date-trigger${dateOpen ? ' is-open' : ''}`}
               aria-expanded={dateOpen}
               aria-controls={dateMenuId}
+              aria-label={`Período ${dateLabel}. Abrir calendário`}
               onClick={() => setDateOpen((open) => !open)}
             >
-              {dateLabel}
-            </button>
-            <button
-              type="button"
-              className={`events__date-cal${dateOpen ? ' is-open' : ''}`}
-              aria-label="Abrir período"
-              aria-expanded={dateOpen}
-              aria-controls={dateMenuId}
-              onClick={() => setDateOpen((open) => !open)}
-            >
-              <CalendarDays size={16} strokeWidth={2} />
+              <span className="events__date-label">{dateLabel}</span>
+              <span className="events__date-cal" aria-hidden="true">
+                <CalendarDays size={16} strokeWidth={2} />
+              </span>
             </button>
 
             {dateOpen ? (
