@@ -781,11 +781,11 @@ html.theme-dark .agenda__slot-half {
 }
 
 .agenda__month-cell .agenda__create-wrap {
-  top: auto;
-  bottom: 0.45rem;
+  top: 50%;
+  bottom: auto;
   left: 50%;
   right: auto;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   max-width: none;
 }
 
@@ -793,7 +793,8 @@ html.theme-dark .agenda__slot-half {
 .agenda__month-cell.is-edge-end .agenda__create-wrap {
   left: auto;
   right: 4px;
-  transform: none;
+  top: 50%;
+  transform: translateY(-50%);
   align-items: flex-end;
 }
 
@@ -801,7 +802,8 @@ html.theme-dark .agenda__slot-half {
 .agenda__month-cell.is-edge-start .agenda__create-wrap {
   left: 4px;
   right: auto;
-  transform: none;
+  top: 50%;
+  transform: translateY(-50%);
   align-items: flex-start;
 }
 
