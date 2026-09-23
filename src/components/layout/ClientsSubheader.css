@@ -27,8 +27,9 @@
   padding-bottom: 0;
 }
 
-/* Clientes: mesma altura do Clarial nas duas abas. */
-.clients-subheader.clients-subheader--clients {
+/* Clientes e Financeiro: mesma altura do Clarial em todas as abas. */
+.clients-subheader.clients-subheader--clients,
+.clients-subheader.clients-subheader--finance {
   height: 54px;
 }
 
@@ -161,7 +162,8 @@ html[data-theme='dark'] .clients-subheader__btn {
     height: 74px;
   }
 
-  .clients-subheader.clients-subheader--clients {
+  .clients-subheader.clients-subheader--clients,
+  .clients-subheader.clients-subheader--finance {
     height: 54px;
   }
 

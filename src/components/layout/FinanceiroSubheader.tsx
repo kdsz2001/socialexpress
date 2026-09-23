@@ -20,7 +20,7 @@ export function FinanceiroSubheader() {
   const showActions = key === 'caixa'
 
   return (
-    <header className="clients-subheader">
+    <header className="clients-subheader clients-subheader--stable clients-subheader--finance">
       <div className="clients-subheader__heading">
         <h1 className="clients-subheader__title">{title}</h1>
       </div>
