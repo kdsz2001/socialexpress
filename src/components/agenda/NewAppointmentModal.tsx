@@ -562,7 +562,7 @@ export function NewAppointmentModal({
                   aria-checked={form.color === item.id}
                   aria-label={item.label}
                   className={`new-apt__color${form.color === item.id ? ' is-active' : ''}`}
-                  style={{ background: item.hex }}
+                  style={{ background: item.hex, color: item.hex }}
                   onClick={() => patch({ color: item.id })}
                 />
               ))}
