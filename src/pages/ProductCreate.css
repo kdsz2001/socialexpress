@@ -116,12 +116,13 @@ html[data-theme='dark'] .product-create__back {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  margin: 0 -12.5px 22.75px;
+  width: 100%;
+  max-width: 655px;
+  margin: 0 auto 22.75px;
 }
 
 .product-create__label {
   width: 33.333%;
-  max-width: 243px;
   flex: 0 0 33.333%;
   padding: 9px 12.5px 0;
   font-size: 14.3px;
@@ -141,7 +142,7 @@ html[data-theme='dark'] .product-create__label {
 }
 
 .product-create__control {
-  flex: 1 1 0;
+  flex: 0 0 66.666%;
   min-width: 0;
   max-width: 66.666%;
   padding: 0 12.5px;
