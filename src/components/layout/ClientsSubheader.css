@@ -27,6 +27,11 @@
   padding-bottom: 0;
 }
 
+/* Clientes: mesma altura do Clarial nas duas abas. */
+.clients-subheader.clients-subheader--clients {
+  height: 54px;
+}
+
 .clients-subheader__title {
   margin: 0;
   font-size: 1.35rem;
@@ -154,6 +159,10 @@ html[data-theme='dark'] .clients-subheader__btn {
   .clients-subheader.clients-subheader--stable {
     padding: 0 15px;
     height: 74px;
+  }
+
+  .clients-subheader.clients-subheader--clients {
+    height: 54px;
   }
 
   .clients-subheader__subtitle {
