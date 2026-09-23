@@ -545,7 +545,7 @@ export function Agenda() {
   }
 
   return (
-    <div className="agenda">
+    <div className={`agenda${view === 'mes' ? ' agenda--mes' : ''}`}>
       <section className="agenda__card">
         <header className="agenda__toolbar">
           <div className="agenda__nav">
