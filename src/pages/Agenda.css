@@ -435,12 +435,12 @@
 }
 
 .agenda__col-head.is-today {
-  background: var(--calendar-today-bg);
+  background: #fcf8e3;
   color: #5e6278;
 }
 
 .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head--gutter) {
-  background: var(--calendar-today-bg);
+  background: #fcf8e3;
   font-size: 0.9rem;
   font-weight: 500;
   color: #5e6278;
@@ -485,12 +485,26 @@
 
 .agenda__allday.is-today,
 .agenda__day-col.is-today {
-  background: var(--calendar-today-bg);
+  background: #fcf8e3;
 }
 
 .agenda__timegrid.is-day .agenda__allday,
 .agenda__timegrid.is-day .agenda__day-col {
-  background: var(--calendar-today-bg);
+  background: #fcf8e3;
+}
+
+html.theme-dark .agenda__col-head.is-today,
+html.theme-dark .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head--gutter),
+html.theme-dark .agenda__allday.is-today,
+html.theme-dark .agenda__day-col.is-today,
+html.theme-dark .agenda__timegrid.is-day .agenda__allday,
+html.theme-dark .agenda__timegrid.is-day .agenda__day-col {
+  background: #3a2f1a;
+}
+
+html.theme-dark .agenda__col-head.is-today,
+html.theme-dark .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head--gutter) {
+  color: #e4e6ef;
 }
 
 .agenda__timegrid.is-day .agenda__day-col {

@@ -46,8 +46,8 @@ const WEEKDAY_KEYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'] as const
 const SLOT_START_HOUR = 7
 const SLOT_END_HOUR = 20
 const HOURS = hoursOfDay(SLOT_START_HOUR, SLOT_END_HOUR)
-const HOUR_HEIGHT = 64
-const ALL_DAY_HEIGHT = 36
+const HOUR_HEIGHT = 67
+const ALL_DAY_HEIGHT = 43
 const HEAD_HEIGHT = 40
 const TIME_GUTTER = 92
 const GRID_START_MIN = SLOT_START_HOUR * 60
@@ -405,7 +405,7 @@ export function Agenda() {
           <div className="agenda__hours" style={{ gridRow: `3 / span ${HOURS.length}` }}>
             {HOURS.map((hour) => (
               <div key={hour} className="agenda__hour-label" style={{ height: HOUR_HEIGHT }}>
-                <span>{padTime(hour)}</span>
+                <span>{String(hour).padStart(2, '0')}</span>
               </div>
             ))}
           </div>
