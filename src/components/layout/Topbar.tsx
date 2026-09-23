@@ -36,7 +36,7 @@ const PRODUCTS_TABS: { id: ProductsTab; label: string; path: string }[] = [
   { id: 'consulta', label: 'Consulta', path: '/produtos?tab=consulta' },
   { id: 'todos', label: 'Todos produtos', path: '/produtos' },
   { id: 'atributos', label: 'Atributos', path: '/produtos?tab=atributos' },
-  { id: 'tipos', label: 'Tipos', path: '/produtos?tab=tipos' },
+  { id: 'tipos', label: 'Tipos de produtos', path: '/produtos?tab=tipos' },
   { id: 'alteracao', label: 'Alteração em massa', path: '/produtos?tab=alteracao' },
 ]
 
