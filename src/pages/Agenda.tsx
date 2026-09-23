@@ -129,17 +129,14 @@ function isSameCreateTarget(a: CreateTarget | null, day: Date, hour?: number) {
   return a.hour === hour
 }
 
-/** Mês: permite criar/editar em qualquer dia, inclusive datas passadas. */
-function canCreateOnMonthDay(_day: Date, _today: Date) {
-  return true
+/** Mês: só o dia de hoje e os dias seguintes abrem um agendamento. */
+function canCreateOnMonthDay(day: Date, today: Date) {
+  return startOfDay(day).getTime() >= startOfDay(today).getTime()
 }
 
-/**
- * Semana/dia: permite criar/editar em qualquer horário,
- * inclusive dias e horas já passados.
- */
-function canCreateOnTimeSlot(_day: Date, _hour: number, _now: Date) {
-  return true
+/** Semana/dia: o dia inteiro de hoje e os dias seguintes podem receber horário. */
+function canCreateOnTimeSlot(day: Date, _hour: number, now: Date) {
+  return startOfDay(day).getTime() >= startOfDay(now).getTime()
 }
 
 export function Agenda() {

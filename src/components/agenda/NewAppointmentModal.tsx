@@ -126,6 +126,16 @@ function sameDay(a: Date, b: Date) {
   )
 }
 
+function startOfToday() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today
+}
+
+function isBeforeToday(day: Date) {
+  return day.getTime() < startOfToday().getTime()
+}
+
 function emptyForm(
   defaultDate?: Date,
   defaultStartTime = '',
@@ -398,10 +408,12 @@ export function NewAppointmentModal({
                   const next = maskDate(event.target.value)
                   setDateText(next)
                   const iso = parseBrDate(next)
-                  if (iso) {
+                  const parsed = iso ? parseIsoDate(iso) : null
+                  if (parsed && !isBeforeToday(parsed)) {
                     patch({ date: iso })
-                    const parsed = parseIsoDate(iso)
-                    if (parsed) setCalMonth(parsed)
+                    setCalMonth(parsed)
+                  } else {
+                    patch({ date: '' })
                   }
                 }}
                 onClick={() => setCalendarOpen(true)}
@@ -449,17 +461,27 @@ export function NewAppointmentModal({
                   <div className="new-apt-cal__grid">
                     {monthCells(calMonth).map((day) => {
                       const selected = parseIsoDate(form.date)
-                      const today = new Date()
-                      today.setHours(0, 0, 0, 0)
+                      const today = startOfToday()
                       const outside = day.getMonth() !== calMonth.getMonth()
+                      const past = isBeforeToday(day)
                       const isToday = sameDay(day, today)
-                      const isSelected = selected ? sameDay(day, selected) : false
+                      const isSelected = Boolean(selected) && !past && sameDay(day, selected as Date)
                       return (
                         <button
                           key={day.toISOString()}
                           type="button"
-                          className={`new-apt-cal__day${outside ? ' is-outside' : ''}${isToday ? ' is-today' : ''}${isSelected ? ' is-selected' : ''}`}
+                          disabled={past}
+                          className={[
+                            'new-apt-cal__day',
+                            outside ? 'is-outside' : '',
+                            past ? 'is-past' : '',
+                            isToday ? 'is-today' : '',
+                            isSelected ? 'is-selected' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
                           onClick={() => {
+                            if (past) return
                             const iso = toDateKey(day)
                             patch({ date: iso })
                             setDateText(formatBrDate(iso))

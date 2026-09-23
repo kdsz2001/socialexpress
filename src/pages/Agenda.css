@@ -250,6 +250,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.agenda__month-cell.is-past .agenda__month-chip {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 .agenda__month-cell.is-past:hover,
 .agenda__month-cell.is-past:active,
 .agenda__month-cell.is-past:focus {
