@@ -62,6 +62,11 @@
   color: #7e8299;
 }
 
+html[data-theme='dark'] .event-form__back {
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+}
+
 .event-form__save {
   background: #3699ff;
   color: #fff;
@@ -109,9 +114,9 @@
 .event-form__control textarea {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--input-border, #e4e6ef);
   border-radius: 5.46px;
-  background: #fff;
+  background: var(--input-bg, #fff);
   color: var(--text-primary, #3f4254);
   font-family: inherit;
   font-size: 13px;
@@ -196,11 +201,11 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--input-border, #e4e6ef);
   border-left: 0;
   border-radius: 0 5.46px 5.46px 0;
-  background: #f3f6f9;
-  color: #b5b5c3;
+  background: var(--surface-muted, #f3f6f9);
+  color: var(--text-muted, #b5b5c3);
   pointer-events: none;
   cursor: default;
 }
@@ -212,9 +217,14 @@
 .event-form__date-field.is-open .event-form__date-btn,
 .event-form__date-field.is-invalid .event-form__date-btn,
 .event-form__date-field input:focus + .event-form__date-btn {
-  border-color: #e4e6ef;
-  background: #f3f6f9;
-  color: #b5b5c3;
+  border-color: var(--input-border, #e4e6ef);
+  background: var(--surface-muted, #f3f6f9);
+  color: var(--text-muted, #b5b5c3);
+}
+
+html[data-theme='dark'] .event-form .cselect__trigger {
+  background: var(--input-bg);
+  border-color: var(--input-border);
 }
 
 .event-cal {
@@ -224,7 +234,7 @@
   left: 0;
   width: 280px;
   padding: 12px 12px 14px;
-  background: #fff;
+  background: var(--card-bg, #fff);
   border-radius: 6px;
   box-shadow: 0 0 30px rgba(82, 63, 105, 0.18);
 }
@@ -234,7 +244,7 @@
   grid-template-columns: 28px 1fr 28px;
   align-items: center;
   margin-bottom: 8px;
-  color: #3f4254;
+  color: var(--text-primary, #3f4254);
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -268,7 +278,7 @@
   height: 32px;
   border: 0;
   background: transparent;
-  color: #3f4254;
+  color: var(--text-primary, #3f4254);
   font-family: inherit;
   font-size: 13px;
   cursor: pointer;
@@ -312,8 +322,20 @@
 }
 
 .event-cal__day:hover:not(:disabled) {
-  background: #e1f0ff;
+  background: var(--info-soft-bg, #e1f0ff);
   color: #3699ff;
+}
+
+html[data-theme='dark'] .event-cal {
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme='dark'] .event-cal__day.is-outside,
+html[data-theme='dark'] .event-cal__day.is-past,
+html[data-theme='dark'] .event-cal__day.is-past.is-outside,
+html[data-theme='dark'] .event-cal__day.is-past:hover {
+  color: #565674;
 }
 
 .event-cal__day.is-past:hover {

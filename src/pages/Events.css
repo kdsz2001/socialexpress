@@ -93,10 +93,10 @@
   height: 38px;
   display: grid;
   place-items: center;
-  border: 1px solid #e4e6ef;
+  border: 1px solid var(--input-border, #e4e6ef);
   border-radius: 0 0.42rem 0.42rem 0;
-  background: #f3f6f9;
-  color: #b5b5c3;
+  background: var(--surface-muted, #f3f6f9);
+  color: var(--text-muted, #b5b5c3);
   flex-shrink: 0;
   pointer-events: none;
   cursor: default;
@@ -287,7 +287,7 @@
   height: 32px;
   border: 0;
   border-radius: 0.35rem;
-  background: #f3f6f9;
+  background: var(--surface-muted, #f3f6f9);
   color: #3699ff;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
@@ -327,6 +327,15 @@
 .events__icon-btn:focus-visible .events__tip {
   opacity: 1;
   visibility: visible;
+}
+
+html[data-theme='dark'] .events__tip {
+  background: #323248;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme='dark'] .events__tip::after {
+  border-top-color: #323248;
 }
 
 .events__icon-btn:hover {
