@@ -147,7 +147,7 @@ function emptyForm(
     endTime: defaultEndTime || '00:00',
     title: '',
     details: '',
-    color: 'coral',
+    color: 'blue',
     responsibleIds: [],
     orderLabel: '',
   }
@@ -536,7 +536,7 @@ export function NewAppointmentModal({
             </div>
           </div>
 
-          <div className="new-apt__row new-apt__row--top">
+          <div className="new-apt__row new-apt__row--top new-apt__row--after">
             <label className="new-apt__label" htmlFor="new-apt-details">
               Detalhes
             </label>

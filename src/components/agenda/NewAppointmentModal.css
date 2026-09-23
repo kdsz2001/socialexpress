@@ -38,8 +38,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 64px;
-  padding: 0 22px;
+  min-height: 59px;
+  padding: 0 24px;
   border-bottom: 1px solid #ebedf3;
   flex-shrink: 0;
 }
@@ -67,17 +67,17 @@
 }
 
 .new-apt__body {
-  padding: 22px 25px 16px;
+  padding: 24px 22px 53px 25px;
   overflow: visible;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 23px;
 }
 
 .new-apt__row {
   display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
-  gap: 0 16px;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 0 25px;
   align-items: center;
 }
 
@@ -86,7 +86,11 @@
 }
 
 .new-apt__row--top .new-apt__label {
-  padding-top: 10px;
+  padding-top: 8px;
+}
+
+.new-apt__row--after {
+  margin-top: 8px;
 }
 
 .new-apt__label {
@@ -94,7 +98,7 @@
   font-weight: 400;
   color: #3f4254;
   line-height: 1.35;
-  text-align: right;
+  text-align: left;
 }
 
 .new-apt__req {
@@ -135,6 +139,7 @@
 }
 
 .new-apt__textarea {
+  display: block;
   width: 100%;
   height: 58px;
   min-height: 58px;
@@ -179,7 +184,7 @@
 .new-apt__date-btn {
   position: relative;
   z-index: 1;
-  width: 42px;
+  width: 44px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
@@ -209,6 +214,7 @@
 .new-apt__time {
   display: flex;
   align-items: stretch;
+  width: calc(100% - 8px);
   height: 38px;
   border: 1px solid #e4e6ef;
   border-radius: 4px;
@@ -223,8 +229,8 @@
   border-radius: 0;
   background: #fff;
   color: #3f4254;
-  text-align: center;
-  padding: 0 8px;
+  text-align: left;
+  padding: 0 12px;
 }
 
 .new-apt__time-input:focus {
@@ -233,7 +239,7 @@
 }
 
 .new-apt__time-sep {
-  flex: 0 0 52px;
+  flex: 0 0 50px;
   display: grid;
   place-items: center;
   border-left: 1px solid #e4e6ef;
@@ -247,7 +253,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  min-height: 38px;
+  min-height: 25px;
 }
 
 .new-apt__color {
@@ -396,7 +402,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 14px 22px 16px;
+  padding: 24px 23px 18px;
   border-top: 1px solid #ebedf3;
   flex-shrink: 0;
 }
@@ -406,7 +412,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 36px;
+  height: 35px;
   padding: 0 14px;
   border: 0;
   border-radius: 4px;
