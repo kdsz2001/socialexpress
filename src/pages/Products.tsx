@@ -1422,7 +1422,9 @@ function ProductsBulk() {
       if (!q) return true
       return (
         item.name.toLocaleLowerCase('pt-BR').includes(q) ||
-        item.type.toLocaleLowerCase('pt-BR').includes(q)
+        item.type.toLocaleLowerCase('pt-BR').includes(q) ||
+        item.fullCode.toLocaleLowerCase('pt-BR').includes(q) ||
+        item.storeCode.toLocaleLowerCase('pt-BR').includes(q)
       )
     })
     setResults(list)
@@ -1433,14 +1435,14 @@ function ProductsBulk() {
     <div className="products">
       <header className="products__page-head">
         <h1>Alteração em massa</h1>
+        <span className="products__page-sep" aria-hidden="true" />
+        <p>Campos em branco não alteram os produtos.</p>
       </header>
 
-      <p className="products__alert products__alert--info">
-        Campos em branco não alteram os produtos.
-      </p>
       <p className="products__alert products__alert--warn">
-        Atenção: esta tela altera vários produtos de uma vez. Antes de salvar, o sistema
-        exibirá uma confirmação com o antes/depois. A operação não possui reversão automática.
+        <strong>Atenção:</strong> esta tela altera vários produtos de uma vez. Antes de salvar, o
+        sistema exibirá uma confirmação com o antes/depois. A operação não possui reversão
+        automática.
       </p>
 
       <section className="products__card">
@@ -1455,13 +1457,13 @@ function ProductsBulk() {
               type="text"
               value={busca}
               onChange={(event) => setBusca(event.target.value)}
-              placeholder="Buscar produtos"
+              placeholder="Nome, código ou código loja"
             />
           </label>
           <label className="products__consulta-field">
             <span>Tipos</span>
             <select value={tipo} onChange={(event) => setTipo(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {types.map((item) => (
                 <option key={item.id} value={formatProductTypeLabel(item)}>
                   {formatProductTypeLabel(item)}
@@ -1472,7 +1474,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Tamanhos</span>
             <select value={tamanho} onChange={(event) => setTamanho(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {sizes.map((item) => (
                 <option key={item.id} value={item.name}>
                   {item.name}
@@ -1483,7 +1485,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Cores</span>
             <select value={cor} onChange={(event) => setCor(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {colors.map((item) => (
                 <option key={item.id} value={item.name}>
                   {item.name}
@@ -1494,7 +1496,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Status</span>
             <select value={status} onChange={(event) => setStatus(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value="">Todos</option>
               <option value="ativo">Ativos</option>
               <option value="inativo">Inativos</option>
             </select>
@@ -1502,7 +1504,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Marcas</span>
             <select value={marca} onChange={(event) => setMarca(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {brands.map((item) => (
                 <option key={item.id} value={item.name}>
                   {item.name}
@@ -1513,7 +1515,7 @@ function ProductsBulk() {
           <label className="products__consulta-field">
             <span>Modelos</span>
             <select value={modelo} onChange={(event) => setModelo(event.target.value)}>
-              <option value="">Selecione</option>
+              <option value=""></option>
               {models.map((item) => (
                 <option key={item.id} value={item.name}>
                   {item.name}
@@ -1528,14 +1530,10 @@ function ProductsBulk() {
             Limpar
           </button>
           <button type="button" className="products__add" onClick={search}>
+            <Search size={15} strokeWidth={2} />
             Buscar produtos
           </button>
         </div>
-
-        <p className="products__bulk-note">
-          Use os filtros acima e clique em Buscar produtos para carregar a lista. Nenhum
-          produto será carregado automaticamente ao abrir esta tela.
-        </p>
       </section>
 
       {searched ? (
