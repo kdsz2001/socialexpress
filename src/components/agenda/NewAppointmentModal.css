@@ -188,7 +188,8 @@
   border-radius: 0 4px 4px 0;
   background: #f3f6f9;
   color: #b5b5c3;
-  cursor: pointer;
+  pointer-events: none;
+  cursor: default;
 }
 
 .new-apt__date.is-open .new-apt__input {

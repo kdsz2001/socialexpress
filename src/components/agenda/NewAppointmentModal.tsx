@@ -418,14 +418,9 @@ export function NewAppointmentModal({
                 }}
                 onClick={() => setCalendarOpen(true)}
               />
-              <button
-                type="button"
-                className="new-apt__date-btn"
-                aria-label="Abrir calendário"
-                onClick={() => setCalendarOpen((open) => !open)}
-              >
+              <span className="new-apt__date-btn" aria-hidden="true">
                 <CalendarDays size={16} strokeWidth={2} />
-              </button>
+              </span>
               {calendarOpen ? (
                 <div className="new-apt-cal" role="dialog" aria-label="Calendário">
                   <div className="new-apt-cal__head">
