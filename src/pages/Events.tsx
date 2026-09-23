@@ -295,6 +295,7 @@ export function Events() {
         onConfirm={() => {
           if (removing) deleteEvent(removing.id)
           setRemoving(null)
+          setToast('Evento excluído com sucesso.')
         }}
       />
     </div>

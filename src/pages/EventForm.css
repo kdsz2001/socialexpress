@@ -190,6 +190,8 @@
 }
 
 .event-form__date-btn {
+  position: relative;
+  z-index: 1;
   width: 42px;
   flex-shrink: 0;
   display: grid;
@@ -203,9 +205,16 @@
   cursor: default;
 }
 
-.event-form__date-field.is-open input,
-.event-form__date-field.is-open .event-form__date-btn {
+.event-form__date-field.is-open input {
   border-color: #3699ff;
+}
+
+.event-form__date-field.is-open .event-form__date-btn,
+.event-form__date-field.is-invalid .event-form__date-btn,
+.event-form__date-field input:focus + .event-form__date-btn {
+  border-color: #e4e6ef;
+  background: #f3f6f9;
+  color: #b5b5c3;
 }
 
 .event-cal {
@@ -271,8 +280,30 @@
 }
 
 .event-cal__day.is-today {
+  position: relative;
   color: #3699ff;
   font-weight: 600;
+}
+
+.event-cal__day.is-today::after {
+  content: '';
+  position: absolute;
+  right: 5px;
+  bottom: 4px;
+  border-style: solid;
+  border-width: 0 0 6px 6px;
+  border-color: transparent transparent #3699ff transparent;
+}
+
+.event-cal__day:disabled {
+  opacity: 1;
+}
+
+.event-cal__day.is-past,
+.event-cal__day.is-past.is-outside {
+  color: #d1d3e0;
+  cursor: default;
+  background: transparent;
 }
 
 .event-cal__day.is-selected {
@@ -280,9 +311,14 @@
   color: #fff;
 }
 
-.event-cal__day:hover {
+.event-cal__day:hover:not(:disabled) {
   background: #e1f0ff;
   color: #3699ff;
+}
+
+.event-cal__day.is-past:hover {
+  background: transparent;
+  color: #d1d3e0;
 }
 
 .event-cal__day.is-selected:hover {

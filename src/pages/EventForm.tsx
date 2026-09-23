@@ -133,6 +133,7 @@ export function EventForm() {
   }
 
   const pickDay = (day: Date) => {
+    if (day.getTime() < today.getTime()) return
     setDate(toIso(day))
     setCalendarOpen(false)
   }
@@ -248,17 +249,20 @@ export function EventForm() {
                   <div className="event-cal__grid">
                     {cells.map((day) => {
                       const inMonth = day.getMonth() === viewMonth.getMonth()
+                      const isPast = day.getTime() < today.getTime()
                       const isSelected = selected ? sameDay(day, selected) : false
                       const isToday = sameDay(day, today)
                       return (
                         <button
                           key={toIso(day)}
                           type="button"
+                          disabled={isPast}
                           className={[
                             'event-cal__day',
                             inMonth ? '' : 'is-outside',
-                            isSelected ? 'is-selected' : '',
-                            isToday && !isSelected ? 'is-today' : '',
+                            isPast ? 'is-past' : '',
+                            isSelected && !isPast ? 'is-selected' : '',
+                            isToday ? 'is-today' : '',
                           ]
                             .filter(Boolean)
                             .join(' ')}
