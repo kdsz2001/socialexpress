@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import {
   type AgendaView,
@@ -146,7 +146,6 @@ export function Agenda() {
   const [appointments, setAppointments] = useState(() => getAppointments())
   const [createTarget, setCreateTarget] = useState<CreateTarget | null>(null)
   const [activeAppointment, setActiveAppointment] = useState<Appointment | null>(null)
-  const timeScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     return subscribeUserProfile(() => {
@@ -202,23 +201,9 @@ export function Agenda() {
   }, [createTarget])
 
   useEffect(() => {
-    if (view !== 'semana' && view !== 'dia') return
-    const el = timeScrollRef.current
-    if (!el) return
-    const scrollParent = el.closest('.app-content') as HTMLElement | null
-    if (!scrollParent) return
-
-    const into = minutesIntoGrid(now)
-    if (into == null) {
-      scrollParent.scrollTop = 0
-      return
-    }
-
-    const hourOffset = Math.max(0, HEAD_HEIGHT + ALL_DAY_HEIGHT + (into / 60 - 1) * HOUR_HEIGHT)
-    const elTop = el.getBoundingClientRect().top
-    const parentTop = scrollParent.getBoundingClientRect().top
-    scrollParent.scrollTop = Math.max(0, scrollParent.scrollTop + (elTop - parentTop) + hourOffset)
-  }, [view, cursor])
+    const scrollParent = document.querySelector('.app-content') as HTMLElement | null
+    if (scrollParent) scrollParent.scrollTop = 0
+  }, [view])
 
   const today = startOfDay(now)
   const monthDays = useMemo(() => getMonthGrid(cursor), [cursor])
@@ -370,7 +355,6 @@ export function Agenda() {
     return (
       <div
         className={`agenda__timegrid${singleDay ? ' is-day' : ' is-week'}`}
-        ref={timeScrollRef}
         style={{ ['--agenda-gutter']: `${TIME_GUTTER}px` } as CSSProperties}
       >
         <div

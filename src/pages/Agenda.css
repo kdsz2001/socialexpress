@@ -434,11 +434,6 @@
   border-right: 0;
 }
 
-.agenda__col-head.is-today {
-  background: #fcf8e3;
-  color: #5e6278;
-}
-
 .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head--gutter) {
   background: var(--card-bg);
   font-size: 13px;
@@ -494,16 +489,11 @@
   background: #fcf8e3;
 }
 
-html.theme-dark .agenda__col-head.is-today,
 html.theme-dark .agenda__allday.is-today,
 html.theme-dark .agenda__day-col.is-today,
 html.theme-dark .agenda__timegrid.is-day .agenda__allday,
 html.theme-dark .agenda__timegrid.is-day .agenda__day-col {
   background: #3a2f1a;
-}
-
-html.theme-dark .agenda__col-head.is-today {
-  color: #e4e6ef;
 }
 
 html.theme-dark .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head--gutter) {
