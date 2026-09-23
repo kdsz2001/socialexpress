@@ -1,31 +1,37 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { ArrowUp, CalendarDays, Plus, Search, SquarePen, Trash2, X } from 'lucide-react'
 import {
-  DATE_PRESETS,
+  ArrowUp,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Plus,
+  Search,
+  SquarePen,
+  Trash2,
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import {
   DateRangePicker,
   formatBr,
-  rangeForPreset,
   type DatePreset,
 } from '../components/clients/DateRangePicker'
+import { SaveToast } from '../components/ui/SaveToast'
 import { useEvents } from '../hooks/useEvents'
-import {
-  addEvent,
-  deleteEvent,
-  updateEvent,
-  type EventItem,
-} from '../lib/eventsStore'
+import { EVENT_TOAST_KEY, deleteEvent, type EventItem } from '../lib/eventsStore'
 import './Events.css'
 
-type PickerMode = 'menu' | 'calendar'
+const EVENT_PRESETS: { id: DatePreset; label: string }[] = [
+  { id: 'semana', label: 'Dessa semana' },
+  { id: 'proxima-semana', label: 'Da próxima semana' },
+  { id: 'mes', label: 'Desse mês' },
+  { id: 'escolher', label: 'Escolher datas' },
+]
+
+const MONTHS_SHORT = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+
 type SortDir = 'asc' | 'desc'
-
-function pad(n: number) {
-  return String(n).padStart(2, '0')
-}
-
-function toInputDate(date: Date) {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
 
 function parseIsoDate(value: string) {
   const [y, m, d] = value.split('-').map(Number)
@@ -37,7 +43,8 @@ function parseIsoDate(value: string) {
 
 function formatEventDate(value: string) {
   const date = parseIsoDate(value)
-  return date ? formatBr(date) : value
+  if (!date) return value
+  return `${date.getDate()} de ${MONTHS_SHORT[date.getMonth()]}. de ${date.getFullYear()}`
 }
 
 function defaultRange() {
@@ -49,6 +56,7 @@ function defaultRange() {
 }
 
 export function Events() {
+  const navigate = useNavigate()
   const events = useEvents()
   const [query, setQuery] = useState('')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
@@ -57,31 +65,32 @@ export function Events() {
   const [rangeEnd, setRangeEnd] = useState(initial.end)
   const [datePreset, setDatePreset] = useState<DatePreset>('escolher')
   const [dateOpen, setDateOpen] = useState(false)
-  const [pickerMode, setPickerMode] = useState<PickerMode>('menu')
+  const [pageSize, setPageSize] = useState(10)
+  const [page, setPage] = useState(1)
+  const [toast, setToast] = useState<string | null>(null)
   const dateWrapRef = useRef<HTMLDivElement>(null)
   const dateMenuId = useId()
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<EventItem | null>(null)
-  const [title, setTitle] = useState('')
-  const [date, setDate] = useState(toInputDate(new Date()))
-  const [touched, setTouched] = useState(false)
+  useEffect(() => {
+    try {
+      const message = sessionStorage.getItem(EVENT_TOAST_KEY)
+      if (!message) return
+      sessionStorage.removeItem(EVENT_TOAST_KEY)
+      setToast(message)
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
 
   const dateLabel = `${formatBr(rangeStart)} até ${formatBr(rangeEnd)}`
 
   useEffect(() => {
     if (!dateOpen) return
     const onPointerDown = (event: MouseEvent) => {
-      if (!dateWrapRef.current?.contains(event.target as Node)) {
-        setDateOpen(false)
-        setPickerMode('menu')
-      }
+      if (!dateWrapRef.current?.contains(event.target as Node)) setDateOpen(false)
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setDateOpen(false)
-        setPickerMode('menu')
-      }
+      if (event.key === 'Escape') setDateOpen(false)
     }
     document.addEventListener('mousedown', onPointerDown)
     document.addEventListener('keydown', onKeyDown)
@@ -103,70 +112,69 @@ export function Events() {
         const t = day.getTime()
         if (t < start || t > end) return false
         if (!q) return true
-        return item.title.toLocaleLowerCase('pt-BR').includes(q)
+        return (
+          item.title.toLocaleLowerCase('pt-BR').includes(q) ||
+          item.type.toLocaleLowerCase('pt-BR').includes(q)
+        )
       })
       .sort((a, b) => {
-        const cmp = a.date.localeCompare(b.date)
+        const cmp = a.date.localeCompare(b.date) || a.title.localeCompare(b.title, 'pt-BR')
         return sortDir === 'asc' ? cmp : -cmp
       })
   }, [events, query, rangeStart, rangeEnd, sortDir])
 
-  const openDate = () => {
-    setDateOpen(true)
-    setPickerMode('menu')
-  }
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const currentPage = Math.min(page, totalPages)
+  const pageStart = filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const pageEnd = Math.min(currentPage * pageSize, filtered.length)
+  const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
-  const onMenuSelect = (preset: DatePreset) => {
-    setDatePreset(preset)
-    if (preset === 'escolher') {
-      setPickerMode('calendar')
-      return
-    }
-    const range = rangeForPreset(preset)
-    setRangeStart(range.start)
-    setRangeEnd(range.end)
-    setDateOpen(false)
-    setPickerMode('menu')
-  }
+  useEffect(() => {
+    setPage(1)
+  }, [query, pageSize, rangeStart, rangeEnd])
 
-  const openCreate = () => {
-    setEditing(null)
-    setTitle('')
-    setDate(toInputDate(new Date()))
-    setTouched(false)
-    setModalOpen(true)
-  }
-
-  const openEdit = (item: EventItem) => {
-    setEditing(item)
-    setTitle(item.title)
-    setDate(item.date)
-    setTouched(false)
-    setModalOpen(true)
-  }
-
-  const closeModal = () => {
-    setModalOpen(false)
-    setEditing(null)
-    setTouched(false)
-  }
-
-  const missingTitle = !title.trim()
-  const missingDate = !date
-
-  const saveEvent = () => {
-    setTouched(true)
-    if (missingTitle || missingDate) return
-    if (editing) {
-      updateEvent(editing.id, { title, date })
-    } else {
-      addEvent({ title, date })
-    }
-    closeModal()
-  }
+  const pager = (
+    <div className="events__pager">
+      <div className="events__pager-left">
+        <select
+          className="events__pager-size"
+          value={pageSize}
+          aria-label="Itens por página"
+          onChange={(event) => setPageSize(Number(event.target.value))}
+        >
+          {[10, 25, 50, 100].map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+        <span className="events__pager-info">
+          Mostrando {pageStart} - {pageEnd} do total de {filtered.length}
+        </span>
+      </div>
+      <div className="events__pager-nav">
+        <button type="button" className="events__pager-btn" aria-label="Primeira página" disabled={currentPage <= 1} onClick={() => setPage(1)}>
+          <ChevronsLeft size={16} strokeWidth={2.25} />
+        </button>
+        <button type="button" className="events__pager-btn" aria-label="Página anterior" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
+          <ChevronLeft size={16} strokeWidth={2.25} />
+        </button>
+        <button type="button" className="events__pager-btn is-active" aria-current="page">
+          {currentPage}
+        </button>
+        <button type="button" className="events__pager-btn" aria-label="Próxima página" disabled={currentPage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
+          <ChevronRight size={16} strokeWidth={2.25} />
+        </button>
+        <button type="button" className="events__pager-btn" aria-label="Última página" disabled={currentPage >= totalPages} onClick={() => setPage(totalPages)}>
+          <ChevronsRight size={16} strokeWidth={2.25} />
+        </button>
+      </div>
+    </div>
+  )
 
   return (
     <div className="events">
+      <SaveToast open={Boolean(toast)} message={toast ?? undefined} onClose={() => setToast(null)} />
       <section className="events__card">
         <div className="events__toolbar">
           <label className="events__search">
@@ -188,7 +196,7 @@ export function Events() {
               className={`events__date-field${dateOpen ? ' is-open' : ''}`}
               aria-expanded={dateOpen}
               aria-controls={dateMenuId}
-              onClick={openDate}
+              onClick={() => setDateOpen((open) => !open)}
             >
               {dateLabel}
             </button>
@@ -198,55 +206,37 @@ export function Events() {
               aria-label="Abrir período"
               aria-expanded={dateOpen}
               aria-controls={dateMenuId}
-              onClick={openDate}
+              onClick={() => setDateOpen((open) => !open)}
             >
               <CalendarDays size={16} strokeWidth={2} />
             </button>
 
-            {dateOpen && pickerMode === 'menu' ? (
-              <div className="events__date-menu" id={dateMenuId} role="listbox" aria-label="Período">
-                {DATE_PRESETS.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="option"
-                    aria-selected={datePreset === item.id}
-                    className={`events__date-option${datePreset === item.id ? ' is-active' : ''}`}
-                    onClick={() => onMenuSelect(item.id)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-
-            {dateOpen && pickerMode === 'calendar' ? (
+            {dateOpen ? (
               <div className="events__date-popover" id={dateMenuId}>
                 <DateRangePicker
                   start={rangeStart}
                   end={rangeEnd}
                   preset={datePreset}
-                  onCancel={() => {
-                    setDateOpen(false)
-                    setPickerMode('menu')
-                  }}
+                  presets={EVENT_PRESETS}
+                  onCancel={() => setDateOpen(false)}
                   onApply={({ start, end, preset: nextPreset }) => {
                     setRangeStart(start)
                     setRangeEnd(end)
                     setDatePreset(nextPreset)
                     setDateOpen(false)
-                    setPickerMode('menu')
                   }}
                 />
               </div>
             ) : null}
           </div>
 
-          <button type="button" className="events__add" onClick={openCreate}>
+          <button type="button" className="events__add" onClick={() => navigate('/eventos/novo')}>
             <Plus size={16} strokeWidth={2.5} />
             Novo evento
           </button>
         </div>
+
+        {filtered.length > 0 ? pager : null}
 
         <div className="events__table-wrap">
           <table className="events__table">
@@ -271,98 +261,55 @@ export function Events() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {pageItems.length === 0 ? (
                 <tr>
                   <td className="events__empty" colSpan={3}>
                     Nenhum resultado encontrado
                   </td>
                 </tr>
               ) : (
-                filtered.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.title}</td>
-                    <td>{formatEventDate(item.date)}</td>
-                    <td className="events__actions-cell">
-                      <button
-                        type="button"
-                        className="events__icon-btn"
-                        aria-label={`Editar ${item.title}`}
-                        onClick={() => openEdit(item)}
-                      >
-                        <SquarePen size={15} strokeWidth={2} />
-                      </button>
-                      <button
-                        type="button"
-                        className="events__icon-btn is-danger"
-                        aria-label={`Excluir ${item.title}`}
-                        onClick={() => deleteEvent(item.id)}
-                      >
-                        <Trash2 size={15} strokeWidth={2} />
-                      </button>
-                    </td>
-                  </tr>
+                pageItems.map((item) => (
+                  <EventRow key={item.id} item={item} onEdit={() => navigate(`/eventos/${item.id}`)} />
                 ))
               )}
             </tbody>
           </table>
         </div>
+
+        {filtered.length > 0 ? pager : null}
       </section>
-
-      {modalOpen ? (
-        <div className="events-modal" role="presentation" onMouseDown={closeModal}>
-          <div
-            className="events-modal__dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="events-modal-title"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <header className="events-modal__header">
-              <h2 id="events-modal-title">{editing ? 'Editar evento' : 'Novo evento'}</h2>
-              <button type="button" className="events-modal__close" aria-label="Fechar" onClick={closeModal}>
-                <X size={16} strokeWidth={2.25} />
-              </button>
-            </header>
-
-            <div className="events-modal__body">
-              <label className="events-modal__field">
-                <span>
-                  Nome do evento <span className="events-modal__req">*</span>
-                </span>
-                <input
-                  type="text"
-                  className={`events-modal__input${touched && missingTitle ? ' is-invalid' : ''}`}
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="Ex.: Casamento"
-                  autoFocus
-                />
-              </label>
-
-              <label className="events-modal__field">
-                <span>
-                  Data <span className="events-modal__req">*</span>
-                </span>
-                <input
-                  type="date"
-                  className={`events-modal__input${touched && missingDate ? ' is-invalid' : ''}`}
-                  value={date}
-                  onChange={(event) => setDate(event.target.value)}
-                />
-              </label>
-            </div>
-
-            <footer className="events-modal__footer">
-              <button type="button" className="events-modal__cancel" onClick={closeModal}>
-                Cancelar
-              </button>
-              <button type="button" className="events-modal__save" onClick={saveEvent}>
-                {editing ? 'Salvar' : 'Cadastrar'}
-              </button>
-            </footer>
-          </div>
-        </div>
-      ) : null}
     </div>
+  )
+}
+
+function EventRow({ item, onEdit }: { item: EventItem; onEdit: () => void }) {
+  return (
+    <tr>
+      <td>
+        <div className="events__event">
+          <strong>{item.title}</strong>
+          {item.type ? <span>{item.type}</span> : null}
+        </div>
+      </td>
+      <td className="events__date-cell">{formatEventDate(item.date)}</td>
+      <td className="events__actions-cell">
+        <button
+          type="button"
+          className="events__icon-btn"
+          aria-label={`Editar ${item.title}`}
+          onClick={onEdit}
+        >
+          <SquarePen size={15} strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          className="events__icon-btn is-danger"
+          aria-label={`Excluir ${item.title}`}
+          onClick={() => deleteEvent(item.id)}
+        >
+          <Trash2 size={15} strokeWidth={2} />
+        </button>
+      </td>
+    </tr>
   )
 }

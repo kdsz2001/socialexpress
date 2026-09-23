@@ -126,6 +126,7 @@ type DateRangePickerProps = {
   start: Date
   end: Date
   preset: DatePreset
+  presets?: { id: DatePreset; label: string }[]
   onCancel: () => void
   onApply: (range: { start: Date; end: Date; preset: DatePreset }) => void
 }
@@ -134,6 +135,7 @@ export function DateRangePicker({
   start,
   end,
   preset,
+  presets = DATE_PRESETS,
   onCancel,
   onApply,
 }: DateRangePickerProps) {
@@ -220,7 +222,7 @@ export function DateRangePicker({
     <div className="daterange" role="dialog" aria-label="Escolher datas">
       <div className="daterange__body">
         <aside className="daterange__presets">
-          {DATE_PRESETS.map((item) => (
+          {presets.map((item) => (
             <button
               key={item.id}
               type="button"

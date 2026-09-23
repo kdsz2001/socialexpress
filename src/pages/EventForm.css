@@ -1,0 +1,299 @@
+.event-form {
+  width: 100%;
+  font-size: 13px;
+  color: var(--text-primary, #3f4254);
+}
+
+.event-form__card {
+  background: var(--card-bg, #fff);
+  border-radius: 5.46px;
+  box-shadow: var(--card-shadow, 0 0 20px 0 rgba(76, 87, 125, 0.02));
+}
+
+.event-form__head,
+.event-form__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 70px;
+  padding: 0 29px;
+  border-bottom: 1px solid var(--border-color, #ebedf3);
+}
+
+.event-form__footer {
+  justify-content: flex-end;
+  border-bottom: 0;
+  border-top: 1px solid var(--border-color, #ebedf3);
+}
+
+.event-form__head h2 {
+  margin: 0;
+  font-size: 16.5px;
+  font-weight: 600;
+  color: var(--text-heading, #181c32);
+}
+
+.event-form__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.event-form__back,
+.event-form__save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 5.46px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.event-form__back {
+  background: #eaeff5;
+  color: #7e8299;
+}
+
+.event-form__save {
+  background: #3699ff;
+  color: #fff;
+}
+
+.event-form__save:hover {
+  background: #187de4;
+}
+
+.event-form__body {
+  padding: 28px 29px 12px;
+}
+
+.event-form__row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto 22px;
+}
+
+.event-form__label {
+  width: 33.333%;
+  flex: 0 0 33.333%;
+  padding: 10px 16px 0 0;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 400;
+  color: #7e8299;
+}
+
+.event-form__label em {
+  color: #f64e60;
+  font-style: normal;
+  margin-left: 2px;
+}
+
+.event-form__control {
+  flex: 0 0 66.666%;
+  max-width: 66.666%;
+  min-width: 0;
+}
+
+.event-form__control input,
+.event-form__control textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e4e6ef;
+  border-radius: 5.46px;
+  background: #fff;
+  color: var(--text-primary, #3f4254);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.event-form__control input {
+  height: 38px;
+  padding: 0 12px;
+}
+
+.event-form__control textarea {
+  min-height: 64px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.event-form__control input:focus,
+.event-form__control textarea:focus {
+  outline: none;
+  border-color: #3699ff;
+  box-shadow: 0 0 0 0.2rem rgba(54, 153, 255, 0.15);
+}
+
+.event-form__input-wrap {
+  position: relative;
+}
+
+.event-form__input-wrap input {
+  padding-right: 36px;
+}
+
+.event-form__input-wrap.is-invalid input,
+.event-form__date-field.is-invalid input,
+.event-form__row.is-invalid .cselect__trigger {
+  border-color: #f64e60;
+}
+
+.event-form__error-icon {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #f64e60;
+  border-radius: 50%;
+  color: #f64e60;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.event-form__error {
+  margin: 4px 0 0;
+  color: #f64e60;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.event-form__date {
+  position: relative;
+}
+
+.event-form__date-field {
+  display: flex;
+  align-items: stretch;
+}
+
+.event-form__date-field input {
+  border-radius: 5.46px 0 0 5.46px;
+  cursor: pointer;
+}
+
+.event-form__date-btn {
+  width: 42px;
+  flex-shrink: 0;
+  border: 1px solid #e4e6ef;
+  border-left: 0;
+  border-radius: 0 5.46px 5.46px 0;
+  background: #f3f6f9;
+  color: #7e8299;
+  cursor: pointer;
+}
+
+.event-form__date-field.is-open input,
+.event-form__date-field.is-open .event-form__date-btn {
+  border-color: #3699ff;
+}
+
+.event-cal {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 280px;
+  padding: 12px 12px 14px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0 30px rgba(82, 63, 105, 0.18);
+}
+
+.event-cal__head {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #3f4254;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.event-cal__nav {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #7e8299;
+  cursor: pointer;
+}
+
+.event-cal__weekdays,
+.event-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.event-cal__weekdays span {
+  text-align: center;
+  font-size: 12px;
+  color: #b5b5c3;
+  padding-bottom: 6px;
+}
+
+.event-cal__day {
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.event-cal__day.is-outside {
+  color: #d1d3e0;
+}
+
+.event-cal__day.is-today {
+  color: #3699ff;
+  font-weight: 600;
+}
+
+.event-cal__day.is-selected {
+  background: #3699ff;
+  color: #fff;
+}
+
+.event-cal__day:hover {
+  background: #e1f0ff;
+  color: #3699ff;
+}
+
+.event-cal__day.is-selected:hover {
+  background: #187de4;
+  color: #fff;
+}
+
+@media (max-width: 760px) {
+  .event-form__row {
+    flex-direction: column;
+  }
+
+  .event-form__label,
+  .event-form__control {
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+    text-align: left;
+    padding-right: 0;
+  }
+}

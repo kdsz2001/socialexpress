@@ -12,6 +12,8 @@ type CreatableSelectProps = {
   selectOnCreate?: boolean
   /** Increment to open the list from outside the field. */
   openToken?: number
+  /** When false, the list only filters existing options. Default true. */
+  allowCreate?: boolean
   onChange: (value: string) => void
   onCreate: (name: string) => void
 }
@@ -24,6 +26,7 @@ export function CreatableSelect({
   invalid,
   selectOnCreate = true,
   openToken = 0,
+  allowCreate = true,
   onChange,
   onCreate,
 }: CreatableSelectProps) {
@@ -40,10 +43,11 @@ export function CreatableSelect({
   }, [options, query])
 
   const canCreate = useMemo(() => {
+    if (!allowCreate) return false
     const q = query.trim()
     if (!q) return false
     return !options.some((item) => item.toLocaleLowerCase('pt-BR') === q.toLocaleLowerCase('pt-BR'))
-  }, [options, query])
+  }, [allowCreate, options, query])
 
   useEffect(() => {
     if (!open) return
