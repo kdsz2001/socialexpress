@@ -619,19 +619,24 @@ html.theme-dark .agenda__timegrid.is-day .agenda__col-head:not(.agenda__col-head
   height: 1px;
   margin: 0;
   border: 0;
-  /* Lighter half-hour rule — short soft dashes */
-  background-image: linear-gradient(
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
     to right,
-    #e4e6ef 0 2px,
-    transparent 2px 8px
+    #dddddd 0 1px,
+    transparent 1px 2px
   );
-  background-size: 8px 1px;
+  background-size: 2px 1px;
   background-repeat: repeat-x;
-  background-position: left center;
-  transform: translateY(-50%);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.85;
+}
+
+html.theme-dark .agenda__slot-half {
+  background-image: repeating-linear-gradient(
+    to right,
+    #3a3a55 0 1px,
+    transparent 1px 2px
+  );
 }
 
 .agenda__create-rail {
