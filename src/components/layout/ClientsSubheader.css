@@ -19,6 +19,14 @@
   min-width: 0;
 }
 
+/* Altura fixa: o título não sobe nem desce quando a aba não tem botões. */
+.clients-subheader.clients-subheader--stable {
+  box-sizing: border-box;
+  height: 74px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .clients-subheader__title {
   margin: 0;
   font-size: 1.35rem;
@@ -141,6 +149,11 @@ html[data-theme='dark'] .clients-subheader__btn {
 @media (max-width: 900px) {
   .clients-subheader {
     padding: 14px 15px;
+  }
+
+  .clients-subheader.clients-subheader--stable {
+    padding: 0 15px;
+    height: 74px;
   }
 
   .clients-subheader__subtitle {

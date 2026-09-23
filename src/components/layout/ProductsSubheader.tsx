@@ -96,7 +96,7 @@ function SubheaderBar({
   children?: ReactNode
 }) {
   return (
-    <header className="clients-subheader">
+    <header className="clients-subheader clients-subheader--stable">
       <div className="clients-subheader__heading">
         <h1 className="clients-subheader__title">{title}</h1>
         {subtitle ? (
@@ -153,7 +153,7 @@ export function ProductsSubheader() {
 
   if (isCreate) {
     return (
-      <header className="clients-subheader">
+      <header className="clients-subheader clients-subheader--stable">
         <div className="clients-subheader__heading">
           <h1 className="clients-subheader__title">Cadastro de produto</h1>
         </div>
@@ -163,7 +163,7 @@ export function ProductsSubheader() {
 
   if (isDetail) {
     return (
-      <header className="clients-subheader">
+      <header className="clients-subheader clients-subheader--stable">
         <div className="clients-subheader__heading">
           <h1 className="clients-subheader__title">
             {detailProduct?.name || 'Produto'}
@@ -218,7 +218,7 @@ export function ProductsSubheader() {
 
   return (
     <>
-      <header className="clients-subheader">
+      <header className="clients-subheader clients-subheader--stable">
         <div className="clients-subheader__heading">
           <h1 className="clients-subheader__title">Produtos</h1>
           <span className="clients-subheader__sep" aria-hidden="true" />
