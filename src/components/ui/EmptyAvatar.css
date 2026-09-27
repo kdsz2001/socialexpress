@@ -1,0 +1,14 @@
+.empty-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  shape-rendering: geometricPrecision;
+}
+
+.empty-avatar__bg {
+  fill: var(--border-color);
+}
+
+.empty-avatar__fg {
+  fill: #b5b5c3;
+}

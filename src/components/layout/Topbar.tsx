@@ -16,6 +16,7 @@ import {
   subscribeUserProfile,
   type UserProfile,
 } from '../../lib/userProfileStore'
+import { EmptyAvatar } from '../ui/EmptyAvatar'
 import { ProfileDrawer } from './ProfileDrawer'
 import './Topbar.css'
 
@@ -520,7 +521,9 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                 src={userProfile.avatarDataUrl}
                 alt=""
               />
-            ) : null}
+            ) : (
+              <EmptyAvatar />
+            )}
           </span>
         </button>
       </div>
