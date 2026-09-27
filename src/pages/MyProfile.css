@@ -10,8 +10,8 @@
   width: 120px;
   height: 120px;
   border-radius: 6px;
-  background: var(--surface-muted);
-  border: 1px solid var(--border-color);
+  background: #e6e7e8;
+  border: 1px solid #e6e7e8;
   overflow: hidden;
 }
 

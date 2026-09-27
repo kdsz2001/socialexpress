@@ -6,9 +6,9 @@
 }
 
 .empty-avatar__bg {
-  fill: var(--border-color);
+  fill: #e6e7e8;
 }
 
 .empty-avatar__fg {
-  fill: #b5b5c3;
+  fill: #babbbe;
 }
