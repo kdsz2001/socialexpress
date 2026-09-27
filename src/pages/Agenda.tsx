@@ -75,14 +75,6 @@ type CreateTarget = {
   endHour?: number
   /** O ponteiro soltou na borda de cima do intervalo. */
   releaseAtStart?: boolean
-  /** Dias inclusivos do arraste no mês. `date` é o dia em que o ponteiro soltou. */
-  rangeFrom?: Date
-  rangeTo?: Date
-}
-
-type MonthDrag = {
-  anchor: number
-  hover: number
 }
 
 type DragPreview = {
@@ -140,6 +132,13 @@ function timeLabel(apt: Appointment) {
   return 'Dia todo'
 }
 
+function isSameCreateTarget(a: CreateTarget | null, day: Date, hour?: number) {
+  if (!a) return false
+  if (!isSameDay(a.date, day)) return false
+  if (hour == null) return a.hour == null
+  return a.hour === hour
+}
+
 /** Mês: só o dia de hoje e os dias seguintes abrem um agendamento. */
 function canCreateOnMonthDay(day: Date, today: Date) {
   return startOfDay(day).getTime() >= startOfDay(today).getTime()
@@ -158,8 +157,6 @@ export function Agenda() {
   const [createTarget, setCreateTarget] = useState<CreateTarget | null>(null)
   const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
   const dragRef = useRef<DragPreview | null>(null)
-  const [monthDrag, setMonthDrag] = useState<MonthDrag | null>(null)
-  const monthDragRef = useRef<MonthDrag | null>(null)
   const [activeAppointment, setActiveAppointment] = useState<Appointment | null>(null)
 
   useEffect(() => {
@@ -187,8 +184,6 @@ export function Agenda() {
     setCreateTarget(null)
     setDragPreview(null)
     dragRef.current = null
-    setMonthDrag(null)
-    monthDragRef.current = null
   }, [view, cursor])
 
   useEffect(() => {
@@ -604,87 +599,6 @@ export function Agenda() {
     )
   }
 
-  const monthCellIndexAt = (grid: HTMLElement, clientX: number, clientY: number) => {
-    const cells = grid.querySelectorAll<HTMLElement>('.agenda__month-cell')
-    for (let index = 0; index < cells.length; index += 1) {
-      const rect = cells[index].getBoundingClientRect()
-      if (
-        clientX >= rect.left &&
-        clientX < rect.right &&
-        clientY >= rect.top &&
-        clientY < rect.bottom
-      ) {
-        return index
-      }
-    }
-    return null
-  }
-
-  const monthDaySpan = (day: Date) => {
-    if (monthDrag) {
-      const start = Math.min(monthDrag.anchor, monthDrag.hover)
-      const end = Math.max(monthDrag.anchor, monthDrag.hover)
-      const index = monthDays.findIndex((item) => isSameDay(item, day))
-      return { inRange: index >= start && index <= end, isRelease: false }
-    }
-    if (!createTarget || createTarget.hour != null || !canCreateOnMonthDay(day, today)) {
-      return { inRange: false, isRelease: false }
-    }
-    const from = startOfDay(createTarget.rangeFrom ?? createTarget.date).getTime()
-    const to = startOfDay(createTarget.rangeTo ?? createTarget.date).getTime()
-    const time = startOfDay(day).getTime()
-    return {
-      inRange: time >= Math.min(from, to) && time <= Math.max(from, to),
-      isRelease: isSameDay(day, createTarget.date),
-    }
-  }
-
-  const onMonthPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) return
-    const target = event.target as HTMLElement
-    if (target.closest('.agenda__month-chip') || target.closest('.agenda__create-tip')) return
-    const index = monthCellIndexAt(event.currentTarget, event.clientX, event.clientY)
-    if (index == null || !canCreateOnMonthDay(monthDays[index], today)) return
-    const preview = { anchor: index, hover: index }
-    monthDragRef.current = preview
-    setMonthDrag(preview)
-    setCreateTarget(null)
-    event.currentTarget.setPointerCapture(event.pointerId)
-    event.preventDefault()
-  }
-
-  const onMonthPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const current = monthDragRef.current
-    if (!current) return
-    const index = monthCellIndexAt(event.currentTarget, event.clientX, event.clientY)
-    if (index == null || index === current.hover) return
-    if (!canCreateOnMonthDay(monthDays[index], today)) return
-    const next = { ...current, hover: index }
-    monthDragRef.current = next
-    setMonthDrag(next)
-  }
-
-  const finishMonthDrag = (event: ReactPointerEvent<HTMLDivElement>, commit: boolean) => {
-    const current = monthDragRef.current
-    if (!current) return
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId)
-    }
-    const index = monthCellIndexAt(event.currentTarget, event.clientX, event.clientY)
-    const hover =
-      index != null && canCreateOnMonthDay(monthDays[index], today) ? index : current.hover
-    monthDragRef.current = null
-    setMonthDrag(null)
-    if (!commit) return
-    const start = Math.min(current.anchor, hover)
-    const end = Math.max(current.anchor, hover)
-    setCreateTarget({
-      date: startOfDay(monthDays[hover]),
-      rangeFrom: startOfDay(monthDays[start]),
-      rangeTo: startOfDay(monthDays[end]),
-    })
-  }
-
   return (
     <div className={`agenda${view === 'mes' ? ' agenda--mes' : ''}`}>
       <section className="agenda__card">
@@ -730,19 +644,12 @@ export function Agenda() {
                 </div>
               ))}
             </div>
-            <div
-              className={`agenda__month-grid${monthDrag ? ' is-dragging' : ''}`}
-              onPointerDown={onMonthPointerDown}
-              onPointerMove={onMonthPointerMove}
-              onPointerUp={(event) => finishMonthDrag(event, true)}
-              onPointerCancel={(event) => finishMonthDrag(event, false)}
-            >
+            <div className="agenda__month-grid">
               {monthDays.map((day, index) => {
                 const inMonth = isSameMonth(day, cursor)
                 const isToday = isSameDay(day, today)
                 const bookable = canCreateOnMonthDay(day, today)
-                const span = monthDaySpan(day)
-                const selected = bookable && span.inRange
+                const selected = bookable && isSameCreateTarget(createTarget, day)
                 const dayApts = appointmentsByDate.get(toDateKey(day)) ?? []
                 const col = index % 7
                 const cellClass = `agenda__month-cell${inMonth ? '' : ' is-outside'}${
@@ -788,7 +695,7 @@ export function Agenda() {
                         </span>
                       ))}
                     </div>
-                    {span.isRelease ? renderCreateTip(day) : null}
+                    {selected ? renderCreateTip(day) : null}
                   </>
                 )
 
@@ -806,6 +713,10 @@ export function Agenda() {
                     role="button"
                     tabIndex={0}
                     className={cellClass}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setCreateTarget({ date: startOfDay(day) })
+                    }}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault()

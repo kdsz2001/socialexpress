@@ -193,12 +193,6 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 234px);
-  user-select: none;
-  touch-action: none;
-}
-
-.agenda__month-grid.is-dragging {
-  cursor: grabbing;
 }
 
 .agenda--mes .agenda__month-grid {
