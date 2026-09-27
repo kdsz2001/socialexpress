@@ -8,6 +8,7 @@ import { formatHistoryDate } from './historyStore'
 
 export type OrderStatus = 'Aberto' | 'Confirmado' | 'Concluído' | 'Anulado'
 export type OrderOperation = 'Aluguel' | 'Venda'
+export type OrderKind = 'Pedido' | 'Orçamento'
 
 export type Order = {
   id: string
@@ -19,6 +20,9 @@ export type Order = {
   status: OrderStatus
   operation: OrderOperation
   createdAt: string
+  kind?: OrderKind
+  origin?: string
+  attendant?: string
 }
 
 const STORAGE_KEY = 'social-express:orders'
@@ -63,6 +67,9 @@ export function addOrder(input: {
   total: string
   status: OrderStatus
   operation: OrderOperation
+  kind?: OrderKind
+  origin?: string
+  attendant?: string
 }): Order {
   const all = readAll()
   const item: Order = {
@@ -75,6 +82,9 @@ export function addOrder(input: {
     status: input.status,
     operation: input.operation,
     createdAt: new Date().toISOString(),
+    kind: input.kind,
+    origin: input.origin?.trim() || undefined,
+    attendant: input.attendant?.trim() || undefined,
   }
   writeAll([...all, item])
   logOrderCreated(item.number, item.clientName)

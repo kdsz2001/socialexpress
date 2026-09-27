@@ -38,6 +38,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/produtos/cadastrar': 'Cadastro de produto',
   '/funcionarios': 'Funcionários',
   '/pedidos': 'Pedidos',
+  '/pedidos/novo': 'Novo pedido',
   '/orcamentos': 'Orçamentos',
   '/financeiro': 'Financeiro',
   '/fornecedores': 'Fornecedores',
@@ -177,7 +178,7 @@ export function AppLayout() {
         {location.pathname.startsWith('/eventos') && <EventsSubheader />}
         {location.pathname.startsWith('/produtos') && <ProductsSubheader />}
         {location.pathname.startsWith('/funcionarios') && <EmployeesSubheader />}
-        {location.pathname === '/pedidos' && <OrdersSubheader />}
+        {location.pathname.startsWith('/pedidos') && <OrdersSubheader />}
         {location.pathname === '/financeiro' && <FinanceiroSubheader />}
         {location.pathname === '/fornecedores' && <SuppliersSubheader />}
         {location.pathname === '/relatorios' && <ReportsSubheader />}

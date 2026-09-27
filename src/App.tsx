@@ -14,6 +14,7 @@ import { ProductCreate } from './pages/ProductCreate'
 import { ProductEdit } from './pages/ProductEdit'
 import { Employees } from './pages/Employees'
 import { Orders } from './pages/Orders'
+import { OrderCreate } from './pages/OrderCreate'
 import { Financeiro } from './pages/Financeiro'
 import { Suppliers } from './pages/Suppliers'
 import { Reports } from './pages/Reports'
@@ -53,6 +54,7 @@ export default function App() {
         <Route path="/produtos/:productId" element={<ProductEdit />} />
         <Route path="/funcionarios" element={<Employees />} />
         <Route path="/pedidos" element={<Orders />} />
+        <Route path="/pedidos/novo" element={<OrderCreate />} />
         <Route path="/financeiro" element={<Financeiro />} />
         <Route path="/fornecedores" element={<Suppliers />} />
         <Route path="/relatorios" element={<Reports />} />
