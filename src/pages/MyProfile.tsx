@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { NeighborhoodSelect } from '../components/clients/NeighborhoodSelect'
 import { AvatarCropModal } from '../components/ui/AvatarCropModal'
+import { EmptyAvatar } from '../components/ui/EmptyAvatar'
 import { SaveToast } from '../components/ui/SaveToast'
 import {
   BRAZIL_STATES,
@@ -342,7 +343,7 @@ export function MyProfile() {
                         alt="Imagem de perfil"
                       />
                     ) : (
-                      <span className="my-profile__avatar-placeholder" aria-hidden="true" />
+                      <EmptyAvatar />
                     )}
                     <button
                       type="button"

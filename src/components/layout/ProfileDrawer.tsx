@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { User, X } from 'lucide-react'
+import { EmptyAvatar } from '../ui/EmptyAvatar'
 import { logout } from '../../lib/authStore'
 import {
   getUserDisplayName,
@@ -106,7 +107,9 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
                 src={profile.avatarDataUrl}
                 alt=""
               />
-            ) : null}
+            ) : (
+              <EmptyAvatar />
+            )}
           </div>
           <div className="profile-drawer__meta">
             <p className="profile-drawer__name">{displayName}</p>

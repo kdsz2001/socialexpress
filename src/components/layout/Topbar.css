@@ -290,17 +290,9 @@
   width: 40px;
   height: 40px;
   border-radius: 0.42rem;
-  background-color: var(--border-color);
-  background-image:
-    radial-gradient(circle at 50% 38%, #b5b5c3 0 22%, transparent 23%),
-    radial-gradient(ellipse 55% 40% at 50% 78%, #b5b5c3 0 52%, transparent 53%);
-  background-repeat: no-repeat;
+  background: var(--border-color);
   flex-shrink: 0;
   overflow: hidden;
-}
-
-.topbar__avatar:has(.topbar__avatar-image) {
-  background-image: none;
 }
 
 .topbar__avatar-image {
