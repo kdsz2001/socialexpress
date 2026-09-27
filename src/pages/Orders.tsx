@@ -12,6 +12,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useOrders } from '../hooks/useOrders'
 import {
   addOrder,
@@ -61,6 +62,7 @@ function statusClass(status: OrderStatus) {
 }
 
 export function Orders() {
+  const navigate = useNavigate()
   const orders = useOrders()
 
   const [query, setQuery] = useState('')
@@ -111,15 +113,7 @@ export function Orders() {
   }, [query, statusFilter, operationFilter, pageSize])
 
   const openCreate = () => {
-    setEditing(null)
-    setClientName('')
-    setPhone('')
-    setEventDate(toInputDate(new Date()))
-    setTotal('')
-    setStatus('Aberto')
-    setOperation('Aluguel')
-    setTouched(false)
-    setModalOpen(true)
+    navigate('/pedidos/novo')
   }
 
   const openEdit = (item: Order) => {
@@ -320,7 +314,7 @@ export function Orders() {
                       <div className="orders__client">
                         <span className="orders__client-name">{item.clientName}</span>
                         <span className="orders__client-meta">
-                          Pedido {item.number} • {item.operation}
+                          {item.kind === 'Orçamento' ? 'Orçamento' : 'Pedido'} {item.number} • {item.operation}
                         </span>
                       </div>
                     </td>
