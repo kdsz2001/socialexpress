@@ -77,22 +77,22 @@ html[data-theme='dark'] .event-form__back {
 }
 
 .event-form__body {
-  padding: 28px 29px 12px;
+  padding: 26px 29px 22px;
 }
 
 .event-form__row {
   display: flex;
   align-items: flex-start;
   width: 100%;
-  max-width: 760px;
+  max-width: 638px;
   margin: 0 auto 22px;
 }
 
 .event-form__label {
-  width: 33.333%;
-  flex: 0 0 33.333%;
-  padding: 10px 16px 0 0;
-  text-align: right;
+  width: 224px;
+  flex: 0 0 224px;
+  padding: 8px 0 0;
+  text-align: left;
   font-size: 13px;
   font-weight: 400;
   color: #7e8299;
@@ -105,8 +105,8 @@ html[data-theme='dark'] .event-form__back {
 }
 
 .event-form__control {
-  flex: 0 0 66.666%;
-  max-width: 66.666%;
+  flex: 1 1 auto;
+  max-width: none;
   min-width: 0;
 }
 
@@ -128,8 +128,8 @@ html[data-theme='dark'] .event-form__back {
 }
 
 .event-form__control textarea {
-  min-height: 64px;
-  padding: 10px 12px;
+  min-height: 56px;
+  padding: 8px 12px;
   resize: vertical;
 }
 
