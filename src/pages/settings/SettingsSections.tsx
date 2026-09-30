@@ -785,15 +785,13 @@ export function PermissionsSection() {
             <tr key={item.id}>
               <td>{item.name}</td>
               <RowActions>
+                <IconAction
+                  kind="edit"
+                  tip="Editar"
+                  onClick={() => navigate(settingsPath('permissoes', `permission:${item.id}`))}
+                />
                 {item.locked ? null : (
-                  <>
-                    <IconAction
-                      kind="edit"
-                      tip="Editar"
-                      onClick={() => navigate(settingsPath('permissoes', `permission:${item.id}`))}
-                    />
-                    <IconAction kind="delete" tip="Excluir" onClick={() => setRemoveId(item.id)} />
-                  </>
+                  <IconAction kind="delete" tip="Excluir" onClick={() => setRemoveId(item.id)} />
                 )}
               </RowActions>
             </tr>
@@ -808,7 +806,7 @@ export function PermissionsSection() {
         onConfirm={() => {
           updateAppConfig((current) => ({
             ...current,
-            permissions: current.permissions.filter((row) => row.id !== removeId),
+            permissions: current.permissions.filter((row) => row.locked || row.id !== removeId),
           }))
           setRemoveId(null)
           notify('Permissão excluída com sucesso.')
