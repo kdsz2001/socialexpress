@@ -40,7 +40,9 @@ export function Employees() {
   }, [navigate, searchParams])
 
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ativos')
+  const statusParam = searchParams.get('status')
+  const statusFilter: StatusFilter =
+    statusParam === 'inativos' || statusParam === 'todos' ? statusParam : 'ativos'
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
@@ -176,7 +178,14 @@ export function Employees() {
             <select
               className="employees__select"
               value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+              onChange={(event) => {
+                const next = event.target.value
+                const params = new URLSearchParams(searchParams)
+                if (next === 'ativos') params.delete('status')
+                else params.set('status', next)
+                const queryString = params.toString()
+                navigate(queryString ? `/funcionarios?${queryString}` : '/funcionarios', { replace: true })
+              }}
               aria-label="Filtro por status"
             >
               {STATUS_OPTIONS.map((item) => (
