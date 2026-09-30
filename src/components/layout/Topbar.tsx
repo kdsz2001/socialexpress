@@ -118,11 +118,12 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         : paramTab === 'trajes'
           ? 'trajes'
           : 'contatos'
-  const employeesTab: EmployeesTab | null = !isEmployeesSection
-    ? null
-    : paramTab === 'permissoes'
-      ? 'permissoes'
-      : 'lista'
+  const employeesTab: EmployeesTab | null =
+    location.pathname !== '/funcionarios'
+      ? null
+      : paramTab === 'permissoes'
+        ? 'permissoes'
+        : 'lista'
   const financeTab: FinanceTab | null = !isFinanceSection
     ? null
     : paramTab === 'pagar'

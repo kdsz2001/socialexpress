@@ -37,6 +37,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/produtos': 'Produtos',
   '/produtos/cadastrar': 'Cadastro de produto',
   '/funcionarios': 'Funcionários',
+  '/funcionarios/cadastrar': 'Cadastro de funcionários',
   '/pedidos': 'Pedidos',
   '/pedidos/novo': 'Novo pedido',
   '/orcamentos': 'Orçamentos',
@@ -124,6 +125,10 @@ export function AppLayout() {
       location.pathname !== '/produtos/cadastrar'
     ) {
       document.title = 'Produto'
+      return
+    }
+    if (location.pathname.startsWith('/funcionarios/') && location.pathname !== '/funcionarios/cadastrar') {
+      document.title = 'Cadastro de funcionários'
       return
     }
     document.title = PAGE_TITLES[location.pathname] ?? 'Social Express'

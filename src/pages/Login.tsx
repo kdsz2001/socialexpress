@@ -2,11 +2,13 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { attemptLogin, isAuthenticated, subscribeAuth } from '../lib/authStore'
+import { EMPLOYEE_UNITS } from '../lib/employeesStore'
 import './Login.css'
 
 export function Login() {
   const navigate = useNavigate()
   const [authed, setAuthed] = useState(() => isAuthenticated())
+  const [unit, setUnit] = useState('')
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -27,7 +29,7 @@ export function Login() {
     event.preventDefault()
     setError(null)
     setSubmitting(true)
-    const result = attemptLogin(identifier, password)
+    const result = attemptLogin(identifier, password, unit)
     setSubmitting(false)
     if (!result.ok) {
       setError(result.error)
@@ -56,6 +58,18 @@ export function Login() {
             </div>
 
             <form className="login__form" onSubmit={onSubmit} noValidate>
+              <label className="login__field">
+                <span>Unidade</span>
+                <select value={unit} onChange={(event) => setUnit(event.target.value)}>
+                  <option value="">Selecione a loja</option>
+                  {EMPLOYEE_UNITS.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
               <label className="login__field">
                 <span>Login ou e-mail</span>
                 <input

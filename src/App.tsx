@@ -13,6 +13,7 @@ import { Products } from './pages/Products'
 import { ProductCreate } from './pages/ProductCreate'
 import { ProductEdit } from './pages/ProductEdit'
 import { Employees } from './pages/Employees'
+import { EmployeeForm } from './pages/EmployeeForm'
 import { Orders } from './pages/Orders'
 import { OrderCreate } from './pages/OrderCreate'
 import { Financeiro } from './pages/Financeiro'
@@ -53,6 +54,8 @@ export default function App() {
         <Route path="/produtos/cadastrar" element={<ProductCreate />} />
         <Route path="/produtos/:productId" element={<ProductEdit />} />
         <Route path="/funcionarios" element={<Employees />} />
+        <Route path="/funcionarios/cadastrar" element={<EmployeeForm />} />
+        <Route path="/funcionarios/:employeeId" element={<EmployeeForm />} />
         <Route path="/pedidos" element={<Orders />} />
         <Route path="/pedidos/novo" element={<OrderCreate />} />
         <Route path="/financeiro" element={<Financeiro />} />
