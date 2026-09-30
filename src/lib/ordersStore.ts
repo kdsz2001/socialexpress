@@ -10,6 +10,13 @@ export type OrderStatus = 'Aberto' | 'Confirmado' | 'Concluído' | 'Anulado'
 export type OrderOperation = 'Aluguel' | 'Venda'
 export type OrderKind = 'Pedido' | 'Orçamento'
 
+export type OrderLine = {
+  productId: string
+  name: string
+  fullCode: string
+  value: number
+}
+
 export type Order = {
   id: string
   number: number
@@ -23,6 +30,7 @@ export type Order = {
   kind?: OrderKind
   origin?: string
   attendant?: string
+  lines?: OrderLine[]
 }
 
 const STORAGE_KEY = 'social-express:orders'
@@ -60,6 +68,19 @@ export function listOrders(): Order[] {
   return cachedOrders
 }
 
+function normalizeLines(lines: OrderLine[] | undefined): OrderLine[] | undefined {
+  if (!lines?.length) return undefined
+  const normalized = lines
+    .map((line) => ({
+      productId: String(line.productId || '').trim(),
+      name: String(line.name || '').trim(),
+      fullCode: String(line.fullCode || '').trim(),
+      value: Number.isFinite(Number(line.value)) ? Number(line.value) : 0,
+    }))
+    .filter((line) => line.productId || line.name || line.fullCode)
+  return normalized.length > 0 ? normalized : undefined
+}
+
 export function addOrder(input: {
   clientName: string
   phone: string
@@ -70,6 +91,7 @@ export function addOrder(input: {
   kind?: OrderKind
   origin?: string
   attendant?: string
+  lines?: OrderLine[]
 }): Order {
   const all = readAll()
   const item: Order = {
@@ -85,6 +107,7 @@ export function addOrder(input: {
     kind: input.kind,
     origin: input.origin?.trim() || undefined,
     attendant: input.attendant?.trim() || undefined,
+    lines: normalizeLines(input.lines),
   }
   writeAll([...all, item])
   logOrderCreated(item.number, item.clientName)

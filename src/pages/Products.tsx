@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as
 import { createPortal } from 'react-dom'
 import {
   ArrowUp,
+  ArrowLeft,
   Calendar,
   Check,
   ChevronDown,
@@ -24,11 +25,12 @@ import {
 import { ConfirmDeleteModal } from '../components/products/ConfirmDeleteModal'
 import { ProductTypeModal } from '../components/products/ProductTypeModal'
 import { SaveToast } from '../components/ui/SaveToast'
-import { useHistory } from '../hooks/useHistory'
+import { useOrders } from '../hooks/useOrders'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { useProducts } from '../hooks/useProducts'
-import { formatHistoryDateTime } from '../lib/historyStore'
+import { moneyBrToNumber } from '../lib/moneyMask'
+import { type Order, type OrderLine } from '../lib/ordersStore'
 import {
   addProductAttribute,
   ATTRIBUTE_KIND_META,
@@ -479,6 +481,34 @@ function ProductsList() {
   )
 }
 
+function formatHistoryMoney(value: number) {
+  const negative = value < 0
+  const [intPart, decPart] = Math.abs(value).toFixed(2).split('.')
+  const withDots = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return `${negative ? '-' : ''}R$ ${withDots},${decPart}`
+}
+
+function formatHistoryDay(value: string) {
+  const [datePart] = value.split('T')
+  const [year, month, day] = datePart.split('-')
+  if (!year || !month || !day) return ''
+  return `${day}/${month}/${year}`
+}
+
+function historyLines(order: Order): OrderLine[] {
+  return Array.isArray(order.lines) ? order.lines : []
+}
+
+function lineMatchesProduct(line: OrderLine, product: Product) {
+  if (line.productId && line.productId === product.id) return true
+  const code = product.fullCode.trim().toLocaleLowerCase('pt-BR')
+  const lineCode = String(line.fullCode || '').trim().toLocaleLowerCase('pt-BR')
+  if (code && lineCode && code === lineCode) return true
+  const name = product.name.trim().toLocaleLowerCase('pt-BR')
+  const lineName = String(line.name || '').trim().toLocaleLowerCase('pt-BR')
+  return Boolean(name && lineName && name === lineName)
+}
+
 function ProductHistoryModal({
   product,
   onClose,
@@ -486,16 +516,19 @@ function ProductHistoryModal({
   product: Product
   onClose: () => void
 }) {
-  const entries = useHistory()
-  const related = useMemo(() => {
-    const name = product.name.trim().toLocaleLowerCase('pt-BR')
-    const code = product.fullCode.trim().toLocaleLowerCase('pt-BR')
-    return entries.filter((entry) => {
-      if (entry.module !== 'Produtos') return false
-      const text = entry.segments.map((segment) => segment.text).join(' ').toLocaleLowerCase('pt-BR')
-      return (name && text.includes(name)) || (code && text.includes(code))
+  const orders = useOrders()
+  const rows = useMemo(() => {
+    return orders.flatMap((order) => {
+      const matched = historyLines(order).filter((line) => lineMatchesProduct(line, product))
+      if (matched.length === 0) return []
+      const value = matched.reduce((sum, line) => sum + (Number(line.value) || 0), 0)
+      return [{ order, value }]
     })
-  }, [entries, product])
+  }, [orders, product])
+  const totalOut = rows.reduce((sum, row) => sum + row.value, 0)
+  const costValue = moneyBrToNumber(product.cost)
+  const costLabel = product.cost.trim() && costValue > 0 ? formatHistoryMoney(costValue) : '-'
+  const titleCode = product.fullCode.trim() || product.name.trim()
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -520,35 +553,64 @@ function ProductHistoryModal({
         aria-labelledby="product-history-title"
       >
         <header className="products-modal__header">
-          <h2 id="product-history-title">Histórico do produto</h2>
+          <h2 id="product-history-title">Histórico do produto {titleCode}</h2>
           <button type="button" className="products-modal__close" aria-label="Fechar" onClick={onClose}>
             <X size={16} strokeWidth={2.25} />
           </button>
         </header>
         <div className="products-modal__body products-history">
-          <p className="products-history__product">{product.name}</p>
-          {related.length === 0 ? (
+          <div className="products-history__head">
+            <span>Pedido</span>
+            <span>Datas</span>
+            <span>Valor</span>
+            <span>Status</span>
+          </div>
+          {rows.length === 0 ? (
             <p className="products-history__empty">Nenhum histórico encontrado.</p>
           ) : (
             <ul className="products-history__list">
-              {related.map((entry) => (
-                <li key={entry.id} className="products-history__item">
-                  <time dateTime={new Date(entry.createdAt).toISOString()}>
-                    {formatHistoryDateTime(entry.createdAt)}
-                  </time>
-                  <p>
-                    {entry.segments.map((segment, index) =>
-                      segment.bold ? (
-                        <strong key={`${entry.id}-${index}`}>{segment.text}</strong>
-                      ) : (
-                        <span key={`${entry.id}-${index}`}>{segment.text}</span>
-                      ),
-                    )}
-                  </p>
-                </li>
-              ))}
+              {rows.map(({ order, value }) => {
+                const created = formatHistoryDay(order.createdAt)
+                const eventDay = formatHistoryDay(order.eventDate)
+                return (
+                  <li key={order.id} className="products-history__row">
+                    <div className="products-history__order">
+                      <span className="products-history__number">{order.number}</span>
+                      <span className="products-history__client">{order.clientName}</span>
+                      {eventDay ? <span className="products-history__event">Evento em {eventDay}</span> : null}
+                    </div>
+                    <div className="products-history__dates">
+                      {created ? (
+                        <span className="products-history__date">
+                          <Calendar size={14} strokeWidth={2} />
+                          {created}
+                        </span>
+                      ) : null}
+                      {eventDay ? (
+                        <span className="products-history__date">
+                          <ArrowLeft size={14} strokeWidth={2} />
+                          {eventDay}
+                        </span>
+                      ) : null}
+                    </div>
+                    <span className="products-history__money">{formatHistoryMoney(value)}</span>
+                    <span className="products-history__status">{order.status}</span>
+                  </li>
+                )
+              })}
             </ul>
           )}
+          <p className="products-history__totals">
+            <span>
+              <strong>Total em saídas:</strong> {formatHistoryMoney(totalOut)}
+            </span>
+            <span>
+              <strong>Custo:</strong> {costLabel}
+            </span>
+            <span>
+              <strong>Total geral:</strong> {formatHistoryMoney(totalOut)}
+            </span>
+          </p>
         </div>
       </div>
     </div>,
