@@ -27,9 +27,10 @@
   padding-bottom: 0;
 }
 
-/* Clientes e Financeiro: mesma altura do Clarial em todas as abas. */
+/* Clientes, Financeiro e Eventos: mesma altura do Clarial. */
 .clients-subheader.clients-subheader--clients,
-.clients-subheader.clients-subheader--finance {
+.clients-subheader.clients-subheader--finance,
+.clients-subheader.clients-subheader--events {
   height: 54px;
 }
 
