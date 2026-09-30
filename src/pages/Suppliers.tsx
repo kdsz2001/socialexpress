@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, Plus, Search, SquarePen, Trash2, X } from 'lucide-react'
+import { ChevronDown, Plus, Search, X } from 'lucide-react'
+import { IconAction, IconActions } from '../components/ui/IconAction'
 import { useSuppliers } from '../hooks/useSuppliers'
 import {
   addSupplier,
@@ -140,22 +141,20 @@ export function Suppliers() {
                     </td>
                     <td className="suppliers__type-cell">{item.type}</td>
                     <td className="suppliers__actions-cell">
-                      <button
-                        type="button"
-                        className="suppliers__icon-btn"
-                        aria-label={`Editar fornecedor ${item.name}`}
-                        onClick={() => openEdit(item)}
-                      >
-                        <SquarePen size={15} strokeWidth={2} />
-                      </button>
-                      <button
-                        type="button"
-                        className="suppliers__icon-btn is-danger"
-                        aria-label={`Excluir fornecedor ${item.name}`}
-                        onClick={() => deleteSupplier(item.id)}
-                      >
-                        <Trash2 size={15} strokeWidth={2} />
-                      </button>
+                      <IconActions>
+                        <IconAction
+                          kind="edit"
+                          tip="Editar fornecedor"
+                          aria-label={`Editar fornecedor ${item.name}`}
+                          onClick={() => openEdit(item)}
+                        />
+                        <IconAction
+                          kind="delete"
+                          tip="Excluir fornecedor"
+                          aria-label={`Excluir fornecedor ${item.name}`}
+                          onClick={() => deleteSupplier(item.id)}
+                        />
+                      </IconActions>
                     </td>
                   </tr>
                 ))

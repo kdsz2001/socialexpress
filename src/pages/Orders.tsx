@@ -8,11 +8,10 @@ import {
   ChevronsRight,
   Plus,
   Search,
-  SquarePen,
-  Trash2,
   X,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { IconAction, IconActions } from '../components/ui/IconAction'
 import { useOrders } from '../hooks/useOrders'
 import {
   addOrder,
@@ -327,22 +326,20 @@ export function Orders() {
                       </span>
                     </td>
                     <td className="orders__actions-cell">
-                      <button
-                        type="button"
-                        className="orders__icon-btn"
-                        aria-label={`Editar pedido ${item.number}`}
-                        onClick={() => openEdit(item)}
-                      >
-                        <SquarePen size={15} strokeWidth={2} />
-                      </button>
-                      <button
-                        type="button"
-                        className="orders__icon-btn is-danger"
-                        aria-label={`Excluir pedido ${item.number}`}
-                        onClick={() => deleteOrder(item.id)}
-                      >
-                        <Trash2 size={15} strokeWidth={2} />
-                      </button>
+                      <IconActions>
+                        <IconAction
+                          kind="edit"
+                          tip="Editar pedido"
+                          aria-label={`Editar pedido ${item.number}`}
+                          onClick={() => openEdit(item)}
+                        />
+                        <IconAction
+                          kind="delete"
+                          tip="Excluir pedido"
+                          aria-label={`Excluir pedido ${item.number}`}
+                          onClick={() => deleteOrder(item.id)}
+                        />
+                      </IconActions>
                     </td>
                   </tr>
                 ))

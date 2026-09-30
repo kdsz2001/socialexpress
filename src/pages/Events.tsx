@@ -8,8 +8,6 @@ import {
   ChevronsRight,
   Plus,
   Search,
-  SquarePen,
-  Trash2,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -18,6 +16,7 @@ import {
   type DatePreset,
 } from '../components/clients/DateRangePicker'
 import { ConfirmDeleteModal } from '../components/products/ConfirmDeleteModal'
+import { IconAction, IconActions } from '../components/ui/IconAction'
 import { SaveToast } from '../components/ui/SaveToast'
 import { useEvents } from '../hooks/useEvents'
 import { EVENT_TOAST_KEY, deleteEvent, type EventItem } from '../lib/eventsStore'
@@ -321,20 +320,10 @@ function EventRow({
       </td>
       <td className="events__date-cell">{formatEventDate(item.date)}</td>
       <td className="events__actions-cell">
-        <div className="events__actions">
-          <button type="button" className="events__icon-btn" aria-label="Visualizar detalhes" onClick={onEdit}>
-            <SquarePen size={15} strokeWidth={2} />
-            <span className="events__tip" role="tooltip">
-              Visualizar detalhes
-            </span>
-          </button>
-          <button type="button" className="events__icon-btn is-danger" aria-label="Remover evento" onClick={onRemove}>
-            <Trash2 size={15} strokeWidth={2} />
-            <span className="events__tip" role="tooltip">
-              Remover evento
-            </span>
-          </button>
-        </div>
+        <IconActions>
+          <IconAction kind="view" tip="Visualizar detalhes" onClick={onEdit} />
+          <IconAction kind="delete" tip="Remover evento" onClick={onRemove} />
+        </IconActions>
       </td>
     </tr>
   )
