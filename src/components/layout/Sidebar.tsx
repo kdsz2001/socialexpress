@@ -60,12 +60,24 @@ function NavItem({
   label: string
   icon: (typeof navItems)[number]['icon']
 }) {
+  const location = useLocation()
   const isDashboard = to === '/'
+
+  const handleDashboardClick = (e: MouseEvent) => {
+    e.preventDefault()
+    if (location.pathname === '/') {
+      window.location.reload()
+    } else {
+      window.location.assign('/')
+    }
+  }
+
   return (
     <li>
       <NavLink
         to={to}
         end={isDashboard}
+        onClick={isDashboard ? handleDashboardClick : undefined}
         className={({ isActive }) =>
           [
             'sidebar__link',
