@@ -423,7 +423,7 @@ html[data-theme='dark'] .settings__switch input:checked + .settings__switch-ui {
 }
 
 .settings-table-wrap {
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .settings-table {
