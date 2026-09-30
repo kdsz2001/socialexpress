@@ -10,7 +10,7 @@ import {
   Search,
   X,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { IconAction, IconActions } from '../components/ui/IconAction'
 import { useOrders } from '../hooks/useOrders'
 import {
@@ -62,6 +62,7 @@ function statusClass(status: OrderStatus) {
 
 export function Orders() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const orders = useOrders()
 
   const [query, setQuery] = useState('')
@@ -126,6 +127,16 @@ export function Orders() {
     setTouched(false)
     setModalOpen(true)
   }
+
+  useEffect(() => {
+    const orderId = searchParams.get('order')
+    if (!orderId) return
+    const item = orders.find((order) => order.id === orderId)
+    if (item) openEdit(item)
+    const next = new URLSearchParams(searchParams)
+    next.delete('order')
+    setSearchParams(next, { replace: true })
+  }, [orders, searchParams, setSearchParams])
 
   const closeModal = () => {
     setModalOpen(false)

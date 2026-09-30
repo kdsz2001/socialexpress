@@ -18,9 +18,12 @@ import {
   rangeForPreset,
   type DatePreset,
 } from '../components/clients/DateRangePicker'
+import { ClientOrdersModal } from '../components/clients/ClientOrdersModal'
 import { DeleteClientModal } from '../components/clients/DeleteClientModal'
 import { SaveToast } from '../components/ui/SaveToast'
 import { useClients } from '../hooks/useClients'
+import { useOrders } from '../hooks/useOrders'
+import type { Order } from '../lib/ordersStore'
 import {
   ageTurningOnBirthday,
   birthdayInRange,
@@ -56,9 +59,26 @@ function WhatsAppGlyph() {
   )
 }
 
+function clientNameKeys(client: Client) {
+  const full = [client.nome, client.sobrenomes].filter(Boolean).join(' ').trim()
+  return [getClientDisplayName(client), full, client.chamado, client.nome]
+    .map((value) => value.trim().toLocaleLowerCase('pt-BR').replace(/\s+/g, ' '))
+    .filter(Boolean)
+}
+
+function ordersForClient(client: Client, orders: Order[]) {
+  const names = new Set(clientNameKeys(client))
+  return orders.filter((order) => {
+    if (order.clientId && order.clientId === client.id) return true
+    const name = order.clientName.trim().toLocaleLowerCase('pt-BR').replace(/\s+/g, ' ')
+    return Boolean(name) && names.has(name)
+  })
+}
+
 export function Clients() {
   const navigate = useNavigate()
   const clients = useClients()
+  const orders = useOrders()
   const [searchParams] = useSearchParams()
   const tab =
     searchParams.get('tab') === 'aniversariantes'
@@ -70,6 +90,7 @@ export function Clients() {
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null)
+  const [historyClient, setHistoryClient] = useState<Client | null>(null)
   const [toastOpen, setToastOpen] = useState(false)
   const closeToast = useCallback(() => setToastOpen(false), [])
   const [dateOpen, setDateOpen] = useState(false)
@@ -568,6 +589,13 @@ export function Clients() {
                           </td>
                           <td className="clients__actions-cell">
                             <IconActions>
+                              {ordersForClient(client, orders).length > 0 ? (
+                                <IconAction
+                                  kind="orders"
+                                  tip="Histórico de pedidos"
+                                  onClick={() => setHistoryClient(client)}
+                                />
+                              ) : null}
                               <IconAction
                                 kind="view"
                                 tip="Visualizar cliente"
@@ -593,6 +621,18 @@ export function Clients() {
           </>
         )}
       </section>
+
+      {historyClient ? (
+        <ClientOrdersModal
+          clientName={getClientDisplayName(historyClient)}
+          orders={ordersForClient(historyClient, orders)}
+          onClose={() => setHistoryClient(null)}
+          onOpenOrder={(order) => {
+            setHistoryClient(null)
+            navigate(`/pedidos?order=${encodeURIComponent(order.id)}`)
+          }}
+        />
+      ) : null}
 
       <DeleteClientModal
         open={clientToDelete !== null}

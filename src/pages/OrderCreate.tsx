@@ -312,6 +312,7 @@ export function OrderCreate() {
     }
     const totalValue = lines.reduce((sum, line) => sum + (Number.isFinite(line.value) ? line.value : 0), 0)
     addOrder({
+      clientId: client?.id,
       clientName: name,
       phone,
       eventDate,

@@ -20,6 +20,7 @@ export type OrderLine = {
 export type Order = {
   id: string
   number: number
+  clientId?: string
   clientName: string
   phone: string
   eventDate: string // YYYY-MM-DD
@@ -82,6 +83,7 @@ function normalizeLines(lines: OrderLine[] | undefined): OrderLine[] | undefined
 }
 
 export function addOrder(input: {
+  clientId?: string
   clientName: string
   phone: string
   eventDate: string
@@ -97,6 +99,7 @@ export function addOrder(input: {
   const item: Order = {
     id: crypto.randomUUID(),
     number: nextNumber(all),
+    clientId: input.clientId?.trim() || undefined,
     clientName: input.clientName.trim(),
     phone: input.phone.trim(),
     eventDate: input.eventDate,
