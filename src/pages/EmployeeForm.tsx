@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
-import { ArrowLeft, Check, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, Eye, EyeOff, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppConfig } from '../hooks/useAppConfig'
 import { maskCpfCnpj, onlyDigits } from '../lib/cpfCnpj'
@@ -62,6 +62,7 @@ export function EmployeeForm() {
   const [unit, setUnit] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [avatar, setAvatar] = useState('')
   const [active, setActive] = useState(true)
   const [shown, setShown] = useState<Record<string, boolean>>({})
@@ -432,13 +433,23 @@ export function EmployeeForm() {
             error={show('password') ? blank('Senha') : ''}
             onBlur={() => reveal('password')}
           >
-            <input
-              type="password"
-              value={password}
-              autoComplete="new-password"
-              onChange={(event) => setPassword(event.target.value)}
-              onBlur={() => reveal('password')}
-            />
+            <div className="emp-form__password">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                autoComplete="new-password"
+                onChange={(event) => setPassword(event.target.value)}
+                onBlur={() => reveal('password')}
+              />
+              <button
+                type="button"
+                className="emp-form__eye"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                onClick={() => setShowPassword((open) => !open)}
+              >
+                {showPassword ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
+              </button>
+            </div>
           </Field>
         </div>
 
