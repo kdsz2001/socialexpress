@@ -2,8 +2,12 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 're
 import { createPortal } from 'react-dom'
 import { Moon, Search, Menu, Sun, UserRound, X } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { useClients } from '../../hooks/useClients'
-import { getClientDisplayName } from '../../lib/clientsStore'
+import {
+  getClients,
+  getClientDisplayName,
+  subscribeClients,
+  type Client,
+} from '../../lib/clientsStore'
 import {
   getTheme,
   subscribeTheme,
@@ -59,7 +63,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const clients = useClients()
+  const [clients, setClients] = useState<Client[]>([])
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [userProfile, setUserProfile] = useState<UserProfile>(() => getUserProfile())
@@ -72,6 +76,12 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const searchId = useId()
 
   useEffect(() => subscribeTheme(() => setThemeState(getTheme())), [])
+
+  useEffect(() => {
+    if (!searchOpen) return
+    setClients(getClients())
+    return subscribeClients(() => setClients(getClients()))
+  }, [searchOpen])
 
   const isClientsSection = location.pathname.startsWith('/clientes')
   const isProductsSection = location.pathname.startsWith('/produtos')
