@@ -11,6 +11,7 @@ import {
   type ClientMeasure,
   type ClientPhone,
 } from '../lib/clientsStore'
+import { moneyBrToNumber } from '../lib/moneyMask'
 import { addOrder, type OrderKind, type OrderOperation } from '../lib/ordersStore'
 import { listProducts } from '../lib/productsStore'
 import { getUserDisplayName } from '../lib/userProfileStore'
@@ -67,7 +68,13 @@ type Draft = {
   observacoes: string
 }
 
-type ProductLine = { id: string; name: string }
+type ProductLine = {
+  id: string
+  name: string
+  productId: string
+  fullCode: string
+  value: number
+}
 
 function pad(n: number) {
   return String(n).padStart(2, '0')
@@ -81,6 +88,13 @@ function formatBr(iso: string) {
   const [y, m, d] = iso.split('-')
   if (!y || !m || !d) return ''
   return `${d}/${m}/${y}`
+}
+
+function formatBrl(value: number) {
+  const negative = value < 0
+  const [intPart, decPart] = Math.abs(value).toFixed(2).split('.')
+  const withDots = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return `${negative ? '-' : ''}R$ ${withDots},${decPart}`
 }
 
 function sameDay(a: Date, b: Date) {
@@ -251,10 +265,19 @@ export function OrderCreate() {
     setStep(2)
   }
 
-  const addLine = (name: string) => {
-    const trimmed = name.trim()
+  const addLine = (line: { name: string; productId?: string; fullCode?: string; value?: number }) => {
+    const trimmed = line.name.trim()
     if (!trimmed) return
-    setLines((current) => [...current, { id: crypto.randomUUID(), name: trimmed }])
+    setLines((current) => [
+      ...current,
+      {
+        id: crypto.randomUUID(),
+        name: trimmed,
+        productId: line.productId?.trim() || '',
+        fullCode: line.fullCode?.trim() || '',
+        value: Number.isFinite(line.value) ? Number(line.value) : 0,
+      },
+    ])
   }
 
   const save = () => {
@@ -287,16 +310,23 @@ export function OrderCreate() {
         observacoes: draft.observacoes,
       })
     }
+    const totalValue = lines.reduce((sum, line) => sum + (Number.isFinite(line.value) ? line.value : 0), 0)
     addOrder({
       clientName: name,
       phone,
       eventDate,
-      total: '',
+      total: lines.length > 0 ? formatBrl(totalValue) : '',
       status: 'Aberto',
       operation,
       kind,
       origin,
       attendant,
+      lines: lines.map((line) => ({
+        productId: line.productId,
+        name: line.name,
+        fullCode: line.fullCode,
+        value: line.value,
+      })),
     })
     navigate('/pedidos')
   }
@@ -550,7 +580,12 @@ export function OrderCreate() {
                         type="button"
                         className="order-new__option"
                         onClick={() => {
-                          addLine(product.name)
+                          addLine({
+                            name: product.name,
+                            productId: product.id,
+                            fullCode: product.fullCode,
+                            value: moneyBrToNumber(product.rental),
+                          })
                           setProductQuery('')
                         }}
                       >
@@ -577,7 +612,7 @@ export function OrderCreate() {
                 <button
                   type="button"
                   onClick={() => {
-                    addLine(looseName)
+                    addLine({ name: looseName })
                     setLooseName('')
                     setLooseOpen(false)
                   }}
