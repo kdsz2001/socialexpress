@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowUp,
   Check,
@@ -23,9 +23,9 @@ type StatusFilter = 'ativos' | 'inativos' | 'todos'
 const TOAST_KEY = 'social-express:employee-toast'
 
 const STATUS_OPTIONS: { id: StatusFilter; label: string }[] = [
+  { id: 'todos', label: 'Todos' },
   { id: 'ativos', label: 'Ativos' },
   { id: 'inativos', label: 'Inativos' },
-  { id: 'todos', label: 'Todos' },
 ]
 
 export function Employees() {
@@ -48,11 +48,30 @@ export function Employees() {
 
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos')
+  const [statusOpen, setStatusOpen] = useState(false)
+  const statusRef = useRef<HTMLDivElement>(null)
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
   const [toast, setToast] = useState<string | null>(null)
   const closeToast = useCallback(() => setToast(null), [])
+  const statusLabel = STATUS_OPTIONS.find((item) => item.id === statusFilter)?.label ?? 'Todos'
+
+  useEffect(() => {
+    if (!statusOpen) return
+    const onPointer = (event: MouseEvent) => {
+      if (!statusRef.current?.contains(event.target as Node)) setStatusOpen(false)
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setStatusOpen(false)
+    }
+    document.addEventListener('mousedown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [statusOpen])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('pt-BR')
@@ -179,26 +198,39 @@ export function Employees() {
             />
           </label>
 
-          <label className="employees__select-wrap">
-            <select
+          <div className={`employees__select-wrap${statusOpen ? ' is-open' : ''}`} ref={statusRef}>
+            <button
+              type="button"
               className="employees__select"
-              value={statusFilter}
-              onChange={(event) => {
-                const next = event.target.value
-                if (next === 'ativos' || next === 'inativos' || next === 'todos') {
-                  setStatusFilter(next)
-                }
-              }}
               aria-label="Filtro por status"
+              aria-haspopup="listbox"
+              aria-expanded={statusOpen}
+              onClick={() => setStatusOpen((open) => !open)}
             >
-              {STATUS_OPTIONS.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
+              {statusLabel}
+            </button>
             <ChevronDown size={16} strokeWidth={2} className="employees__select-icon" />
-          </label>
+            {statusOpen ? (
+              <ul className="employees__select-menu" role="listbox" aria-label="Filtro por status">
+                {STATUS_OPTIONS.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={item.id === statusFilter}
+                      className={item.id === statusFilter ? 'is-selected' : undefined}
+                      onClick={() => {
+                        setStatusFilter(item.id)
+                        setStatusOpen(false)
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
 
           <button type="button" className="employees__add" onClick={() => navigate('/funcionarios/cadastrar')}>
             <Plus size={16} strokeWidth={2.5} />
