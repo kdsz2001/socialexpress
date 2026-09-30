@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import {
   AlignCenter,
@@ -6,6 +6,7 @@ import {
   AlignLeft,
   AlignRight,
   ArrowLeft,
+  ArrowUp,
   Bold,
   Check,
   CircleAlert,
@@ -850,11 +851,95 @@ export function AlertEditor({ alertId }: { alertId: string }) {
   )
 }
 
+function packPermissionColumns<T extends { items: unknown[] }>(groups: T[]) {
+  const columns: [T[], T[]] = [[], []]
+  const heights = [0, 0]
+  groups.forEach((group) => {
+    const height = 123 + group.items.length * 42
+    const index = heights[0] <= heights[1] ? 0 : 1
+    columns[index].push(group)
+    heights[index] += height + 25
+  })
+  return columns
+}
+
+function PermSwitch({
+  checked,
+  label,
+  head,
+  onChange,
+}: {
+  checked: boolean
+  label: string
+  head?: boolean
+  onChange: (value: boolean) => void
+}) {
+  return (
+    <label className={`perm-switch${head ? ' perm-switch--head' : ''}`}>
+      <input type="checkbox" aria-label={label} checked={checked} onChange={(event) => onChange(event.target.checked)} />
+      <span />
+    </label>
+  )
+}
+
+function PermScrollTop() {
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const scroller = document.querySelector('.app-content')
+    if (!scroller) return
+    const update = () => setVisible(scroller.scrollTop > 180)
+    update()
+    scroller.addEventListener('scroll', update, { passive: true })
+    return () => scroller.removeEventListener('scroll', update)
+  }, [])
+
+  if (!visible) return null
+
+  return createPortal(
+    <button
+      type="button"
+      className="perm-scrolltop"
+      aria-label="Voltar ao topo"
+      onClick={() => document.querySelector('.app-content')?.scrollTo({ top: 0, behavior: 'smooth' })}
+    >
+      <ArrowUp size={18} strokeWidth={2.25} />
+    </button>,
+    document.body,
+  )
+}
+
 export function PermissionEditor({ permissionId }: { permissionId: string }) {
   const navigate = useNavigate()
   const isNew = permissionId === 'new'
   const [draft, setDraft] = useState<PermissionLevel | null>(null)
   const [invalid, setInvalid] = useState(false)
+  const cardRefs = useRef<Array<HTMLElement | null>>([])
+  const [columns, setColumns] = useState(() => packPermissionColumns(PERMISSION_GROUPS))
+
+  useLayoutEffect(() => {
+    const place = () => {
+      const heights = PERMISSION_GROUPS.map((_, index) => cardRefs.current[index]?.offsetHeight ?? 0)
+      if (heights.some((height) => height <= 0)) return
+      const next: [typeof PERMISSION_GROUPS, typeof PERMISSION_GROUPS] = [[], []]
+      const totals = [0, 0]
+      heights.forEach((height, index) => {
+        const column = totals[0] <= totals[1] ? 0 : 1
+        next[column].push(PERMISSION_GROUPS[index])
+        totals[column] += height + 25
+      })
+      setColumns((current) => {
+        const signature = (value: typeof current) => value.map((column) => column.map((group) => group.id).join(',')).join('|')
+        return signature(current) === signature(next) ? current : next
+      })
+    }
+    place()
+    const observer = new ResizeObserver(place)
+    cardRefs.current.forEach((node) => {
+      if (node) observer.observe(node)
+    })
+    return () => observer.disconnect()
+  }, [draft])
 
   useEffect(() => {
     if (isNew) {
@@ -897,70 +982,88 @@ export function PermissionEditor({ permissionId }: { permissionId: string }) {
   }
 
   return (
-    <article className="settings-card settings-editor">
-      <EditorBar
-        title={isNew ? 'Nova permissão' : draft.name}
-        subtitle={isNew ? '' : 'Editando permissões'}
-        saveLabel="Salvar"
-        onBack={back}
-        onSave={save}
-      />
-      <div className="settings-editor__body">
-        <label className="settings-editor__label" htmlFor="perm-name">
-          Nome da permissão <em>*</em>
-        </label>
-        <input
-          id="perm-name"
-          className={`settings-editor__input${invalid ? ' is-invalid' : ''}`}
-          value={draft.name}
-          onChange={(event) => {
-            setDraft({ ...draft, name: event.target.value })
-            setInvalid(false)
-          }}
-        />
-        {invalid ? <p className="settings-editor__error">&quot;Nome&quot; não pode ficar em branco.</p> : null}
-        <div className="settings-grants">
-          {PERMISSION_GROUPS.map((group) => {
-            const ids = group.items.map((item) => item.id)
-            const allOn = ids.every((id) => draft.grants[id])
-            return (
-              <section key={group.id}>
-                <header className="settings-grants__head">
-                  <h3>{group.label}</h3>
-                  <label className="settings__switch">
-                    <input
-                      type="checkbox"
-                      aria-label={group.label}
-                      checked={allOn}
-                      onChange={(event) => {
-                        const grants = { ...draft.grants }
-                        ids.forEach((id) => {
-                          grants[id] = event.target.checked
-                        })
-                        setDraft({ ...draft, grants })
-                      }}
-                    />
-                    <span className="settings__switch-ui" />
-                  </label>
-                </header>
-                {group.items.map((item) => (
-                  <label key={item.id} className="settings-grants__row">
-                    <input
-                      className="settings-check"
-                      type="checkbox"
-                      checked={Boolean(draft.grants[item.id])}
-                      onChange={(event) =>
-                        setDraft({ ...draft, grants: { ...draft.grants, [item.id]: event.target.checked } })
-                      }
-                    />
-                    <span>{item.label}</span>
-                  </label>
-                ))}
-              </section>
-            )
-          })}
+    <article className="settings-card settings-perms">
+      <header className="settings-perms__head">
+        <h2>{isNew ? 'Nova permissão' : draft.name || 'Permissão'}</h2>
+        {isNew ? null : <p>Editando permissões</p>}
+      </header>
+      <div className="settings-perms__body">
+        <div className="settings-perms__field">
+          <label className="settings-perms__label" htmlFor="perm-name">
+            Nome da permissão <em>*</em>
+          </label>
+          <input
+            id="perm-name"
+            className={`settings-perms__input${invalid ? ' is-invalid' : ''}`}
+            value={draft.name}
+            onChange={(event) => {
+              setDraft({ ...draft, name: event.target.value })
+              setInvalid(false)
+            }}
+          />
+          {invalid ? <p className="settings-editor__error">&quot;Nome&quot; não pode ficar em branco.</p> : null}
+        </div>
+        <div className="settings-perms__cols">
+          {columns.map((column, columnIndex) => (
+            <div className="settings-perms__col" key={columnIndex}>
+              {column.map((group) => {
+                const ids = group.items.map((item) => item.id)
+                const allOn = ids.every((id) => draft.grants[id])
+                return (
+                  <section
+                    className="perm-card"
+                    key={group.id}
+                    ref={(node) => {
+                      cardRefs.current[PERMISSION_GROUPS.findIndex((entry) => entry.id === group.id)] = node
+                    }}
+                  >
+                    <header className="perm-card__head">
+                      <h3>{group.label}</h3>
+                      <PermSwitch
+                        head
+                        label={group.label}
+                        checked={allOn}
+                        onChange={(checked) => {
+                          const grants = { ...draft.grants }
+                          ids.forEach((id) => {
+                            grants[id] = checked
+                          })
+                          setDraft({ ...draft, grants })
+                        }}
+                      />
+                    </header>
+                    <div className="perm-card__sep" />
+                    <div className="perm-card__body">
+                      {group.items.map((item) => (
+                        <div className="perm-row" key={item.id}>
+                          <span className="perm-row__label">{item.label}</span>
+                          <PermSwitch
+                            label={item.label}
+                            checked={Boolean(draft.grants[item.id])}
+                            onChange={(checked) =>
+                              setDraft({ ...draft, grants: { ...draft.grants, [item.id]: checked } })
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )
+              })}
+            </div>
+          ))}
         </div>
       </div>
+      <footer className="settings-perms__foot">
+        <button type="button" className="settings-perms__back" onClick={back}>
+          Voltar
+        </button>
+        <button type="button" className="settings-perms__save" onClick={save}>
+          <Check size={16} strokeWidth={2.75} />
+          Salvar
+        </button>
+      </footer>
+      <PermScrollTop />
     </article>
   )
 }

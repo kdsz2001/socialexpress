@@ -177,6 +177,48 @@ html[data-theme='dark'] .clients-subheader__btn {
   background: #d7dae7;
 }
 
+.clients-subheader__heading:has(.clients-subheader__subtitle--perms) {
+  gap: 16.25px;
+}
+
+.clients-subheader__subtitle--perms {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12.025px;
+  font-weight: 500;
+  line-height: 18.0375px;
+  color: #b5b5c3;
+}
+
+.clients-subheader__dot {
+  margin: 0 6.5px;
+  color: #b5b5c3;
+}
+
+.settings-subheader__back {
+  height: 38.4px;
+  padding: 0 13px;
+  border: 1px solid #eaeef5;
+  border-radius: 5.46px;
+  background: #eaeef5;
+  color: #98989e;
+  font-size: 13px;
+  font-weight: 400;
+  gap: 6px;
+}
+
+.settings-subheader__back:hover {
+  background: #e2e8f0;
+  filter: none;
+}
+
+html.theme-dark .settings-subheader__back,
+html[data-theme='dark'] .settings-subheader__back {
+  border-color: #2b2b40;
+  background: #2b2b40;
+  color: #98989e;
+}
+
 .clients-subheader__primary {
   display: inline-flex;
   align-items: center;
