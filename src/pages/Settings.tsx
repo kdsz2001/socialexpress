@@ -5,7 +5,6 @@ import {
   Check,
   CreditCard,
   FileText,
-  ImageIcon,
   KeyRound,
   ListChecks,
   Pencil,
@@ -21,6 +20,16 @@ import {
   type ShopPhone,
   type ShopSettings,
 } from '../lib/shopSettingsStore'
+import { citiesFor, neighborhoodsFor, withCurrent } from './settings/locations'
+import {
+  AlertsSection,
+  DocumentsSection,
+  GoalsSection,
+  InvoiceSection,
+  OperationsSection,
+  PaymentsSection,
+  PermissionsSection,
+} from './settings/SettingsSections'
 import './Settings.css'
 import './ClientCreate.css'
 
@@ -151,9 +160,6 @@ export function Settings() {
           phones: [{ id: crypto.randomUUID(), number: '', isPrimary: true, hasWhatsapp: false }],
         }
       }
-      if (!next.some((phone) => phone.isPrimary)) {
-        next[0] = { ...next[0], isPrimary: true }
-      }
       return { ...current, phones: next }
     })
   }
@@ -210,8 +216,6 @@ export function Settings() {
     saveShopSettings(draft)
   }
 
-  const currentSection = SECTIONS.find((item) => item.id === section) ?? SECTIONS[0]
-
   return (
     <div className="settings">
       <aside className="settings__nav" aria-label="Seções de configurações">
@@ -246,32 +250,28 @@ export function Settings() {
               <div className="client-create__row client-create__row--top">
                 <span className="client-create__label">Logotipo</span>
                 <div className="settings__logo-field">
-                  <div className="settings__logo-box">
-                    {draft.logoDataUrl ? (
-                      <img className="settings__logo-image" src={draft.logoDataUrl} alt="Logotipo" />
-                    ) : (
-                      <span className="settings__logo-placeholder" aria-hidden="true">
-                        <ImageIcon size={28} strokeWidth={1.5} />
-                      </span>
-                    )}
+                  <div className="settings__logo-wrap">
+                    <div className="settings__logo-box">
+                      {draft.logoDataUrl ? (
+                        <img className="settings__logo-image" src={draft.logoDataUrl} alt="Logotipo" />
+                      ) : null}
+                    </div>
                     <button
                       type="button"
                       className="settings__logo-edit"
                       aria-label="Editar logotipo"
                       onClick={openLogoPicker}
                     >
-                      <Pencil size={12} strokeWidth={2.5} />
+                      <Pencil size={13} strokeWidth={2} />
                     </button>
-                    {draft.logoDataUrl ? (
-                      <button
-                        type="button"
-                        className="settings__logo-remove"
-                        aria-label="Remover logotipo"
-                        onClick={() => patch('logoDataUrl', '')}
-                      >
-                        <X size={12} strokeWidth={2.5} />
-                      </button>
-                    ) : null}
+                    <button
+                      type="button"
+                      className="settings__logo-remove"
+                      aria-label="Remover logotipo"
+                      onClick={() => patch('logoDataUrl', '')}
+                    >
+                      <X size={14} strokeWidth={2} />
+                    </button>
                   </div>
                   <input
                     ref={fileInputRef}
@@ -358,7 +358,7 @@ export function Settings() {
                         onChange={(event) => updatePhone(phone.id, { number: event.target.value })}
                       />
                       <div className="settings__phone-options">
-                        <label className="settings__switch">
+                        <label className="settings__check">
                           <input
                             type="checkbox"
                             checked={phone.isPrimary}
@@ -366,7 +366,6 @@ export function Settings() {
                               updatePhone(phone.id, { isPrimary: event.target.checked })
                             }
                           />
-                          <span className="settings__switch-ui" aria-hidden="true" />
                           <span>Telefone principal</span>
                         </label>
                         <label className="settings__check">
@@ -394,11 +393,14 @@ export function Settings() {
                 </div>
               ))}
 
-              <div className="settings__add-phone-row">
-                <button type="button" className="settings__add-phone" onClick={addPhone}>
-                  <Plus size={16} strokeWidth={2.5} />
-                  Adicionar outro telefone
-                </button>
+              <div className="client-create__row">
+                <span className="client-create__label" />
+                <div className="client-create__field">
+                  <button type="button" className="settings__add-phone" onClick={addPhone}>
+                    <Plus size={16} strokeWidth={2.5} />
+                    Adicionar outro telefone
+                  </button>
+                </div>
               </div>
 
               <div className="client-create__row">
@@ -464,9 +466,17 @@ export function Settings() {
                 <div className="client-create__field">
                   <select
                     id="shop-estado"
-                    className={`client-create__input${touched && missingEstado ? ' is-invalid' : ''}`}
+                    className={`client-create__select${touched && missingEstado ? ' is-invalid' : ''}`}
                     value={draft.estado}
-                    onChange={(event) => patch('estado', event.target.value)}
+                    onChange={(event) => {
+                      const estado = event.target.value
+                      setDraft((current) => ({
+                        ...current,
+                        estado,
+                        cidade: citiesFor(estado).includes(current.cidade) ? current.cidade : '',
+                        bairro: '',
+                      }))
+                    }}
                   >
                     {ESTADOS.map((estado) => (
                       <option key={estado} value={estado}>
@@ -482,12 +492,26 @@ export function Settings() {
                   Cidade <span className="req">*</span>
                 </label>
                 <div className="client-create__field">
-                  <input
+                  <select
                     id="shop-cidade"
-                    className={`client-create__input${touched && missingCidade ? ' is-invalid' : ''}`}
+                    className={`client-create__select${touched && missingCidade ? ' is-invalid' : ''}`}
                     value={draft.cidade}
-                    onChange={(event) => patch('cidade', event.target.value)}
-                  />
+                    onChange={(event) => {
+                      const cidade = event.target.value
+                      setDraft((current) => ({
+                        ...current,
+                        cidade,
+                        bairro: neighborhoodsFor(cidade).includes(current.bairro) ? current.bairro : '',
+                      }))
+                    }}
+                  >
+                    <option value="">Selecione</option>
+                    {withCurrent(citiesFor(draft.estado), draft.cidade).map((cidade) => (
+                      <option key={cidade} value={cidade}>
+                        {cidade}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -496,12 +520,19 @@ export function Settings() {
                   Bairro <span className="req">*</span>
                 </label>
                 <div className="client-create__field">
-                  <input
+                  <select
                     id="shop-bairro"
-                    className={`client-create__input${touched && missingBairro ? ' is-invalid' : ''}`}
+                    className={`client-create__select${touched && missingBairro ? ' is-invalid' : ''}`}
                     value={draft.bairro}
                     onChange={(event) => patch('bairro', event.target.value)}
-                  />
+                  >
+                    <option value="">Selecione</option>
+                    {withCurrent(neighborhoodsFor(draft.cidade), draft.bairro).map((bairro) => (
+                      <option key={bairro} value={bairro}>
+                        {bairro}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -514,9 +545,14 @@ export function Settings() {
             </footer>
           </>
         ) : (
-          <div className="settings__placeholder">
-            <h2>{currentSection.label}</h2>
-            <p>Em desenvolvimento.</p>
+          <div className="settings__main">
+            {section === 'documentos' ? <DocumentsSection /> : null}
+            {section === 'operacoes' ? <OperationsSection /> : null}
+            {section === 'pagamentos' ? <PaymentsSection /> : null}
+            {section === 'metas' ? <GoalsSection /> : null}
+            {section === 'avisos' ? <AlertsSection /> : null}
+            {section === 'nota-fiscal' ? <InvoiceSection /> : null}
+            {section === 'permissoes' ? <PermissionsSection /> : null}
           </div>
         )}
       </section>
