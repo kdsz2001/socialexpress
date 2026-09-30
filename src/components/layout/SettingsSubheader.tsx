@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { settingsEditSubtitle, settingsPath } from '../../pages/settings/settingsNav'
 import './ClientsSubheader.css'
 
 const SECTION_LABELS: Record<string, string> = {
@@ -17,7 +18,8 @@ export function SettingsSubheader() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const section = searchParams.get('section') ?? 'loja'
-  const subtitle = SECTION_LABELS[section] ?? SECTION_LABELS.loja
+  const edit = searchParams.get('edit')
+  const subtitle = settingsEditSubtitle(edit) || SECTION_LABELS[section] || SECTION_LABELS.loja
 
   return (
     <header className="clients-subheader">
@@ -31,7 +33,13 @@ export function SettingsSubheader() {
         <button
           type="button"
           className="clients-subheader__back"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (edit) {
+              navigate(settingsPath(section))
+              return
+            }
+            navigate(-1)
+          }}
         >
           <ArrowLeft size={16} strokeWidth={2.25} />
           Voltar
