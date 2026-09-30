@@ -862,7 +862,7 @@ export function PermissionEditor({ permissionId }: { permissionId: string }) {
       return
     }
     const config = getAppConfig()
-    const found = config.permissions.find((item) => item.id === permissionId && !item.locked)
+    const found = config.permissions.find((item) => item.id === permissionId)
     setDraft(found ? { ...found, grants: { ...found.grants } } : null)
   }, [isNew, permissionId])
 
@@ -872,7 +872,7 @@ export function PermissionEditor({ permissionId }: { permissionId: string }) {
       setInvalid(true)
       return
     }
-    const next = { ...draft, name: draft.name.trim(), locked: false }
+    const next = { ...draft, name: draft.name.trim(), locked: draft.id === 'perm-admin' || draft.locked }
     updateAppConfig((current) => {
       const exists = current.permissions.some((item) => item.id === next.id)
       return {
