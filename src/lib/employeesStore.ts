@@ -4,6 +4,7 @@ import {
   logEmployeeDeleted,
   logEmployeeUpdated,
 } from './historyLog'
+import { getUserProfile, updateUserProfile } from './userProfileStore'
 
 export const EMPLOYEE_UNITS = [
   'Canoas',
@@ -65,6 +66,8 @@ export type EmployeeInput = {
 
 const STORAGE_KEY = 'social-express:employees'
 
+export const MASTER_EMPLOYEE_ID = 'emp-master'
+
 let cachedEmployees: Employee[] | null = null
 
 function displayName(firstName: string, lastName: string, fallback = '') {
@@ -119,7 +122,7 @@ function normalize(raw: Partial<Employee> & { name?: string }): Employee {
   }
 }
 
-function readAll(): Employee[] {
+function readStored(): Employee[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
@@ -129,6 +132,75 @@ function readAll(): Employee[] {
   } catch {
     return []
   }
+}
+
+function buildMaster(stored?: Employee): Employee {
+  const profile = getUserProfile()
+  const phones = profile.phones.map((phone) => ({
+    number: phone.number,
+    principal: phone.primary,
+    whatsapp: phone.whatsapp,
+  }))
+  const firstName = profile.nome.trim()
+  const lastName = profile.sobrenomes.trim()
+  return {
+    id: MASTER_EMPLOYEE_ID,
+    firstName,
+    lastName,
+    name: displayName(firstName, lastName, profile.chamado),
+    nickname: profile.chamado.trim(),
+    phones: phones.length > 0 ? phones : [{ number: '', principal: false, whatsapp: false }],
+    phone: primaryPhone(phones),
+    username: profile.login.trim(),
+    password: profile.password,
+    email: profile.email.trim(),
+    cpf: profile.cpf.trim(),
+    birthDate: profile.birthDate.trim(),
+    gender: stored?.gender ?? '',
+    level: 'Master',
+    unit: stored?.unit || '',
+    active: stored ? stored.active : true,
+    avatarDataUrl: profile.avatarDataUrl,
+    createdAt: stored?.createdAt || '2020-01-01T00:00:00.000Z',
+  }
+}
+
+function withMaster(items: Employee[]): Employee[] {
+  const login = getUserProfile().login.trim().toLocaleLowerCase('pt-BR')
+  const stored = items.find((item) => item.id === MASTER_EMPLOYEE_ID)
+  const others = items.filter((item) => item.id !== MASTER_EMPLOYEE_ID)
+  if (
+    !stored &&
+    login &&
+    others.some((item) => item.username.trim().toLocaleLowerCase('pt-BR') === login)
+  ) {
+    return others
+  }
+  return [buildMaster(stored), ...others]
+}
+
+function readAll(): Employee[] {
+  return withMaster(readStored())
+}
+
+function syncMasterProfile(employee: Employee) {
+  if (employee.id !== MASTER_EMPLOYEE_ID) return
+  updateUserProfile({
+    nome: employee.firstName,
+    sobrenomes: employee.lastName,
+    chamado: employee.nickname,
+    email: employee.email,
+    cpf: employee.cpf,
+    birthDate: employee.birthDate,
+    login: employee.username,
+    password: employee.password,
+    phones: employee.phones.map((phone) => ({
+      number: phone.number,
+      primary: phone.principal,
+      whatsapp: phone.whatsapp,
+    })),
+    avatarDataUrl: employee.avatarDataUrl,
+  })
 }
 
 function writeAll(items: Employee[]) {
@@ -202,6 +274,7 @@ export function updateEmployee(id: string, input: EmployeeInput): Employee | nul
   const before = all[index]
   const updated = toStored(input, before)
   all[index] = updated
+  syncMasterProfile(updated)
   writeAll(all)
   logEmployeeUpdated(
     updated.name,

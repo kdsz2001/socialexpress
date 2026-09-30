@@ -1,6 +1,6 @@
 /** Sessão local do dashboard Social Express (login/senha do perfil). */
 
-import { findEmployeeForLogin } from './employeesStore'
+import { findEmployeeForLogin, MASTER_EMPLOYEE_ID } from './employeesStore'
 import { getUserProfile } from './userProfileStore'
 
 const STORAGE_KEY = 'social-express:auth-session'
@@ -84,10 +84,12 @@ export function attemptLogin(
     if (!employee.active) {
       return { ok: false, error: 'Este funcionário está inativo.' }
     }
-    if (password !== employee.password) {
+    const masterPassword = employee.password.trim() || DEFAULT_LOGIN_PASSWORD
+    const expected = employee.id === MASTER_EMPLOYEE_ID ? masterPassword : employee.password
+    if (password !== expected) {
       return { ok: false, error: 'Senha incorreta.' }
     }
-    if (employee.unit !== unit) {
+    if (employee.id !== MASTER_EMPLOYEE_ID && employee.unit !== unit) {
       return { ok: false, error: 'A unidade selecionada não é a deste funcionário.' }
     }
     writeSession({
