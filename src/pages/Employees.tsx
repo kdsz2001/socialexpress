@@ -19,7 +19,6 @@ import './Employees.css'
 
 type SortDir = 'asc' | 'desc'
 type StatusFilter = 'ativos' | 'inativos' | 'todos'
-type EmployeesTab = 'lista' | 'permissoes'
 
 const TOAST_KEY = 'social-express:employee-toast'
 
@@ -29,15 +28,16 @@ const STATUS_OPTIONS: { id: StatusFilter; label: string }[] = [
   { id: 'todos', label: 'Todos' },
 ]
 
-function tabFromParam(value: string | null): EmployeesTab {
-  return value === 'permissoes' ? 'permissoes' : 'lista'
-}
-
 export function Employees() {
   const employees = useEmployees()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const tab = tabFromParam(searchParams.get('tab'))
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'permissoes') {
+      navigate('/configuracoes?section=permissoes', { replace: true })
+    }
+  }, [navigate, searchParams])
 
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ativos')
@@ -153,17 +153,6 @@ export function Employees() {
       </div>
     </div>
   )
-
-  if (tab === 'permissoes') {
-    return (
-      <div className="employees">
-        <section className="employees__card employees__card--placeholder">
-          <h2>Gerenciar permissões</h2>
-          <p>Nenhum resultado encontrado</p>
-        </section>
-      </div>
-    )
-  }
 
   return (
     <div className="employees">

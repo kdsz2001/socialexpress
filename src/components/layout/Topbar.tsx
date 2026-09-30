@@ -26,7 +26,6 @@ type TopbarProps = {
 
 type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
-type EmployeesTab = 'lista' | 'permissoes'
 type FinanceTab = 'caixa' | 'pagar' | 'receber' | 'dre'
 type CrmTab = 'novo' | 'contatos' | 'analise' | 'trajes'
 
@@ -118,12 +117,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         : paramTab === 'trajes'
           ? 'trajes'
           : 'contatos'
-  const employeesTab: EmployeesTab | null =
-    location.pathname !== '/funcionarios'
-      ? null
-      : paramTab === 'permissoes'
-        ? 'permissoes'
-        : 'lista'
+  const showEmployeesPermissions = location.pathname === '/funcionarios'
   const financeTab: FinanceTab | null = !isFinanceSection
     ? null
     : paramTab === 'pagar'
@@ -253,10 +247,6 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const setCrmTab = (tab: CrmTab) => {
     const match = CRM_TABS.find((item) => item.id === tab)
     if (match) navigate(match.path)
-  }
-
-  const setEmployeesTab = (tab: EmployeesTab) => {
-    navigate(tab === 'permissoes' ? '/funcionarios?tab=permissoes' : '/funcionarios')
   }
 
   const setFinanceTab = (tab: FinanceTab) => {
@@ -429,14 +419,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </div>
       ) : null}
 
-      {isEmployeesSection && employeesTab ? (
+      {isEmployeesSection && showEmployeesPermissions ? (
         <div className="topbar__tabs" role="tablist" aria-label="Funcionários">
           <button
             type="button"
             role="tab"
-            aria-selected={employeesTab === 'permissoes'}
-            className={`topbar__tab${employeesTab === 'permissoes' ? ' is-active' : ''}`}
-            onClick={() => setEmployeesTab('permissoes')}
+            className="topbar__tab"
+            onClick={() => navigate('/configuracoes?section=permissoes')}
           >
             Gerenciar permissões
           </button>
