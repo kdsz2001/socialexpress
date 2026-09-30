@@ -89,7 +89,11 @@ export function attemptLogin(
     if (password !== expected) {
       return { ok: false, error: 'Senha incorreta.' }
     }
-    if (employee.id !== MASTER_EMPLOYEE_ID && employee.unit !== unit) {
+    if (
+      employee.id !== MASTER_EMPLOYEE_ID &&
+      employee.unit !== 'Todas' &&
+      employee.unit !== unit
+    ) {
       return { ok: false, error: 'A unidade selecionada não é a deste funcionário.' }
     }
     writeSession({

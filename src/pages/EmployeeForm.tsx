@@ -405,6 +405,7 @@ export function EmployeeForm() {
               onBlur={() => reveal('unit')}
             >
               <option value="">Selecione</option>
+              <option value="Todas">Todas</option>
               {EMPLOYEE_UNITS.map((item) => (
                 <option key={item} value={item}>
                   {item}
