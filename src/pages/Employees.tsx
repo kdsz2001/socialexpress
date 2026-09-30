@@ -120,7 +120,7 @@ export function Employees() {
           disabled={currentPage <= 1}
           onClick={() => setPage(1)}
         >
-          <ChevronsLeft size={16} strokeWidth={2} />
+          <ChevronsLeft size={12} strokeWidth={2} />
         </button>
         <button
           type="button"
@@ -129,7 +129,7 @@ export function Employees() {
           disabled={currentPage <= 1}
           onClick={() => setPage((value) => Math.max(1, value - 1))}
         >
-          <ChevronLeft size={16} strokeWidth={2} />
+          <ChevronLeft size={12} strokeWidth={2} />
         </button>
         <button type="button" className="employees__pager-btn is-active" aria-current="page">
           {currentPage}
@@ -141,7 +141,7 @@ export function Employees() {
           disabled={currentPage >= totalPages}
           onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
         >
-          <ChevronRight size={16} strokeWidth={2} />
+          <ChevronRight size={12} strokeWidth={2} />
         </button>
         <button
           type="button"
@@ -150,7 +150,7 @@ export function Employees() {
           disabled={currentPage >= totalPages}
           onClick={() => setPage(totalPages)}
         >
-          <ChevronsRight size={16} strokeWidth={2} />
+          <ChevronsRight size={12} strokeWidth={2} />
         </button>
       </div>
     </div>
@@ -203,6 +203,7 @@ export function Employees() {
           </button>
         </div>
 
+        <div className="employees__body">
         {pager}
 
         <div className="employees__table-wrap">
@@ -217,8 +218,8 @@ export function Employees() {
                   >
                     Nome
                     <ArrowUp
-                      size={14}
-                      strokeWidth={2.25}
+                      size={10}
+                      strokeWidth={2.5}
                       className={sortDir === 'desc' ? 'is-desc' : undefined}
                     />
                   </button>
@@ -262,7 +263,7 @@ export function Employees() {
                           }}
                         >
                           <span className="employees__status-knob" aria-hidden="true">
-                            {item.active ? <Check size={12} strokeWidth={3} /> : null}
+                            {item.active ? <Check size={9} strokeWidth={3} /> : null}
                           </span>
                         </button>
                         <IconAction
@@ -281,6 +282,7 @@ export function Employees() {
         </div>
 
         {pager}
+        </div>
       </section>
     </div>
   )
