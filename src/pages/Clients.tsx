@@ -575,7 +575,7 @@ export function Clients() {
                               />
                               <IconAction
                                 kind="delete"
-                                tip="Excluir"
+                                tip="Excluir cliente"
                                 onClick={() => setClientToDelete(client)}
                               />
                             </IconActions>

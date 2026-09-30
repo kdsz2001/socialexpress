@@ -322,7 +322,7 @@ function ProductsList() {
                           />
                           <IconAction
                             kind="delete"
-                            tip="Excluir"
+                            tip="Excluir produto"
                             aria-label={`Excluir ${item.name}`}
                             onClick={() => setDeleting(item)}
                           />
