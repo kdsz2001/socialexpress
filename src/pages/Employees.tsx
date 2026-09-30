@@ -251,25 +251,29 @@ export function Employees() {
                     <td>{item.username}</td>
                     <td>{item.level}</td>
                     <td className="employees__actions-cell">
-                      <button
-                        type="button"
-                        className={`employees__status${item.active ? ' is-on' : ''}`}
-                        role="switch"
-                        aria-checked={item.active}
-                        aria-label={item.active ? `Desativar ${item.name}` : `Ativar ${item.name}`}
-                        onClick={() => {
-                          setEmployeeActive(item.id, !item.active)
-                          setToast('Funcionário atualizado.')
-                        }}
-                      >
-                        {item.active ? <Check size={14} strokeWidth={2.75} /> : null}
-                      </button>
-                      <IconAction
-                        kind="edit"
-                        tip="Editar funcionário"
-                        aria-label={`Editar ${item.name}`}
-                        onClick={() => navigate(`/funcionarios/${item.id}`)}
-                      />
+                      <span className="employees__actions">
+                        <button
+                          type="button"
+                          className={`employees__status${item.active ? ' is-on' : ''}`}
+                          role="switch"
+                          aria-checked={item.active}
+                          aria-label={item.active ? `Desativar ${item.name}` : `Ativar ${item.name}`}
+                          onClick={() => {
+                            setEmployeeActive(item.id, !item.active)
+                            setToast('Funcionário atualizado.')
+                          }}
+                        >
+                          <span className="employees__status-knob" aria-hidden="true">
+                            {item.active ? <Check size={12} strokeWidth={3} /> : null}
+                          </span>
+                        </button>
+                        <IconAction
+                          kind="edit"
+                          tip="Editar funcionário"
+                          aria-label={`Editar ${item.name}`}
+                          onClick={() => navigate(`/funcionarios/${item.id}`)}
+                        />
+                      </span>
                     </td>
                   </tr>
                 ))
