@@ -137,6 +137,37 @@
   min-width: 0;
 }
 
+.emp-form__password {
+  position: relative;
+}
+
+.emp-form__password input {
+  padding-right: 40px;
+}
+
+.emp-form__eye {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 5.46px;
+  background: transparent;
+  color: #7e8299;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.emp-form__eye:hover {
+  color: #3699ff;
+  background: #f3f6f9;
+}
+
 .emp-form__input input,
 .emp-form__input select,
 .emp-form__phone input:not([type='checkbox']) {
@@ -181,6 +212,14 @@
 
 .emp-form__row.is-invalid .emp-form__input input {
   padding-right: 36px;
+}
+
+.emp-form__row.is-invalid .emp-form__password input {
+  padding-right: 62px;
+}
+
+.emp-form__row.is-invalid .emp-form__eye {
+  right: 34px;
 }
 
 .emp-form__bang {
@@ -391,6 +430,17 @@ html[data-theme='dark'] .emp-form__avatar-box,
 html[data-theme='dark'] .emp-form__avatar-edit {
   background: var(--card-bg);
   border-color: var(--border-color);
+}
+
+html.theme-dark .emp-form__eye,
+html[data-theme='dark'] .emp-form__eye {
+  color: #a1a5b7;
+}
+
+html.theme-dark .emp-form__eye:hover,
+html[data-theme='dark'] .emp-form__eye:hover {
+  color: #3699ff;
+  background: #2b2b40;
 }
 
 @media (max-width: 760px) {
