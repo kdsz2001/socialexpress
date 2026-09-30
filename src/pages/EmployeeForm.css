@@ -130,6 +130,7 @@
 }
 
 .emp-form__label span {
+  margin-left: 0.25em;
   color: #f64e60;
 }
 
