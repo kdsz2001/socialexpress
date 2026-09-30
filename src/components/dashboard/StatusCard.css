@@ -31,14 +31,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   padding: 1.25rem; /* .p-5 */
+  border: 0;
   border-radius: 0.42rem; /* .rounded */
   margin-bottom: 1.25rem; /* .mb-5 */
   box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-.status-card__item.is-last {
+.status-card__list li.is-last .status-card__item {
   margin-bottom: 0;
+}
+
+.status-card__item:hover {
+  filter: brightness(0.97);
 }
 
 .status-card__label {
