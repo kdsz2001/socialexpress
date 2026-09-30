@@ -154,10 +154,24 @@ html[data-theme='dark'] .event-form__back {
   border-color: #f64e60;
 }
 
+.event-form__input-wrap.is-invalid input:focus,
+.event-form__date-field.is-invalid input:focus,
+.event-form__date-field.is-invalid.is-open input,
+.event-form__row.is-invalid .cselect__trigger:focus,
+.event-form__row.is-invalid .cselect.is-open .cselect__trigger {
+  border-color: #f64e60;
+  box-shadow: none;
+}
+
+.event-form__select-wrap {
+  position: relative;
+}
+
 .event-form__error-icon {
   position: absolute;
   top: 9px;
   right: 10px;
+  z-index: 2;
   width: 18px;
   height: 18px;
   border: 1.5px solid #f64e60;
@@ -167,6 +181,16 @@ html[data-theme='dark'] .event-form__back {
   font-weight: 700;
   line-height: 16px;
   text-align: center;
+  pointer-events: none;
+}
+
+.event-form__error-icon--select {
+  right: 34px;
+}
+
+.event-form__row.is-invalid .cselect__placeholder,
+.event-form__row.is-invalid .cselect__value {
+  padding-right: 24px;
 }
 
 .event-form__error {
@@ -181,8 +205,17 @@ html[data-theme='dark'] .event-form__back {
 }
 
 .event-form__date-field {
+  position: relative;
   display: flex;
   align-items: stretch;
+}
+
+.event-form__error-icon--date {
+  right: 52px;
+}
+
+.event-form__date-field.is-invalid input {
+  padding-right: 36px;
 }
 
 .event-form__date-field input {
