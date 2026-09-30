@@ -337,7 +337,7 @@ export function EmployeeForm() {
                     ) : null}
                   </div>
                   <div className="emp-form__checks">
-                    <label>
+                    <label className="phone-flag">
                       <input
                         type="checkbox"
                         checked={phone.principal}
@@ -345,7 +345,7 @@ export function EmployeeForm() {
                       />
                       Telefone principal
                     </label>
-                    <label>
+                    <label className="phone-flag">
                       <input
                         type="checkbox"
                         checked={phone.whatsapp}

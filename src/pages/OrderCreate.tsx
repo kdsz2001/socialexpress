@@ -705,7 +705,7 @@ function ClientDetails({
             value={phone.number}
             onChange={(event) => setPhone(index, { number: event.target.value })}
           />
-          <label className="order-new__check">
+          <label className="order-new__check phone-flag">
             <input
               type="checkbox"
               checked={phone.primary}
@@ -713,7 +713,7 @@ function ClientDetails({
             />
             Telefone principal
           </label>
-          <label className="order-new__check">
+          <label className="order-new__check phone-flag">
             <input
               type="checkbox"
               checked={phone.whatsapp}

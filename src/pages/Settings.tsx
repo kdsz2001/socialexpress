@@ -358,7 +358,7 @@ export function Settings() {
                         onChange={(event) => updatePhone(phone.id, { number: event.target.value })}
                       />
                       <div className="settings__phone-options">
-                        <label className="settings__check">
+                        <label className="settings__check phone-flag">
                           <input
                             type="checkbox"
                             checked={phone.isPrimary}
@@ -368,7 +368,7 @@ export function Settings() {
                           />
                           <span>Telefone principal</span>
                         </label>
-                        <label className="settings__check">
+                        <label className="settings__check phone-flag">
                           <input
                             type="checkbox"
                             checked={phone.hasWhatsapp}
