@@ -8,7 +8,7 @@ const SECTION_LABELS: Record<string, string> = {
   operacoes: 'Operações',
   pagamentos: 'Métodos de pagamento',
   metas: 'Metas',
-  avisos: 'Avisos e mensagens',
+  avisos: 'Avisos e alertas',
   'nota-fiscal': 'Nota fiscal',
   permissoes: 'Permissões',
 }

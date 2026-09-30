@@ -35,7 +35,7 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
     {
       id: 'phone-1',
       number: '',
-      isPrimary: true,
+      isPrimary: false,
       hasWhatsapp: false,
     },
   ],
@@ -61,10 +61,6 @@ function normalize(raw: unknown): ShopSettings {
         hasWhatsapp: Boolean(phone?.hasWhatsapp),
       }))
     : DEFAULT_SHOP_SETTINGS.phones.map((phone) => ({ ...phone }))
-
-  if (!phones.some((phone) => phone.isPrimary) && phones[0]) {
-    phones[0] = { ...phones[0], isPrimary: true }
-  }
 
   return {
     logoDataUrl: typeof item.logoDataUrl === 'string' ? item.logoDataUrl : '',
