@@ -217,7 +217,7 @@ export function Settings() {
   }
 
   return (
-    <div className="settings">
+    <div className={`settings${section === 'permissoes' ? ' settings--permissoes' : ''}`}>
       <aside className="settings__nav" aria-label="Seções de configurações">
         {SECTIONS.map((item) => {
           const Icon = item.icon

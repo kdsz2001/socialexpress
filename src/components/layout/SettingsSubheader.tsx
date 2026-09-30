@@ -19,20 +19,32 @@ export function SettingsSubheader() {
   const [searchParams] = useSearchParams()
   const section = searchParams.get('section') ?? 'loja'
   const edit = searchParams.get('edit')
-  const subtitle = settingsEditSubtitle(edit) || SECTION_LABELS[section] || SECTION_LABELS.loja
+  const sectionLabel = SECTION_LABELS[section] || SECTION_LABELS.loja
+  const editLabel = settingsEditSubtitle(edit)
+  const permCrumb = section === 'permissoes' && Boolean(editLabel)
 
   return (
     <header className="clients-subheader">
       <div className="clients-subheader__heading">
         <h1 className="clients-subheader__title">Configurações</h1>
-        <span className="clients-subheader__sep" aria-hidden="true" />
-        <p className="clients-subheader__subtitle">{subtitle}</p>
+        {permCrumb ? null : <span className="clients-subheader__sep" aria-hidden="true" />}
+        {permCrumb ? (
+          <p className="clients-subheader__subtitle clients-subheader__subtitle--perms">
+            <span>Permissões</span>
+            <span className="clients-subheader__dot" aria-hidden="true">
+              •
+            </span>
+            <span>{editLabel}</span>
+          </p>
+        ) : (
+          <p className="clients-subheader__subtitle">{editLabel || sectionLabel}</p>
+        )}
       </div>
 
       <div className="clients-subheader__actions">
         <button
           type="button"
-          className="clients-subheader__back"
+          className="clients-subheader__back settings-subheader__back"
           onClick={() => {
             if (edit) {
               navigate(settingsPath(section))

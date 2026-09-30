@@ -1210,9 +1210,401 @@ html[data-theme='dark'] .cfg-attention__no {
   color: #a1a5b7;
 }
 
+.app-content:has(.settings--permissoes) {
+  background: #eef0f8;
+  padding-bottom: 90px;
+}
+
+.settings--permissoes {
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 26px;
+}
+
+.settings--permissoes .settings__nav {
+  gap: 0;
+  width: 250px;
+  padding: 13px 29px 16px;
+  border-radius: 5.46px;
+  box-shadow: 0 0 30px 0 rgba(82, 63, 105, 0.05);
+}
+
+.settings--permissoes .settings__nav-item {
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 6.5px;
+  padding: 13px 0;
+  border-radius: 5.46px;
+  background: transparent;
+  color: #3f4254;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+}
+
+.settings--permissoes .settings__nav-item:last-child {
+  margin-bottom: 0;
+}
+
+.settings--permissoes .settings__nav-item:hover,
+.settings--permissoes .settings__nav-item.is-active {
+  background: transparent;
+  color: #3f4254;
+}
+
+.settings--permissoes .settings__nav-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #3f4254;
+}
+
+.settings--permissoes .settings__panel {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.settings--permissoes .settings-card {
+  border-radius: 5.46px;
+  box-shadow: 0 0 30px 0 rgba(82, 63, 105, 0.05);
+}
+
+.settings-perms__head {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 70px;
+  padding: 0 29.25px;
+}
+
+.settings-perms__head h2 {
+  margin: 0;
+  color: #181c32;
+  font-size: 16.575px;
+  font-weight: 600;
+  line-height: 19.89px;
+}
+
+.settings-perms__head p {
+  margin: 3.25px 0 0;
+  color: #b5b5c3;
+  font-size: 12.025px;
+  font-weight: 500;
+  line-height: 18.0375px;
+}
+
+.settings-perms__body {
+  padding: 26px 29.25px;
+}
+
+.settings-perms__field {
+  margin: 0 0 22.75px;
+}
+
+.settings-perms__label {
+  display: inline-block;
+  margin: 0 0 3.9px;
+  color: #3f4254;
+  font-size: 14.3px;
+  font-weight: 400;
+  line-height: 21.45px;
+}
+
+.settings-perms__label em {
+  margin-left: 0.2em;
+  color: #f64e60;
+  font-style: normal;
+}
+
+.settings-perms__input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 38.4px;
+  padding: 0 13px;
+  border: 1px solid #d7d9de;
+  border-radius: 5.46px;
+  background: #fff;
+  color: #3f4254;
+  font: inherit;
+  font-size: 13px;
+  line-height: 19.5px;
+}
+
+.settings-perms__input.is-invalid {
+  border-color: #f64e60;
+}
+
+.settings-perms__cols {
+  display: flex;
+  align-items: flex-start;
+  gap: 25px;
+}
+
+.settings-perms__col {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 25px;
+  min-width: 0;
+}
+
+.perm-card {
+  border: 1px solid #ebedf3;
+  border-radius: 5.46px;
+  background: #f3f6f9;
+}
+
+.perm-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 70px;
+  padding: 0 29.25px;
+}
+
+.perm-card__head h3 {
+  margin: 0;
+  color: #181c32;
+  font-size: 16.575px;
+  font-weight: 500;
+  line-height: 19.89px;
+}
+
+.perm-card__sep {
+  height: 0;
+  border-bottom: 1px solid #181c32;
+  opacity: 0.05;
+}
+
+.perm-card__body {
+  padding: 26px 29.25px 19.5px;
+}
+
+.perm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 -12.5px 6.5px;
+  padding: 0 0 6.5px;
+  border-bottom: 1px solid #ebedf3;
+  min-height: 29px;
+}
+
+.perm-row__label {
+  padding: 0 12.5px;
+  color: #3f4254;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+}
+
+.perm-switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  width: 40px;
+  height: 28px;
+  margin: 0 12.5px 0 16.25px;
+  cursor: pointer;
+}
+
+.perm-switch--head {
+  margin: 0;
+}
+
+.perm-switch input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.perm-switch span {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 24px;
+}
+
+.perm-switch span::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 38px;
+  height: 24px;
+  border-radius: 12px;
+  background: #ebedf3;
+}
+
+.perm-switch span::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 12px;
+  background: #fff;
+  transition: left 0.15s ease, background 0.15s ease;
+}
+
+.perm-switch input:checked + span::after {
+  left: 16px;
+  background: #3699ff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.2 6.2 L4.7 8.7 L9.8 3.3' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 8px 8px no-repeat;
+}
+
+.perm-switch input:focus-visible + span::before {
+  box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.25);
+}
+
+.settings-perms__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3.5px;
+  padding: 26px 29.25px;
+  border-top: 1px solid #ebedf3;
+}
+
+.settings-perms__back,
+.settings-perms__save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 38.4px;
+  padding: 0 13px;
+  border-radius: 5.46px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  cursor: pointer;
+}
+
+.settings-perms__back {
+  border: 1px solid #eaeef5;
+  background: #eaeef5;
+  color: #98989e;
+}
+
+.settings-perms__back:hover {
+  background: #e2e8f0;
+}
+
+.settings-perms__save {
+  gap: 4.55px;
+  border: 1px solid #3699ff;
+  background: #3699ff;
+  color: #fff;
+}
+
+.settings-perms__save:hover {
+  border-color: #187de4;
+  background: #187de4;
+}
+
+.perm-scrolltop {
+  position: fixed;
+  right: 20px;
+  bottom: 40px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 5.46px;
+  background: #3699ff;
+  color: #fff;
+  box-shadow: 0 6.5px 19.5px 6.5px rgba(0, 0, 0, 0.075);
+  cursor: pointer;
+}
+
+html.theme-dark .settings-perms__head h2,
+html[data-theme='dark'] .settings-perms__head h2,
+html.theme-dark .perm-card__head h3,
+html[data-theme='dark'] .perm-card__head h3 {
+  color: #e4e6ef;
+}
+
+html.theme-dark .settings-perms__label,
+html[data-theme='dark'] .settings-perms__label,
+html.theme-dark .perm-row__label,
+html[data-theme='dark'] .perm-row__label,
+html.theme-dark .settings--permissoes .settings__nav-item,
+html[data-theme='dark'] .settings--permissoes .settings__nav-item,
+html.theme-dark .settings--permissoes .settings__nav-item:hover,
+html[data-theme='dark'] .settings--permissoes .settings__nav-item:hover,
+html.theme-dark .settings--permissoes .settings__nav-item.is-active,
+html[data-theme='dark'] .settings--permissoes .settings__nav-item.is-active,
+html.theme-dark .settings--permissoes .settings__nav-item svg,
+html[data-theme='dark'] .settings--permissoes .settings__nav-item svg {
+  color: #e4e6ef;
+}
+
+html.theme-dark .settings-perms__input,
+html[data-theme='dark'] .settings-perms__input {
+  border-color: #2b2b40;
+  background: #1e1e2d;
+  color: #e4e6ef;
+}
+
+html.theme-dark .perm-card,
+html[data-theme='dark'] .perm-card {
+  border-color: #2b2b40;
+  background: #1b1b29;
+}
+
+html.theme-dark .perm-row,
+html[data-theme='dark'] .perm-row,
+html.theme-dark .settings-perms__foot,
+html[data-theme='dark'] .settings-perms__foot {
+  border-color: #2b2b40;
+}
+
+html.theme-dark .perm-switch span::before,
+html[data-theme='dark'] .perm-switch span::before {
+  background: #2b2b40;
+}
+
+html.theme-dark .settings-perms__back,
+html[data-theme='dark'] .settings-perms__back {
+  border-color: #2b2b40;
+  background: #2b2b40;
+  color: #98989e;
+}
+
+html.theme-dark .app-content:has(.settings--permissoes),
+html[data-theme='dark'] .app-content:has(.settings--permissoes) {
+  background: #151521;
+}
+
 @media (max-width: 900px) {
   .settings {
     grid-template-columns: 1fr;
+  }
+
+  .settings--permissoes {
+    grid-template-columns: 1fr;
+  }
+
+  .settings--permissoes .settings__nav {
+    width: 100%;
+  }
+
+  .settings-perms__cols {
+    flex-direction: column;
   }
 
   .settings-form__row {
