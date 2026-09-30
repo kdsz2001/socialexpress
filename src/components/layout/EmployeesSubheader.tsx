@@ -1,17 +1,11 @@
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useEmployees } from '../../hooks/useEmployees'
 import './ClientsSubheader.css'
 
 export function EmployeesSubheader() {
   const location = useLocation()
-  const [searchParams] = useSearchParams()
   const employees = useEmployees()
-  const status = searchParams.get('status')
-  const count = employees.filter((item) => {
-    if (status === 'inativos') return !item.active
-    if (status === 'todos') return true
-    return item.active
-  }).length
+  const count = employees.length
   const isForm = location.pathname !== '/funcionarios'
 
   const countLabel =
