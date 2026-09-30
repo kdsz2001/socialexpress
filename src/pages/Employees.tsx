@@ -36,13 +36,18 @@ export function Employees() {
   useEffect(() => {
     if (searchParams.get('tab') === 'permissoes') {
       navigate('/configuracoes?section=permissoes', { replace: true })
+      return
+    }
+    if (searchParams.get('status')) {
+      const params = new URLSearchParams(searchParams)
+      params.delete('status')
+      const queryString = params.toString()
+      navigate(queryString ? `/funcionarios?${queryString}` : '/funcionarios', { replace: true })
     }
   }, [navigate, searchParams])
 
   const [query, setQuery] = useState('')
-  const statusParam = searchParams.get('status')
-  const statusFilter: StatusFilter =
-    statusParam === 'inativos' || statusParam === 'todos' ? statusParam : 'ativos'
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
@@ -180,11 +185,9 @@ export function Employees() {
               value={statusFilter}
               onChange={(event) => {
                 const next = event.target.value
-                const params = new URLSearchParams(searchParams)
-                if (next === 'ativos') params.delete('status')
-                else params.set('status', next)
-                const queryString = params.toString()
-                navigate(queryString ? `/funcionarios?${queryString}` : '/funcionarios', { replace: true })
+                if (next === 'ativos' || next === 'inativos' || next === 'todos') {
+                  setStatusFilter(next)
+                }
               }}
               aria-label="Filtro por status"
             >
