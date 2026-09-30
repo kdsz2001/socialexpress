@@ -1,5 +1,6 @@
 import { useState, type MouseEvent } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
+import { refreshNavigation } from '../../lib/refreshNavigation'
 import {
   Monitor,
   User,
@@ -60,16 +61,11 @@ function NavItem({
   label: string
   icon: (typeof navItems)[number]['icon']
 }) {
-  const location = useLocation()
   const isDashboard = to === '/'
 
-  const handleDashboardClick = (e: MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     e.preventDefault()
-    if (location.pathname === '/') {
-      window.location.reload()
-    } else {
-      window.location.assign('/')
-    }
+    refreshNavigation(to)
   }
 
   return (
@@ -77,7 +73,7 @@ function NavItem({
       <NavLink
         to={to}
         end={isDashboard}
-        onClick={isDashboard ? handleDashboardClick : undefined}
+        onClick={handleClick}
         className={({ isActive }) =>
           [
             'sidebar__link',
@@ -96,7 +92,6 @@ function NavItem({
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const location = useLocation()
   // Clarial: menu fixado fechado abre no hover e fecha ao sair
   const [hoverOpen, setHoverOpen] = useState(false)
   const pinnedClosed = collapsed
@@ -104,11 +99,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   const handleBrandClick = (e: MouseEvent) => {
     e.preventDefault()
-    if (location.pathname === '/') {
-      window.location.reload()
-    } else {
-      window.location.assign('/')
-    }
+    refreshNavigation('/')
   }
 
   return (
