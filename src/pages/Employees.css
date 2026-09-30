@@ -35,6 +35,8 @@
 }
 
 .employees__toolbar {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 6.5px;
@@ -99,11 +101,18 @@
 
 .employees__select-wrap {
   position: relative;
+  z-index: 4;
   flex: 0 0 150px;
   width: 150px;
 }
 
+.employees__select-wrap.is-open {
+  z-index: 20;
+}
+
 .employees__select {
+  display: flex;
+  align-items: center;
   width: 100%;
   height: 40px;
   padding: 0 32px 0 13px;
@@ -114,23 +123,69 @@
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  appearance: none;
+  line-height: 19.5px;
+  text-align: left;
   cursor: pointer;
 }
 
 .employees__select:focus {
   outline: none;
-  border-color: #3699ff;
-  box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.12);
+}
+
+.employees__select-wrap:hover .employees__select,
+.employees__select-wrap.is-open .employees__select {
+  background: #3699ff;
+  color: #ffffff;
 }
 
 .employees__select-icon {
   position: absolute;
   right: 13px;
-  top: 50%;
+  top: 20px;
   transform: translateY(-50%);
   color: #7e8299;
   pointer-events: none;
+}
+
+.employees__select-wrap:hover .employees__select-icon,
+.employees__select-wrap.is-open .employees__select-icon {
+  color: #ffffff;
+}
+
+.employees__select-menu {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  z-index: 2;
+  width: 150px;
+  margin: 0;
+  padding: 6.5px 0;
+  list-style: none;
+  border-radius: 5.46px;
+  background: #ffffff;
+  box-shadow: 0 0 50px 0 rgba(82, 63, 105, 0.15);
+}
+
+.employees__select-menu button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 39.5px;
+  padding: 0 15px;
+  border: 0;
+  background: transparent;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.employees__select-menu button:hover,
+.employees__select-menu button.is-selected {
+  background: #f3f6f9;
 }
 
 .employees__add {
@@ -452,6 +507,39 @@ html.theme-dark .employees__pager-btn,
 html[data-theme='dark'] .employees__pager-btn {
   background-color: #2b2b40;
   color: #a1a5b7;
+}
+
+html.theme-dark .employees__select-wrap:hover .employees__select,
+html[data-theme='dark'] .employees__select-wrap:hover .employees__select,
+html.theme-dark .employees__select-wrap.is-open .employees__select,
+html[data-theme='dark'] .employees__select-wrap.is-open .employees__select {
+  background: #3699ff;
+  color: #fff;
+}
+
+html.theme-dark .employees__select-wrap:hover .employees__select-icon,
+html[data-theme='dark'] .employees__select-wrap:hover .employees__select-icon,
+html.theme-dark .employees__select-wrap.is-open .employees__select-icon,
+html[data-theme='dark'] .employees__select-wrap.is-open .employees__select-icon {
+  color: #fff;
+}
+
+html.theme-dark .employees__select-menu,
+html[data-theme='dark'] .employees__select-menu {
+  background: #1e1e2d;
+  box-shadow: 0 0 50px 0 rgba(0, 0, 0, 0.45);
+}
+
+html.theme-dark .employees__select-menu button,
+html[data-theme='dark'] .employees__select-menu button {
+  color: #e4e6ef;
+}
+
+html.theme-dark .employees__select-menu button:hover,
+html[data-theme='dark'] .employees__select-menu button:hover,
+html.theme-dark .employees__select-menu button.is-selected,
+html[data-theme='dark'] .employees__select-menu button.is-selected {
+  background: #2b2b40;
 }
 
 html.theme-dark .employees__pager-btn.is-active,
