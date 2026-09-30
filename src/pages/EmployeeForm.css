@@ -333,6 +333,7 @@
 
 .emp-form__checks {
   margin-top: 8px;
+  gap: 8px 22px;
 }
 
 .emp-form__add-phone {

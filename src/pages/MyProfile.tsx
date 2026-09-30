@@ -640,7 +640,7 @@ export function MyProfile() {
                         ) : null}
                       </div>
                       <div className="client-create__checks">
-                        <label className="client-create__check">
+                        <label className="client-create__check phone-flag">
                           <input
                             type="checkbox"
                             checked={phone.primary}
@@ -660,7 +660,7 @@ export function MyProfile() {
                           <span className="client-create__check-ui" aria-hidden="true" />
                           <span>Telefone principal</span>
                         </label>
-                        <label className="client-create__check">
+                        <label className="client-create__check phone-flag">
                           <input
                             type="checkbox"
                             checked={phone.whatsapp}
