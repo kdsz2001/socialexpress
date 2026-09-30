@@ -3,16 +3,14 @@ import { createPortal } from 'react-dom'
 import {
   ArrowUp,
   Calendar,
-  Camera,
   Check,
   ChevronDown,
   Plus,
   Search,
-  SquarePen,
-  Trash2,
   X,
 } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { IconAction, IconActions } from '../components/ui/IconAction'
 import {
   DateRangePicker,
   formatBr,
@@ -309,41 +307,26 @@ function ProductsList() {
                         )}
                       </td>
                       <td className="products__actions-cell">
-                        {item.photoDataUrl ? (
-                          <button
-                            type="button"
-                            className="products__icon-btn is-image"
-                            aria-label="Imagem do produto"
-                            onClick={() => setImagePreview(item)}
-                          >
-                            <Camera size={15} strokeWidth={2} />
-                            <span className="products__action-tip" role="tooltip">
-                              Imagem do produto
-                            </span>
-                          </button>
-                        ) : null}
-                        <button
-                          type="button"
-                          className="products__icon-btn is-view"
-                          aria-label="Visualizar produto"
-                          onClick={() => navigate(`/produtos/${item.id}`)}
-                        >
-                          <SquarePen size={15} strokeWidth={2} />
-                          <span className="products__action-tip" role="tooltip">
-                            Visualizar produto
-                          </span>
-                        </button>
-                        <button
-                          type="button"
-                          className="products__icon-btn is-danger"
-                          aria-label={`Excluir ${item.name}`}
-                          onClick={() => setDeleting(item)}
-                        >
-                          <Trash2 size={15} strokeWidth={2} />
-                          <span className="products__action-tip" role="tooltip">
-                            Excluir
-                          </span>
-                        </button>
+                        <IconActions>
+                          {item.photoDataUrl ? (
+                            <IconAction
+                              kind="image"
+                              tip="Imagem do produto"
+                              onClick={() => setImagePreview(item)}
+                            />
+                          ) : null}
+                          <IconAction
+                            kind="view"
+                            tip="Visualizar produto"
+                            onClick={() => navigate(`/produtos/${item.id}`)}
+                          />
+                          <IconAction
+                            kind="delete"
+                            tip="Excluir"
+                            aria-label={`Excluir ${item.name}`}
+                            onClick={() => setDeleting(item)}
+                          />
+                        </IconActions>
                       </td>
                     </tr>
                   )
@@ -1049,24 +1032,20 @@ function ProductsAtributos() {
                     <tr key={item.id}>
                       <td>{item.name}</td>
                       <td className="products__actions-cell">
-                        <button
-                          type="button"
-                          className="products__icon-btn is-edit"
-                          title="Editar"
-                          aria-label={`Editar ${item.name}`}
-                          onClick={() => openEdit(item)}
-                        >
-                          <SquarePen size={15} strokeWidth={2} />
-                        </button>
-                        <button
-                          type="button"
-                          className="products__icon-btn is-danger"
-                          title="Excluir valor"
-                          aria-label={`Excluir ${item.name}`}
-                          onClick={() => setDeleting(item)}
-                        >
-                          <Trash2 size={15} strokeWidth={2} />
-                        </button>
+                        <IconActions>
+                          <IconAction
+                            kind="edit"
+                            tip="Editar"
+                            aria-label={`Editar ${item.name}`}
+                            onClick={() => openEdit(item)}
+                          />
+                          <IconAction
+                            kind="delete"
+                            tip="Excluir valor"
+                            aria-label={`Excluir ${item.name}`}
+                            onClick={() => setDeleting(item)}
+                          />
+                        </IconActions>
                       </td>
                     </tr>
                   ))
@@ -1249,29 +1228,25 @@ function ProductsTipos() {
                     <td className="products__col-id">{formatProductTypeCode(item.code)}</td>
                     <td className="products__col-type-name">{item.name}</td>
                     <td className="products__actions-cell">
-                      <button
-                        type="button"
-                        className="products__icon-btn is-edit"
-                        title="Editar"
-                        aria-label={`Editar ${item.name}`}
-                        onClick={() => {
-                          setEditing(item)
-                          setName(item.name)
-                          setDescription(item.description)
-                          setModalOpen(true)
-                        }}
-                      >
-                        <SquarePen size={15} strokeWidth={2} />
-                      </button>
-                      <button
-                        type="button"
-                        className="products__icon-btn is-danger"
-                        title="Excluir"
-                        aria-label={`Excluir ${item.name}`}
-                        onClick={() => setDeleting(item)}
-                      >
-                        <Trash2 size={15} strokeWidth={2} />
-                      </button>
+                      <IconActions>
+                        <IconAction
+                          kind="edit"
+                          tip="Editar"
+                          aria-label={`Editar ${item.name}`}
+                          onClick={() => {
+                            setEditing(item)
+                            setName(item.name)
+                            setDescription(item.description)
+                            setModalOpen(true)
+                          }}
+                        />
+                        <IconAction
+                          kind="delete"
+                          tip="Excluir"
+                          aria-label={`Excluir ${item.name}`}
+                          onClick={() => setDeleting(item)}
+                        />
+                      </IconActions>
                     </td>
                   </tr>
                 ))

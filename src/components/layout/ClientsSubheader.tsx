@@ -81,7 +81,7 @@ export function ClientsSubheader() {
               onClick={() => setImportOpen(true)}
             >
               <CloudUpload size={18} strokeWidth={2} />
-              <span className="clients-subheader__tooltip" role="tooltip">
+              <span className="ui-tip clients-subheader__tooltip" role="tooltip">
                 Importar clientes
               </span>
             </button>
@@ -91,7 +91,7 @@ export function ClientsSubheader() {
               aria-label="Exportar clientes"
             >
               <Download size={18} strokeWidth={2} />
-              <span className="clients-subheader__tooltip" role="tooltip">
+              <span className="ui-tip clients-subheader__tooltip" role="tooltip">
                 Exportar clientes
               </span>
             </button>

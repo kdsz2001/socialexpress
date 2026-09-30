@@ -4,14 +4,13 @@ import {
   Plus,
   CalendarDays,
   ArrowUp,
-  SquarePen,
-  Trash2,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
 } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { IconAction, IconActions } from '../components/ui/IconAction'
 import {
   DATE_PRESETS,
   DateRangePicker,
@@ -568,36 +567,18 @@ export function Clients() {
                             )}
                           </td>
                           <td className="clients__actions-cell">
-                            <div className="clients__actions">
-                              <button
-                                type="button"
-                                className="clients__action clients__action--view"
-                                aria-label="Visualizar cliente"
+                            <IconActions>
+                              <IconAction
+                                kind="view"
+                                tip="Visualizar cliente"
                                 onClick={() => navigate(`/clientes/${client.id}`)}
-                              >
-                                <SquarePen size={16} strokeWidth={2} />
-                                <span
-                                  className="clients__action-tip"
-                                  role="tooltip"
-                                >
-                                  Visualizar cliente
-                                </span>
-                              </button>
-                              <button
-                                type="button"
-                                className="clients__action clients__action--delete"
-                                aria-label="Excluir"
+                              />
+                              <IconAction
+                                kind="delete"
+                                tip="Excluir"
                                 onClick={() => setClientToDelete(client)}
-                              >
-                                <Trash2 size={16} strokeWidth={2} />
-                                <span
-                                  className="clients__action-tip"
-                                  role="tooltip"
-                                >
-                                  Excluir
-                                </span>
-                              </button>
-                            </div>
+                              />
+                            </IconActions>
                           </td>
                         </tr>
                       )

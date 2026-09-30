@@ -8,10 +8,10 @@ import {
   ChevronsRight,
   Plus,
   Search,
-  SquarePen,
   X,
 } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
+import { IconAction } from '../components/ui/IconAction'
 import { useEmployees } from '../hooks/useEmployees'
 import {
   addEmployee,
@@ -306,14 +306,12 @@ export function Employees() {
                       >
                         <span className="employees__switch-knob" />
                       </button>
-                      <button
-                        type="button"
-                        className="employees__icon-btn"
+                      <IconAction
+                        kind="edit"
+                        tip="Editar funcionário"
                         aria-label={`Editar ${item.name}`}
                         onClick={() => openEdit(item)}
-                      >
-                        <SquarePen size={15} strokeWidth={2} />
-                      </button>
+                      />
                     </td>
                   </tr>
                 ))

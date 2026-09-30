@@ -179,31 +179,6 @@
   white-space: nowrap;
 }
 
-.suppliers__icon-btn {
-  display: inline-grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  margin-left: 0.25rem;
-  border: 0;
-  border-radius: 0.35rem;
-  background: var(--surface-muted);
-  color: #3699ff;
-  cursor: pointer;
-}
-
-.suppliers__icon-btn:hover {
-  background: var(--info-soft-bg);
-}
-
-.suppliers__icon-btn.is-danger {
-  color: #f64e60;
-}
-
-.suppliers__icon-btn.is-danger:hover {
-  background: var(--danger-soft-bg);
-}
-
 .suppliers__empty {
   text-align: center;
   padding: 3.5rem 1rem !important;
