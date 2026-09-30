@@ -103,18 +103,17 @@
   display: grid;
   grid-template-columns: 229px 433px;
   gap: 0 13px;
-  align-items: center;
+  align-items: start;
   justify-content: center;
   max-width: 675px;
   margin: 0 auto 22.75px;
 }
 
-.emp-form__row--avatar,
-.emp-form__row--top {
-  align-items: start;
-}
-
 .emp-form__label {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 38px;
   padding: 0 12.5px;
   text-align: left;
   font-size: 14.3px;
@@ -125,6 +124,8 @@
 
 .emp-form__row--avatar .emp-form__label,
 .emp-form__row--top .emp-form__label {
+  align-items: flex-start;
+  min-height: 0;
   padding-top: 9px;
 }
 
@@ -315,9 +316,13 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px 18px;
-  min-height: 26px;
+  min-height: 38px;
   font-size: 14.3px;
   color: #3f4254;
+}
+
+.emp-form__checks {
+  min-height: 26px;
 }
 
 .emp-form__radio,
