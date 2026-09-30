@@ -1,5 +1,6 @@
 /** Sessão local do dashboard Social Express (login/senha do perfil). */
 
+import { findEmployeeForLogin } from './employeesStore'
 import { getUserProfile } from './userProfileStore'
 
 const STORAGE_KEY = 'social-express:auth-session'
@@ -11,6 +12,8 @@ export type AuthSession = {
   loggedIn: boolean
   at: number
   identifier: string
+  unit: string
+  employeeId?: string
 }
 
 function readSession(): AuthSession | null {
@@ -23,6 +26,8 @@ function readSession(): AuthSession | null {
       loggedIn: true,
       at: typeof parsed.at === 'number' ? parsed.at : Date.now(),
       identifier: typeof parsed.identifier === 'string' ? parsed.identifier : '',
+      unit: typeof parsed.unit === 'string' ? parsed.unit : '',
+      employeeId: typeof parsed.employeeId === 'string' ? parsed.employeeId : undefined,
     }
   } catch {
     return null
@@ -59,11 +64,40 @@ export function subscribeAuth(onChange: () => void) {
 
 export type LoginResult = { ok: true } | { ok: false; error: string }
 
-export function attemptLogin(identifierRaw: string, passwordRaw: string): LoginResult {
+export function attemptLogin(
+  identifierRaw: string,
+  passwordRaw: string,
+  unitRaw: string,
+): LoginResult {
   const identifier = String(identifierRaw || '').trim()
   const password = String(passwordRaw || '')
+  const unit = String(unitRaw || '').trim()
+  if (!unit) {
+    return { ok: false, error: 'Selecione a unidade.' }
+  }
   if (!identifier || !password) {
     return { ok: false, error: 'Informe login (ou e-mail) e senha.' }
+  }
+
+  const employee = findEmployeeForLogin(identifier)
+  if (employee) {
+    if (!employee.active) {
+      return { ok: false, error: 'Este funcionário está inativo.' }
+    }
+    if (password !== employee.password) {
+      return { ok: false, error: 'Senha incorreta.' }
+    }
+    if (employee.unit !== unit) {
+      return { ok: false, error: 'A unidade selecionada não é a deste funcionário.' }
+    }
+    writeSession({
+      loggedIn: true,
+      at: Date.now(),
+      identifier,
+      unit,
+      employeeId: employee.id,
+    })
+    return { ok: true }
   }
 
   const profile = getUserProfile()
@@ -85,6 +119,7 @@ export function attemptLogin(identifierRaw: string, passwordRaw: string): LoginR
     loggedIn: true,
     at: Date.now(),
     identifier,
+    unit,
   })
   return { ok: true }
 }
