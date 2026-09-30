@@ -246,6 +246,7 @@
 }
 
 .employees__table th {
+  box-sizing: border-box;
   text-align: left;
   height: 38px;
   padding: 9.75px 13px;
@@ -257,16 +258,6 @@
   color: #b5b5c3;
   border-bottom: 1px solid #ebedf3;
   white-space: nowrap;
-}
-
-.employees__table th:first-child,
-.employees__table td:first-child {
-  padding-left: 0;
-}
-
-.employees__table th:last-child,
-.employees__table td:last-child {
-  padding-right: 0;
 }
 
 .employees__table td {
@@ -282,10 +273,29 @@
   vertical-align: middle;
 }
 
-.employees__col-name,
+.employees__table th,
+.employees__table td {
+  padding-left: 13px;
+  padding-right: 13px;
+}
+
+.employees__table th:first-child,
+.employees__table td:first-child {
+  padding-left: 0;
+}
+
+.employees__table th:last-child,
+.employees__table td:last-child {
+  padding-right: 0;
+}
+
+.employees__col-name {
+  width: 27.33%;
+}
+
 .employees__col-user,
 .employees__col-level {
-  width: calc((100% - 156px) / 3);
+  width: 28.61%;
 }
 
 .employees__col-actions {
