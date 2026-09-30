@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { Camera, Clock, SquarePen, Trash2 } from 'lucide-react'
+import { Camera, Clock, ExternalLink, History, SquarePen, Trash2 } from 'lucide-react'
 import './IconAction.css'
 
 const ICONS = {
@@ -15,6 +15,8 @@ const ICONS = {
   view: SquarePen,
   image: Camera,
   history: Clock,
+  orders: History,
+  link: ExternalLink,
   delete: Trash2,
 } as const
 
