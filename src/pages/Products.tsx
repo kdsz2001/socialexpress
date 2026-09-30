@@ -5,6 +5,10 @@ import {
   Calendar,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Plus,
   Search,
   X,
@@ -20,9 +24,11 @@ import {
 import { ConfirmDeleteModal } from '../components/products/ConfirmDeleteModal'
 import { ProductTypeModal } from '../components/products/ProductTypeModal'
 import { SaveToast } from '../components/ui/SaveToast'
+import { useHistory } from '../hooks/useHistory'
 import { useProductAttributes } from '../hooks/useProductAttributes'
 import { useProductTypes } from '../hooks/useProductTypes'
 import { useProducts } from '../hooks/useProducts'
+import { formatHistoryDateTime } from '../lib/historyStore'
 import {
   addProductAttribute,
   ATTRIBUTE_KIND_META,
@@ -63,7 +69,7 @@ type ProductListFilter =
   | 'vendidos'
 
 const STATUS_OPTIONS: { id: ProductListFilter; label: string }[] = [
-  { id: 'todos', label: 'Mostrar todos' },
+  { id: 'todos', label: 'Filtro por status' },
   { id: 'ativo', label: 'Ativos' },
   { id: 'inativo', label: 'Inativos' },
   { id: 'consignados', label: 'Consignados' },
@@ -76,6 +82,14 @@ const REMOVED_TOAST_KEY = 'social-express:product-removed-toast'
 
 const ATTRIBUTE_KINDS = Object.keys(ATTRIBUTE_KIND_META) as ProductAttributeKind[]
 const PAGE_SIZES = [5, 10, 20, 30, 50, 100]
+const LIST_PAGE_SIZES = [10, 25, 50, 100]
+
+function splitProductTypeLabel(typeLabel: string) {
+  const name = productTypeDisplayName(typeLabel)
+  const match = name.match(/^(.*?)(\s*\([^)]+\))\s*$/)
+  if (!match) return { title: name, code: '' }
+  return { title: match[1].trim(), code: match[2].trim() }
+}
 
 function tabFromParam(value: string | null): ProductsTab {
   if (value === 'consulta') return 'consulta'
@@ -106,10 +120,13 @@ function ProductsList() {
   const [typeFilter, setTypeFilter] = useState('todos')
   const [statusFilter, setStatusFilter] = useState<ProductListFilter>('todos')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [pageSize, setPageSize] = useState(10)
+  const [page, setPage] = useState(1)
   const [deleting, setDeleting] = useState<Product | null>(null)
-  const [imagePreview, setImagePreview] = useState<Product | null>(null)
+  const [historyProduct, setHistoryProduct] = useState<Product | null>(null)
   const [toastOpen, setToastOpen] = useState(false)
   const closeToast = useCallback(() => setToastOpen(false), [])
+  const closeHistory = useCallback(() => setHistoryProduct(null), [])
 
   useEffect(() => {
     try {
@@ -123,18 +140,8 @@ function ProductsList() {
   }, [])
 
   useEffect(() => {
-    if (!imagePreview) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setImagePreview(null)
-    }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [imagePreview])
+    setPage(1)
+  }, [query, typeFilter, statusFilter])
 
   const typeOptions = useMemo(() => {
     const fromTypes = types.map((item) => formatProductTypeLabel(item))
@@ -175,6 +182,81 @@ function ProductsList() {
       })
   }, [products, query, typeFilter, statusFilter, sortDir])
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const currentPage = Math.min(page, totalPages)
+  const pageFrom = (currentPage - 1) * pageSize
+  const pageItems = filtered.slice(pageFrom, pageFrom + pageSize)
+  const showingFrom = filtered.length === 0 ? 0 : pageFrom + 1
+  const showingTo = Math.min(filtered.length, pageFrom + pageSize)
+
+  function renderListPager() {
+    return (
+    <div className="products__list-pager">
+      <div className="products__list-pager-left">
+        <select
+          className="products__list-pager-size"
+          value={pageSize}
+          aria-label="Itens por página"
+          onChange={(event) => {
+            setPageSize(Number(event.target.value))
+            setPage(1)
+          }}
+        >
+          {LIST_PAGE_SIZES.map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+        <span className="products__list-pager-info">
+          {`Mostrando ${showingFrom} - ${showingTo} do total de ${filtered.length}`}
+        </span>
+      </div>
+      <div className="products__list-pager-nav">
+        <button
+          type="button"
+          className="products__list-pager-btn"
+          aria-label="Primeira página"
+          disabled={currentPage <= 1}
+          onClick={() => setPage(1)}
+        >
+          <ChevronsLeft size={15} strokeWidth={2.25} />
+        </button>
+        <button
+          type="button"
+          className="products__list-pager-btn"
+          aria-label="Página anterior"
+          disabled={currentPage <= 1}
+          onClick={() => setPage((value) => Math.max(1, value - 1))}
+        >
+          <ChevronLeft size={15} strokeWidth={2.25} />
+        </button>
+        <button type="button" className="products__list-pager-btn is-active" aria-current="page">
+          {currentPage}
+        </button>
+        <button
+          type="button"
+          className="products__list-pager-btn"
+          aria-label="Próxima página"
+          disabled={currentPage >= totalPages}
+          onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+        >
+          <ChevronRight size={15} strokeWidth={2.25} />
+        </button>
+        <button
+          type="button"
+          className="products__list-pager-btn"
+          aria-label="Última página"
+          disabled={currentPage >= totalPages}
+          onClick={() => setPage(totalPages)}
+        >
+          <ChevronsRight size={15} strokeWidth={2.25} />
+        </button>
+      </div>
+    </div>
+    )
+  }
+
   return (
     <div className="products">
       <SaveToast
@@ -182,7 +264,7 @@ function ProductsList() {
         message="Produto removido com sucesso."
         onClose={closeToast}
       />
-      <section className="products__card">
+      <section className="products__card products__card--list">
         <div className="products__toolbar">
           <label className="products__search">
             <Search size={16} strokeWidth={2} className="products__search-icon" />
@@ -199,12 +281,12 @@ function ProductsList() {
 
           <label className="products__select-wrap products__select-wrap--type">
             <select
-              className="products__select"
+              className={`products__select${typeFilter === 'todos' ? ' is-placeholder' : ''}`}
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value)}
               aria-label="Filtro por tipo de produto"
             >
-              <option value="todos">Todos tipos de produto</option>
+              <option value="todos">Filtro por tipo de produto</option>
               {typeOptions.map((item) => (
                 <option key={item} value={item}>
                   {item}
@@ -216,7 +298,7 @@ function ProductsList() {
 
           <label className="products__select-wrap products__select-wrap--status">
             <select
-              className="products__select"
+              className={`products__select${statusFilter === 'todos' ? ' is-placeholder' : ''}`}
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as ProductListFilter)}
               aria-label="Filtro por status"
@@ -240,8 +322,10 @@ function ProductsList() {
           </button>
         </div>
 
-        <div className="products__table-wrap">
-          <table className="products__table">
+        {renderListPager()}
+
+        <div className="products__table-wrap products__table-wrap--list">
+          <table className="products__table products__table--list">
             <thead>
               <tr>
                 <th className="products__col-name">
@@ -252,8 +336,8 @@ function ProductsList() {
                   >
                     Produto
                     <ArrowUp
-                      size={14}
-                      strokeWidth={2.25}
+                      size={12}
+                      strokeWidth={2.5}
                       className={sortDir === 'desc' ? 'is-desc' : undefined}
                     />
                   </button>
@@ -272,9 +356,10 @@ function ProductsList() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((item) => {
+                pageItems.map((item) => {
                   const codes = formatProductCodes(item)
                   const chips = productAttributeChips(item)
+                  const typeParts = splitProductTypeLabel(item.type)
                   return (
                     <tr key={item.id}>
                       <td>
@@ -288,8 +373,21 @@ function ProductsList() {
                           {codes ? <span className="products__codes">{codes}</span> : null}
                         </div>
                       </td>
-                      <td className="products__type-cell">{productTypeDisplayName(item.type) || '—'}</td>
-                      <td>{item.rental || '—'}</td>
+                      <td className="products__type-cell">
+                        {typeParts.title || typeParts.code ? (
+                          <div className="products__type">
+                            {typeParts.title ? (
+                              <span className="products__type-title">{typeParts.title}</span>
+                            ) : null}
+                            {typeParts.code ? (
+                              <span className="products__type-code">{typeParts.code}</span>
+                            ) : null}
+                          </div>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                      <td className="products__rental-cell">{item.rental || '—'}</td>
                       <td>
                         {chips.length > 0 ? (
                           <div className="products__chips">
@@ -298,7 +396,14 @@ function ProductsList() {
                                 key={`${chip.label}-${chip.value}`}
                                 className="products__chip"
                               >
-                                {chip.label ? `${chip.label}: ${chip.value}` : chip.value}
+                                {chip.label ? (
+                                  <>
+                                    <span>{chip.label}:</span>
+                                    <span>{chip.value}</span>
+                                  </>
+                                ) : (
+                                  chip.value
+                                )}
                               </span>
                             ))}
                           </div>
@@ -308,13 +413,12 @@ function ProductsList() {
                       </td>
                       <td className="products__actions-cell">
                         <IconActions>
-                          {item.photoDataUrl ? (
-                            <IconAction
-                              kind="image"
-                              tip="Imagem do produto"
-                              onClick={() => setImagePreview(item)}
-                            />
-                          ) : null}
+                          <IconAction
+                            kind="history"
+                            tip="Histórico do produto"
+                            aria-label={`Histórico de ${item.name}`}
+                            onClick={() => setHistoryProduct(item)}
+                          />
                           <IconAction
                             kind="view"
                             tip="Visualizar produto"
@@ -335,7 +439,13 @@ function ProductsList() {
             </tbody>
           </table>
         </div>
+
+        {renderListPager()}
       </section>
+
+      {historyProduct ? (
+        <ProductHistoryModal product={historyProduct} onClose={closeHistory} />
+      ) : null}
 
       <ConfirmDeleteModal
         open={Boolean(deleting)}
@@ -365,44 +475,84 @@ function ProductsList() {
           window.location.assign(`${window.location.pathname}${window.location.search}`)
         }}
       />
-
-      {imagePreview && imagePreview.photoDataUrl
-        ? createPortal(
-            <div className="products-image-modal" role="presentation">
-              <button
-                type="button"
-                className="products-image-modal__overlay"
-                aria-label="Fechar"
-                onClick={() => setImagePreview(null)}
-              />
-              <header className="products-image-modal__header">
-                <h2>
-                  {[imagePreview.fullCode, imagePreview.name].filter(Boolean).join(' | ')}
-                </h2>
-                <button
-                  type="button"
-                  className="products-image-modal__close"
-                  aria-label="Fechar"
-                  onClick={() => setImagePreview(null)}
-                >
-                  <X size={18} strokeWidth={2.25} />
-                </button>
-              </header>
-              <div
-                className="products-image-modal__dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Imagem do produto"
-              >
-                <div className="products-image-modal__body">
-                  <img src={imagePreview.photoDataUrl} alt={imagePreview.name} />
-                </div>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
     </div>
+  )
+}
+
+function ProductHistoryModal({
+  product,
+  onClose,
+}: {
+  product: Product
+  onClose: () => void
+}) {
+  const entries = useHistory()
+  const related = useMemo(() => {
+    const name = product.name.trim().toLocaleLowerCase('pt-BR')
+    const code = product.fullCode.trim().toLocaleLowerCase('pt-BR')
+    return entries.filter((entry) => {
+      if (entry.module !== 'Produtos') return false
+      const text = entry.segments.map((segment) => segment.text).join(' ').toLocaleLowerCase('pt-BR')
+      return (name && text.includes(name)) || (code && text.includes(code))
+    })
+  }, [entries, product])
+
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [onClose])
+
+  return createPortal(
+    <div className="products-modal" role="presentation">
+      <button type="button" className="products-modal__overlay" aria-label="Fechar" onClick={onClose} />
+      <div
+        className="products-modal__dialog products-modal__dialog--history"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="product-history-title"
+      >
+        <header className="products-modal__header">
+          <h2 id="product-history-title">Histórico do produto</h2>
+          <button type="button" className="products-modal__close" aria-label="Fechar" onClick={onClose}>
+            <X size={16} strokeWidth={2.25} />
+          </button>
+        </header>
+        <div className="products-modal__body products-history">
+          <p className="products-history__product">{product.name}</p>
+          {related.length === 0 ? (
+            <p className="products-history__empty">Nenhum histórico encontrado.</p>
+          ) : (
+            <ul className="products-history__list">
+              {related.map((entry) => (
+                <li key={entry.id} className="products-history__item">
+                  <time dateTime={new Date(entry.createdAt).toISOString()}>
+                    {formatHistoryDateTime(entry.createdAt)}
+                  </time>
+                  <p>
+                    {entry.segments.map((segment, index) =>
+                      segment.bold ? (
+                        <strong key={`${entry.id}-${index}`}>{segment.text}</strong>
+                      ) : (
+                        <span key={`${entry.id}-${index}`}>{segment.text}</span>
+                      ),
+                    )}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
   )
 }
 
