@@ -1,5 +1,6 @@
-import { useState, type MouseEvent } from 'react'
+import { useRef, useState, type MouseEvent } from 'react'
 import { NavLink } from 'react-router-dom'
+import { prefetchRoute } from '../../lib/routePrefetch'
 import { refreshNavigation } from '../../lib/refreshNavigation'
 import {
   Monitor,
@@ -62,10 +63,22 @@ function NavItem({
   icon: (typeof navItems)[number]['icon']
 }) {
   const isDashboard = to === '/'
+  const prefetchTimer = useRef<number | null>(null)
 
   const handleClick = (e: MouseEvent) => {
     e.preventDefault()
     refreshNavigation(to)
+  }
+
+  const queuePrefetch = () => {
+    if (prefetchTimer.current !== null) window.clearTimeout(prefetchTimer.current)
+    prefetchTimer.current = window.setTimeout(() => prefetchRoute(to), 60)
+  }
+
+  const cancelPrefetch = () => {
+    if (prefetchTimer.current === null) return
+    window.clearTimeout(prefetchTimer.current)
+    prefetchTimer.current = null
   }
 
   return (
@@ -74,6 +87,11 @@ function NavItem({
         to={to}
         end={isDashboard}
         onClick={handleClick}
+        onPointerDown={() => prefetchRoute(to)}
+        onMouseEnter={queuePrefetch}
+        onMouseLeave={cancelPrefetch}
+        onFocus={queuePrefetch}
+        onBlur={cancelPrefetch}
         className={({ isActive }) =>
           [
             'sidebar__link',
