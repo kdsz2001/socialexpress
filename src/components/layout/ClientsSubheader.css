@@ -6,8 +6,10 @@
   justify-content: space-between;
   gap: 1rem;
   flex-shrink: 0;
+  box-sizing: border-box;
+  height: 54px;
   background: var(--card-bg);
-  padding: 18px var(--app-content-pad-x, 30px);
+  padding: 0 var(--app-content-pad-x, 30px);
   border-bottom: 1px solid var(--border-color);
   overflow: visible;
 }
@@ -22,7 +24,7 @@
 /* Altura fixa: o título não sobe nem desce quando a aba não tem botões. */
 .clients-subheader.clients-subheader--stable {
   box-sizing: border-box;
-  height: 74px;
+  height: 54px;
   padding-top: 0;
   padding-bottom: 0;
 }
@@ -36,10 +38,10 @@
 
 .clients-subheader__title {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 16.25px;
   font-weight: 500;
   color: var(--text-heading);
-  line-height: 1.35;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
