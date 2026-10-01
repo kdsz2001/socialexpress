@@ -1212,7 +1212,6 @@ html[data-theme='dark'] .cfg-attention__no {
 
 .app-content:has(.settings--permissoes) {
   background: #eef0f8;
-  padding-bottom: 90px;
 }
 
 .settings--permissoes {
