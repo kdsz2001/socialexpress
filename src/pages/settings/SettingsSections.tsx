@@ -212,151 +212,193 @@ export function OperationsSection() {
   }
 
   return (
-    <article className="settings-card">
+    <article className="settings-card settings-ops">
       <header className="settings-card__head">
         <h2 className="settings-card__title">Configurações de operações</h2>
-        <button type="button" className="settings__save" onClick={save}>
+        <button type="button" className="settings-ops__save" onClick={save}>
           <Check size={16} strokeWidth={2.5} />
           Salvar alterações
         </button>
       </header>
 
-      <div className="settings-form">
-        <div className="settings-form__row">
-          <span className="settings-form__label">Bloquear o produto antes de sua prova</span>
-          <div className="settings-form__days">
-            <input
-              className="settings-form__number"
-              type="number"
-              min={0}
-              aria-label="Dias antes da prova"
-              value={draft.blockBeforeProofDays}
-              onChange={(event) => patch('blockBeforeProofDays', Number(event.target.value))}
-            />
-            <span>dias</span>
-          </div>
-        </div>
-        <div className="settings-form__row">
-          <span className="settings-form__label">Manter produto bloqueado depois da sua devolução</span>
-          <div className="settings-form__days">
-            <input
-              className="settings-form__number"
-              type="number"
-              min={0}
-              aria-label="Dias depois da devolução"
-              value={draft.blockAfterReturnDays}
-              onChange={(event) => patch('blockAfterReturnDays', Number(event.target.value))}
-            />
-            <span>dias</span>
-          </div>
-        </div>
-
-        <ToggleRow
-          label='Mostrar campo de código personalizado no cadastro de produto'
-          checked={draft.showCustomCode}
-          onChange={(value) => patch('showCustomCode', value)}
-        />
-        <ToggleRow
-          label="Permitir venda de produtos"
-          checked={draft.allowProductSale}
-          onChange={(value) => patch('allowProductSale', value)}
-        />
-        <ToggleRow
-          label="Permitir cadastro de produtos em consignado"
-          checked={draft.allowConsignment}
-          onChange={(value) => patch('allowConsignment', value)}
-        />
-        <ToggleRow
-          label="Permitir consulta QR de forma pública"
-          checked={draft.allowPublicQr}
-          onChange={(value) => patch('allowPublicQr', value)}
-        />
-        <ToggleRow
-          label="Marcar automaticamente as provas no calendário"
-          checked={draft.autoMarkProofs}
-          onChange={(value) => patch('autoMarkProofs', value)}
-        />
-        <ToggleRow
-          label="Usar controle de estoque"
-          checked={draft.useStockControl}
-          onChange={(value) => patch('useStockControl', value)}
-        />
-
-        <h3 className="settings-form__heading">Preenchimento de pedidos e orçamentos:</h3>
-        <div className="settings-form__row settings-form__row--top">
-          <span className="settings-form__label">Tornar &quot;Origem&quot; obrigatória ao criar pedido</span>
-          <div>
-            <Switch
-              label='Tornar "Origem" obrigatória ao criar pedido'
-              checked={draft.originRequired}
-              onChange={(value) => patch('originRequired', value)}
-            />
-            <p className="settings-form__hint">
-              Afeta somente a criação de pedidos (não bloqueia edição de pedidos antigos).
-            </p>
-          </div>
+      <div className="settings-ops__body">
+        <div className="settings-ops__block">
+          <DaysRow
+            label="Bloquear o produto antes de sua prova"
+            value={draft.blockBeforeProofDays}
+            onChange={(value) => patch('blockBeforeProofDays', value)}
+          />
+          <DaysRow
+            label="Manter produto bloqueado depois da sua devolução"
+            value={draft.blockAfterReturnDays}
+            onChange={(value) => patch('blockAfterReturnDays', value)}
+          />
+          <ToggleRow
+            label="Mostrar campo de código personalizado no cadastro de produto"
+            checked={draft.showCustomCode}
+            onChange={(value) => patch('showCustomCode', value)}
+          />
+          <ToggleRow
+            label="Permitir venda de produtos"
+            checked={draft.allowProductSale}
+            onChange={(value) => patch('allowProductSale', value)}
+          />
+          <ToggleRow
+            label="Permitir cadastro de produtos em consignado"
+            checked={draft.allowConsignment}
+            onChange={(value) => patch('allowConsignment', value)}
+          />
+          <ToggleRow
+            label="Permitir consulta QR de forma pública"
+            checked={draft.allowPublicQr}
+            onChange={(value) => patch('allowPublicQr', value)}
+          />
+          <ToggleRow
+            label="Marcar automaticamente as provas no calendário"
+            checked={draft.autoMarkProofs}
+            onChange={(value) => patch('autoMarkProofs', value)}
+          />
+          <ToggleRow
+            label="Usar controle de estoque"
+            checked={draft.useStockControl}
+            onChange={(value) => patch('useStockControl', value)}
+          />
         </div>
 
-        <NoteRow
-          label="Observação do traje:"
-          value={draft.outfitNotes}
-          onChange={(value) => patch('outfitNotes', value)}
-        />
-        <NoteRow
-          label="Observações do pedido:"
-          value={draft.orderNotes}
-          onChange={(value) => patch('orderNotes', value)}
-        />
-        <NoteRow
-          label="Observações do orçamento:"
-          value={draft.quoteNotes}
-          onChange={(value) => patch('quoteNotes', value)}
-        />
-
-        <h3 className="settings-form__heading">Cancelamento de pedidos:</h3>
-        <div className="settings-form__row settings-form__row--top">
-          <span className="settings-form__label">
-            Quando ocorre o cancelamento do pedido a comissão deve ser paga sobre
-          </span>
-          <div className="settings-form__radios">
-            <label className="settings__radio">
-              <input
-                type="radio"
-                name="commission-base"
-                checked={draft.commissionBase === 'total'}
-                onChange={() => patch('commissionBase', 'total')}
+        <div className="settings-ops__block">
+          <h3 className="settings-ops__heading">Preenchimento de pedidos e orçamentos:</h3>
+          <div className="settings-ops__row">
+            <span className="settings-ops__label">Tornar &quot;Origem&quot; obrigatória ao criar pedido</span>
+            <div className="settings-ops__field">
+              <OpsSwitch
+                label='Tornar "Origem" obrigatória ao criar pedido'
+                checked={draft.originRequired}
+                onChange={(value) => patch('originRequired', value)}
               />
-              <span>Valor total do pedido</span>
-            </label>
-            <label className="settings__radio">
-              <input
-                type="radio"
-                name="commission-base"
-                checked={draft.commissionBase === 'paid'}
-                onChange={() => patch('commissionBase', 'paid')}
-              />
-              <span>Valor pago</span>
-            </label>
+              <p className="settings-ops__hint">
+                Afeta somente a criação de pedidos (não bloqueia edição de pedidos antigos).
+              </p>
+            </div>
           </div>
+          <NoteRow
+            label="Observação do traje:"
+            value={draft.outfitNotes}
+            onChange={(value) => patch('outfitNotes', value)}
+          />
+          <NoteRow
+            label="Observações do pedido:"
+            value={draft.orderNotes}
+            onChange={(value) => patch('orderNotes', value)}
+          />
+          <NoteRow
+            label="Observações do orçamento:"
+            value={draft.quoteNotes}
+            onChange={(value) => patch('quoteNotes', value)}
+          />
         </div>
-        <ToggleRow
-          label="Incluir valor da multa para calcular a comissão"
-          checked={draft.includeFineInCommission}
-          onChange={(value) => patch('includeFineInCommission', value)}
-        />
+
+        <div className="settings-ops__block settings-ops__block--last">
+          <h3 className="settings-ops__heading">Cancelamento de pedidos:</h3>
+          <div className="settings-ops__row">
+            <span className="settings-ops__label">
+              Quando ocorre o cancelamento do pedido a comissão deve ser paga sobre
+            </span>
+            <div className="settings-ops__field">
+              <div className="settings-ops__radios">
+                <label className="settings-ops__radio">
+                  <input
+                    type="radio"
+                    name="commission-base"
+                    checked={draft.commissionBase === 'total'}
+                    onChange={() => patch('commissionBase', 'total')}
+                  />
+                  <span />
+                  Valor total do pedido
+                </label>
+                <label className="settings-ops__radio">
+                  <input
+                    type="radio"
+                    name="commission-base"
+                    checked={draft.commissionBase === 'paid'}
+                    onChange={() => patch('commissionBase', 'paid')}
+                  />
+                  <span />
+                  Valor pago
+                </label>
+              </div>
+            </div>
+          </div>
+          <ToggleRow
+            label="Incluir valor da multa para calcular a comissão"
+            checked={draft.includeFineInCommission}
+            onChange={(value) => patch('includeFineInCommission', value)}
+          />
+        </div>
       </div>
 
-      <footer className="settings-card__foot">
-        <button type="button" className="settings__back" onClick={() => navigate(-1)}>
-          <ArrowLeft size={16} strokeWidth={2.25} />
+      <footer className="settings-ops__foot">
+        <button type="button" className="settings-ops__back" onClick={() => navigate(-1)}>
           Voltar
         </button>
-        <button type="button" className="settings__save" onClick={save}>
+        <button type="button" className="settings-ops__save" onClick={save}>
           <Check size={16} strokeWidth={2.5} />
           Salvar
         </button>
       </footer>
     </article>
+  )
+}
+
+function OpsSwitch({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean
+  label: string
+  onChange: (value: boolean) => void
+}) {
+  return (
+    <label className="settings-ops__switch">
+      <input
+        type="checkbox"
+        aria-label={label}
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+      <span aria-hidden="true" />
+    </label>
+  )
+}
+
+function DaysRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: number
+  onChange: (value: number) => void
+}) {
+  return (
+    <div className="settings-ops__row">
+      <span className="settings-ops__label">{label}</span>
+      <div className="settings-ops__field settings-ops__field--days">
+        <div className="settings-ops__days">
+          <input
+            type="text"
+            inputMode="numeric"
+            aria-label={label}
+            value={Number.isFinite(value) ? String(value) : ''}
+            onChange={(event) => {
+              const raw = event.target.value.replace(/[^\d]/g, '')
+              onChange(raw === '' ? 0 : Number(raw))
+            }}
+          />
+          <span>dias</span>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -370,9 +412,11 @@ function ToggleRow({
   onChange: (value: boolean) => void
 }) {
   return (
-    <div className="settings-form__row">
-      <span className="settings-form__label">{label}</span>
-      <Switch label={label} checked={checked} onChange={onChange} />
+    <div className="settings-ops__row">
+      <span className="settings-ops__label">{label}</span>
+      <div className="settings-ops__field">
+        <OpsSwitch label={label} checked={checked} onChange={onChange} />
+      </div>
     </div>
   )
 }
@@ -387,16 +431,18 @@ function NoteRow({
   onChange: (value: string) => void
 }) {
   return (
-    <div className="settings-form__row settings-form__row--top">
-      <label className="settings-form__label" htmlFor={`op-${label}`}>
+    <div className="settings-ops__row">
+      <label className="settings-ops__label" htmlFor={`op-${label}`}>
         {label}
       </label>
-      <textarea
-        id={`op-${label}`}
-        className="settings-form__area"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
+      <div className="settings-ops__field">
+        <textarea
+          id={`op-${label}`}
+          className="settings-ops__area"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </div>
     </div>
   )
 }
