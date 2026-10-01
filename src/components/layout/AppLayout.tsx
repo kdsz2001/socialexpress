@@ -215,7 +215,7 @@ export function AppLayout() {
           {location.pathname.startsWith('/funcionarios') && <EmployeesSubheader />}
           {location.pathname.startsWith('/pedidos') && <OrdersSubheader />}
           {location.pathname === '/financeiro' && <FinanceiroSubheader />}
-          {location.pathname === '/fornecedores' && <SuppliersSubheader />}
+          {location.pathname.startsWith('/fornecedores') && <SuppliersSubheader />}
           {location.pathname === '/relatorios' && <ReportsSubheader />}
           {location.pathname === '/configuracoes' && <SettingsSubheader />}
           {location.pathname === '/historicos' && <HistorySubheader />}
