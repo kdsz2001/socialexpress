@@ -41,14 +41,14 @@
     gap 0.45s ease;
 }
 
-/* Fechado (sem hover): px pares + stack fixo (sem drift no zoom) */
+/* Fechado: a mesma altura do topo, para a linha encontrar a borda branca */
 .sidebar.is-collapsed:not(.is-hover-open) .sidebar__brand {
   flex-direction: row;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   width: 70px;
-  height: 70px;
-  padding: 16px 0 6px;
+  height: var(--topbar-height);
+  padding: 0;
   gap: 0;
   box-sizing: border-box;
 }
