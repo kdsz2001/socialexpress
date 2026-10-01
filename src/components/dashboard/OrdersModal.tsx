@@ -42,7 +42,7 @@ export function OrdersModal({
 }) {
   const [openId, setOpenId] = useState<string | null>(null)
   const showBalance = kind !== 'Provas'
-  const columns = showBalance ? 4 : 3
+  const columns = showBalance ? 6 : 5
 
   useEffect(() => {
     const previous = document.body.style.overflow
@@ -64,17 +64,19 @@ export function OrdersModal({
         <header className="dash-orders__header">
           <h2 id="dash-orders-title">{title}</h2>
           <button type="button" className="dash-orders__close" aria-label="Fechar" onClick={onClose}>
-            <X size={16} strokeWidth={2.25} />
+            <X size={13} strokeWidth={2.4} />
           </button>
         </header>
         <div className="dash-orders__body">
-          <table className="dash-orders__table">
+          <table className={`dash-orders__table${showBalance ? ' is-balance' : ''}`}>
             <thead>
               <tr>
-                <th className="dash-orders__toggle" aria-hidden="true" />
+                <th className="dash-orders__gap" aria-hidden="true" />
+                <th className="dash-orders__gap dash-orders__gap--check" aria-hidden="true" />
                 <th>Cliente / Pedido</th>
-                <th>Data</th>
-                {showBalance ? <th className="is-right">Saldo</th> : null}
+                <th className="dash-orders__date">Data</th>
+                {showBalance ? <th className="dash-orders__balance is-right">Saldo</th> : null}
+                <th className="dash-orders__actions"><span>Ações</span></th>
               </tr>
             </thead>
             <tbody>
@@ -137,7 +139,7 @@ function OrderRows({
   return (
     <>
       <tr className={open ? 'is-open' : undefined}>
-        <td className="dash-orders__toggle">
+        <td className="dash-orders__gap">
           <button
             type="button"
             className={`dash-orders__expand${open ? ' is-open' : ''}`}
@@ -148,6 +150,7 @@ function OrderRows({
             <ChevronDown size={16} strokeWidth={2.25} />
           </button>
         </td>
+        <td className="dash-orders__gap dash-orders__gap--check" />
         <td>
           <button type="button" className="dash-orders__who" onClick={onToggle}>
             <strong>{order.clientName || 'Cliente'}</strong>
@@ -156,6 +159,7 @@ function OrderRows({
         </td>
         <td>{formatDay(order.eventDate)}</td>
         {showBalance ? <td className="is-right">{order.total.trim() || 'R$ 0,00'}</td> : null}
+        <td className="dash-orders__actions" />
       </tr>
       {open ? (
         <tr className="dash-orders__detail">
