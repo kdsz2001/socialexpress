@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { ArrowLeft, Check, DollarSign, HelpCircle, Plus } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { IconAction, IconActions } from '../../components/ui/IconAction'
@@ -20,8 +21,9 @@ import {
 } from './SettingsFlow'
 import { settingsPath } from './settingsNav'
 
-const BEFORE_OPTIONS = ['1 dia antes', '2 dias antes', '3 dias antes', '5 dias antes', '7 dias antes']
-const AFTER_OPTIONS = ['1 dia depois', '2 dias depois', '3 dias depois', '5 dias depois', '7 dias depois']
+const BEFORE_OPTIONS = ['1 dia antes', '2 dias antes', '3 dias antes', '4 dias antes', '5 dias antes']
+const AFTER_OPTIONS = ['1 dia depois', '2 dias depois', '3 dias depois', '4 dias depois', '5 dias depois']
+const ALERT_OFF = 'Desativado'
 
 function Switch({
   checked,
@@ -593,6 +595,126 @@ export function GoalsSection() {
   )
 }
 
+function MailSwitch({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean
+  label: string
+  onChange: (value: boolean) => void
+}) {
+  return (
+    <label className="settings-mail__switch">
+      <input
+        type="checkbox"
+        aria-label={label}
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+      <span aria-hidden="true" />
+    </label>
+  )
+}
+
+function MailDelay({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: string
+  options: string[]
+  onChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLUListElement>(null)
+  const [box, setBox] = useState<{ top: number; left: number; width: number } | null>(null)
+
+  useLayoutEffect(() => {
+    if (!open) return
+    const place = () => {
+      const rect = rootRef.current?.getBoundingClientRect()
+      if (!rect) return
+      setBox({ top: rect.bottom + 1, left: rect.left, width: rect.width })
+    }
+    place()
+    window.addEventListener('scroll', place, true)
+    window.addEventListener('resize', place)
+    return () => {
+      window.removeEventListener('scroll', place, true)
+      window.removeEventListener('resize', place)
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const onPointer = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (rootRef.current?.contains(target) || menuRef.current?.contains(target)) return
+      setOpen(false)
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div className={`settings-mail__delay${open ? ' is-open' : ''}`} ref={rootRef}>
+      <button
+        type="button"
+        className="settings-mail__delay-btn"
+        aria-label={label}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span>{value}</span>
+        <svg viewBox="0 0 8 8" aria-hidden="true">
+          <path d="M1.15 2.55 4 5.4 6.85 2.55" />
+        </svg>
+      </button>
+      {open && box
+        ? createPortal(
+            <ul
+              ref={menuRef}
+              className="settings-mail__menu"
+              role="listbox"
+              aria-label={label}
+              style={{ top: box.top, left: box.left, width: box.width }}
+            >
+              {options.map((option) => (
+                <li key={option}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={option === value}
+                    className={option === value ? 'is-selected' : ''}
+                    onClick={() => {
+                      onChange(option)
+                      setOpen(false)
+                    }}
+                  >
+                    {option}
+                  </button>
+                </li>
+              ))}
+            </ul>,
+            document.body,
+          )
+        : null}
+    </div>
+  )
+}
+
 const ALERT_ROWS: {
   id: string
   name: string
@@ -604,7 +726,7 @@ const ALERT_ROWS: {
   {
     id: 'birthday',
     name: 'Email de aniversário',
-    description: 'Enviado automaticamente no dia do aniversário de clientes',
+    description: 'Enviado automaticamente no dia do aniversário de clientes.',
     enabled: 'birthdayEnabled',
   },
   {
@@ -652,79 +774,78 @@ export function AlertsSection() {
   }
 
   return (
-    <article className="settings-card">
+    <article className="settings-card settings-mails">
       <header className="settings-card__head">
         <h2 className="settings-card__title">E-mails</h2>
       </header>
-      <DataTable columns={['Nome', 'Ações']}>
-        {ALERT_ROWS.map((row) => {
-          const current = row.field ? config.alerts[row.field] : ''
-          const options = row.options
-            ? current && !row.options.includes(current)
-              ? [current, ...row.options]
-              : row.options
-            : []
-          return (
-            <tr key={row.id}>
-              <td>
-                <div className="settings-mail__name">{row.name}</div>
-                <div className="settings-mail__desc">{row.description}</div>
-              </td>
-              <td className="settings-table__actions">
-                <div className="settings-mail__tools">
-                  {row.field ? (
-                    <select
-                      className="settings__delay"
-                      aria-label={row.name}
-                      value={current}
-                      onChange={(event) => {
-                        const field = row.field
-                        if (!field) return
-                        updateAppConfig((currentConfig) => ({
-                          ...currentConfig,
-                          alerts: { ...currentConfig.alerts, [field]: event.target.value },
-                        }))
-                      }}
-                    >
-                      {options.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      className="settings-check"
-                      type="checkbox"
-                      aria-label={row.name}
-                      checked={config.alerts[row.enabled]}
-                      onChange={(event) =>
-                        updateAppConfig((currentConfig) => ({
-                          ...currentConfig,
-                          alerts: { ...currentConfig.alerts, [row.enabled]: event.target.checked },
-                        }))
-                      }
-                    />
-                  )}
-                  <IconAction kind="edit" tip="Editar" onClick={() => navigate(settingsPath('avisos', `alert:${row.id}`))} />
-                  {row.field ? (
-                    <Switch
-                      label={row.name}
-                      checked={config.alerts[row.enabled]}
-                      onChange={(value) =>
-                        updateAppConfig((currentConfig) => ({
-                          ...currentConfig,
-                          alerts: { ...currentConfig.alerts, [row.enabled]: value },
-                        }))
-                      }
-                    />
-                  ) : null}
-                </div>
-              </td>
+      <div className="settings-table-wrap">
+        <table className="settings-table settings-mails__table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th className="settings-mails__control" />
+              <th className="settings-mails__edit">Ações</th>
             </tr>
-          )
-        })}
-      </DataTable>
+          </thead>
+          <tbody>
+            {ALERT_ROWS.map((row) => {
+              const enabled = config.alerts[row.enabled]
+              const stored = row.field ? config.alerts[row.field] : ''
+              const options = row.options ? [ALERT_OFF, ...row.options] : []
+              if (stored && !options.includes(stored)) options.push(stored)
+              const shown = row.field ? (enabled ? stored : ALERT_OFF) : ''
+              return (
+                <tr key={row.id}>
+                  <td>
+                    <div className="settings-mail__name">{row.name}</div>
+                    <div className="settings-mail__desc">{row.description}</div>
+                  </td>
+                  <td className="settings-mails__control">
+                    {row.field ? (
+                      <MailDelay
+                        label={row.name}
+                        value={shown}
+                        options={options}
+                        onChange={(option) => {
+                          const field = row.field
+                          if (!field) return
+                          updateAppConfig((currentConfig) => ({
+                            ...currentConfig,
+                            alerts: {
+                              ...currentConfig.alerts,
+                              [row.enabled]: option !== ALERT_OFF,
+                              ...(option === ALERT_OFF ? {} : { [field]: option }),
+                            },
+                          }))
+                        }}
+                      />
+                    ) : (
+                      <MailSwitch
+                        label={row.name}
+                        checked={enabled}
+                        onChange={(value) =>
+                          updateAppConfig((currentConfig) => ({
+                            ...currentConfig,
+                            alerts: { ...currentConfig.alerts, [row.enabled]: value },
+                          }))
+                        }
+                      />
+                    )}
+                  </td>
+                  <td className="settings-mails__edit">
+                    <IconAction
+                      className="settings-mail__edit"
+                      kind="edit"
+                      tip="Editar"
+                      onClick={() => navigate(settingsPath('avisos', `alert:${row.id}`))}
+                    />
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </article>
   )
 }
