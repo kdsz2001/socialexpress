@@ -27,6 +27,7 @@ const Orders = lazyPage(() => import('./pages/Orders'), 'Orders')
 const OrderCreate = lazyPage(() => import('./pages/OrderCreate'), 'OrderCreate')
 const Financeiro = lazyPage(() => import('./pages/Financeiro'), 'Financeiro')
 const Suppliers = lazyPage(() => import('./pages/Suppliers'), 'Suppliers')
+const SupplierForm = lazyPage(() => import('./pages/SupplierForm'), 'SupplierForm')
 const Reports = lazyPage(() => import('./pages/Reports'), 'Reports')
 const Settings = lazyPage(() => import('./pages/Settings'), 'Settings')
 const History = lazyPage(() => import('./pages/History'), 'History')
@@ -66,6 +67,8 @@ export default function App() {
         <Route path="/pedidos/novo" element={<OrderCreate />} />
         <Route path="/financeiro" element={<Financeiro />} />
         <Route path="/fornecedores" element={<Suppliers />} />
+        <Route path="/fornecedores/novo" element={<SupplierForm />} />
+        <Route path="/fornecedores/:supplierId" element={<SupplierForm />} />
         <Route path="/relatorios" element={<Reports />} />
         <Route path="/configuracoes" element={<Settings />} />
         <Route path="/historicos" element={<History />} />
