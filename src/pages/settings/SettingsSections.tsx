@@ -566,60 +566,73 @@ export function GoalsSection() {
   const removing = config.goalGroups.find((item) => item.id === removeId)
 
   return (
-    <>
-      <article className="settings-card">
-        <div className="settings-note-wrap">
-          <div className="settings-note">
-            <span className="settings-note__icon" aria-hidden="true">
-              <HelpCircle size={18} strokeWidth={2} />
-            </span>
+    <div className="settings-metas">
+      <article className="settings-card settings-metas__card">
+        <header className="settings-card__head">
+          <h2 className="settings-card__title">Configurações de metas</h2>
+        </header>
+        <div className="settings-metas__body">
+          <div className="settings-metas__alert">
+            <HelpCircle size={31} strokeWidth={1.75} aria-hidden="true" />
             <p>
               Com esta opção ativa, o sistema irá calcular as comissões de acordo com as faixas
               estabelecidas por grupos. Você poderá então definir o grupo de comissionamento de cada
               usuário do sistema.
             </p>
           </div>
-          <div className="settings-form__row">
-            <span className="settings-form__label">Usar configuração de faixas de metas</span>
-            <Switch
-              label="Usar configuração de faixas de metas"
-              checked={config.goalsEnabled}
-              onChange={(value) => {
-                updateAppConfig((current) => ({ ...current, goalsEnabled: value }))
-                notify(value ? 'Metas ativadas.' : 'Metas desativadas.')
-              }}
-            />
+          <div className="settings-ops__row">
+            <span className="settings-ops__label">Usar configuração de faixas de metas</span>
+            <div className="settings-ops__field">
+              <OpsSwitch
+                label="Usar configuração de faixas de metas"
+                checked={config.goalsEnabled}
+                onChange={(value) => {
+                  updateAppConfig((current) => ({ ...current, goalsEnabled: value }))
+                  notify(value ? 'Metas ativadas.' : 'Metas desativadas.')
+                }}
+              />
+            </div>
           </div>
         </div>
       </article>
 
-      <article className="settings-card">
+      <article className="settings-card settings-metas__card">
         <header className="settings-card__head">
           <h2 className="settings-card__title">Faixas cadastradas</h2>
-          <button type="button" className="settings__save" onClick={() => navigate(settingsPath('metas', 'goal:new'))}>
+          <button type="button" className="settings-metas__add" onClick={() => navigate(settingsPath('metas', 'goal:new'))}>
             <Plus size={16} strokeWidth={2.5} />
             Cadastrar
           </button>
         </header>
-        <DataTable columns={['Grupo', 'Ações']}>
-          {config.goalGroups.length === 0 ? (
-            <tr>
-              <td className="settings-table__empty" colSpan={2}>
-                Nenhum resultado foi encontrado.
-              </td>
-            </tr>
-          ) : (
-            config.goalGroups.map((item) => (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <RowActions>
-                  <IconAction kind="edit" tip="Editar" onClick={() => navigate(settingsPath('metas', `goal:${item.id}`))} />
-                  <IconAction kind="delete" tip="Excluir" onClick={() => setRemoveId(item.id)} />
-                </RowActions>
+        <div className="settings-metas__body">
+          <table className="settings-metas__table">
+            <thead>
+              <tr>
+                <th>Grupo</th>
+                <th>Ações</th>
               </tr>
-            ))
-          )}
-        </DataTable>
+            </thead>
+            <tbody>
+              {config.goalGroups.length === 0 ? (
+                <tr>
+                  <td className="settings-metas__empty" colSpan={2}>
+                    Nenhum resultado foi encontrado.
+                  </td>
+                </tr>
+              ) : (
+                config.goalGroups.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.name}</td>
+                    <td className="settings-metas__actions">
+                      <IconAction kind="edit" tip="Editar" onClick={() => navigate(settingsPath('metas', `goal:${item.id}`))} />
+                      <IconAction kind="delete" tip="Excluir" onClick={() => setRemoveId(item.id)} />
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </article>
 
       <AttentionModal
@@ -637,7 +650,7 @@ export function GoalsSection() {
         }}
       />
       {node}
-    </>
+    </div>
   )
 }
 
