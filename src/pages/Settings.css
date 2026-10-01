@@ -730,6 +730,24 @@ html[data-theme='dark'] .settings__switch input:checked + .settings__switch-ui {
   color: #3699ff;
 }
 
+html.theme-dark .settings-header-link,
+html[data-theme='dark'] .settings-header-link {
+  background: #2b2b40;
+  color: #a1a5b7;
+}
+
+html.theme-dark .settings-header-link:hover,
+html[data-theme='dark'] .settings-header-link:hover {
+  background: #3699ff;
+  color: #fff;
+}
+
+html.theme-dark .settings__radio input,
+html[data-theme='dark'] .settings__radio input {
+  border-color: #4a4b68;
+  background: transparent;
+}
+
 .settings-editor__bar,
 .settings-card__foot {
   display: flex;
