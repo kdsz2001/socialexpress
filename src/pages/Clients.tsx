@@ -234,6 +234,9 @@ export function Clients() {
   useEffect(() => {
     setDateOpen(false)
     setPickerMode('menu')
+    setQuery('')
+    setHistoryClient(null)
+    setClientToDelete(null)
     // Ao entrar em Aniversariantes, mostra todos até escolher um período
     if (tab === 'aniversariantes') {
       setBirthdayFilterActive(false)

@@ -20,7 +20,6 @@ import {
   subscribeUserProfile,
   type UserProfile,
 } from '../../lib/userProfileStore'
-import { refreshNavigation } from '../../lib/refreshNavigation'
 import { EmptyAvatar } from '../ui/EmptyAvatar'
 import { ProfileDrawer } from './ProfileDrawer'
 import './Topbar.css'
@@ -238,31 +237,40 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     navigate(`/clientes/${clientId}`)
   }
 
+  const openTab = (to: string) => {
+    const next = new URL(to, window.location.href)
+    const target = `${next.pathname}${next.search}${next.hash}`
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`
+    if (target === current) return
+    navigate(target)
+    document.querySelector('.app-content')?.scrollTo(0, 0)
+  }
+
   const setClientsTab = (tab: ClientsTab) => {
     if (tab === 'todos') {
-      refreshNavigation('/clientes')
+      openTab('/clientes')
       return
     }
     if (tab === 'aniversariantes') {
-      refreshNavigation('/clientes?tab=aniversariantes')
+      openTab('/clientes?tab=aniversariantes')
       return
     }
-    refreshNavigation('/clientes?tab=whatsapp')
+    openTab('/clientes?tab=whatsapp')
   }
 
   const setProductsTab = (tab: ProductsTab) => {
     const match = PRODUCTS_TABS.find((item) => item.id === tab)
-    if (match) refreshNavigation(match.path)
+    if (match) openTab(match.path)
   }
 
   const setCrmTab = (tab: CrmTab) => {
     const match = CRM_TABS.find((item) => item.id === tab)
-    if (match) refreshNavigation(match.path)
+    if (match) openTab(match.path)
   }
 
   const setFinanceTab = (tab: FinanceTab) => {
     const match = FINANCE_TABS.find((item) => item.id === tab)
-    if (match) refreshNavigation(match.path)
+    if (match) openTab(match.path)
   }
 
   const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
@@ -436,7 +444,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             type="button"
             role="tab"
             className="topbar__tab"
-            onClick={() => refreshNavigation('/configuracoes?section=permissoes')}
+            onClick={() => openTab('/configuracoes?section=permissoes')}
           >
             Gerenciar permissões
           </button>
@@ -448,7 +456,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           <button
             type="button"
             className="topbar__tab"
-            onClick={() => refreshNavigation('/orcamentos')}
+            onClick={() => openTab('/orcamentos')}
           >
             Orçamentos
           </button>
