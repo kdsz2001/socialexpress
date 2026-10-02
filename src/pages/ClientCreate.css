@@ -395,7 +395,9 @@
 .client-create__checks {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px 20px;
+  align-items: center;
+  gap: 8px 22px;
+  min-height: 18px;
 }
 
 .client-create__check {

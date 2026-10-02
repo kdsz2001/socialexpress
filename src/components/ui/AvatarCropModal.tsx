@@ -92,6 +92,10 @@ export function AvatarCropModal({
     originX: number
     originY: number
   } | null>(null)
+  const zoomRef = useRef(zoom)
+  const offsetRef = useRef(offset)
+  zoomRef.current = zoom
+  offsetRef.current = offset
 
   const measureStage = useCallback(() => {
     const node = stageRef.current
@@ -114,6 +118,46 @@ export function AvatarCropModal({
     }
     image.src = imageSrc
   }, [open, imageSrc])
+
+  useEffect(() => {
+    const node = stageRef.current
+    if (!open || !node) return
+
+    const onWheel = (event: WheelEvent) => {
+      if (busy || !naturalSize.w || !naturalSize.h) return
+      event.preventDefault()
+
+      const line = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stageSize : 1
+      const delta = event.deltaY * line
+      const currentZoom = zoomRef.current
+      const nextZoom = clamp(currentZoom * Math.exp(-delta * 0.0015), MIN_ZOOM, MAX_ZOOM)
+      if (nextZoom === currentZoom) return
+
+      const rect = node.getBoundingClientRect()
+      const pointerX = event.clientX - rect.left
+      const pointerY = event.clientY - rect.top
+      const ratio = nextZoom / currentZoom
+      const current = offsetRef.current
+      const centerX = stageSize / 2 + current.x
+      const centerY = stageSize / 2 + current.y
+      const base = getCoverBaseSize(naturalSize.w, naturalSize.h, stageSize)
+      const nextOffset = clampOffset(
+        pointerX - (pointerX - centerX) * ratio - stageSize / 2,
+        pointerY - (pointerY - centerY) * ratio - stageSize / 2,
+        base.width * nextZoom,
+        base.height * nextZoom,
+        stageSize,
+      )
+
+      zoomRef.current = nextZoom
+      offsetRef.current = nextOffset
+      setZoom(nextZoom)
+      setOffset(nextOffset)
+    }
+
+    node.addEventListener('wheel', onWheel, { passive: false })
+    return () => node.removeEventListener('wheel', onWheel)
+  }, [open, busy, naturalSize.w, naturalSize.h, stageSize])
 
   useEffect(() => {
     if (!open) return
@@ -241,7 +285,7 @@ export function AvatarCropModal({
         </header>
 
         <p className="avatar-crop__hint">
-          Arraste a imagem e use o zoom para escolher a área que ficará visível no perfil.
+          Arraste a imagem. Use a roda do mouse ou o zoom para aproximar e afastar a área do perfil.
         </p>
 
         <div

@@ -34,7 +34,7 @@ export function FinanceiroSubheader() {
             onClick={() => requestCashMovement('entrada')}
           >
             <ArrowDown size={18} strokeWidth={2.25} />
-            <span className="clients-subheader__tooltip" role="tooltip">
+            <span className="ui-tip clients-subheader__tooltip" role="tooltip">
               Nova entrada
             </span>
           </button>
@@ -45,13 +45,13 @@ export function FinanceiroSubheader() {
             onClick={() => requestCashMovement('saida')}
           >
             <ArrowUp size={18} strokeWidth={2.25} />
-            <span className="clients-subheader__tooltip" role="tooltip">
+            <span className="ui-tip clients-subheader__tooltip" role="tooltip">
               Nova saída
             </span>
           </button>
           <button type="button" className="clients-subheader__btn" aria-label="Imprimir">
             <Printer size={18} strokeWidth={2} />
-            <span className="clients-subheader__tooltip" role="tooltip">
+            <span className="ui-tip clients-subheader__tooltip" role="tooltip">
               Imprimir
             </span>
           </button>
@@ -61,7 +61,7 @@ export function FinanceiroSubheader() {
             aria-label="Exportar"
           >
             <FileSpreadsheet size={18} strokeWidth={2} />
-            <span className="clients-subheader__tooltip" role="tooltip">
+            <span className="ui-tip clients-subheader__tooltip" role="tooltip">
               Exportar
             </span>
           </button>

@@ -28,7 +28,7 @@ export function SuppliersSubheader() {
           aria-label="Importar fornecedores"
         >
           <CloudUpload size={18} strokeWidth={2} />
-          <span className="clients-subheader__tooltip" role="tooltip">
+          <span className="ui-tip clients-subheader__tooltip" role="tooltip">
             Importar fornecedores
           </span>
         </button>

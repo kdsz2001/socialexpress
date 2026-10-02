@@ -1,0 +1,337 @@
+.dash-orders {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  overflow: auto;
+}
+
+.dash-orders__overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.dash-orders__dialog {
+  position: relative;
+  z-index: 1;
+  width: 1100px;
+  max-width: calc(100% - 30px);
+  max-height: calc(100vh - 45.5px);
+  margin: 22.75px auto;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 5.46px;
+  box-shadow: 0 6.5px 13px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.dash-orders__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 19.5px 22.75px;
+  border-bottom: 1px solid #ebedf3;
+}
+
+.dash-orders__header h2 {
+  margin: 0;
+  font-size: 16.9px;
+  font-weight: 500;
+  line-height: 25.35px;
+  color: #181c32;
+}
+
+.dash-orders__close {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #b5b5c3;
+  cursor: pointer;
+}
+
+.dash-orders__close:hover {
+  background: transparent;
+  color: #3f4254;
+}
+
+.dash-orders__body {
+  overflow: auto;
+  padding: 22.75px;
+}
+
+.dash-orders__table,
+.dash-orders__items {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dash-orders__table {
+  table-layout: fixed;
+}
+
+.dash-orders__table th {
+  padding: 9.75px 13px;
+  border-bottom: 1px solid #ebedf3;
+  font-size: 11.7px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+  line-height: 17.55px;
+  text-transform: uppercase;
+  text-align: left;
+  color: #b5b5c3;
+  background: #fff;
+}
+
+.dash-orders__table td {
+  padding: 12px 13px;
+  border-top: 1px solid #ebedf3;
+  font-size: 13px;
+  line-height: 19.5px;
+  color: #3f4254;
+  vertical-align: middle;
+}
+
+.dash-orders__gap {
+  width: 40px;
+  padding-right: 13px;
+  padding-left: 0;
+}
+
+.dash-orders__gap--check {
+  width: 80px;
+  padding-left: 13px;
+}
+
+.dash-orders__date {
+  width: 201px;
+}
+
+.dash-orders__balance {
+  width: 140px;
+}
+
+.dash-orders__table.is-balance .dash-orders__actions {
+  width: 216px;
+}
+
+.dash-orders__expand {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 5.46px;
+  background: #f3f6f9;
+  color: #7e8299;
+  cursor: pointer;
+}
+
+.dash-orders__expand svg {
+  transition: transform 0.15s ease;
+}
+
+.dash-orders__expand.is-open svg {
+  transform: rotate(180deg);
+}
+
+.dash-orders__expand:hover {
+  color: #3699ff;
+}
+
+.dash-orders__who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dash-orders__who strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #181c32;
+}
+
+.dash-orders__who span {
+  font-size: 12px;
+  font-weight: 500;
+  color: #7e8299;
+}
+
+.dash-orders__table .is-right,
+.dash-orders__items .is-right {
+  text-align: right;
+}
+
+.dash-orders__actions {
+  width: 356px;
+  padding-right: 0;
+  text-align: left;
+}
+
+th.dash-orders__actions {
+  padding: 9.75px 0 9.75px 13px;
+}
+
+th.dash-orders__actions span {
+  display: block;
+  width: 192px;
+  max-width: 100%;
+  text-align: right;
+}
+
+.dash-orders__empty {
+  padding: 30px 16px !important;
+  border-top: 0 !important;
+  text-align: center;
+  color: #3f4254;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.dash-orders__detail td {
+  padding: 0 16px 14px 62px;
+  background: #fff;
+}
+
+.dash-orders__items {
+  background: #f3f6f9;
+  border-radius: 5.46px;
+  overflow: hidden;
+}
+
+.dash-orders__items th,
+.dash-orders__items td {
+  padding: 10px 14px;
+  border: 0;
+  font-size: 13px;
+  text-align: left;
+}
+
+.dash-orders__items th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b5b5c3;
+}
+
+.dash-orders__items td {
+  color: #3f4254;
+  border-top: 1px solid #ebedf3;
+}
+
+.dash-orders__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 3.25px;
+  padding: 22.75px;
+  border-top: 1px solid #ebedf3;
+}
+
+.dash-orders__cancel,
+.dash-orders__save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 38.4px;
+  padding: 8.45px 13px;
+  border-radius: 5.46px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  cursor: pointer;
+}
+
+.dash-orders__cancel {
+  border: 1px solid #e4e6ef;
+  background: #e4e6ef;
+  color: #3f4254;
+}
+
+.dash-orders__cancel:hover {
+  background: #d7dbe7;
+}
+
+.dash-orders__save {
+  border: 0;
+  background: #3699ff;
+  color: #fff;
+}
+
+.dash-orders__save:hover {
+  background: #187de4;
+}
+
+html.theme-dark .dash-orders__dialog,
+html[data-theme='dark'] .dash-orders__dialog {
+  background: #1e1e2d;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.45);
+}
+
+html.theme-dark .dash-orders__header,
+html[data-theme='dark'] .dash-orders__header,
+html.theme-dark .dash-orders__footer,
+html[data-theme='dark'] .dash-orders__footer,
+html.theme-dark .dash-orders__table td,
+html[data-theme='dark'] .dash-orders__table td,
+html.theme-dark .dash-orders__items td,
+html[data-theme='dark'] .dash-orders__items td {
+  border-color: #2b2b40;
+}
+
+html.theme-dark .dash-orders__header h2,
+html[data-theme='dark'] .dash-orders__header h2,
+html.theme-dark .dash-orders__who strong,
+html[data-theme='dark'] .dash-orders__who strong {
+  color: #fff;
+}
+
+html.theme-dark .dash-orders__table th,
+html[data-theme='dark'] .dash-orders__table th,
+html.theme-dark .dash-orders__detail td,
+html[data-theme='dark'] .dash-orders__detail td {
+  background: #1e1e2d;
+}
+
+html.theme-dark .dash-orders__table td,
+html[data-theme='dark'] .dash-orders__table td,
+html.theme-dark .dash-orders__items td,
+html[data-theme='dark'] .dash-orders__items td,
+html.theme-dark .dash-orders__empty,
+html[data-theme='dark'] .dash-orders__empty,
+html.theme-dark .dash-orders__cancel,
+html[data-theme='dark'] .dash-orders__cancel {
+  color: #e4e6ef;
+}
+
+html.theme-dark .dash-orders__items,
+html[data-theme='dark'] .dash-orders__items,
+html.theme-dark .dash-orders__expand,
+html[data-theme='dark'] .dash-orders__expand,
+html.theme-dark .dash-orders__cancel,
+html[data-theme='dark'] .dash-orders__cancel {
+  background: #2b2b40;
+  border-color: #2b2b40;
+}

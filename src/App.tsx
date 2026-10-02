@@ -1,28 +1,38 @@
+import { lazy, type ComponentType } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { RequireAuth } from './components/auth/RequireAuth'
-import { Dashboard } from './pages/Dashboard'
-import { Clients } from './pages/Clients'
-import { ClientCreate } from './pages/ClientCreate'
-import { ClientDetail } from './pages/ClientDetail'
-import { MyProfile } from './pages/MyProfile'
-import { Agenda } from './pages/Agenda'
-import { Events } from './pages/Events'
-import { EventForm } from './pages/EventForm'
-import { Products } from './pages/Products'
-import { ProductCreate } from './pages/ProductCreate'
-import { ProductEdit } from './pages/ProductEdit'
-import { Employees } from './pages/Employees'
-import { Orders } from './pages/Orders'
-import { Financeiro } from './pages/Financeiro'
-import { Suppliers } from './pages/Suppliers'
-import { Reports } from './pages/Reports'
-import { Settings } from './pages/Settings'
-import { History } from './pages/History'
-import { Crm } from './pages/Crm'
-import { CrmCapture } from './pages/CrmCapture'
-import { Login } from './pages/Login'
 import { PlaceholderPage } from './pages/PlaceholderPage'
+
+function lazyPage<P>(factory: () => Promise<Record<string, ComponentType<P>>>, name: string) {
+  return lazy(() => factory().then((mod) => ({ default: mod[name] })))
+}
+
+const Login = lazyPage(() => import('./pages/Login'), 'Login')
+const CrmCapture = lazyPage(() => import('./pages/CrmCapture'), 'CrmCapture')
+const Dashboard = lazyPage(() => import('./pages/Dashboard'), 'Dashboard')
+const Clients = lazyPage(() => import('./pages/Clients'), 'Clients')
+const ClientCreate = lazyPage(() => import('./pages/ClientCreate'), 'ClientCreate')
+const ClientDetail = lazyPage(() => import('./pages/ClientDetail'), 'ClientDetail')
+const MyProfile = lazyPage(() => import('./pages/MyProfile'), 'MyProfile')
+const Agenda = lazyPage(() => import('./pages/Agenda'), 'Agenda')
+const Events = lazyPage(() => import('./pages/Events'), 'Events')
+const EventForm = lazyPage(() => import('./pages/EventForm'), 'EventForm')
+const Products = lazyPage(() => import('./pages/Products'), 'Products')
+const ProductCreate = lazyPage(() => import('./pages/ProductCreate'), 'ProductCreate')
+const ProductEdit = lazyPage(() => import('./pages/ProductEdit'), 'ProductEdit')
+const Employees = lazyPage(() => import('./pages/Employees'), 'Employees')
+const EmployeeForm = lazyPage(() => import('./pages/EmployeeForm'), 'EmployeeForm')
+const Orders = lazyPage(() => import('./pages/Orders'), 'Orders')
+const OrderCreate = lazyPage(() => import('./pages/OrderCreate'), 'OrderCreate')
+const OrderView = lazyPage(() => import('./pages/OrderView'), 'OrderView')
+const Financeiro = lazyPage(() => import('./pages/Financeiro'), 'Financeiro')
+const Suppliers = lazyPage(() => import('./pages/Suppliers'), 'Suppliers')
+const SupplierForm = lazyPage(() => import('./pages/SupplierForm'), 'SupplierForm')
+const Reports = lazyPage(() => import('./pages/Reports'), 'Reports')
+const Settings = lazyPage(() => import('./pages/Settings'), 'Settings')
+const History = lazyPage(() => import('./pages/History'), 'History')
+const Crm = lazyPage(() => import('./pages/Crm'), 'Crm')
 
 const pages = [{ path: '/orcamentos', title: 'Orçamentos' }] as const
 
@@ -52,9 +62,15 @@ export default function App() {
         <Route path="/produtos/cadastrar" element={<ProductCreate />} />
         <Route path="/produtos/:productId" element={<ProductEdit />} />
         <Route path="/funcionarios" element={<Employees />} />
+        <Route path="/funcionarios/cadastrar" element={<EmployeeForm />} />
+        <Route path="/funcionarios/:employeeId" element={<EmployeeForm />} />
         <Route path="/pedidos" element={<Orders />} />
+        <Route path="/pedidos/novo" element={<OrderCreate />} />
+        <Route path="/pedidos/:orderId" element={<OrderView />} />
         <Route path="/financeiro" element={<Financeiro />} />
         <Route path="/fornecedores" element={<Suppliers />} />
+        <Route path="/fornecedores/novo" element={<SupplierForm />} />
+        <Route path="/fornecedores/:supplierId" element={<SupplierForm />} />
         <Route path="/relatorios" element={<Reports />} />
         <Route path="/configuracoes" element={<Settings />} />
         <Route path="/historicos" element={<History />} />

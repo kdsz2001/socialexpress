@@ -1,22 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { lazy, Suspense, useState, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { ChevronUp } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
-import { ClientsSubheader } from './ClientsSubheader'
-import { ProfileSubheader } from './ProfileSubheader'
-import { AgendaSubheader } from './AgendaSubheader'
-import { EventsSubheader } from './EventsSubheader'
-import { ProductsSubheader } from './ProductsSubheader'
-import { EmployeesSubheader } from './EmployeesSubheader'
-import { OrdersSubheader } from './OrdersSubheader'
-import { FinanceiroSubheader } from './FinanceiroSubheader'
-import { SuppliersSubheader } from './SuppliersSubheader'
-import { ReportsSubheader } from './ReportsSubheader'
-import { SettingsSubheader } from './SettingsSubheader'
-import { HistorySubheader } from './HistorySubheader'
-import { CrmSubheader } from './CrmSubheader'
-import { NewAppointmentModal } from '../agenda/NewAppointmentModal'
 import { SaveToast } from '../ui/SaveToast'
 import type { Appointment } from '../../lib/agendaStore'
 import {
@@ -25,6 +11,49 @@ import {
   subscribeNewAppointmentRequest,
 } from '../../lib/agendaUi'
 import './AppLayout.css'
+
+const ClientsSubheader = lazy(() =>
+  import('./ClientsSubheader').then((mod) => ({ default: mod.ClientsSubheader })),
+)
+const ProfileSubheader = lazy(() =>
+  import('./ProfileSubheader').then((mod) => ({ default: mod.ProfileSubheader })),
+)
+const AgendaSubheader = lazy(() =>
+  import('./AgendaSubheader').then((mod) => ({ default: mod.AgendaSubheader })),
+)
+const EventsSubheader = lazy(() =>
+  import('./EventsSubheader').then((mod) => ({ default: mod.EventsSubheader })),
+)
+const ProductsSubheader = lazy(() =>
+  import('./ProductsSubheader').then((mod) => ({ default: mod.ProductsSubheader })),
+)
+const EmployeesSubheader = lazy(() =>
+  import('./EmployeesSubheader').then((mod) => ({ default: mod.EmployeesSubheader })),
+)
+const OrdersSubheader = lazy(() =>
+  import('./OrdersSubheader').then((mod) => ({ default: mod.OrdersSubheader })),
+)
+const FinanceiroSubheader = lazy(() =>
+  import('./FinanceiroSubheader').then((mod) => ({ default: mod.FinanceiroSubheader })),
+)
+const SuppliersSubheader = lazy(() =>
+  import('./SuppliersSubheader').then((mod) => ({ default: mod.SuppliersSubheader })),
+)
+const ReportsSubheader = lazy(() =>
+  import('./ReportsSubheader').then((mod) => ({ default: mod.ReportsSubheader })),
+)
+const SettingsSubheader = lazy(() =>
+  import('./SettingsSubheader').then((mod) => ({ default: mod.SettingsSubheader })),
+)
+const HistorySubheader = lazy(() =>
+  import('./HistorySubheader').then((mod) => ({ default: mod.HistorySubheader })),
+)
+const CrmSubheader = lazy(() =>
+  import('./CrmSubheader').then((mod) => ({ default: mod.CrmSubheader })),
+)
+const NewAppointmentModal = lazy(() =>
+  import('../agenda/NewAppointmentModal').then((mod) => ({ default: mod.NewAppointmentModal })),
+)
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
@@ -37,7 +66,9 @@ const PAGE_TITLES: Record<string, string> = {
   '/produtos': 'Produtos',
   '/produtos/cadastrar': 'Cadastro de produto',
   '/funcionarios': 'Funcionários',
+  '/funcionarios/cadastrar': 'Cadastro de funcionários',
   '/pedidos': 'Pedidos',
+  '/pedidos/novo': 'Novo pedido',
   '/orcamentos': 'Orçamentos',
   '/financeiro': 'Financeiro',
   '/fornecedores': 'Fornecedores',
@@ -125,6 +156,14 @@ export function AppLayout() {
       document.title = 'Produto'
       return
     }
+    if (location.pathname.startsWith('/funcionarios/') && location.pathname !== '/funcionarios/cadastrar') {
+      document.title = 'Cadastro de funcionários'
+      return
+    }
+    if (location.pathname.startsWith('/pedidos/') && location.pathname !== '/pedidos/novo') {
+      document.title = 'Pedido'
+      return
+    }
     document.title = PAGE_TITLES[location.pathname] ?? 'Social Express'
   }, [location.pathname])
 
@@ -168,24 +207,28 @@ export function AppLayout() {
       )}
       <div className="app-main">
         <Topbar onMenuClick={toggle} />
-        {location.pathname.startsWith('/clientes') && <ClientsSubheader />}
-        {location.pathname === '/crm' && <CrmSubheader />}
-        {location.pathname === '/meu-perfil' && <ProfileSubheader />}
-        {location.pathname === '/agenda' && (
-          <AgendaSubheader onNewAppointment={() => openNewAppointment()} />
-        )}
-        {location.pathname.startsWith('/eventos') && <EventsSubheader />}
-        {location.pathname.startsWith('/produtos') && <ProductsSubheader />}
-        {location.pathname.startsWith('/funcionarios') && <EmployeesSubheader />}
-        {location.pathname === '/pedidos' && <OrdersSubheader />}
-        {location.pathname === '/financeiro' && <FinanceiroSubheader />}
-        {location.pathname === '/fornecedores' && <SuppliersSubheader />}
-        {location.pathname === '/relatorios' && <ReportsSubheader />}
-        {location.pathname === '/configuracoes' && <SettingsSubheader />}
-        {location.pathname === '/historicos' && <HistorySubheader />}
+        <Suspense fallback={null}>
+          {location.pathname.startsWith('/clientes') && <ClientsSubheader />}
+          {location.pathname === '/crm' && <CrmSubheader />}
+          {location.pathname === '/meu-perfil' && <ProfileSubheader />}
+          {location.pathname === '/agenda' && (
+            <AgendaSubheader onNewAppointment={() => openNewAppointment()} />
+          )}
+          {location.pathname.startsWith('/eventos') && <EventsSubheader />}
+          {location.pathname.startsWith('/produtos') && <ProductsSubheader />}
+          {location.pathname.startsWith('/funcionarios') && <EmployeesSubheader />}
+          {location.pathname.startsWith('/pedidos') && <OrdersSubheader />}
+          {location.pathname === '/financeiro' && <FinanceiroSubheader />}
+          {location.pathname.startsWith('/fornecedores') && <SuppliersSubheader />}
+          {location.pathname === '/relatorios' && <ReportsSubheader />}
+          {location.pathname === '/configuracoes' && <SettingsSubheader />}
+          {location.pathname === '/historicos' && <HistorySubheader />}
+        </Suspense>
         <main className="app-content" ref={contentRef}>
           <div className="app-content__inner">
-            <Outlet />
+            <Suspense fallback={null}>
+              <Outlet />
+            </Suspense>
           </div>
           {location.pathname === '/financeiro' ? null : (
             <footer className="app-footer">2016© Social Express</footer>
@@ -194,7 +237,7 @@ export function AppLayout() {
       </div>
 
       {location.pathname === '/agenda' ? (
-        <>
+        <Suspense fallback={null}>
           <NewAppointmentModal
             open={newAppointmentOpen}
             onClose={closeNewAppointment}
@@ -212,7 +255,7 @@ export function AppLayout() {
             message={agendaToastMessage}
             onClose={() => setAgendaToastOpen(false)}
           />
-        </>
+        </Suspense>
       ) : null}
 
       <button

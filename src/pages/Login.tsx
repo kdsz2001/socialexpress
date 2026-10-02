@@ -1,12 +1,19 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Check, ChevronDown, Eye, EyeOff } from 'lucide-react'
 import { attemptLogin, isAuthenticated, subscribeAuth } from '../lib/authStore'
+import { EMPLOYEE_UNITS } from '../lib/employeesStore'
 import './Login.css'
+
+const UNIT_OPTIONS: string[] = [...EMPLOYEE_UNITS]
 
 export function Login() {
   const navigate = useNavigate()
   const [authed, setAuthed] = useState(() => isAuthenticated())
+  const [unit, setUnit] = useState('')
+  const [unitOpen, setUnitOpen] = useState(false)
+  const [unitHighlight, setUnitHighlight] = useState(0)
+  const unitRef = useRef<HTMLDivElement>(null)
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -19,6 +26,52 @@ export function Login() {
 
   useEffect(() => subscribeAuth(() => setAuthed(isAuthenticated())), [])
 
+  useEffect(() => {
+    if (!unitOpen) return
+    const onPointer = (event: MouseEvent) => {
+      if (!unitRef.current?.contains(event.target as Node)) setUnitOpen(false)
+    }
+    document.addEventListener('mousedown', onPointer)
+    return () => document.removeEventListener('mousedown', onPointer)
+  }, [unitOpen])
+
+  useEffect(() => {
+    if (!unitOpen) return
+    const node = unitRef.current?.querySelector<HTMLButtonElement>(`[data-index="${unitHighlight}"]`)
+    node?.scrollIntoView({ block: 'nearest' })
+  }, [unitHighlight, unitOpen])
+
+  const chooseUnit = (value: string) => {
+    setUnit(value)
+    setUnitOpen(false)
+  }
+
+  const onUnitKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      if (!unitOpen) {
+        const current = UNIT_OPTIONS.indexOf(unit)
+        setUnitHighlight(current >= 0 ? current : 0)
+        setUnitOpen(true)
+        return
+      }
+      const delta = event.key === 'ArrowDown' ? 1 : -1
+      setUnitHighlight((current) => {
+        if (current < 0) return delta > 0 ? 0 : UNIT_OPTIONS.length - 1
+        return (current + delta + UNIT_OPTIONS.length) % UNIT_OPTIONS.length
+      })
+      return
+    }
+    if (event.key === 'Enter' && unitOpen) {
+      event.preventDefault()
+      chooseUnit(UNIT_OPTIONS[unitHighlight] ?? '')
+      return
+    }
+    if (event.key === 'Escape') {
+      setUnitOpen(false)
+    }
+  }
+
   if (authed) {
     return <Navigate to="/" replace />
   }
@@ -27,7 +80,7 @@ export function Login() {
     event.preventDefault()
     setError(null)
     setSubmitting(true)
-    const result = attemptLogin(identifier, password)
+    const result = attemptLogin(identifier, password, unit)
     setSubmitting(false)
     if (!result.ok) {
       setError(result.error)
@@ -56,6 +109,54 @@ export function Login() {
             </div>
 
             <form className="login__form" onSubmit={onSubmit} noValidate>
+              <div className="login__field">
+                <span id="login-unit-label">Unidade</span>
+                <div className={`login__unit${unitOpen ? ' is-open' : ''}`} ref={unitRef}>
+                  <button
+                    type="button"
+                    id="login-unit"
+                    className={`login__unit-trigger${unit ? '' : ' is-placeholder'}`}
+                    aria-labelledby="login-unit-label"
+                    aria-haspopup="listbox"
+                    aria-expanded={unitOpen}
+                    aria-controls="login-unit-menu"
+                    onClick={() => {
+                      if (!unitOpen) setUnitHighlight(UNIT_OPTIONS.indexOf(unit))
+                      setUnitOpen((open) => !open)
+                    }}
+                    onKeyDown={onUnitKeyDown}
+                  >
+                    <span>{unit || 'Selecione a loja'}</span>
+                    <ChevronDown size={16} strokeWidth={2.25} className="login__unit-chevron" aria-hidden="true" />
+                  </button>
+                  {unitOpen ? (
+                    <ul className="login__unit-menu" id="login-unit-menu" role="listbox" aria-label="Unidade">
+                      {UNIT_OPTIONS.map((item, index) => {
+                        const selected = item === unit
+                        return (
+                          <li key={item}>
+                            <button
+                              type="button"
+                              role="option"
+                              data-index={index}
+                              aria-selected={selected}
+                              className={[selected ? 'is-selected' : '', index === unitHighlight ? 'is-active' : '']
+                                .filter(Boolean)
+                                .join(' ') || undefined}
+                              onMouseEnter={() => setUnitHighlight(index)}
+                              onClick={() => chooseUnit(item)}
+                            >
+                              <span>{item}</span>
+                              {selected ? <Check size={15} strokeWidth={2.5} aria-hidden="true" /> : null}
+                            </button>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  ) : null}
+                </div>
+              </div>
+
               <label className="login__field">
                 <span>Login ou e-mail</span>
                 <input

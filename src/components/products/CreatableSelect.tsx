@@ -16,6 +16,8 @@ type CreatableSelectProps = {
   allowCreate?: boolean
   onChange: (value: string) => void
   onCreate: (name: string) => void
+  /** Called when the list closes after the user opened it. */
+  onDismiss?: () => void
 }
 
 export function CreatableSelect({
@@ -29,6 +31,7 @@ export function CreatableSelect({
   allowCreate = true,
   onChange,
   onCreate,
+  onDismiss,
 }: CreatableSelectProps) {
   const id = useId()
   const rootRef = useRef<HTMLDivElement>(null)
@@ -76,6 +79,12 @@ export function CreatableSelect({
     if (!openToken) return
     setOpen(true)
   }, [openToken])
+
+  const openedRef = useRef(false)
+  useEffect(() => {
+    if (openedRef.current && !open) onDismiss?.()
+    openedRef.current = open
+  }, [open, onDismiss])
 
   const clearValue = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
     event.preventDefault()
