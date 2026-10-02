@@ -44,7 +44,7 @@ function todayStart() {
 }
 
 function windowOf(order: Order, today: Date): DashboardWindow | null {
-  if (order.status === 'Anulado' || !order.eventDate) return null
+  if (order.status === 'Anulado' || order.status === 'Cancelado' || !order.eventDate) return null
   const day = parseDay(order.eventDate)
   if (!day) return null
   const diff = Math.round((day.getTime() - today.getTime()) / 86400000)

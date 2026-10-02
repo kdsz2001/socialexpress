@@ -598,6 +598,141 @@ select.order-new__control {
   color: #3699ff;
 }
 
+.order-new__stage {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 28px 0;
+}
+
+.order-new__stage h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #181c32;
+}
+
+.order-new__stage p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #7e8299;
+}
+
+.order-new__void {
+  border: 0;
+  background: transparent;
+  color: #f64e60;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.order-new__saving {
+  padding: 0 28px 16px;
+  color: #7e8299;
+  font-size: 13px;
+}
+
+.order-new__catalog-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.order-new__catalog-bar select,
+.order-new__catalog-bar input {
+  height: 38px;
+  border: 1px solid #d7d9de;
+  border-radius: 5.46px;
+  background: #fff;
+  color: #3f4254;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.order-new__catalog-bar select {
+  width: 180px;
+  padding: 0 10px;
+}
+
+.order-new__catalog-bar input {
+  flex: 1;
+  min-width: 180px;
+  padding: 0 12px;
+}
+
+.order-new__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.order-new__card-product {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid #e4e6ef;
+  border-radius: 5.46px;
+  background: #fff;
+}
+
+.order-new__card-product strong {
+  color: #3699ff;
+  font-size: 13px;
+}
+
+.order-new__card-product span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #181c32;
+}
+
+.order-new__card-product small,
+.order-new__card-product em {
+  font-style: normal;
+  font-size: 12.5px;
+  color: #7e8299;
+}
+
+.order-new__card-product button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  margin-top: 8px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5.46px;
+  background: #c9f7f5;
+  color: #1bc5bd;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.order-new__card-product button.is-remove {
+  background: #ffe2e5;
+  color: #f64e60;
+}
+
+.order-new__end,
+.order-new__cart {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: #7e8299;
+}
+
+.order-new__next:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 @media (max-width: 760px) {
   .order-new__row {
     grid-template-columns: 1fr;

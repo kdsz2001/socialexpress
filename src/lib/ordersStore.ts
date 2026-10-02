@@ -7,33 +7,27 @@ import {
 import { formatHistoryDate } from './historyStore'
 
 export type OrderStatus =
-  | 'Confirmado'
-  | 'Cancelado'
-  | 'Orçamento'
-  | 'Concluído'
   | 'Aberto'
+  | 'Confirmado'
+  | 'Concluído'
   | 'Anulado'
-
+  | 'Cancelado'
+  | 'Adiado'
+  | 'Perdido'
+  | 'Orçamento'
 export type OrderOperation = 'Aluguel' | 'Venda'
 export type OrderKind = 'Pedido' | 'Orçamento'
-
-export type OrderLineStatus =
-  | 'Aguardando prova'
-  | 'Aguardando retirada'
-  | 'Retirado'
-  | 'Devolvido'
+export type OrderLineStatus = 'Aguardando prova' | 'Aguardando retirada' | 'Retirado' | 'Devolvido'
 
 export type OrderLine = {
-  id: string
+  id?: string
   productId: string
-  code: string
   name: string
-  size: string
-  price: number
-  status: OrderLineStatus
-  /** Compatível com o cadastro anterior do pedido. */
-  fullCode?: string
-  value?: number
+  fullCode: string
+  value: number
+  size?: string
+  status?: OrderLineStatus
+  adjustment?: number
 }
 
 export type OrderPayment = {
@@ -43,112 +37,40 @@ export type OrderPayment = {
   date: string
 }
 
-export type OrderInstallment = {
-  id: string
-  number: number
-  dueDate: string
-  amount: number
-}
-
 export type Order = {
   id: string
   number: number
-  clientId: string
+  clientId?: string
   clientName: string
   phone: string
-  eventDate: string
-  fittingDate: string
-  pickupDate: string
-  returnDate: string
+  eventDate: string // YYYY-MM-DD
   total: string
   status: OrderStatus
   operation: OrderOperation
-  kind: OrderKind
-  origin: string
-  attendant: string
-  lines: OrderLine[]
-  discount: number
-  payments: OrderPayment[]
-  installments: OrderInstallment[]
-  notes: string
-  suitNotes: string
-  fittingTime: string
-  pickupTime: string
-  returnTime: string
   createdAt: string
+  kind?: OrderKind
+  origin?: string
+  attendant?: string
+  lines?: OrderLine[]
+  proofDate?: string
+  pickupDate?: string
+  returnDate?: string
+  discount?: number
+  orderNotes?: string
+  suitNotes?: string
+  payments?: OrderPayment[]
 }
 
 const STORAGE_KEY = 'social-express:orders'
-const ORIGIN_KEY = 'social-express:order-origins'
-const DEFAULT_ORIGINS = ['Instagram', 'Indicação', 'Loja', 'WhatsApp']
 
 let cachedOrders: Order[] | null = null
-
-export function formatBrl(value: number) {
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
-
-export function orderMoney(order: Order) {
-  const subtotal = order.lines.reduce((sum, line) => sum + line.price, 0)
-  const discount = Math.min(Math.max(order.discount, 0), subtotal)
-  const total = Math.max(0, subtotal - discount)
-  const paid = order.payments.reduce((sum, payment) => sum + payment.amount, 0)
-  const balance = Math.max(0, total - paid)
-  return { subtotal, discount, total, paid, balance }
-}
-
-function displayStatus(status: string): OrderStatus {
-  if (status === 'Cancelado') return 'Cancelado'
-  if (status === 'Anulado') return 'Anulado'
-  if (status === 'Orçamento') return 'Orçamento'
-  if (status === 'Concluído') return 'Concluído'
-  if (status === 'Aberto') return 'Aberto'
-  return 'Confirmado'
-}
-
-function normalize(raw: Partial<Order> & { id?: string }): Order {
-  const status = displayStatus(String(raw.status || 'Confirmado'))
-  const kind: OrderKind = raw.kind === 'Orçamento' || status === 'Orçamento' ? 'Orçamento' : 'Pedido'
-  return {
-    id: String(raw.id || crypto.randomUUID()),
-    number: Number(raw.number) || 1,
-    clientId: String(raw.clientId || ''),
-    clientName: String(raw.clientName || ''),
-    phone: String(raw.phone || ''),
-    eventDate: String(raw.eventDate || ''),
-    fittingDate: String(raw.fittingDate || ''),
-    pickupDate: String(raw.pickupDate || ''),
-    returnDate: String(raw.returnDate || ''),
-    total: String(raw.total || 'R$ 0,00'),
-    status: kind === 'Orçamento' && status === 'Confirmado' ? 'Orçamento' : status,
-    operation: raw.operation === 'Venda' ? 'Venda' : 'Aluguel',
-    kind,
-    origin: String(raw.origin || ''),
-    attendant: String(raw.attendant || ''),
-    lines: Array.isArray(raw.lines) ? raw.lines.map((line) => normalizeLine(line)) : [],
-    discount: Number(raw.discount) || 0,
-    payments: Array.isArray(raw.payments) ? raw.payments : [],
-    installments: Array.isArray(raw.installments) ? raw.installments : [],
-    notes: String(raw.notes || ''),
-    suitNotes: String(raw.suitNotes || ''),
-    fittingTime: String(raw.fittingTime || ''),
-    pickupTime: String(raw.pickupTime || ''),
-    returnTime: String(raw.returnTime || ''),
-    createdAt: String(raw.createdAt || new Date().toISOString()),
-  }
-}
-
-function syncTotal(order: Order): Order {
-  const { total } = orderMoney(order)
-  return { ...order, total: formatBrl(total) }
-}
 
 function readAll(): Order[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
-    const parsed = JSON.parse(raw) as Partial<Order>[]
-    return Array.isArray(parsed) ? parsed.map((item) => normalize(item)) : []
+    const parsed = JSON.parse(raw) as Order[]
+    return Array.isArray(parsed) ? parsed : []
   } catch {
     return []
   }
@@ -174,43 +96,21 @@ export function listOrders(): Order[] {
   return cachedOrders
 }
 
-function normalizeLine(raw: Partial<OrderLine> & { fullCode?: string; value?: number }): OrderLine {
-  const price = Number.isFinite(Number(raw.price)) ? Number(raw.price) : Number(raw.value) || 0
-  const code = String(raw.code || raw.fullCode || '').trim()
-  return {
-    id: String(raw.id || crypto.randomUUID()),
-    productId: String(raw.productId || '').trim(),
-    code,
-    name: String(raw.name || '').trim(),
-    size: String(raw.size || '').trim(),
-    price,
-    status: raw.status || 'Aguardando prova',
-    fullCode: code,
-    value: price,
-  }
-}
-
-export function getOrder(id: string): Order | null {
-  return readAll().find((item) => item.id === id) ?? null
-}
-
-export function listOrderOrigins(): string[] {
-  try {
-    const raw = localStorage.getItem(ORIGIN_KEY)
-    const parsed = raw ? (JSON.parse(raw) as string[]) : []
-    const names = Array.isArray(parsed) ? parsed.map((item) => String(item).trim()).filter(Boolean) : []
-    return names.length ? names : [...DEFAULT_ORIGINS]
-  } catch {
-    return [...DEFAULT_ORIGINS]
-  }
-}
-
-export function addOrderOrigin(name: string) {
-  const label = name.trim()
-  if (!label) return
-  const current = listOrderOrigins()
-  if (current.some((item) => item.toLocaleLowerCase('pt-BR') === label.toLocaleLowerCase('pt-BR'))) return
-  localStorage.setItem(ORIGIN_KEY, JSON.stringify([...current, label]))
+function normalizeLines(lines: OrderLine[] | undefined): OrderLine[] | undefined {
+  if (!lines?.length) return undefined
+  const normalized = lines
+    .map((line) => ({
+      id: line.id || crypto.randomUUID(),
+      productId: String(line.productId || '').trim(),
+      name: String(line.name || '').trim(),
+      fullCode: String(line.fullCode || '').trim(),
+      value: Number.isFinite(Number(line.value)) ? Number(line.value) : 0,
+      size: line.size?.trim() || undefined,
+      status: line.status || 'Aguardando prova',
+      adjustment: Number.isFinite(Number(line.adjustment)) ? Number(line.adjustment) : 0,
+    }))
+    .filter((line) => line.productId || line.name || line.fullCode)
+  return normalized.length > 0 ? normalized : undefined
 }
 
 export function addOrder(input: {
@@ -224,39 +124,68 @@ export function addOrder(input: {
   kind?: OrderKind
   origin?: string
   attendant?: string
-  lines?: Array<Partial<OrderLine> & { fullCode?: string; value?: number }>
+  lines?: OrderLine[]
+  proofDate?: string
+  pickupDate?: string
+  returnDate?: string
+  discount?: number
+  orderNotes?: string
+  suitNotes?: string
+  payments?: OrderPayment[]
 }): Order {
   const all = readAll()
-  const kind: OrderKind = input.kind || (input.status === 'Orçamento' ? 'Orçamento' : 'Pedido')
-  const item = syncTotal(
-    normalize({
-      id: crypto.randomUUID(),
-      number: nextNumber(all),
-      clientId: input.clientId || '',
-      clientName: input.clientName.trim(),
-      phone: input.phone.trim(),
-      eventDate: input.eventDate,
-      total: input.total.trim() || 'R$ 0,00',
-      status: kind === 'Orçamento' ? 'Orçamento' : input.status || 'Confirmado',
-      operation: input.operation,
-      kind,
-      origin: input.origin || '',
-      attendant: input.attendant || '',
-      lines: (input.lines || []) as OrderLine[],
-      createdAt: new Date().toISOString(),
-    }),
-  )
+  const item: Order = {
+    id: crypto.randomUUID(),
+    number: nextNumber(all),
+    clientId: input.clientId?.trim() || undefined,
+    clientName: input.clientName.trim(),
+    phone: input.phone.trim(),
+    eventDate: input.eventDate,
+    total: input.total.trim(),
+    status: input.status,
+    operation: input.operation,
+    createdAt: new Date().toISOString(),
+    kind: input.kind,
+    origin: input.origin?.trim() || undefined,
+    attendant: input.attendant?.trim() || undefined,
+    lines: normalizeLines(input.lines),
+    proofDate: input.proofDate || undefined,
+    pickupDate: input.pickupDate || undefined,
+    returnDate: input.returnDate || undefined,
+    discount: Number.isFinite(Number(input.discount)) ? Number(input.discount) : 0,
+    orderNotes: input.orderNotes || '',
+    suitNotes: input.suitNotes || '',
+    payments: input.payments || [],
+  }
   writeAll([...all, item])
   logOrderCreated(item.number, item.clientName)
   return item
 }
 
-export function patchOrder(id: string, patch: Partial<Order>): Order | null {
+export function updateOrder(
+  id: string,
+  input: {
+    clientName: string
+    phone: string
+    eventDate: string
+    total: string
+    status: OrderStatus
+    operation: OrderOperation
+  },
+): Order | null {
   const all = readAll()
   const index = all.findIndex((item) => item.id === id)
   if (index < 0) return null
   const before = all[index]
-  const updated = syncTotal(normalize({ ...before, ...patch, id: before.id, number: before.number }))
+  const updated: Order = {
+    ...before,
+    clientName: input.clientName.trim(),
+    phone: input.phone.trim(),
+    eventDate: input.eventDate,
+    total: input.total.trim(),
+    status: input.status,
+    operation: input.operation,
+  }
   all[index] = updated
   writeAll(all)
   logOrderUpdated(
@@ -291,22 +220,33 @@ export function patchOrder(id: string, patch: Partial<Order>): Order | null {
   return updated
 }
 
-export function updateOrder(
+export function patchOrder(
   id: string,
-  input: {
-    clientName: string
-    phone: string
-    eventDate: string
-    total: string
-    status: OrderStatus
-    operation: OrderOperation
-  },
+  patch: Partial<Omit<Order, 'id' | 'number' | 'createdAt'>>,
 ): Order | null {
-  return patchOrder(id, input)
-}
-
-export function cancelOrder(id: string): Order | null {
-  return patchOrder(id, { status: 'Cancelado' })
+  const all = readAll()
+  const index = all.findIndex((item) => item.id === id)
+  if (index < 0) return null
+  const before = all[index]
+  const updated: Order = {
+    ...before,
+    ...patch,
+    id: before.id,
+    number: before.number,
+    createdAt: before.createdAt,
+  }
+  if (patch.lines) updated.lines = normalizeLines(patch.lines)
+  all[index] = updated
+  writeAll(all)
+  logOrderUpdated(
+    updated.number,
+    buildFieldDiffs(
+      { status: before.status, total: before.total },
+      { status: updated.status, total: updated.total },
+      { status: 'status', total: 'total' },
+    ),
+  )
+  return updated
 }
 
 export function deleteOrder(id: string) {

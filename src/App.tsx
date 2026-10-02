@@ -25,7 +25,7 @@ const Employees = lazyPage(() => import('./pages/Employees'), 'Employees')
 const EmployeeForm = lazyPage(() => import('./pages/EmployeeForm'), 'EmployeeForm')
 const Orders = lazyPage(() => import('./pages/Orders'), 'Orders')
 const OrderCreate = lazyPage(() => import('./pages/OrderCreate'), 'OrderCreate')
-const OrderFlow = lazyPage(() => import('./pages/OrderFlow'), 'OrderFlow')
+const OrderView = lazyPage(() => import('./pages/OrderView'), 'OrderView')
 const Financeiro = lazyPage(() => import('./pages/Financeiro'), 'Financeiro')
 const Suppliers = lazyPage(() => import('./pages/Suppliers'), 'Suppliers')
 const SupplierForm = lazyPage(() => import('./pages/SupplierForm'), 'SupplierForm')
@@ -66,9 +66,7 @@ export default function App() {
         <Route path="/funcionarios/:employeeId" element={<EmployeeForm />} />
         <Route path="/pedidos" element={<Orders />} />
         <Route path="/pedidos/novo" element={<OrderCreate />} />
-        <Route path="/pedidos/:orderId/datas" element={<OrderFlow />} />
-        <Route path="/pedidos/:orderId/itens" element={<OrderFlow />} />
-        <Route path="/pedidos/:orderId" element={<OrderFlow />} />
+        <Route path="/pedidos/:orderId" element={<OrderView />} />
         <Route path="/financeiro" element={<Financeiro />} />
         <Route path="/fornecedores" element={<Suppliers />} />
         <Route path="/fornecedores/novo" element={<SupplierForm />} />
