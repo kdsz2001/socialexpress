@@ -375,7 +375,9 @@ export function Orders() {
                 </th>
                 <th className="orders__col-event">Evento</th>
                 <th className="orders__col-phone">Telefone</th>
-                <th className="orders__col-total">Total</th>
+                <th className="orders__col-total">
+                  <span>Total</span>
+                </th>
                 <th className="orders__col-status">Status</th>
                 <th className="orders__col-actions">Ações</th>
               </tr>
@@ -400,7 +402,9 @@ export function Orders() {
                     </td>
                     <td>{item.eventDate ? formatBrDate(item.eventDate) : ''}</td>
                     <td>{item.phone}</td>
-                    <td className="orders__total">{item.total}</td>
+                    <td className="orders__total">
+                      <span>{item.total}</span>
+                    </td>
                     <td>
                       <span className={`orders__status ${statusClass(item.status)}`}>
                         {item.status}

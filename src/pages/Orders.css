@@ -108,6 +108,7 @@
 .orders__select-wrap--op {
   flex-basis: 200px;
   width: 200px;
+  margin-left: -2.2px;
 }
 
 .orders__select-wrap.is-open {
@@ -129,6 +130,8 @@
   font-weight: 500;
   line-height: 19.5px;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
   cursor: pointer;
 }
 
@@ -352,29 +355,43 @@
 }
 
 .orders__col-client {
-  width: 18.7668%;
+  width: 153px;
 }
 
 .orders__col-event {
-  width: 18.7668%;
+  width: 166px;
 }
 
 .orders__col-phone {
-  width: 26.8097%;
+  width: 226px;
 }
 
-.orders__col-total,
-.orders__total {
-  width: 16.0858%;
-  text-align: right;
+.orders__col-total {
+  width: 146px;
 }
 
 .orders__col-status {
-  width: 11.5282%;
+  width: 112px;
 }
 
 .orders__col-actions {
-  width: 8.0429%;
+  width: 73px;
+}
+
+.orders__table th.orders__col-total,
+.orders__table td.orders__total {
+  text-align: left;
+}
+
+.orders__table th.orders__col-total span,
+.orders__table td.orders__total span {
+  display: inline-block;
+  width: 120px;
+  text-align: right;
+}
+
+.orders__table th.orders__col-actions,
+.orders__table td.orders__actions-cell {
   text-align: right;
 }
 
