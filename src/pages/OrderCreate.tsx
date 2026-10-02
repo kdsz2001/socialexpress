@@ -12,8 +12,8 @@ import {
   type ClientPhone,
 } from '../lib/clientsStore'
 import { moneyBrToNumber } from '../lib/moneyMask'
-import { addOrder, type OrderKind, type OrderOperation } from '../lib/ordersStore'
-import { listProducts } from '../lib/productsStore'
+import { addOrder, patchOrder, type OrderKind, type OrderOperation } from '../lib/ordersStore'
+import { listProducts, type Product } from '../lib/productsStore'
 import { getUserDisplayName } from '../lib/userProfileStore'
 import './OrderCreate.css'
 
@@ -26,6 +26,8 @@ const ORIGINS = [
   'Outro',
   'Rádio',
   'Site',
+  'Telefone',
+  'Visita presencial',
 ]
 
 const WEEKDAYS = ['D', '2ª', '3ª', '4ª', '5ª', '6ª', 'S']
@@ -175,7 +177,10 @@ export function OrderCreate() {
   const employees = useEmployees()
   const userName = getUserDisplayName()
 
-  const [step, setStep] = useState<1 | 2>(1)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [orderId, setOrderId] = useState('')
+  const [orderNumber, setOrderNumber] = useState(0)
+  const [saving, setSaving] = useState(false)
   const [kind, setKind] = useState<OrderKind>('Pedido')
   const [operation, setOperation] = useState<OrderOperation>('Aluguel')
   const [clientId, setClientId] = useState('')
@@ -184,13 +189,14 @@ export function OrderCreate() {
   const [origin, setOrigin] = useState('')
   const [attendant, setAttendant] = useState('')
   const [eventDate, setEventDate] = useState('')
+  const [proofDate, setProofDate] = useState('')
+  const [pickupDate, setPickupDate] = useState('')
+  const [returnDate, setReturnDate] = useState('')
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [viewMonth, setViewMonth] = useState(() => new Date())
   const [draft, setDraft] = useState<Draft>(emptyDraft)
   const [touched, setTouched] = useState(false)
   const [productQuery, setProductQuery] = useState('')
-  const [looseOpen, setLooseOpen] = useState(false)
-  const [looseName, setLooseName] = useState('')
   const [lines, setLines] = useState<ProductLine[]>([])
 
   const clientBoxRef = useRef<HTMLDivElement>(null)
@@ -215,20 +221,6 @@ export function OrderCreate() {
       })
       .slice(0, 8)
   }, [clients, clientQuery])
-
-  const productMatches = useMemo(() => {
-    const q = productQuery.trim().toLocaleLowerCase('pt-BR')
-    if (!q) return []
-    return listProducts()
-      .filter((product) => {
-        return (
-          product.name.toLocaleLowerCase('pt-BR').includes(q) ||
-          product.fullCode.toLocaleLowerCase('pt-BR').includes(q) ||
-          product.storeCode.toLocaleLowerCase('pt-BR').includes(q)
-        )
-      })
-      .slice(0, 8)
-  }, [productQuery])
 
   useEffect(() => {
     const onPointer = (event: MouseEvent) => {
@@ -259,10 +251,88 @@ export function OrderCreate() {
 
   const patchDraft = (patch: Partial<Draft>) => setDraft((current) => ({ ...current, ...patch }))
 
+  const clientPayload = () => {
+    const client = clients.find((item) => item.id === clientId)
+    const phone = draft.phones.find((item) => item.primary)?.number || draft.phones[0]?.number || ''
+    const name = [draft.nome, draft.sobrenomes].filter(Boolean).join(' ').trim() || clientQuery
+    return { client, phone, name }
+  }
+
+  const persistClient = () => {
+    const { client } = clientPayload()
+    if (!client) return
+    updateClient(client.id, {
+      cpfCnpj: draft.cpfCnpj,
+      rg: draft.rg,
+      gender: draft.gender,
+      nome: draft.nome,
+      sobrenomes: draft.sobrenomes,
+      chamado: draft.chamado,
+      email: draft.email,
+      facebook: draft.facebook,
+      instagram: draft.instagram,
+      birthDate: draft.birthDate,
+      phones: draft.phones,
+      cep: draft.cep,
+      logradouro: draft.logradouro,
+      numero: draft.numero,
+      complemento: draft.complemento,
+      estado: draft.estado,
+      cidade: draft.cidade,
+      bairro: draft.bairro,
+      notifyEmail: draft.notifyEmail,
+      measures: draft.measures,
+      observacoes: draft.observacoes,
+    })
+  }
+
   const goNext = () => {
     setTouched(true)
-    if (missingClient || missingAttendant || missingDate) return
-    setStep(2)
+    const missingPhone = !draft.phones.some((item) => item.number.trim())
+    const missingName = !draft.sobrenomes.trim()
+    const missingStreet = !draft.logradouro.trim()
+    const missingNumber = !draft.numero.trim()
+    if (missingClient || missingAttendant || missingDate || missingPhone || missingName || missingStreet || missingNumber) {
+      return
+    }
+    setSaving(true)
+    window.setTimeout(() => {
+      persistClient()
+      const { client, phone, name } = clientPayload()
+      const payload = {
+        clientId: client?.id,
+        clientName: name,
+        phone,
+        eventDate,
+        total: 'R$ 0,00',
+        status: kind === 'Orçamento' ? ('Orçamento' as const) : ('Confirmado' as const),
+        operation,
+        kind,
+        origin,
+        attendant,
+        proofDate,
+        pickupDate,
+        returnDate,
+      }
+      if (orderId) {
+        patchOrder(orderId, payload)
+      } else {
+        const created = addOrder(payload)
+        setOrderId(created.id)
+        setOrderNumber(created.number)
+      }
+      setSaving(false)
+      setStep(2)
+      setTouched(false)
+    }, 400)
+  }
+
+  const goProducts = () => {
+    setTouched(true)
+    if (!proofDate || !pickupDate || !returnDate) return
+    if (orderId) patchOrder(orderId, { eventDate, proofDate, pickupDate, returnDate })
+    setTouched(false)
+    setStep(3)
   }
 
   const addLine = (line: { name: string; productId?: string; fullCode?: string; value?: number }) => {
@@ -281,54 +351,31 @@ export function OrderCreate() {
   }
 
   const save = () => {
-    if (!clientId || !eventDate) return
-    const client = clients.find((item) => item.id === clientId)
-    const phone = draft.phones.find((item) => item.primary)?.number || draft.phones[0]?.number || ''
-    const name = [draft.nome, draft.sobrenomes].filter(Boolean).join(' ').trim() || clientQuery
-    if (client) {
-      updateClient(client.id, {
-        cpfCnpj: draft.cpfCnpj,
-        rg: draft.rg,
-        gender: draft.gender,
-        nome: draft.nome,
-        sobrenomes: draft.sobrenomes,
-        chamado: draft.chamado,
-        email: draft.email,
-        facebook: draft.facebook,
-        instagram: draft.instagram,
-        birthDate: draft.birthDate,
-        phones: draft.phones,
-        cep: draft.cep,
-        logradouro: draft.logradouro,
-        numero: draft.numero,
-        complemento: draft.complemento,
-        estado: draft.estado,
-        cidade: draft.cidade,
-        bairro: draft.bairro,
-        notifyEmail: draft.notifyEmail,
-        measures: draft.measures,
-        observacoes: draft.observacoes,
-      })
-    }
+    if (!orderId) return
     const totalValue = lines.reduce((sum, line) => sum + (Number.isFinite(line.value) ? line.value : 0), 0)
-    addOrder({
-      clientId: client?.id,
-      clientName: name,
-      phone,
-      eventDate,
-      total: lines.length > 0 ? formatBrl(totalValue) : '',
-      status: 'Aberto',
-      operation,
-      kind,
-      origin,
-      attendant,
-      lines: lines.map((line) => ({
-        productId: line.productId,
-        name: line.name,
-        fullCode: line.fullCode,
-        value: line.value,
-      })),
-    })
+    setSaving(true)
+    window.setTimeout(() => {
+      patchOrder(orderId, {
+        lines: lines.map((line) => ({
+          id: line.id,
+          productId: line.productId,
+          name: line.name,
+          fullCode: line.fullCode,
+          value: line.value,
+          status: 'Aguardando prova' as const,
+        })),
+        total: formatBrl(totalValue),
+        eventDate,
+        proofDate,
+        pickupDate,
+        returnDate,
+      })
+      navigate(`/pedidos/${orderId}`)
+    }, 400)
+  }
+
+  const cancelDraft = () => {
+    if (orderId) patchOrder(orderId, { status: 'Cancelado' })
     navigate('/pedidos')
   }
 
@@ -338,20 +385,18 @@ export function OrderCreate() {
   return (
     <div className="order-new">
       <section className="order-new__card">
-        {step === 2 ? (
-          <div className="order-new__steps" aria-label="Etapas do pedido">
-            <button type="button" className="order-new__step is-done" onClick={() => setStep(1)}>
-              <span className="order-new__step-mark">
-                <Check size={14} strokeWidth={2.5} />
-              </span>
-              Dados do cliente
+        {step > 1 ? (
+          <header className="order-new__stage">
+            <div>
+              <h2>{step === 3 ? `Itens do pedido ${orderNumber}` : `Pedido ${orderNumber}`}</h2>
+              <p>
+                {operation} de {draft.chamado || draft.nome || clientQuery}
+              </p>
+            </div>
+            <button type="button" className="order-new__void" onClick={cancelDraft}>
+              Anular pedido
             </button>
-            <span className="order-new__step-line" />
-            <span className="order-new__step is-current">
-              <span className="order-new__step-mark">2</span>
-              Produtos
-            </span>
-          </div>
+          </header>
         ) : null}
 
         {step === 1 ? (
@@ -481,7 +526,7 @@ export function OrderCreate() {
                   ))}
                 </select>
                 {touched && missingAttendant ? (
-                  <p className="order-new__error">&quot;Vendedor(a)&quot; não pode ficar em branco.</p>
+                  <p className="order-new__error">&quot;Atendente&quot; não pode ficar em branco.</p>
                 ) : null}
               </div>
             </div>
@@ -557,106 +602,83 @@ export function OrderCreate() {
                     </div>
                   </div>
                 ) : null}
-                {touched && missingDate ? <p className="order-new__error">Informe a data do evento.</p> : null}
+                {touched && missingDate ? (
+                  <p className="order-new__error">&quot;Data do evento&quot; não pode ficar em branco.</p>
+                ) : null}
               </div>
             </div>
 
-            {clientId ? <ClientDetails draft={draft} onChange={patchDraft} /> : null}
+            {clientId ? <ClientDetails draft={draft} showErrors={touched} onChange={patchDraft} /> : null}
+          </div>
+        ) : step === 2 ? (
+          <div className="order-new__body">
+            <h3 className="order-new__section">Datas do pedido:</h3>
+            <DateRow label="Data do evento" required value={eventDate} onChange={setEventDate} />
+            <DateRow
+              label="Data da prova"
+              required
+              value={proofDate}
+              onChange={setProofDate}
+              error={touched && !proofDate ? '"Data da prova" não pode ficar em branco.' : ''}
+            />
+            <DateRow
+              label="Data de retirada"
+              required
+              value={pickupDate}
+              onChange={setPickupDate}
+              error={touched && !pickupDate ? '"Data de retirada" não pode ficar em branco.' : ''}
+            />
+            <DateRow
+              label="Data de devolução"
+              required
+              value={returnDate}
+              onChange={setReturnDate}
+              error={touched && !returnDate ? '"Data de devolução" não pode ficar em branco.' : ''}
+            />
           </div>
         ) : (
-          <div className="order-new__body">
-            <div className="order-new__products">
-              <div className="order-new__product-search">
-                <input
-                  type="search"
-                  value={productQuery}
-                  placeholder="Busque por nome ou código"
-                  onChange={(event) => setProductQuery(event.target.value)}
-                />
-                {productMatches.length > 0 ? (
-                  <div className="order-new__menu">
-                    {productMatches.map((product) => (
-                      <button
-                        key={product.id}
-                        type="button"
-                        className="order-new__option"
-                        onClick={() => {
-                          addLine({
-                            name: product.name,
-                            productId: product.id,
-                            fullCode: product.fullCode,
-                            value: moneyBrToNumber(product.rental),
-                          })
-                          setProductQuery('')
-                        }}
-                      >
-                        <strong>{product.name}</strong>
-                        {product.fullCode ? <span>{product.fullCode}</span> : null}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-              <button type="button" className="order-new__loose" onClick={() => setLooseOpen(true)}>
-                <Plus size={15} strokeWidth={2.4} />
-                Adicionar produto avulso
-              </button>
-            </div>
-            {looseOpen ? (
-              <div className="order-new__loose-row">
-                <input
-                  type="text"
-                  value={looseName}
-                  placeholder="Nome do produto"
-                  onChange={(event) => setLooseName(event.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    addLine({ name: looseName })
-                    setLooseName('')
-                    setLooseOpen(false)
-                  }}
-                >
-                  Adicionar
-                </button>
-              </div>
-            ) : null}
-            {lines.length > 0 ? (
-              <ul className="order-new__lines">
-                {lines.map((line) => (
-                  <li key={line.id}>
-                    <span>{line.name}</span>
-                    <button type="button" aria-label={`Remover ${line.name}`} onClick={() => setLines((current) => current.filter((item) => item.id !== line.id))}>
-                      <X size={14} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
+          <ProductStep
+            operation={operation}
+            query={productQuery}
+            onQuery={setProductQuery}
+            lines={lines}
+            onAdd={(product) =>
+              addLine({
+                name: product.name,
+                productId: product.id,
+                fullCode: product.fullCode,
+                value: moneyBrToNumber(operation === 'Venda' ? product.salePrice : product.rental),
+              })
+            }
+            onRemove={(id) => setLines((current) => current.filter((item) => item.id !== id))}
+          />
         )}
 
         <footer className="order-new__footer">
-          {step === 2 ? (
-            <button type="button" className="order-new__back" onClick={() => setStep(1)}>
+          {step === 3 ? (
+            <button type="button" className="order-new__back" onClick={() => setStep(2)}>
               Voltar
+            </button>
+          ) : step === 2 ? (
+            <button type="button" className="order-new__void" onClick={cancelDraft}>
+              Anular pedido
             </button>
           ) : (
             <span />
           )}
-          {step === 1 ? (
-            <button type="button" className="order-new__next" onClick={goNext}>
+          {step === 3 ? (
+            <button type="button" className="order-new__next" onClick={save} disabled={lines.length === 0 || saving}>
               <Check size={16} strokeWidth={2.5} />
-              Avançar
+              Confirmar produtos e avançar
             </button>
           ) : (
-            <button type="button" className="order-new__next" onClick={save}>
+            <button type="button" className="order-new__next" onClick={step === 1 ? goNext : goProducts} disabled={saving}>
               <Check size={16} strokeWidth={2.5} />
-              Salvar pedido
+              {saving ? 'Salvando...' : 'Avançar'}
             </button>
           )}
         </footer>
+        {saving ? <div className="order-new__saving">Salvando...</div> : null}
       </section>
     </div>
   )
@@ -664,9 +686,11 @@ export function OrderCreate() {
 
 function ClientDetails({
   draft,
+  showErrors,
   onChange,
 }: {
   draft: Draft
+  showErrors: boolean
   onChange: (patch: Partial<Draft>) => void
 }) {
   const setPhone = (index: number, patch: Partial<ClientPhone>) => {
@@ -712,7 +736,8 @@ function ClientDetails({
         <input className="order-new__control" value={draft.nome} onChange={(event) => onChange({ nome: event.target.value })} />
       </Field>
       <Field label="Sobrenomes" required>
-        <input className="order-new__control" value={draft.sobrenomes} onChange={(event) => onChange({ sobrenomes: event.target.value })} />
+        <input className={`order-new__control${showErrors && !draft.sobrenomes.trim() ? ' is-invalid' : ''}`} value={draft.sobrenomes} onChange={(event) => onChange({ sobrenomes: event.target.value })} />
+        {showErrors && !draft.sobrenomes.trim() ? <p className="order-new__error">&quot;Sobrenomes&quot; não pode ficar em branco.</p> : null}
       </Field>
       <Field label="Como quer ser chamado">
         <input className="order-new__control" value={draft.chamado} onChange={(event) => onChange({ chamado: event.target.value })} />
@@ -737,10 +762,13 @@ function ClientDetails({
       {draft.phones.map((phone, index) => (
         <Field key={index} label={index === 0 ? 'Telefone' : 'Outro telefone'} required={index === 0}>
           <input
-            className="order-new__control"
+            className={`order-new__control${showErrors && index === 0 && !phone.number.trim() ? ' is-invalid' : ''}`}
             value={phone.number}
             onChange={(event) => setPhone(index, { number: event.target.value })}
           />
+          {showErrors && index === 0 && !phone.number.trim() ? (
+            <p className="order-new__error">&quot;Telefone&quot; não pode ficar em branco.</p>
+          ) : null}
           <label className="order-new__check phone-flag">
             <input
               type="checkbox"
@@ -775,10 +803,12 @@ function ClientDetails({
         <input className="order-new__control" value={draft.cep} onChange={(event) => onChange({ cep: event.target.value })} />
       </Field>
       <Field label="Logradouro" required>
-        <input className="order-new__control" value={draft.logradouro} onChange={(event) => onChange({ logradouro: event.target.value })} />
+        <input className={`order-new__control${showErrors && !draft.logradouro.trim() ? ' is-invalid' : ''}`} value={draft.logradouro} onChange={(event) => onChange({ logradouro: event.target.value })} />
+        {showErrors && !draft.logradouro.trim() ? <p className="order-new__error">&quot;Logradouro&quot; não pode ficar em branco.</p> : null}
       </Field>
       <Field label="Número" required>
-        <input className="order-new__control" value={draft.numero} onChange={(event) => onChange({ numero: event.target.value })} />
+        <input className={`order-new__control${showErrors && !draft.numero.trim() ? ' is-invalid' : ''}`} value={draft.numero} onChange={(event) => onChange({ numero: event.target.value })} />
+        {showErrors && !draft.numero.trim() ? <p className="order-new__error">&quot;Número&quot; não pode ficar em branco.</p> : null}
       </Field>
       <Field label="Complemento">
         <input className="order-new__control" value={draft.complemento} onChange={(event) => onChange({ complemento: event.target.value })} />
@@ -850,6 +880,127 @@ function ClientDetails({
         />
       </Field>
     </>
+  )
+}
+
+function DateRow({
+  label,
+  required,
+  value,
+  onChange,
+  error,
+}: {
+  label: string
+  required?: boolean
+  value: string
+  onChange: (value: string) => void
+  error?: string
+}) {
+  return (
+    <div className="order-new__row">
+      <span className="order-new__label">
+        {label}
+        {required ? <span className="order-new__req"> *</span> : null}
+      </span>
+      <div className="order-new__field">
+        <input
+          type="date"
+          className={`order-new__control${error ? ' is-invalid' : ''}`}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        {error ? <p className="order-new__error">{error}</p> : null}
+      </div>
+    </div>
+  )
+}
+
+function ProductStep({
+  operation,
+  query,
+  onQuery,
+  lines,
+  onAdd,
+  onRemove,
+}: {
+  operation: OrderOperation
+  query: string
+  onQuery: (value: string) => void
+  lines: ProductLine[]
+  onAdd: (product: Product) => void
+  onRemove: (id: string) => void
+}) {
+  const [type, setType] = useState('todos')
+  const products = listProducts().filter((product) => product.status !== 'inativo')
+  const types = [...new Set(products.map((product) => product.type).filter(Boolean))]
+  const q = query.trim().toLocaleLowerCase('pt-BR')
+  const visible = products.filter((product) => {
+    if (type !== 'todos' && product.type !== type) return false
+    if (!q) return true
+    return (
+      product.name.toLocaleLowerCase('pt-BR').includes(q) ||
+      product.fullCode.toLocaleLowerCase('pt-BR').includes(q)
+    )
+  })
+  const total = lines.reduce((sum, line) => sum + (Number.isFinite(line.value) ? line.value : 0), 0)
+  const selected = new Set(lines.map((line) => line.productId).filter(Boolean))
+
+  return (
+    <div className="order-new__body">
+      <div className="order-new__catalog-bar">
+        <select value={type} onChange={(event) => setType(event.target.value)} aria-label="Tipo de produto">
+          <option value="todos">Todos tipos</option>
+          {types.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+        <input
+          type="search"
+          value={query}
+          placeholder="Busque por nome ou código"
+          onChange={(event) => onQuery(event.target.value)}
+        />
+        <button type="button" className="order-new__back" onClick={() => onQuery('')}>
+          Limpar
+        </button>
+        <button type="button" className="order-new__next">
+          Buscar
+        </button>
+      </div>
+      <div className="order-new__cards">
+        {visible.map((product) => {
+          const line = lines.find((item) => item.productId === product.id)
+          const price = moneyBrToNumber(operation === 'Venda' ? product.salePrice : product.rental)
+          return (
+            <article key={product.id} className="order-new__card-product">
+              <strong>{product.fullCode}</strong>
+              <span>{product.name}</span>
+              {product.size ? <small>Tamanho {product.size}</small> : null}
+              <em>Preço {formatBrl(price)}</em>
+              {line ? (
+                <button type="button" className="is-remove" onClick={() => line.id && onRemove(line.id)}>
+                  <X size={14} /> Remover
+                </button>
+              ) : (
+                <button type="button" onClick={() => onAdd(product)}>
+                  <Plus size={14} /> Adicionar
+                </button>
+              )}
+            </article>
+          )
+        })}
+      </div>
+      {visible.length === 0 ? <p className="order-new__end">Sem mais produtos a exibir</p> : null}
+      {selected.size > 0 ? (
+        <div className="order-new__cart">
+          <span>
+            {lines.length} {lines.length === 1 ? 'produto' : 'produtos'} · {formatBrl(total)}
+          </span>
+        </div>
+      ) : null}
+    </div>
   )
 }
 

@@ -45,6 +45,15 @@
   white-space: nowrap;
 }
 
+.clients-subheader__back {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
 .clients-subheader__sep {
   width: 1px;
   height: 16px;

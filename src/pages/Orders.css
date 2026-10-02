@@ -431,47 +431,95 @@
 }
 
 .orders__client-name {
+  font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary);
+  line-height: 19.5px;
+  color: #3f4254;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .orders__client-meta {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #b5b5c3;
+}
+
+.orders__op {
+  color: #1bc5bd;
+  font-weight: 500;
+}
+
+.orders__phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 9.75px;
+  border-radius: 5.46px;
+  background: #c9f7f5;
+  color: #1bc5bd;
+  font-size: 11.7px;
+  font-weight: 500;
+  line-height: 24px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.orders__phone svg {
+  color: #1bc5bd;
 }
 
 .orders__status {
   display: inline-flex;
   align-items: center;
   height: 24px;
-  padding: 0 0.65rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
+  color: #fff;
 }
 
 .orders__status.is-canceled {
-  background: var(--border-color);
-  color: var(--text-secondary);
+  background: #f64e60;
 }
 
 .orders__status.is-open {
-  background: var(--info-soft-bg);
-  color: #3699ff;
+  background: #3699ff;
 }
 
 .orders__status.is-confirmed {
-  background: var(--success-soft-bg);
-  color: #1bc5bd;
+  background: #3699ff;
 }
 
 .orders__status.is-done {
-  background: var(--success-soft-bg);
-  color: #0bb783;
+  background: #1bc5bd;
+}
+
+.orders__status.is-delayed {
+  background: #ffa800;
+}
+
+.orders__status.is-lost {
+  background: #b5b5c3;
+  color: #3f4254;
+}
+
+.orders__actions-cell .icon-action {
+  width: 32.5px;
+  height: 32.5px;
+  border-radius: 5.46px;
+  background: #f3f6f9;
+  color: #3699ff;
+}
+
+.orders__actions-cell .icon-action svg {
+  width: 16px;
+  height: 16px;
 }
 
 .orders__actions-cell {
