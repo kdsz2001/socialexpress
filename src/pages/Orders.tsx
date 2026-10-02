@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowUp,
   ChevronDown,
@@ -68,9 +68,16 @@ export function Orders() {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'todos' | OrderStatus>('todos')
   const [operationFilter, setOperationFilter] = useState<'todos' | OrderOperation>('todos')
+  const [statusOpen, setStatusOpen] = useState(false)
+  const [operationOpen, setOperationOpen] = useState(false)
+  const statusRef = useRef<HTMLDivElement>(null)
+  const operationRef = useRef<HTMLDivElement>(null)
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
+  const statusLabel = STATUS_OPTIONS.find((item) => item.id === statusFilter)?.label ?? 'Qualquer status'
+  const operationLabel =
+    OPERATION_OPTIONS.find((item) => item.id === operationFilter)?.label ?? 'Ambas operações'
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Order | null>(null)
@@ -111,6 +118,27 @@ export function Orders() {
   useEffect(() => {
     setPage(1)
   }, [query, statusFilter, operationFilter, pageSize])
+
+  useEffect(() => {
+    if (!statusOpen && !operationOpen) return
+    const onPointer = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (statusOpen && !statusRef.current?.contains(target)) setStatusOpen(false)
+      if (operationOpen && !operationRef.current?.contains(target)) setOperationOpen(false)
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setStatusOpen(false)
+        setOperationOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [statusOpen, operationOpen])
 
   const openCreate = () => {
     navigate('/pedidos/novo')
@@ -168,7 +196,7 @@ export function Orders() {
           onChange={(event) => setPageSize(Number(event.target.value))}
           aria-label="Itens por página"
         >
-          {[10, 25, 50, 100].map((size) => (
+          {[5, 10, 20, 30, 50, 100].map((size) => (
             <option key={size} value={size}>
               {size}
             </option>
@@ -241,49 +269,91 @@ export function Orders() {
             />
           </label>
 
-          <label className="orders__select-wrap">
-            <select
+          <div className={`orders__select-wrap${statusOpen ? ' is-open' : ''}`} ref={statusRef}>
+            <button
+              type="button"
               className="orders__select"
-              value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(event.target.value as 'todos' | OrderStatus)
-              }
               aria-label="Filtro por status"
+              aria-haspopup="listbox"
+              aria-expanded={statusOpen}
+              onClick={() => {
+                setStatusOpen((open) => !open)
+                setOperationOpen(false)
+              }}
             >
-              {STATUS_OPTIONS.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
+              {statusLabel}
+            </button>
             <ChevronDown size={16} strokeWidth={2} className="orders__select-icon" />
-          </label>
+            {statusOpen ? (
+              <ul className="orders__select-menu" role="listbox" aria-label="Filtro por status">
+                {STATUS_OPTIONS.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={item.id === statusFilter}
+                      className={item.id === statusFilter ? 'is-selected' : undefined}
+                      onClick={() => {
+                        setStatusFilter(item.id)
+                        setStatusOpen(false)
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
 
-          <label className="orders__select-wrap">
-            <select
+          <div
+            className={`orders__select-wrap orders__select-wrap--op${operationOpen ? ' is-open' : ''}`}
+            ref={operationRef}
+          >
+            <button
+              type="button"
               className="orders__select"
-              value={operationFilter}
-              onChange={(event) =>
-                setOperationFilter(event.target.value as 'todos' | OrderOperation)
-              }
               aria-label="Filtro por operação"
+              aria-haspopup="listbox"
+              aria-expanded={operationOpen}
+              onClick={() => {
+                setOperationOpen((open) => !open)
+                setStatusOpen(false)
+              }}
             >
-              {OPERATION_OPTIONS.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
+              {operationLabel}
+            </button>
             <ChevronDown size={16} strokeWidth={2} className="orders__select-icon" />
-          </label>
+            {operationOpen ? (
+              <ul className="orders__select-menu" role="listbox" aria-label="Filtro por operação">
+                {OPERATION_OPTIONS.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={item.id === operationFilter}
+                      className={item.id === operationFilter ? 'is-selected' : undefined}
+                      onClick={() => {
+                        setOperationFilter(item.id)
+                        setOperationOpen(false)
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
 
           <button type="button" className="orders__add" onClick={openCreate}>
-            <Plus size={16} strokeWidth={2.5} />
+            <Plus size={16} strokeWidth={2} />
             Novo pedido
           </button>
         </div>
 
-        {pager}
+        <div className="orders__body">
+        {filtered.length > 0 ? pager : null}
 
         <div className="orders__table-wrap">
           <table className="orders__table">
@@ -297,15 +367,17 @@ export function Orders() {
                   >
                     Cliente
                     <ArrowUp
-                      size={14}
-                      strokeWidth={2.25}
+                      size={10}
+                      strokeWidth={2.5}
                       className={sortDir === 'desc' ? 'is-desc' : undefined}
                     />
                   </button>
                 </th>
                 <th className="orders__col-event">Evento</th>
                 <th className="orders__col-phone">Telefone</th>
-                <th className="orders__col-total">Total</th>
+                <th className="orders__col-total">
+                  <span>Total</span>
+                </th>
                 <th className="orders__col-status">Status</th>
                 <th className="orders__col-actions">Ações</th>
               </tr>
@@ -330,7 +402,9 @@ export function Orders() {
                     </td>
                     <td>{item.eventDate ? formatBrDate(item.eventDate) : ''}</td>
                     <td>{item.phone}</td>
-                    <td>{item.total}</td>
+                    <td className="orders__total">
+                      <span>{item.total}</span>
+                    </td>
                     <td>
                       <span className={`orders__status ${statusClass(item.status)}`}>
                         {item.status}
@@ -359,7 +433,8 @@ export function Orders() {
           </table>
         </div>
 
-        {pager}
+        {filtered.length > 0 ? pager : null}
+        </div>
       </section>
 
       {modalOpen ? (
