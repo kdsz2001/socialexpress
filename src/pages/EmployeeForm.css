@@ -419,23 +419,86 @@
   color: #fff;
 }
 
+html.theme-dark .emp-form__head h2,
 html[data-theme='dark'] .emp-form__head h2,
+html.theme-dark .emp-form__section,
 html[data-theme='dark'] .emp-form__section,
+html.theme-dark .emp-form__label,
 html[data-theme='dark'] .emp-form__label,
+html.theme-dark .emp-form__radios,
 html[data-theme='dark'] .emp-form__radios,
+html.theme-dark .emp-form__checks,
 html[data-theme='dark'] .emp-form__checks {
   color: var(--text-primary);
 }
 
-html[data-theme='dark'] .emp-form__back {
-  background: var(--surface-muted);
-  color: var(--text-secondary);
+html.theme-dark .emp-form__head,
+html[data-theme='dark'] .emp-form__head,
+html.theme-dark .emp-form__foot,
+html[data-theme='dark'] .emp-form__foot {
+  border-color: #2b2b40;
 }
 
+html.theme-dark .emp-form__back,
+html[data-theme='dark'] .emp-form__back {
+  background: #2b2b40;
+  border-color: #2b2b40;
+  color: #a1a5b7;
+}
+
+html.theme-dark .emp-form__back:hover,
+html[data-theme='dark'] .emp-form__back:hover {
+  background: #323248;
+  color: #e4e6ef;
+}
+
+html.theme-dark .emp-form__input input,
+html[data-theme='dark'] .emp-form__input input,
+html.theme-dark .emp-form__input select,
+html[data-theme='dark'] .emp-form__input select,
+html.theme-dark .emp-form__phone input:not([type='checkbox']),
+html[data-theme='dark'] .emp-form__phone input:not([type='checkbox']) {
+  background-color: #1e1e2d;
+  border-color: #323248;
+  color: #e4e6ef;
+}
+
+html.theme-dark .emp-form__input input::placeholder,
+html[data-theme='dark'] .emp-form__input input::placeholder,
+html.theme-dark .emp-form__phone input:not([type='checkbox'])::placeholder,
+html[data-theme='dark'] .emp-form__phone input:not([type='checkbox'])::placeholder {
+  color: #565674;
+}
+
+html.theme-dark .emp-form__radio input:not(:checked),
+html[data-theme='dark'] .emp-form__radio input:not(:checked),
+html.theme-dark .emp-form__checks input:not(:checked),
+html[data-theme='dark'] .emp-form__checks input:not(:checked) {
+  background-color: transparent;
+  border-color: #4a4b68;
+}
+
+html.theme-dark .emp-form__add-phone,
+html[data-theme='dark'] .emp-form__add-phone {
+  background: #1b2a3f;
+  color: #3699ff;
+}
+
+html.theme-dark .emp-form__add-phone:hover,
+html[data-theme='dark'] .emp-form__add-phone:hover {
+  background: #3699ff;
+  color: #fff;
+}
+
+html.theme-dark .emp-form__avatar-box,
 html[data-theme='dark'] .emp-form__avatar-box,
-html[data-theme='dark'] .emp-form__avatar-edit {
-  background: var(--card-bg);
-  border-color: var(--border-color);
+html.theme-dark .emp-form__avatar-edit,
+html[data-theme='dark'] .emp-form__avatar-edit,
+html.theme-dark .emp-form__avatar-remove,
+html[data-theme='dark'] .emp-form__avatar-remove {
+  background: #2b2b40;
+  border-color: #2b2b40;
+  color: #a1a5b7;
 }
 
 html.theme-dark .emp-form__eye,
