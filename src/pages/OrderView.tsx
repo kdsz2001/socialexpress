@@ -1,13 +1,22 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   Bell,
+  BookOpen,
   Check,
   ChevronDown,
+  ClipboardList,
   DollarSign,
+  MessageSquare,
+  MoreHorizontal,
+  Package,
+  Pencil,
   Percent,
   Plus,
   Printer,
-  Settings,
+  ShoppingCart,
+  Star,
+  Undo2,
+  User,
   X,
 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -48,6 +57,23 @@ const MONTHS = [
 const MONTHS_SHORT = ['jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.']
 
 const PAY_METHODS = ['Boleto', 'Crédito', 'Débito', 'Cheque', 'Depósito', 'Dinheiro', 'Pix']
+
+function whatsAppHref(phone: string) {
+  const digits = phone.replace(/\D/g, '')
+  if (!digits) return '#'
+  return `https://wa.me/${digits.startsWith('55') ? digits : `55${digits}`}`
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M20.5 3.5A11 11 0 0 0 2.1 17.8L1 23l5.3-1.1A11 11 0 0 0 12 23a11 11 0 0 0 8.5-19.5zM12 21a9 9 0 0 1-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 0 1 12 21zm5-6.8c-.3-.1-1.6-.8-1.8-.9s-.4-.1-.6.1-.7.9-.9 1.1-.3.2-.6.1a7.4 7.4 0 0 1-2.2-1.4 8.2 8.2 0 0 1-1.5-1.9c-.2-.3 0-.4.1-.6l.4-.4.2-.4a.5.5 0 0 0 0-.5c-.1-.1-.6-1.4-.8-1.9s-.4-.4-.6-.5h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.6 11.4 11.4 0 0 0 4.4 3.9 3.6 3.6 0 0 0 1.6.1 2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3z"
+      />
+    </svg>
+  )
+}
 
 function formatBrl(value: number) {
   const negative = value < 0
@@ -103,6 +129,9 @@ export function OrderView() {
   const [noteDraft, setNoteDraft] = useState('')
   const [suitDraft, setSuitDraft] = useState('')
   const [notesOn, setNotesOn] = useState<'order' | 'suit' | null>(null)
+  const [adjustId, setAdjustId] = useState<string | null>(null)
+  const [adjustMode, setAdjustMode] = useState<'add' | 'sub'>('add')
+  const [adjustValue, setAdjustValue] = useState('')
 
   useEffect(() => {
     if (!order) return
@@ -222,6 +251,17 @@ export function OrderView() {
     setToast('Pedido cancelado.')
   }
 
+  const saveAdjust = () => {
+    const amount = moneyBrToNumber(adjustValue)
+    const adjustment = adjustMode === 'sub' ? -amount : amount
+    const next = lines.map((line) => (line.id === adjustId ? { ...line, adjustment } : line))
+    const sum = next.reduce((acc, line) => acc + lineTotal(line), 0)
+    saveLines(next, Math.max(0, sum - discount))
+    setAdjustId(null)
+    setAdjustValue('')
+    setToast('Valor do produto atualizado.')
+  }
+
   const matches = listProducts().filter((product) => {
     const q = productQuery.trim().toLocaleLowerCase('pt-BR')
     if (!q) return product.status !== 'inativo'
@@ -236,7 +276,7 @@ export function OrderView() {
     <div className="ov">
       {toast ? <div className="ov-toast">{toast}</div> : null}
       <header className="ov-head">
-        <div>
+        <div className="ov-head__titles">
           <h2>{orderTitle(order)}</h2>
           <p>{createdLabel(order.createdAt)}</p>
         </div>
@@ -282,7 +322,7 @@ export function OrderView() {
                   setAlertsOpen(false)
                 }}
               >
-                <Settings size={15} />
+                <ClipboardList size={15} />
                 Ações do pedido
               </button>
               {actionsOpen ? (
@@ -341,18 +381,22 @@ export function OrderView() {
           {!cancelled ? (
             <div className="ov-times">
               <button type="button" onClick={() => setDatesOpen(true)}>
+                <User size={18} />
                 <span>Prova</span>
                 <strong>{order.proofDate ? shortDate(order.proofDate) : 'sem data'}</strong>
               </button>
               <button type="button" onClick={() => setDatesOpen(true)}>
+                <Package size={18} />
                 <span>Retirada</span>
                 <strong>{shortDate(order.pickupDate)}</strong>
               </button>
               <button type="button" onClick={() => setDatesOpen(true)}>
+                <Star size={18} />
                 <span>Evento</span>
                 <strong>{shortDate(order.eventDate)}</strong>
               </button>
               <button type="button" onClick={() => setDatesOpen(true)}>
+                <Undo2 size={18} />
                 <span>Devolução</span>
                 <strong>{shortDate(order.returnDate)}</strong>
               </button>
@@ -361,9 +405,11 @@ export function OrderView() {
 
           <section className="ov-card">
             <header className="ov-card__head">
-              <h3>Produtos do pedido</h3>
+              <h3>
+                <ShoppingCart size={16} /> Produtos do pedido
+              </h3>
               {!cancelled ? (
-                <button type="button" className="ov-outline" onClick={() => setIncludeOpen(true)}>
+                <button type="button" className="ov-solid" onClick={() => setIncludeOpen(true)}>
                   <Plus size={14} /> Incluir produto
                 </button>
               ) : null}
@@ -373,7 +419,6 @@ export function OrderView() {
                 <tr>
                   <th>Produto</th>
                   <th className="is-right">Valor</th>
-                  <th />
                   <th>
                     Status
                     {!cancelled ? (
@@ -401,7 +446,7 @@ export function OrderView() {
               <tbody>
                 {lines.length === 0 ? (
                   <tr>
-                    <td colSpan={cancelled ? 4 : 5} className="ov-empty">
+                    <td colSpan={cancelled ? 3 : 4} className="ov-empty">
                       Nenhum produto neste pedido.
                     </td>
                   </tr>
@@ -413,15 +458,26 @@ export function OrderView() {
                           {line.fullCode ? `${line.fullCode} - ` : ''}
                           {line.name}
                         </strong>
-                        {line.size ? <span>Tamanho {line.size}</span> : null}
                       </td>
-                      <td className="is-right">
-                        {line.adjustment ? (
-                          <s>{formatBrl(line.value)}</s>
-                        ) : null}{' '}
-                        {formatBrl(lineTotal(line))}
+                      <td className="is-right ov-value">
+                        <span>{formatBrl(lineTotal(line))}</span>
+                        {!cancelled ? (
+                          <button
+                            type="button"
+                            className="ov-dollar"
+                            aria-label="Ajustar valor"
+                            onClick={() => {
+                              setAdjustId(line.id || null)
+                              setAdjustMode((line.adjustment || 0) < 0 ? 'sub' : 'add')
+                              setAdjustValue(
+                                line.adjustment ? maskMoneyBr(String(Math.round(Math.abs(line.adjustment) * 100))) : '',
+                              )
+                            }}
+                          >
+                            <DollarSign size={14} />
+                          </button>
+                        ) : null}
                       </td>
-                      <td />
                       <td>
                         {cancelled ? (
                           line.status || 'Aguardando prova'
@@ -448,7 +504,7 @@ export function OrderView() {
                             aria-label="Ações do produto"
                             onClick={() => setLineMenu(lineMenu === line.id ? null : line.id || null)}
                           >
-                            ···
+                            <MoreHorizontal size={16} />
                           </button>
                           {lineMenu === line.id ? (
                             <ul>
@@ -480,9 +536,11 @@ export function OrderView() {
 
           <section className="ov-card">
             <header className="ov-card__head">
-              <h3>$ Pagamentos</h3>
+              <h3>
+                <DollarSign size={16} /> Pagamentos
+              </h3>
               {!cancelled ? (
-                <button type="button" className="ov-outline" onClick={() => setPayOpen(true)}>
+                <button type="button" className="ov-solid" onClick={() => setPayOpen(true)}>
                   Novo pagamento
                 </button>
               ) : null}
@@ -503,9 +561,11 @@ export function OrderView() {
 
           <section className="ov-card">
             <header className="ov-card__head">
-              <h3>Carnês</h3>
+              <h3>
+                <BookOpen size={16} /> Carnês
+              </h3>
               {!cancelled ? (
-                <button type="button" className="ov-outline" onClick={() => setToast('Nenhum carnê gerado para este pedido.')}>
+                <button type="button" className="ov-solid" onClick={() => setToast('Nenhum carnê gerado para este pedido.')}>
                   Gerar carnê
                 </button>
               ) : null}
@@ -515,7 +575,9 @@ export function OrderView() {
 
           <section className="ov-card">
             <header className="ov-card__head">
-              <h3>Observações</h3>
+              <h3>
+                <MessageSquare size={16} /> Observações
+              </h3>
             </header>
             <div className="ov-notes">
               <h4>Observações do pedido</h4>
@@ -555,9 +617,26 @@ export function OrderView() {
 
         <aside className="ov-side">
           <div className="ov-who">
-            <strong>{order.clientName}</strong>
-            {order.phone ? <span className="ov-who__phone">{order.phone}</span> : null}
-            {order.attendant ? <span className="ov-who__att">Atendido por {order.attendant}</span> : null}
+            <strong className="ov-who__num">{order.number}</strong>
+            <span className="ov-who__kind">
+              {order.kind === 'Orçamento' ? 'Orçamento' : `Pedido de ${order.operation}`}
+            </span>
+            <span className="ov-who__name">
+              {order.clientName}
+              <User size={15} />
+            </span>
+            {order.phone ? (
+              <a className="ov-who__phone" href={whatsAppHref(order.phone)} target="_blank" rel="noreferrer">
+                {order.phone}
+                <WhatsAppIcon />
+              </a>
+            ) : null}
+            {order.attendant ? (
+              <span className="ov-who__att">
+                Atendido por {order.attendant}
+                <Pencil size={13} />
+              </span>
+            ) : null}
           </div>
           <div className="ov-money">
             <div>
@@ -724,6 +803,35 @@ export function OrderView() {
             </button>
             <button type="button" className="ov-danger" onClick={cancelOrder}>
               Cancelar pedido
+            </button>
+          </div>
+        </Modal>
+      ) : null}
+
+      {adjustId ? (
+        <Modal title="Ajuste de valor" onClose={() => setAdjustId(null)}>
+          <div className="ov-methods">
+            <button type="button" className={adjustMode === 'add' ? 'is-on' : ''} onClick={() => setAdjustMode('add')}>
+              Acréscimo
+            </button>
+            <button type="button" className={adjustMode === 'sub' ? 'is-on' : ''} onClick={() => setAdjustMode('sub')}>
+              Desconto
+            </button>
+          </div>
+          <label>
+            Valor
+            <input
+              className="ov-input"
+              value={adjustValue}
+              onChange={(event) => setAdjustValue(maskMoneyBr(event.target.value))}
+            />
+          </label>
+          <div className="ov-modal__foot">
+            <button type="button" className="ov-ghost" onClick={() => setAdjustId(null)}>
+              Cancelar
+            </button>
+            <button type="button" className="ov-primary" onClick={saveAdjust}>
+              Salvar
             </button>
           </div>
         </Modal>
