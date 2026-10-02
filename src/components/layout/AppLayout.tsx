@@ -160,6 +160,10 @@ export function AppLayout() {
       document.title = 'Cadastro de funcionários'
       return
     }
+    if (location.pathname.startsWith('/pedidos/') && location.pathname !== '/pedidos/novo') {
+      document.title = 'Pedido'
+      return
+    }
     document.title = PAGE_TITLES[location.pathname] ?? 'Social Express'
   }, [location.pathname])
 

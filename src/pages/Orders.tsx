@@ -15,7 +15,6 @@ import { IconAction, IconActions } from '../components/ui/IconAction'
 import { useOrders } from '../hooks/useOrders'
 import {
   addOrder,
-  deleteOrder,
   updateOrder,
   type Order,
   type OrderOperation,
@@ -27,10 +26,12 @@ type SortDir = 'asc' | 'desc'
 
 const STATUS_OPTIONS: { id: 'todos' | OrderStatus; label: string }[] = [
   { id: 'todos', label: 'Qualquer status' },
-  { id: 'Aberto', label: 'Aberto' },
-  { id: 'Confirmado', label: 'Confirmado' },
+  { id: 'Adiado', label: 'Adiado' },
+  { id: 'Cancelado', label: 'Cancelado' },
   { id: 'Concluído', label: 'Concluído' },
-  { id: 'Anulado', label: 'Anulado' },
+  { id: 'Confirmado', label: 'Confirmado' },
+  { id: 'Orçamento', label: 'Orçamento' },
+  { id: 'Perdido', label: 'Perdido' },
 ]
 
 const OPERATION_OPTIONS: { id: 'todos' | OrderOperation; label: string }[] = [
@@ -54,15 +55,39 @@ function formatBrDate(value: string) {
 }
 
 function statusClass(status: OrderStatus) {
-  if (status === 'Anulado') return 'is-canceled'
+  if (status === 'Anulado' || status === 'Cancelado') return 'is-canceled'
   if (status === 'Confirmado') return 'is-confirmed'
   if (status === 'Concluído') return 'is-done'
+  if (status === 'Adiado') return 'is-delayed'
+  if (status === 'Perdido') return 'is-lost'
   return 'is-open'
+}
+
+function displayStatus(status: OrderStatus) {
+  if (status === 'Anulado') return 'Cancelado'
+  return status
+}
+
+function whatsAppHref(phone: string) {
+  const digits = phone.replace(/\D/g, '')
+  if (!digits) return '#'
+  return `https://wa.me/${digits.startsWith('55') ? digits : `55${digits}`}`
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M20.5 3.5A11 11 0 0 0 2.1 17.8L1 23l5.3-1.1A11 11 0 0 0 12 23a11 11 0 0 0 8.5-19.5zM12 21a9 9 0 0 1-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 1 1 12 21zm5-6.8c-.3-.1-1.6-.8-1.8-.9s-.4-.1-.6.1-.7.9-.9 1.1-.3.2-.6.1a7.4 7.4 0 0 1-2.2-1.4 8.2 8.2 0 0 1-1.5-1.9c-.2-.3 0-.4.1-.6l.4-.4.2-.4a.5.5 0 0 0 0-.5c-.1-.1-.6-1.4-.8-1.9s-.4-.4-.6-.5h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.6 11.4 11.4 0 0 0 4.4 3.9 3.6 3.6 0 0 0 1.6.1 2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3z"
+      />
+    </svg>
+  )
 }
 
 export function Orders() {
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const orders = useOrders()
 
   const [query, setQuery] = useState('')
@@ -93,7 +118,11 @@ export function Orders() {
     const q = query.trim().toLocaleLowerCase('pt-BR')
     return orders
       .filter((item) => {
-        if (statusFilter !== 'todos' && item.status !== statusFilter) return false
+        if (statusFilter === 'Orçamento') {
+          if (item.kind !== 'Orçamento' && item.status !== 'Orçamento') return false
+        } else if (statusFilter === 'Cancelado') {
+          if (item.status !== 'Cancelado' && item.status !== 'Anulado') return false
+        } else if (statusFilter !== 'todos' && item.status !== statusFilter) return false
         if (operationFilter !== 'todos' && item.operation !== operationFilter) return false
         if (!q) return true
         return (
@@ -144,27 +173,12 @@ export function Orders() {
     navigate('/pedidos/novo')
   }
 
-  const openEdit = (item: Order) => {
-    setEditing(item)
-    setClientName(item.clientName)
-    setPhone(item.phone)
-    setEventDate(item.eventDate)
-    setTotal(item.total)
-    setStatus(item.status)
-    setOperation(item.operation)
-    setTouched(false)
-    setModalOpen(true)
-  }
-
   useEffect(() => {
     const orderId = searchParams.get('order')
     if (!orderId) return
     const item = orders.find((order) => order.id === orderId)
-    if (item) openEdit(item)
-    const next = new URLSearchParams(searchParams)
-    next.delete('order')
-    setSearchParams(next, { replace: true })
-  }, [orders, searchParams, setSearchParams])
+    if (item) navigate(`/pedidos/${item.id}`, { replace: true })
+  }, [navigate, orders, searchParams])
 
   const closeModal = () => {
     setModalOpen(false)
@@ -396,18 +410,27 @@ export function Orders() {
                       <div className="orders__client">
                         <span className="orders__client-name">{item.clientName}</span>
                         <span className="orders__client-meta">
-                          {item.kind === 'Orçamento' ? 'Orçamento' : 'Pedido'} {item.number} • {item.operation}
+                          {item.kind === 'Orçamento' ? 'Orçamento' : 'Pedido'} {item.number}
+                          {' • '}
+                          <span className="orders__op">{item.operation}</span>
                         </span>
                       </div>
                     </td>
                     <td>{item.eventDate ? formatBrDate(item.eventDate) : ''}</td>
-                    <td>{item.phone}</td>
+                    <td>
+                      {item.phone ? (
+                        <a className="orders__phone" href={whatsAppHref(item.phone)} target="_blank" rel="noreferrer">
+                          {item.phone}
+                          <WhatsAppIcon />
+                        </a>
+                      ) : null}
+                    </td>
                     <td className="orders__total">
                       <span>{item.total}</span>
                     </td>
                     <td>
                       <span className={`orders__status ${statusClass(item.status)}`}>
-                        {item.status}
+                        {displayStatus(item.status)}
                       </span>
                     </td>
                     <td className="orders__actions-cell">
@@ -416,13 +439,7 @@ export function Orders() {
                           kind="edit"
                           tip="Editar pedido"
                           aria-label={`Editar pedido ${item.number}`}
-                          onClick={() => openEdit(item)}
-                        />
-                        <IconAction
-                          kind="delete"
-                          tip="Excluir pedido"
-                          aria-label={`Excluir pedido ${item.number}`}
-                          onClick={() => deleteOrder(item.id)}
+                          onClick={() => navigate(`/pedidos/${item.id}`)}
                         />
                       </IconActions>
                     </td>
