@@ -77,22 +77,22 @@ html[data-theme='dark'] .event-form__back {
 }
 
 .event-form__body {
-  padding: 28px 29px 12px;
+  padding: 26px 29px 22px;
 }
 
 .event-form__row {
   display: flex;
   align-items: flex-start;
   width: 100%;
-  max-width: 760px;
+  max-width: 638px;
   margin: 0 auto 22px;
 }
 
 .event-form__label {
-  width: 33.333%;
-  flex: 0 0 33.333%;
-  padding: 10px 16px 0 0;
-  text-align: right;
+  width: 224px;
+  flex: 0 0 224px;
+  padding: 8px 0 0;
+  text-align: left;
   font-size: 13px;
   font-weight: 400;
   color: #7e8299;
@@ -105,8 +105,8 @@ html[data-theme='dark'] .event-form__back {
 }
 
 .event-form__control {
-  flex: 0 0 66.666%;
-  max-width: 66.666%;
+  flex: 1 1 auto;
+  max-width: none;
   min-width: 0;
 }
 
@@ -128,8 +128,8 @@ html[data-theme='dark'] .event-form__back {
 }
 
 .event-form__control textarea {
-  min-height: 64px;
-  padding: 10px 12px;
+  min-height: 56px;
+  padding: 8px 12px;
   resize: vertical;
 }
 
@@ -154,10 +154,24 @@ html[data-theme='dark'] .event-form__back {
   border-color: #f64e60;
 }
 
+.event-form__input-wrap.is-invalid input:focus,
+.event-form__date-field.is-invalid input:focus,
+.event-form__date-field.is-invalid.is-open input,
+.event-form__row.is-invalid .cselect__trigger:focus,
+.event-form__row.is-invalid .cselect.is-open .cselect__trigger {
+  border-color: #f64e60;
+  box-shadow: none;
+}
+
+.event-form__select-wrap {
+  position: relative;
+}
+
 .event-form__error-icon {
   position: absolute;
   top: 9px;
   right: 10px;
+  z-index: 2;
   width: 18px;
   height: 18px;
   border: 1.5px solid #f64e60;
@@ -167,6 +181,16 @@ html[data-theme='dark'] .event-form__back {
   font-weight: 700;
   line-height: 16px;
   text-align: center;
+  pointer-events: none;
+}
+
+.event-form__error-icon--select {
+  right: 34px;
+}
+
+.event-form__row.is-invalid .cselect__placeholder,
+.event-form__row.is-invalid .cselect__value {
+  padding-right: 24px;
 }
 
 .event-form__error {
@@ -181,8 +205,17 @@ html[data-theme='dark'] .event-form__back {
 }
 
 .event-form__date-field {
+  position: relative;
   display: flex;
   align-items: stretch;
+}
+
+.event-form__error-icon--date {
+  right: 52px;
+}
+
+.event-form__date-field.is-invalid input {
+  padding-right: 36px;
 }
 
 .event-form__date-field input {
@@ -285,12 +318,13 @@ html[data-theme='dark'] .event-form .cselect__trigger {
   border-radius: 4px;
 }
 
-.event-cal__day.is-outside {
-  color: #d1d3e0;
+.event-cal__day.is-outside:not(.is-past) {
+  color: var(--text-primary, #3f4254);
 }
 
 .event-cal__day.is-today {
   position: relative;
+  background: #e1f0ff;
   color: #3699ff;
   font-weight: 600;
 }
@@ -298,10 +332,10 @@ html[data-theme='dark'] .event-form .cselect__trigger {
 .event-cal__day.is-today::after {
   content: '';
   position: absolute;
-  right: 5px;
+  right: 4px;
   bottom: 4px;
   border-style: solid;
-  border-width: 0 0 6px 6px;
+  border-width: 0 0 7px 7px;
   border-color: transparent transparent #3699ff transparent;
 }
 
@@ -316,26 +350,20 @@ html[data-theme='dark'] .event-form .cselect__trigger {
   background: transparent;
 }
 
-.event-cal__day.is-selected {
+.event-cal__day.is-selected,
+.event-cal__day.is-selected.is-outside,
+.event-cal__day.is-selected:hover {
   background: #3699ff;
   color: #fff;
 }
 
-.event-cal__day:hover:not(:disabled) {
-  background: var(--info-soft-bg, #e1f0ff);
+.event-cal__day.is-selected.is-today::after {
+  border-bottom-color: #fff;
+}
+
+.event-cal__day:hover:not(:disabled):not(.is-selected) {
+  background: #e1f0ff;
   color: #3699ff;
-}
-
-html[data-theme='dark'] .event-cal {
-  border: 1px solid var(--border-color);
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.45);
-}
-
-html[data-theme='dark'] .event-cal__day.is-outside,
-html[data-theme='dark'] .event-cal__day.is-past,
-html[data-theme='dark'] .event-cal__day.is-past.is-outside,
-html[data-theme='dark'] .event-cal__day.is-past:hover {
-  color: #565674;
 }
 
 .event-cal__day.is-past:hover {
@@ -343,8 +371,64 @@ html[data-theme='dark'] .event-cal__day.is-past:hover {
   color: #d1d3e0;
 }
 
-.event-cal__day.is-selected:hover {
+.event-cal__day.is-selected:hover,
+.event-cal__day.is-selected.is-outside:hover {
   background: #187de4;
+  color: #fff;
+}
+
+html.theme-dark .event-cal {
+  background: #1e1e2d;
+  border: 1px solid #323248;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+html.theme-dark .event-cal__head {
+  color: #e4e6ef;
+}
+
+html.theme-dark .event-cal__nav {
+  color: #a1a5b7;
+}
+
+html.theme-dark .event-cal__nav:hover {
+  color: #e4e6ef;
+}
+
+html.theme-dark .event-cal__weekdays span {
+  color: #7e8299;
+}
+
+html.theme-dark .event-cal__day {
+  color: #e4e6ef;
+}
+
+html.theme-dark .event-cal__day.is-outside:not(.is-past) {
+  color: #e4e6ef;
+}
+
+html.theme-dark .event-cal__day.is-past,
+html.theme-dark .event-cal__day.is-past.is-outside,
+html.theme-dark .event-cal__day.is-past:hover {
+  color: #5e6278;
+  background: transparent;
+}
+
+html.theme-dark .event-cal__day.is-today:not(.is-selected) {
+  background: #1b2a3f;
+  color: #3699ff;
+}
+
+html.theme-dark .event-cal__day:hover:not(:disabled):not(.is-selected):not(.is-past) {
+  background: #1b2a3f;
+  color: #3699ff;
+}
+
+html.theme-dark .event-cal__day.is-selected,
+html.theme-dark .event-cal__day.is-selected.is-outside,
+html.theme-dark .event-cal__day.is-selected:hover,
+html.theme-dark .event-cal__day.is-selected.is-outside:hover {
+  background: #3699ff;
   color: #fff;
 }
 

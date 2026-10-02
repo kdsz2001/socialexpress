@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowUp,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -8,55 +9,69 @@ import {
   ChevronsRight,
   Plus,
   Search,
-  SquarePen,
-  X,
 } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { IconAction } from '../components/ui/IconAction'
+import { SaveToast } from '../components/ui/SaveToast'
 import { useEmployees } from '../hooks/useEmployees'
-import {
-  addEmployee,
-  setEmployeeActive,
-  updateEmployee,
-  type Employee,
-  type EmployeeLevel,
-} from '../lib/employeesStore'
+import { setEmployeeActive } from '../lib/employeesStore'
 import './Employees.css'
 
 type SortDir = 'asc' | 'desc'
 type StatusFilter = 'ativos' | 'inativos' | 'todos'
-type EmployeesTab = 'lista' | 'permissoes'
 
-const LEVELS: EmployeeLevel[] = ['Master', 'Administrador', 'Funcionário']
+const TOAST_KEY = 'social-express:employee-toast'
 
 const STATUS_OPTIONS: { id: StatusFilter; label: string }[] = [
+  { id: 'todos', label: 'Todos' },
   { id: 'ativos', label: 'Ativos' },
   { id: 'inativos', label: 'Inativos' },
-  { id: 'todos', label: 'Todos' },
 ]
-
-function tabFromParam(value: string | null): EmployeesTab {
-  return value === 'permissoes' ? 'permissoes' : 'lista'
-}
 
 export function Employees() {
   const employees = useEmployees()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const tab = tabFromParam(searchParams.get('tab'))
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'permissoes') {
+      navigate('/configuracoes?section=permissoes', { replace: true })
+      return
+    }
+    if (searchParams.get('status')) {
+      const params = new URLSearchParams(searchParams)
+      params.delete('status')
+      const queryString = params.toString()
+      navigate(queryString ? `/funcionarios?${queryString}` : '/funcionarios', { replace: true })
+    }
+  }, [navigate, searchParams])
 
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ativos')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos')
+  const [statusOpen, setStatusOpen] = useState(false)
+  const statusRef = useRef<HTMLDivElement>(null)
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
+  const [toast, setToast] = useState<string | null>(null)
+  const closeToast = useCallback(() => setToast(null), [])
+  const statusLabel = STATUS_OPTIONS.find((item) => item.id === statusFilter)?.label ?? 'Todos'
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Employee | null>(null)
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [username, setUsername] = useState('')
-  const [level, setLevel] = useState<EmployeeLevel>('Funcionário')
-  const [active, setActive] = useState(true)
-  const [touched, setTouched] = useState(false)
+  useEffect(() => {
+    if (!statusOpen) return
+    const onPointer = (event: MouseEvent) => {
+      if (!statusRef.current?.contains(event.target as Node)) setStatusOpen(false)
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setStatusOpen(false)
+    }
+    document.addEventListener('mousedown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [statusOpen])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('pt-BR')
@@ -69,7 +84,9 @@ export function Employees() {
           item.name.toLocaleLowerCase('pt-BR').includes(q) ||
           item.username.toLocaleLowerCase('pt-BR').includes(q) ||
           item.phone.toLocaleLowerCase('pt-BR').includes(q) ||
-          item.level.toLocaleLowerCase('pt-BR').includes(q)
+          item.email.toLocaleLowerCase('pt-BR').includes(q) ||
+          item.level.toLocaleLowerCase('pt-BR').includes(q) ||
+          item.unit.toLocaleLowerCase('pt-BR').includes(q)
         )
       })
       .sort((a, b) => {
@@ -88,48 +105,17 @@ export function Employees() {
     setPage(1)
   }, [query, statusFilter, pageSize])
 
-  const openCreate = () => {
-    setEditing(null)
-    setName('')
-    setPhone('')
-    setUsername('')
-    setLevel('Funcionário')
-    setActive(true)
-    setTouched(false)
-    setModalOpen(true)
-  }
-
-  const openEdit = (item: Employee) => {
-    setEditing(item)
-    setName(item.name)
-    setPhone(item.phone)
-    setUsername(item.username)
-    setLevel(item.level)
-    setActive(item.active)
-    setTouched(false)
-    setModalOpen(true)
-  }
-
-  const closeModal = () => {
-    setModalOpen(false)
-    setEditing(null)
-    setTouched(false)
-  }
-
-  const missingName = !name.trim()
-  const missingUsername = !username.trim()
-
-  const saveEmployee = () => {
-    setTouched(true)
-    if (missingName || missingUsername) return
-    const payload = { name, phone, username, level, active }
-    if (editing) {
-      updateEmployee(editing.id, payload)
-    } else {
-      addEmployee(payload)
+  useEffect(() => {
+    try {
+      const message = sessionStorage.getItem(TOAST_KEY)
+      if (message) {
+        sessionStorage.removeItem(TOAST_KEY)
+        setToast(message)
+      }
+    } catch {
+      // ignore
     }
-    closeModal()
-  }
+  }, [])
 
   const pager = (
     <div className="employees__pager">
@@ -147,9 +133,7 @@ export function Employees() {
           ))}
         </select>
         <span className="employees__pager-info">
-          {filtered.length === 0
-            ? 'Mostrando 0 do total de 0'
-            : `Mostrando ${pageStart} - ${pageEnd} do total de ${filtered.length}`}
+            {`Mostrando ${filtered.length === 0 ? 0 : pageStart} - ${pageEnd} do total de ${filtered.length}`}
         </span>
       </div>
       <div className="employees__pager-nav">
@@ -160,7 +144,7 @@ export function Employees() {
           disabled={currentPage <= 1}
           onClick={() => setPage(1)}
         >
-          <ChevronsLeft size={16} strokeWidth={2} />
+          <ChevronsLeft size={12} strokeWidth={2} />
         </button>
         <button
           type="button"
@@ -169,7 +153,7 @@ export function Employees() {
           disabled={currentPage <= 1}
           onClick={() => setPage((value) => Math.max(1, value - 1))}
         >
-          <ChevronLeft size={16} strokeWidth={2} />
+          <ChevronLeft size={12} strokeWidth={2} />
         </button>
         <button type="button" className="employees__pager-btn is-active" aria-current="page">
           {currentPage}
@@ -181,7 +165,7 @@ export function Employees() {
           disabled={currentPage >= totalPages}
           onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
         >
-          <ChevronRight size={16} strokeWidth={2} />
+          <ChevronRight size={12} strokeWidth={2} />
         </button>
         <button
           type="button"
@@ -190,25 +174,15 @@ export function Employees() {
           disabled={currentPage >= totalPages}
           onClick={() => setPage(totalPages)}
         >
-          <ChevronsRight size={16} strokeWidth={2} />
+          <ChevronsRight size={12} strokeWidth={2} />
         </button>
       </div>
     </div>
   )
 
-  if (tab === 'permissoes') {
-    return (
-      <div className="employees">
-        <section className="employees__card employees__card--placeholder">
-          <h2>Gerenciar permissões</h2>
-          <p>Nenhum resultado encontrado</p>
-        </section>
-      </div>
-    )
-  }
-
   return (
     <div className="employees">
+      <SaveToast open={Boolean(toast)} message={toast ?? undefined} onClose={closeToast} />
       <section className="employees__card">
         <div className="employees__toolbar">
           <label className="employees__search">
@@ -224,28 +198,47 @@ export function Employees() {
             />
           </label>
 
-          <label className="employees__select-wrap">
-            <select
+          <div className={`employees__select-wrap${statusOpen ? ' is-open' : ''}`} ref={statusRef}>
+            <button
+              type="button"
               className="employees__select"
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
               aria-label="Filtro por status"
+              aria-haspopup="listbox"
+              aria-expanded={statusOpen}
+              onClick={() => setStatusOpen((open) => !open)}
             >
-              {STATUS_OPTIONS.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
+              {statusLabel}
+            </button>
             <ChevronDown size={16} strokeWidth={2} className="employees__select-icon" />
-          </label>
+            {statusOpen ? (
+              <ul className="employees__select-menu" role="listbox" aria-label="Filtro por status">
+                {STATUS_OPTIONS.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={item.id === statusFilter}
+                      className={item.id === statusFilter ? 'is-selected' : undefined}
+                      onClick={() => {
+                        setStatusFilter(item.id)
+                        setStatusOpen(false)
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
 
-          <button type="button" className="employees__add" onClick={openCreate}>
+          <button type="button" className="employees__add" onClick={() => navigate('/funcionarios/cadastrar')}>
             <Plus size={16} strokeWidth={2.5} />
             Cadastrar funcionário
           </button>
         </div>
 
+        <div className="employees__body">
         {pager}
 
         <div className="employees__table-wrap">
@@ -260,8 +253,8 @@ export function Employees() {
                   >
                     Nome
                     <ArrowUp
-                      size={14}
-                      strokeWidth={2.25}
+                      size={10}
+                      strokeWidth={2.5}
                       className={sortDir === 'desc' ? 'is-desc' : undefined}
                     />
                   </button>
@@ -292,28 +285,29 @@ export function Employees() {
                     <td>{item.username}</td>
                     <td>{item.level}</td>
                     <td className="employees__actions-cell">
-                      <button
-                        type="button"
-                        className={`employees__switch${item.active ? ' is-on' : ''}`}
-                        role="switch"
-                        aria-checked={item.active}
-                        aria-label={
-                          item.active
-                            ? `Desativar ${item.name}`
-                            : `Ativar ${item.name}`
-                        }
-                        onClick={() => setEmployeeActive(item.id, !item.active)}
-                      >
-                        <span className="employees__switch-knob" />
-                      </button>
-                      <button
-                        type="button"
-                        className="employees__icon-btn"
-                        aria-label={`Editar ${item.name}`}
-                        onClick={() => openEdit(item)}
-                      >
-                        <SquarePen size={15} strokeWidth={2} />
-                      </button>
+                      <span className="employees__actions">
+                        <button
+                          type="button"
+                          className={`employees__status${item.active ? ' is-on' : ''}`}
+                          role="switch"
+                          aria-checked={item.active}
+                          aria-label={item.active ? `Desativar ${item.name}` : `Ativar ${item.name}`}
+                          onClick={() => {
+                            setEmployeeActive(item.id, !item.active)
+                            setToast('Funcionário atualizado.')
+                          }}
+                        >
+                          <span className="employees__status-knob" aria-hidden="true">
+                            {item.active ? <Check size={9} strokeWidth={3} /> : null}
+                          </span>
+                        </button>
+                        <IconAction
+                          kind="edit"
+                          tip="Editar funcionário"
+                          aria-label={`Editar ${item.name}`}
+                          onClick={() => navigate(`/funcionarios/${item.id}`)}
+                        />
+                      </span>
                     </td>
                   </tr>
                 ))
@@ -323,106 +317,8 @@ export function Employees() {
         </div>
 
         {pager}
-      </section>
-
-      {modalOpen ? (
-        <div className="employees-modal" role="presentation" onMouseDown={closeModal}>
-          <div
-            className="employees-modal__dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="employees-modal-title"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <header className="employees-modal__header">
-              <h2 id="employees-modal-title">
-                {editing ? 'Editar funcionário' : 'Cadastrar funcionário'}
-              </h2>
-              <button
-                type="button"
-                className="employees-modal__close"
-                aria-label="Fechar"
-                onClick={closeModal}
-              >
-                <X size={16} strokeWidth={2.25} />
-              </button>
-            </header>
-
-            <div className="employees-modal__body">
-              <label className="employees-modal__field">
-                <span>
-                  Nome <span className="employees-modal__req">*</span>
-                </span>
-                <input
-                  type="text"
-                  className={`employees-modal__input${touched && missingName ? ' is-invalid' : ''}`}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="Ex.: Kelton Djames Schulze"
-                  autoFocus
-                />
-              </label>
-
-              <label className="employees-modal__field">
-                <span>Telefone</span>
-                <input
-                  type="text"
-                  className="employees-modal__input"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  placeholder="Ex.: (47) 98927-4677"
-                />
-              </label>
-
-              <label className="employees-modal__field">
-                <span>
-                  Usuário <span className="employees-modal__req">*</span>
-                </span>
-                <input
-                  type="text"
-                  className={`employees-modal__input${touched && missingUsername ? ' is-invalid' : ''}`}
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
-                  placeholder="Ex.: djamesz"
-                />
-              </label>
-
-              <label className="employees-modal__field">
-                <span>Nível</span>
-                <select
-                  className="employees-modal__input"
-                  value={level}
-                  onChange={(event) => setLevel(event.target.value as EmployeeLevel)}
-                >
-                  {LEVELS.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="employees-modal__check">
-                <input
-                  type="checkbox"
-                  checked={active}
-                  onChange={(event) => setActive(event.target.checked)}
-                />
-                Funcionário ativo
-              </label>
-            </div>
-
-            <footer className="employees-modal__footer">
-              <button type="button" className="employees-modal__cancel" onClick={closeModal}>
-                Cancelar
-              </button>
-              <button type="button" className="employees-modal__save" onClick={saveEmployee}>
-                {editing ? 'Salvar' : 'Cadastrar'}
-              </button>
-            </footer>
-          </div>
         </div>
-      ) : null}
+      </section>
     </div>
   )
 }

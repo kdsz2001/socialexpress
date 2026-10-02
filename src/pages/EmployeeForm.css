@@ -1,0 +1,530 @@
+.emp-form {
+  width: 100%;
+  font-size: 13px;
+  color: var(--text-primary, #3f4254);
+}
+
+.emp-form__card {
+  background: var(--card-bg);
+  border-radius: 0.42rem;
+  box-shadow: var(--card-shadow);
+}
+
+.emp-form__head,
+.emp-form__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
+  min-height: 70px;
+  padding: 0 29px;
+}
+
+.emp-form__head {
+  border-bottom: 1px solid #ebedf3;
+}
+
+.emp-form__foot {
+  justify-content: flex-end;
+  min-height: 0;
+  padding: 26px 29px;
+  border-top: 1px solid #ebedf3;
+  background: var(--card-bg);
+  border-radius: 0 0 5.46px 5.46px;
+}
+
+.emp-form__head h2 {
+  margin: 0;
+  font-size: 16.575px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #181c32;
+}
+
+.emp-form__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emp-form__back,
+.emp-form__save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  border-radius: 5.46px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.emp-form__back {
+  background: #eaeef5;
+  border-color: #eaeef5;
+  color: #98989e;
+}
+
+.emp-form__back:hover {
+  background: #e4e6ef;
+}
+
+.emp-form__save {
+  background: #3699ff;
+  color: #fff;
+}
+
+.emp-form__save:hover {
+  background: #187de4;
+}
+
+.emp-form__body {
+  padding: 26px 29px 8px;
+}
+
+.emp-form__section {
+  max-width: 675px;
+  margin: 8px auto 18px;
+  padding-left: 12.5px;
+  font-size: 17.55px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #181c32;
+}
+
+.emp-form__row {
+  display: grid;
+  grid-template-columns: 229px 433px;
+  gap: 0 13px;
+  align-items: start;
+  justify-content: center;
+  max-width: 675px;
+  margin: 0 auto 22.75px;
+}
+
+.emp-form__label {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 38px;
+  padding: 0 12.5px;
+  text-align: left;
+  font-size: 14.3px;
+  font-weight: 400;
+  color: #3f4254;
+  line-height: 1.5;
+}
+
+.emp-form__row--avatar .emp-form__label,
+.emp-form__row--top .emp-form__label {
+  align-items: flex-start;
+  min-height: 0;
+  padding-top: 9px;
+}
+
+.emp-form__label span {
+  margin-left: 0.25em;
+  color: #f64e60;
+}
+
+.emp-form__control {
+  position: relative;
+  min-width: 0;
+}
+
+.emp-form__password {
+  position: relative;
+}
+
+.emp-form__password input {
+  padding-right: 40px;
+}
+
+.emp-form__eye {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 5.46px;
+  background: transparent;
+  color: #7e8299;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.emp-form__eye:hover {
+  color: #3699ff;
+  background: #f3f6f9;
+}
+
+.emp-form__input input,
+.emp-form__input select,
+.emp-form__phone input:not([type='checkbox']) {
+  box-sizing: border-box;
+  width: 100%;
+  height: 38px;
+  padding: 8.45px 13px;
+  border: 1px solid #d7d9de;
+  border-radius: 5.46px;
+  background: var(--card-bg, #fff);
+  color: var(--text-primary, #3f4254);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.emp-form__input select {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237E8299' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+.emp-form__input input::placeholder,
+.emp-form__phone input:not([type='checkbox'])::placeholder {
+  color: #b5b5c3;
+}
+
+.emp-form__input input:focus,
+.emp-form__input select:focus,
+.emp-form__phone input:not([type='checkbox']):focus {
+  border-color: #3699ff;
+}
+
+.emp-form__row.is-invalid .emp-form__input input,
+.emp-form__row.is-invalid .emp-form__input select,
+.emp-form__row.is-invalid .emp-form__phone input:not([type='checkbox']) {
+  border-color: #f64e60;
+}
+
+.emp-form__row.is-invalid .emp-form__input input {
+  padding-right: 36px;
+}
+
+.emp-form__row.is-invalid .emp-form__password input {
+  padding-right: 62px;
+}
+
+.emp-form__row.is-invalid .emp-form__eye {
+  right: 34px;
+}
+
+.emp-form__bang {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #f64e60;
+  border-radius: 50%;
+  color: #f64e60;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.emp-form__row.is-select .emp-form__bang {
+  display: none;
+}
+
+.emp-form__error {
+  margin: 4px 0 0;
+  color: #f64e60;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.emp-form__avatar-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.emp-form__avatar-box {
+  width: 120px;
+  height: 120px;
+  border: 1px solid #e4e6ef;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.emp-form__avatar-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.emp-form__avatar-edit,
+.emp-form__avatar-remove {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.emp-form__avatar-edit,
+.emp-form__avatar-remove {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: #fff;
+  color: #7e8299;
+  box-shadow: 0 0 13px rgba(82, 63, 105, 0.15);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.emp-form__avatar-edit {
+  top: -10px;
+  right: -10px;
+}
+
+.emp-form__avatar-remove {
+  right: -10px;
+  bottom: -10px;
+}
+
+.emp-form__hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #b5b5c3;
+}
+
+.emp-form__radios,
+.emp-form__checks {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  min-height: 38px;
+  font-size: 14.3px;
+  color: #3f4254;
+}
+
+.emp-form__checks {
+  min-height: 26px;
+}
+
+.emp-form__radio,
+.emp-form__checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.emp-form__radio input,
+.emp-form__checks input {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid #d7d9e0;
+  background: #fff;
+  cursor: pointer;
+}
+
+.emp-form__radio input {
+  border-radius: 50%;
+}
+
+.emp-form__checks input {
+  border-radius: 3px;
+}
+
+.emp-form__radio input:checked,
+.emp-form__checks input:checked {
+  border-color: #3699ff;
+  background: #3699ff;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.emp-form__checks input:checked {
+  box-shadow: none;
+  background: #3699ff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10' viewBox='0 0 12 10'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' d='M1 5.2 4.2 8.2 11 1.4'/%3E%3C/svg%3E") center / 10px 8px no-repeat;
+}
+
+.emp-form__phone + .emp-form__phone {
+  margin-top: 12px;
+}
+
+.emp-form__phone-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emp-form__phone-remove {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 0.35rem;
+  background: #f64e60;
+  color: #fff;
+  cursor: pointer;
+}
+
+.emp-form__phone-remove:hover {
+  background: #d92135;
+}
+
+.emp-form__checks {
+  margin-top: 8px;
+  gap: 8px 22px;
+}
+
+.emp-form__add-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  margin-top: 10px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5.46px;
+  background: #e1f0ff;
+  color: #3699ff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.emp-form__add-phone:hover {
+  background: #3699ff;
+  color: #fff;
+}
+
+html.theme-dark .emp-form__head h2,
+html[data-theme='dark'] .emp-form__head h2,
+html.theme-dark .emp-form__section,
+html[data-theme='dark'] .emp-form__section,
+html.theme-dark .emp-form__label,
+html[data-theme='dark'] .emp-form__label,
+html.theme-dark .emp-form__radios,
+html[data-theme='dark'] .emp-form__radios,
+html.theme-dark .emp-form__checks,
+html[data-theme='dark'] .emp-form__checks {
+  color: var(--text-primary);
+}
+
+html.theme-dark .emp-form__head,
+html[data-theme='dark'] .emp-form__head,
+html.theme-dark .emp-form__foot,
+html[data-theme='dark'] .emp-form__foot {
+  border-color: #2b2b40;
+}
+
+html.theme-dark .emp-form__back,
+html[data-theme='dark'] .emp-form__back {
+  background: #2b2b40;
+  border-color: #2b2b40;
+  color: #a1a5b7;
+}
+
+html.theme-dark .emp-form__back:hover,
+html[data-theme='dark'] .emp-form__back:hover {
+  background: #323248;
+  color: #e4e6ef;
+}
+
+html.theme-dark .emp-form__input input,
+html[data-theme='dark'] .emp-form__input input,
+html.theme-dark .emp-form__input select,
+html[data-theme='dark'] .emp-form__input select,
+html.theme-dark .emp-form__phone input:not([type='checkbox']),
+html[data-theme='dark'] .emp-form__phone input:not([type='checkbox']) {
+  background-color: #1e1e2d;
+  border-color: #323248;
+  color: #e4e6ef;
+}
+
+html.theme-dark .emp-form__input input::placeholder,
+html[data-theme='dark'] .emp-form__input input::placeholder,
+html.theme-dark .emp-form__phone input:not([type='checkbox'])::placeholder,
+html[data-theme='dark'] .emp-form__phone input:not([type='checkbox'])::placeholder {
+  color: #565674;
+}
+
+html.theme-dark .emp-form__radio input:not(:checked),
+html[data-theme='dark'] .emp-form__radio input:not(:checked),
+html.theme-dark .emp-form__checks input:not(:checked),
+html[data-theme='dark'] .emp-form__checks input:not(:checked) {
+  background-color: transparent;
+  border-color: #4a4b68;
+}
+
+html.theme-dark .emp-form__add-phone,
+html[data-theme='dark'] .emp-form__add-phone {
+  background: #1b2a3f;
+  color: #3699ff;
+}
+
+html.theme-dark .emp-form__add-phone:hover,
+html[data-theme='dark'] .emp-form__add-phone:hover {
+  background: #3699ff;
+  color: #fff;
+}
+
+html.theme-dark .emp-form__avatar-box,
+html[data-theme='dark'] .emp-form__avatar-box,
+html.theme-dark .emp-form__avatar-edit,
+html[data-theme='dark'] .emp-form__avatar-edit,
+html.theme-dark .emp-form__avatar-remove,
+html[data-theme='dark'] .emp-form__avatar-remove {
+  background: #2b2b40;
+  border-color: #2b2b40;
+  color: #a1a5b7;
+}
+
+html.theme-dark .emp-form__eye,
+html[data-theme='dark'] .emp-form__eye {
+  color: #a1a5b7;
+}
+
+html.theme-dark .emp-form__eye:hover,
+html[data-theme='dark'] .emp-form__eye:hover {
+  color: #3699ff;
+  background: #2b2b40;
+}
+
+@media (max-width: 760px) {
+  .emp-form__row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .emp-form__label {
+    text-align: left;
+    padding-top: 0;
+  }
+
+  .emp-form__head,
+  .emp-form__foot {
+    flex-wrap: wrap;
+  }
+}

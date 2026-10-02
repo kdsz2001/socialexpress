@@ -6,6 +6,7 @@ import { seedDemoClients } from './lib/seedDemoClients'
 import { seedDemoProducts } from './lib/seedDemoProducts'
 import { bootTheme } from './lib/themeStore'
 import './index.css'
+import './components/ui/IconAction.css'
 
 bootTheme()
 seedDemoClients(1200)

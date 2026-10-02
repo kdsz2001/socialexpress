@@ -233,7 +233,7 @@ export function ProductsSubheader() {
             onClick={() => setImportOpen(true)}
           >
             <CloudUpload size={18} strokeWidth={2} />
-            <span className="clients-subheader__tooltip" role="tooltip">
+            <span className="ui-tip clients-subheader__tooltip" role="tooltip">
               Importar
             </span>
           </button>
@@ -244,7 +244,7 @@ export function ProductsSubheader() {
             onClick={exportProductsXls}
           >
             <Download size={18} strokeWidth={2} />
-            <span className="clients-subheader__tooltip" role="tooltip">
+            <span className="ui-tip clients-subheader__tooltip" role="tooltip">
               Exportar
             </span>
           </button>
@@ -255,7 +255,7 @@ export function ProductsSubheader() {
             onClick={printCatalog}
           >
             <ClipboardList size={18} strokeWidth={2} />
-            <span className="clients-subheader__tooltip" role="tooltip">
+            <span className="ui-tip clients-subheader__tooltip" role="tooltip">
               Imprimir catálogo
             </span>
           </button>
@@ -266,7 +266,7 @@ export function ProductsSubheader() {
             onClick={() => setLabelsOpen(true)}
           >
             <Tag size={18} strokeWidth={2} />
-            <span className="clients-subheader__tooltip" role="tooltip">
+            <span className="ui-tip clients-subheader__tooltip" role="tooltip">
               Imprimir etiquetas
             </span>
           </button>

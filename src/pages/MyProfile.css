@@ -10,19 +10,9 @@
   width: 120px;
   height: 120px;
   border-radius: 6px;
-  background: var(--surface-muted);
-  border: 1px solid var(--border-color);
+  background: #e6e7e8;
+  border: 1px solid #e6e7e8;
   overflow: hidden;
-}
-
-.my-profile__avatar-placeholder {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(circle at 50% 38%, #b5b5c3 0 18%, transparent 19%),
-    radial-gradient(ellipse 55% 42% at 50% 78%, #b5b5c3 0 48%, transparent 49%),
-    var(--border-color);
 }
 
 .my-profile__avatar-image {

@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
-import { CalendarDays, Check, ChevronDown, X } from 'lucide-react'
+import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import {
   APPOINTMENT_COLORS,
   type Appointment,
@@ -48,6 +48,94 @@ function buildResponsibleOptions() {
   ]
 }
 
+const CAL_WEEKDAYS = ['D', '2ª', '3ª', '4ª', '5ª', '6ª', 'S']
+const CAL_MONTHS = [
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
+]
+
+function pad2(value: number) {
+  return String(value).padStart(2, '0')
+}
+
+function parseIsoDate(value: string) {
+  const [year, month, day] = value.split('-').map(Number)
+  if (!year || !month || !day) return null
+  return new Date(year, month - 1, day)
+}
+
+function formatBrDate(value: string) {
+  const date = parseIsoDate(value)
+  if (!date) return ''
+  return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`
+}
+
+function maskDate(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+  const day = digits.slice(0, 2)
+  const month = digits.slice(2, 4)
+  const year = digits.slice(4, 8)
+  if (digits.length <= 2) return day
+  if (digits.length <= 4) return `${day}/${month}`
+  return `${day}/${month}/${year}`
+}
+
+function parseBrDate(value: string) {
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!match) return ''
+  const day = Number(match[1])
+  const month = Number(match[2])
+  const year = Number(match[3])
+  const date = new Date(year, month - 1, day)
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return ''
+  }
+  return toDateKey(date)
+}
+
+function monthCells(anchor: Date) {
+  const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
+  const start = new Date(first)
+  start.setDate(1 - first.getDay())
+  return Array.from({ length: 42 }, (_, index) => {
+    const day = new Date(start)
+    day.setDate(start.getDate() + index)
+    return day
+  })
+}
+
+function sameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  )
+}
+
+function startOfToday() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today
+}
+
+function isBeforeToday(day: Date) {
+  return day.getTime() < startOfToday().getTime()
+}
+
 function emptyForm(
   defaultDate?: Date,
   defaultStartTime = '',
@@ -55,11 +143,11 @@ function emptyForm(
 ): FormState {
   return {
     date: toDateKey(defaultDate ?? new Date()),
-    startTime: defaultStartTime,
-    endTime: defaultEndTime,
+    startTime: defaultStartTime || '00:00',
+    endTime: defaultEndTime || '00:00',
     title: '',
     details: '',
-    color: 'coral',
+    color: 'blue',
     responsibleIds: [],
     orderLabel: '',
   }
@@ -68,8 +156,8 @@ function emptyForm(
 function formFromAppointment(appointment: Appointment): FormState {
   return {
     date: appointment.date,
-    startTime: appointment.startTime,
-    endTime: appointment.endTime,
+    startTime: appointment.startTime || '00:00',
+    endTime: appointment.endTime || '00:00',
     title: appointment.title,
     details: appointment.details,
     color: appointment.color,
@@ -104,6 +192,7 @@ export function NewAppointmentModal({
   const titleId = useId()
   const peopleRef = useRef<HTMLDivElement>(null)
   const peopleMenuRef = useRef<HTMLDivElement>(null)
+  const dateRef = useRef<HTMLDivElement>(null)
   const options = useMemo(() => buildResponsibleOptions(), [open])
   const isEditing = Boolean(editingAppointment)
   const [form, setForm] = useState<FormState>(() =>
@@ -114,14 +203,19 @@ export function NewAppointmentModal({
   const [peopleOpen, setPeopleOpen] = useState(false)
   const [peopleMenuStyle, setPeopleMenuStyle] = useState<CSSProperties>({})
   const [touched, setTouched] = useState(false)
+  const [dateText, setDateText] = useState('')
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [calMonth, setCalMonth] = useState(() => new Date())
 
   useEffect(() => {
     if (!open) return
-    setForm(
-      editingAppointment
-        ? formFromAppointment(editingAppointment)
-        : emptyForm(defaultDate, defaultStartTime, defaultEndTime),
-    )
+    const next = editingAppointment
+      ? formFromAppointment(editingAppointment)
+      : emptyForm(defaultDate, defaultStartTime, defaultEndTime)
+    setForm(next)
+    setDateText(formatBrDate(next.date))
+    setCalMonth(parseIsoDate(next.date) ?? new Date())
+    setCalendarOpen(false)
     setPeopleOpen(false)
     setTouched(false)
   }, [open, defaultDate, defaultStartTime, defaultEndTime, editingAppointment])
@@ -132,7 +226,8 @@ export function NewAppointmentModal({
     document.body.style.overflow = 'hidden'
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (peopleOpen) setPeopleOpen(false)
+        if (calendarOpen) setCalendarOpen(false)
+        else if (peopleOpen) setPeopleOpen(false)
         else onClose()
       }
     }
@@ -141,7 +236,17 @@ export function NewAppointmentModal({
       document.body.style.overflow = previous
       document.removeEventListener('keydown', onKey)
     }
-  }, [open, onClose, peopleOpen])
+  }, [open, onClose, peopleOpen, calendarOpen])
+
+  useEffect(() => {
+    if (!calendarOpen) return
+    const onPointer = (event: MouseEvent) => {
+      if (dateRef.current?.contains(event.target as Node)) return
+      setCalendarOpen(false)
+    }
+    document.addEventListener('mousedown', onPointer)
+    return () => document.removeEventListener('mousedown', onPointer)
+  }, [calendarOpen])
 
   useEffect(() => {
     if (!peopleOpen) return
@@ -287,26 +392,105 @@ export function NewAppointmentModal({
               Data <span className="new-apt__req">*</span>
             </label>
             <div
-              className={`new-apt__control new-apt__date${touched && missingDate ? ' is-invalid' : ''}`}
+              className={`new-apt__control new-apt__date${touched && missingDate ? ' is-invalid' : ''}${calendarOpen ? ' is-open' : ''}`}
+              ref={dateRef}
             >
               <input
                 id="new-apt-date"
-                type="date"
+                type="text"
                 className="new-apt__input"
-                value={form.date}
-                onChange={(event) => patch({ date: event.target.value })}
-                onClick={(event) => {
-                  const input = event.currentTarget
-                  try {
-                    input.showPicker?.()
-                  } catch {
-                    /* unsupported or blocked by the browser */
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="dd/mm/aaaa"
+                maxLength={10}
+                value={dateText}
+                onChange={(event) => {
+                  const next = maskDate(event.target.value)
+                  setDateText(next)
+                  const iso = parseBrDate(next)
+                  const parsed = iso ? parseIsoDate(iso) : null
+                  if (parsed && !isBeforeToday(parsed)) {
+                    patch({ date: iso })
+                    setCalMonth(parsed)
+                  } else {
+                    patch({ date: '' })
                   }
                 }}
+                onClick={() => setCalendarOpen(true)}
               />
-              <span className="new-apt__date-icon" aria-hidden="true">
-                <CalendarDays size={15} strokeWidth={2} />
+              <span className="new-apt__date-btn" aria-hidden="true">
+                <CalendarDays size={16} strokeWidth={2} />
               </span>
+              {calendarOpen ? (
+                <div className="new-apt-cal" role="dialog" aria-label="Calendário">
+                  <div className="new-apt-cal__head">
+                    <button
+                      type="button"
+                      className="new-apt-cal__nav"
+                      aria-label="Mês anterior"
+                      onClick={() =>
+                        setCalMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))
+                      }
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <span>
+                      {CAL_MONTHS[calMonth.getMonth()]} {calMonth.getFullYear()}
+                    </span>
+                    <button
+                      type="button"
+                      className="new-apt-cal__nav"
+                      aria-label="Próximo mês"
+                      onClick={() =>
+                        setCalMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))
+                      }
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                  <div className="new-apt-cal__weekdays">
+                    {CAL_WEEKDAYS.map((label) => (
+                      <span key={label}>{label}</span>
+                    ))}
+                  </div>
+                  <div className="new-apt-cal__grid">
+                    {monthCells(calMonth).map((day) => {
+                      const selected = parseIsoDate(form.date)
+                      const today = startOfToday()
+                      const outside = day.getMonth() !== calMonth.getMonth()
+                      const past = isBeforeToday(day)
+                      const isToday = sameDay(day, today)
+                      const isSelected = Boolean(selected) && !past && sameDay(day, selected as Date)
+                      return (
+                        <button
+                          key={day.toISOString()}
+                          type="button"
+                          disabled={past}
+                          className={[
+                            'new-apt-cal__day',
+                            outside ? 'is-outside' : '',
+                            past ? 'is-past' : '',
+                            isToday ? 'is-today' : '',
+                            isSelected ? 'is-selected' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          onClick={() => {
+                            if (past) return
+                            const iso = toDateKey(day)
+                            patch({ date: iso })
+                            setDateText(formatBrDate(iso))
+                            setCalMonth(new Date(day.getFullYear(), day.getMonth(), 1))
+                            setCalendarOpen(false)
+                          }}
+                        >
+                          {day.getDate()}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -315,8 +499,7 @@ export function NewAppointmentModal({
             <div className="new-apt__time">
               <input
                 type="text"
-                className="new-apt__input new-apt__input--time"
-                placeholder="hh:mm"
+                className="new-apt__time-input"
                 inputMode="numeric"
                 autoComplete="off"
                 maxLength={5}
@@ -327,8 +510,7 @@ export function NewAppointmentModal({
               <span className="new-apt__time-sep">até</span>
               <input
                 type="text"
-                className="new-apt__input new-apt__input--time"
-                placeholder="hh:mm"
+                className="new-apt__time-input"
                 inputMode="numeric"
                 autoComplete="off"
                 maxLength={5}
@@ -354,7 +536,7 @@ export function NewAppointmentModal({
             </div>
           </div>
 
-          <div className="new-apt__row new-apt__row--top">
+          <div className="new-apt__row new-apt__row--top new-apt__row--after">
             <label className="new-apt__label" htmlFor="new-apt-details">
               Detalhes
             </label>
@@ -380,7 +562,7 @@ export function NewAppointmentModal({
                   aria-checked={form.color === item.id}
                   aria-label={item.label}
                   className={`new-apt__color${form.color === item.id ? ' is-active' : ''}`}
-                  style={{ background: item.hex }}
+                  style={{ background: item.hex, color: item.hex }}
                   onClick={() => patch({ color: item.id })}
                 />
               ))}

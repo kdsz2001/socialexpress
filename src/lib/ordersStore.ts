@@ -31,6 +31,9 @@ export type OrderLine = {
   size: string
   price: number
   status: OrderLineStatus
+  /** Compatível com o cadastro anterior do pedido. */
+  fullCode?: string
+  value?: number
 }
 
 export type OrderPayment = {
@@ -95,7 +98,8 @@ export function orderMoney(order: Order) {
 }
 
 function displayStatus(status: string): OrderStatus {
-  if (status === 'Anulado' || status === 'Cancelado') return 'Cancelado'
+  if (status === 'Cancelado') return 'Cancelado'
+  if (status === 'Anulado') return 'Anulado'
   if (status === 'Orçamento') return 'Orçamento'
   if (status === 'Concluído') return 'Concluído'
   if (status === 'Aberto') return 'Aberto'
@@ -121,7 +125,7 @@ function normalize(raw: Partial<Order> & { id?: string }): Order {
     kind,
     origin: String(raw.origin || ''),
     attendant: String(raw.attendant || ''),
-    lines: Array.isArray(raw.lines) ? raw.lines : [],
+    lines: Array.isArray(raw.lines) ? raw.lines.map((line) => normalizeLine(line)) : [],
     discount: Number(raw.discount) || 0,
     payments: Array.isArray(raw.payments) ? raw.payments : [],
     installments: Array.isArray(raw.installments) ? raw.installments : [],
@@ -170,6 +174,22 @@ export function listOrders(): Order[] {
   return cachedOrders
 }
 
+function normalizeLine(raw: Partial<OrderLine> & { fullCode?: string; value?: number }): OrderLine {
+  const price = Number.isFinite(Number(raw.price)) ? Number(raw.price) : Number(raw.value) || 0
+  const code = String(raw.code || raw.fullCode || '').trim()
+  return {
+    id: String(raw.id || crypto.randomUUID()),
+    productId: String(raw.productId || '').trim(),
+    code,
+    name: String(raw.name || '').trim(),
+    size: String(raw.size || '').trim(),
+    price,
+    status: raw.status || 'Aguardando prova',
+    fullCode: code,
+    value: price,
+  }
+}
+
 export function getOrder(id: string): Order | null {
   return readAll().find((item) => item.id === id) ?? null
 }
@@ -194,16 +214,17 @@ export function addOrderOrigin(name: string) {
 }
 
 export function addOrder(input: {
+  clientId?: string
   clientName: string
   phone: string
   eventDate: string
   total: string
   status: OrderStatus
   operation: OrderOperation
-  clientId?: string
   kind?: OrderKind
   origin?: string
   attendant?: string
+  lines?: Array<Partial<OrderLine> & { fullCode?: string; value?: number }>
 }): Order {
   const all = readAll()
   const kind: OrderKind = input.kind || (input.status === 'Orçamento' ? 'Orçamento' : 'Pedido')
@@ -221,6 +242,7 @@ export function addOrder(input: {
       kind,
       origin: input.origin || '',
       attendant: input.attendant || '',
+      lines: (input.lines || []) as OrderLine[],
       createdAt: new Date().toISOString(),
     }),
   )

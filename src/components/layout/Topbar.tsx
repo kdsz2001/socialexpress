@@ -2,8 +2,12 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 're
 import { createPortal } from 'react-dom'
 import { Moon, Search, Menu, Sun, UserRound, X } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { useClients } from '../../hooks/useClients'
-import { getClientDisplayName } from '../../lib/clientsStore'
+import {
+  getClients,
+  getClientDisplayName,
+  subscribeClients,
+  type Client,
+} from '../../lib/clientsStore'
 import {
   getTheme,
   subscribeTheme,
@@ -16,6 +20,7 @@ import {
   subscribeUserProfile,
   type UserProfile,
 } from '../../lib/userProfileStore'
+import { EmptyAvatar } from '../ui/EmptyAvatar'
 import { ProfileDrawer } from './ProfileDrawer'
 import './Topbar.css'
 
@@ -25,7 +30,6 @@ type TopbarProps = {
 
 type ClientsTab = 'todos' | 'aniversariantes' | 'whatsapp'
 type ProductsTab = 'consulta' | 'todos' | 'atributos' | 'tipos' | 'alteracao'
-type EmployeesTab = 'lista' | 'permissoes'
 type FinanceTab = 'caixa' | 'pagar' | 'receber' | 'dre'
 type CrmTab = 'novo' | 'contatos' | 'analise' | 'trajes'
 
@@ -58,7 +62,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const clients = useClients()
+  const [clients, setClients] = useState<Client[]>([])
   const [searchOpen, setSearchOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [userProfile, setUserProfile] = useState<UserProfile>(() => getUserProfile())
@@ -72,11 +76,17 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
   useEffect(() => subscribeTheme(() => setThemeState(getTheme())), [])
 
+  useEffect(() => {
+    if (!searchOpen) return
+    setClients(getClients())
+    return subscribeClients(() => setClients(getClients()))
+  }, [searchOpen])
+
   const isClientsSection = location.pathname.startsWith('/clientes')
   const isProductsSection = location.pathname.startsWith('/produtos')
   const isEmployeesSection = location.pathname.startsWith('/funcionarios')
   const isOrdersSection = location.pathname.startsWith('/pedidos')
-  const isOrderDetail = /^\/pedidos\/[^/]+$/.test(location.pathname)
+  const isOrderDetail = /^\/pedidos\/(?!novo$)[^/]+$/.test(location.pathname)
   const isFinanceSection = location.pathname === '/financeiro'
   const isCrmSection = location.pathname === '/crm' || location.pathname.startsWith('/crm/')
   const isClientCreate = location.pathname === '/clientes/cadastrar'
@@ -118,11 +128,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         : paramTab === 'trajes'
           ? 'trajes'
           : 'contatos'
-  const employeesTab: EmployeesTab | null = !isEmployeesSection
-    ? null
-    : paramTab === 'permissoes'
-      ? 'permissoes'
-      : 'lista'
+  const showEmployeesPermissions = location.pathname === '/funcionarios'
   const financeTab: FinanceTab | null = !isFinanceSection
     ? null
     : paramTab === 'pagar'
@@ -232,35 +238,40 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     navigate(`/clientes/${clientId}`)
   }
 
+  const openTab = (to: string) => {
+    const next = new URL(to, window.location.href)
+    const target = `${next.pathname}${next.search}${next.hash}`
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`
+    if (target === current) return
+    navigate(target)
+    document.querySelector('.app-content')?.scrollTo(0, 0)
+  }
+
   const setClientsTab = (tab: ClientsTab) => {
     if (tab === 'todos') {
-      navigate('/clientes')
+      openTab('/clientes')
       return
     }
     if (tab === 'aniversariantes') {
-      navigate('/clientes?tab=aniversariantes')
+      openTab('/clientes?tab=aniversariantes')
       return
     }
-    navigate('/clientes?tab=whatsapp')
+    openTab('/clientes?tab=whatsapp')
   }
 
   const setProductsTab = (tab: ProductsTab) => {
     const match = PRODUCTS_TABS.find((item) => item.id === tab)
-    if (match) navigate(match.path)
+    if (match) openTab(match.path)
   }
 
   const setCrmTab = (tab: CrmTab) => {
     const match = CRM_TABS.find((item) => item.id === tab)
-    if (match) navigate(match.path)
-  }
-
-  const setEmployeesTab = (tab: EmployeesTab) => {
-    navigate(tab === 'permissoes' ? '/funcionarios?tab=permissoes' : '/funcionarios')
+    if (match) openTab(match.path)
   }
 
   const setFinanceTab = (tab: FinanceTab) => {
     const match = FINANCE_TABS.find((item) => item.id === tab)
-    if (match) navigate(match.path)
+    if (match) openTab(match.path)
   }
 
   const showWhatsappTab = isClientCreate || paramTab === 'whatsapp'
@@ -428,14 +439,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </div>
       ) : null}
 
-      {isEmployeesSection && employeesTab ? (
+      {isEmployeesSection && showEmployeesPermissions ? (
         <div className="topbar__tabs" role="tablist" aria-label="Funcionários">
           <button
             type="button"
             role="tab"
-            aria-selected={employeesTab === 'permissoes'}
-            className={`topbar__tab${employeesTab === 'permissoes' ? ' is-active' : ''}`}
-            onClick={() => setEmployeesTab('permissoes')}
+            className="topbar__tab"
+            onClick={() => openTab('/configuracoes?section=permissoes')}
           >
             Gerenciar permissões
           </button>
@@ -445,7 +455,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       {isOrdersSection ? (
         <div className="topbar__tabs" aria-label="Pedidos">
           {location.pathname === '/pedidos' ? (
-            <button type="button" className="topbar__tab" onClick={() => navigate('/orcamentos')}>
+            <button type="button" className="topbar__tab" onClick={() => openTab('/orcamentos')}>
               Orçamentos
             </button>
           ) : (
@@ -527,7 +537,9 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                 src={userProfile.avatarDataUrl}
                 alt=""
               />
-            ) : null}
+            ) : (
+              <EmptyAvatar />
+            )}
           </span>
         </button>
       </div>

@@ -5,8 +5,6 @@ import {
   CalendarDays,
   ChevronDown,
   Search,
-  SquarePen,
-  Trash2,
   X,
 } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
@@ -17,6 +15,7 @@ import {
   rangeForPreset,
   type DatePreset,
 } from '../components/clients/DateRangePicker'
+import { IconAction, IconActions } from '../components/ui/IconAction'
 import { useCashMovements } from '../hooks/useCashMovements'
 import {
   addCashMovement,
@@ -495,22 +494,14 @@ export function Financeiro() {
                       {formatMoney(item.value)}
                     </td>
                     <td className="financeiro__actions-cell">
-                      <button
-                        type="button"
-                        className="financeiro__icon-btn"
-                        aria-label="Editar lançamento"
-                        onClick={() => openEdit(item)}
-                      >
-                        <SquarePen size={15} strokeWidth={2} />
-                      </button>
-                      <button
-                        type="button"
-                        className="financeiro__icon-btn is-danger"
-                        aria-label="Excluir lançamento"
-                        onClick={() => deleteCashMovement(item.id)}
-                      >
-                        <Trash2 size={15} strokeWidth={2} />
-                      </button>
+                      <IconActions>
+                        <IconAction kind="edit" tip="Editar lançamento" onClick={() => openEdit(item)} />
+                        <IconAction
+                          kind="delete"
+                          tip="Excluir lançamento"
+                          onClick={() => deleteCashMovement(item.id)}
+                        />
+                      </IconActions>
                     </td>
                   </tr>
                 ))

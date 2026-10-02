@@ -66,7 +66,6 @@
   border-radius: 0.42rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: color 0.15s ease, background 0.15s ease;
 }
 
 .topbar__tab:hover {
@@ -289,18 +288,10 @@
 .topbar__avatar {
   width: 40px;
   height: 40px;
-  border-radius: 0.42rem;
-  background-color: var(--border-color);
-  background-image:
-    radial-gradient(circle at 50% 38%, #b5b5c3 0 22%, transparent 23%),
-    radial-gradient(ellipse 55% 40% at 50% 78%, #b5b5c3 0 52%, transparent 53%);
-  background-repeat: no-repeat;
+  border-radius: 50%;
+  background: #e6e7e8;
   flex-shrink: 0;
   overflow: hidden;
-}
-
-.topbar__avatar:has(.topbar__avatar-image) {
-  background-image: none;
 }
 
 .topbar__avatar-image {

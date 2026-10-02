@@ -77,7 +77,9 @@ export function EventForm() {
   const [date, setDate] = useState(editing?.date ?? '')
   const [notes, setNotes] = useState(editing?.notes ?? '')
   const [touched, setTouched] = useState(false)
+  const [blurred, setBlurred] = useState({ type: false, title: false, date: false })
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const dateOpenedRef = useRef(false)
   const [viewMonth, setViewMonth] = useState(() => {
     const current = parseIso(editing?.date ?? '') ?? new Date()
     return new Date(current.getFullYear(), current.getMonth(), 1)
@@ -91,6 +93,15 @@ export function EventForm() {
     return now
   }, [])
   const selected = parseIso(date)
+
+  useEffect(() => {
+    if (calendarOpen) {
+      dateOpenedRef.current = true
+      return
+    }
+    if (!dateOpenedRef.current) return
+    setBlurred((current) => ({ ...current, date: true }))
+  }, [calendarOpen])
 
   useEffect(() => {
     if (!calendarOpen) return
@@ -111,6 +122,9 @@ export function EventForm() {
   const missingType = !type
   const missingTitle = !title.trim()
   const missingDate = !date
+  const showTypeError = (touched || blurred.type) && missingType
+  const showTitleError = (touched || blurred.title) && missingTitle
+  const showDateError = (touched || blurred.date) && missingDate
 
   const back = () => navigate('/eventos')
 
@@ -163,45 +177,54 @@ export function EventForm() {
         </header>
 
         <div className="event-form__body">
-          <Field label="Tipo" required invalid={touched && missingType}>
-            <CreatableSelect
-              value={type}
-              options={EVENT_TYPE_OPTIONS}
-              placeholder="Selecione um tipo de evento"
-              createLabel="Tipo"
-              allowCreate={false}
-              invalid={touched && missingType}
-              onChange={setType}
-              onCreate={() => undefined}
-            />
-            {touched && missingType ? (
+          <Field label="Tipo" required invalid={showTypeError}>
+            <div className="event-form__select-wrap">
+              <CreatableSelect
+                value={type}
+                options={EVENT_TYPE_OPTIONS}
+                placeholder="Selecione um tipo de evento"
+                createLabel="Tipo"
+                allowCreate={false}
+                invalid={showTypeError}
+                onChange={setType}
+                onCreate={() => undefined}
+                onDismiss={() => setBlurred((current) => ({ ...current, type: true }))}
+              />
+              {showTypeError ? (
+                <span className="event-form__error-icon event-form__error-icon--select" aria-hidden="true">
+                  !
+                </span>
+              ) : null}
+            </div>
+            {showTypeError ? (
               <p className="event-form__error">&quot;Tipo&quot; não pode ficar em branco.</p>
             ) : null}
           </Field>
 
-          <Field label="Nome do evento" required invalid={touched && missingTitle}>
-            <div className={`event-form__input-wrap${touched && missingTitle ? ' is-invalid' : ''}`}>
+          <Field label="Nome do evento" required invalid={showTitleError}>
+            <div className={`event-form__input-wrap${showTitleError ? ' is-invalid' : ''}`}>
               <input
                 type="text"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
+                onBlur={() => setBlurred((current) => ({ ...current, title: true }))}
               />
-              {touched && missingTitle ? (
+              {showTitleError ? (
                 <span className="event-form__error-icon" aria-hidden="true">
                   !
                 </span>
               ) : null}
             </div>
-            {touched && missingTitle ? (
+            {showTitleError ? (
               <p className="event-form__error">
                 &quot;Nome do evento&quot; não pode ficar em branco.
               </p>
             ) : null}
           </Field>
 
-          <Field label="Data" required invalid={touched && missingDate}>
+          <Field label="Data" required invalid={showDateError}>
             <div className="event-form__date" ref={calendarRef}>
-              <div className={`event-form__date-field${touched && missingDate ? ' is-invalid' : ''}${calendarOpen ? ' is-open' : ''}`}>
+              <div className={`event-form__date-field${showDateError ? ' is-invalid' : ''}${calendarOpen ? ' is-open' : ''}`}>
                 <input
                   type="text"
                   readOnly
@@ -209,7 +232,13 @@ export function EventForm() {
                   placeholder=""
                   aria-label="Data do evento"
                   onClick={() => setCalendarOpen(true)}
+                  onFocus={() => setCalendarOpen(true)}
                 />
+                {showDateError ? (
+                  <span className="event-form__error-icon event-form__error-icon--date" aria-hidden="true">
+                    !
+                  </span>
+                ) : null}
                 <span className="event-form__date-btn" aria-hidden="true">
                   <CalendarDays size={16} strokeWidth={2} />
                 </span>
@@ -276,7 +305,7 @@ export function EventForm() {
                 </div>
               ) : null}
             </div>
-            {touched && missingDate ? (
+            {showDateError ? (
               <p className="event-form__error">&quot;Data&quot; não pode ficar em branco.</p>
             ) : null}
           </Field>
