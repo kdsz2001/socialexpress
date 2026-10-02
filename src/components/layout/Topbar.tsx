@@ -75,7 +75,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const isClientsSection = location.pathname.startsWith('/clientes')
   const isProductsSection = location.pathname.startsWith('/produtos')
   const isEmployeesSection = location.pathname.startsWith('/funcionarios')
-  const isOrdersSection = location.pathname === '/pedidos'
+  const isOrdersSection = location.pathname.startsWith('/pedidos')
+  const isOrderDetail = /^\/pedidos\/[^/]+$/.test(location.pathname)
   const isFinanceSection = location.pathname === '/financeiro'
   const isCrmSection = location.pathname === '/crm' || location.pathname.startsWith('/crm/')
   const isClientCreate = location.pathname === '/clientes/cadastrar'
@@ -443,13 +444,19 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
       {isOrdersSection ? (
         <div className="topbar__tabs" aria-label="Pedidos">
-          <button
-            type="button"
-            className="topbar__tab"
-            onClick={() => navigate('/orcamentos')}
-          >
-            Orçamentos
-          </button>
+          {location.pathname === '/pedidos' ? (
+            <button type="button" className="topbar__tab" onClick={() => navigate('/orcamentos')}>
+              Orçamentos
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={`topbar__tab${isOrderDetail ? ' is-active' : ''}`}
+              onClick={() => navigate('/pedidos')}
+            >
+              Todos pedidos
+            </button>
+          )}
         </div>
       ) : null}
 
