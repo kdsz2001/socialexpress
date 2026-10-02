@@ -118,6 +118,8 @@ export function OrderView() {
   const [discountOpen, setDiscountOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
   const [datesOpen, setDatesOpen] = useState(false)
+  const [carneOpen, setCarneOpen] = useState(false)
+  const [carneCount, setCarneCount] = useState('2')
   const [toast, setToast] = useState('')
   const [productQuery, setProductQuery] = useState('')
   const [payMethod, setPayMethod] = useState('')
@@ -251,6 +253,28 @@ export function OrderView() {
     setToast('Pedido cancelado.')
   }
 
+  const saveCarne = () => {
+    const count = Number(carneCount)
+    if (!Number.isInteger(count) || count < 1 || balance <= 0) return
+    const amount = Math.round((balance / count) * 100) / 100
+    const base = order.eventDate ? new Date(`${order.eventDate}T12:00:00`) : new Date()
+    const installments = Array.from({ length: count }, (_, index) => {
+      const due = new Date(base)
+      due.setMonth(due.getMonth() + index)
+      const month = String(due.getMonth() + 1).padStart(2, '0')
+      const day = String(due.getDate()).padStart(2, '0')
+      return {
+        id: crypto.randomUUID(),
+        number: index + 1,
+        dueDate: `${due.getFullYear()}-${month}-${day}`,
+        amount,
+      }
+    })
+    patchOrder(order.id, { installments })
+    setCarneOpen(false)
+    setToast('Carnê gerado.')
+  }
+
   const saveAdjust = () => {
     const amount = moneyBrToNumber(adjustValue)
     const adjustment = adjustMode === 'sub' ? -amount : amount
@@ -298,7 +322,7 @@ export function OrderView() {
             <div className="ov-popover ov-popover--alerts">
               <strong>Alertas</strong>
               <p>Alertas por e-mail</p>
-              <span>{order.clientName ? 'Cliente sem e-mail cadastrado.' : 'Cliente sem e-mail cadastrado.'}</span>
+              <span>Cliente sem e-mail cadastrado.</span>
               <p>Alertas por SMS</p>
               <span>Sua assinatura não prevê o envio de mensagens SMS.</span>
               <p>Alertas por WhatsApp</p>
@@ -565,12 +589,26 @@ export function OrderView() {
                 <BookOpen size={16} /> Carnês
               </h3>
               {!cancelled ? (
-                <button type="button" className="ov-solid" onClick={() => setToast('Nenhum carnê gerado para este pedido.')}>
+                <button type="button" className="ov-solid" onClick={() => setCarneOpen(true)}>
                   Gerar carnê
                 </button>
               ) : null}
             </header>
-            <p className="ov-muted">Nenhum carnê gerado para este pedido.</p>
+            {(order.installments || []).length === 0 ? (
+              <p className="ov-muted">Nenhum carnê gerado para este pedido.</p>
+            ) : (
+              <ul className="ov-pays">
+                {(order.installments || []).map((item) => (
+                  <li key={item.id}>
+                    <span>
+                      Parcela {item.number}
+                      {item.dueDate ? ` · ${item.dueDate.split('-').reverse().join('/')}` : ''}
+                    </span>
+                    <strong>{formatBrl(item.amount)}</strong>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
 
           <section className="ov-card">
@@ -763,6 +801,29 @@ export function OrderView() {
             </button>
             <button type="button" className="ov-primary" onClick={savePayment}>
               Salvar pagamento
+            </button>
+          </div>
+        </Modal>
+      ) : null}
+
+      {carneOpen ? (
+        <Modal title="Gerar carnê" onClose={() => setCarneOpen(false)}>
+          <p>Saldo aberto {formatBrl(balance)}. Em quantas parcelas?</p>
+          <label>
+            Parcelas
+            <input
+              className="ov-input"
+              inputMode="numeric"
+              value={carneCount}
+              onChange={(event) => setCarneCount(event.target.value.replace(/\D/g, '').slice(0, 2))}
+            />
+          </label>
+          <div className="ov-modal__foot">
+            <button type="button" className="ov-ghost" onClick={() => setCarneOpen(false)}>
+              Cancelar
+            </button>
+            <button type="button" className="ov-primary" onClick={saveCarne}>
+              Gerar
             </button>
           </div>
         </Modal>

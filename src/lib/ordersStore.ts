@@ -37,6 +37,13 @@ export type OrderPayment = {
   date: string
 }
 
+export type OrderInstallment = {
+  id: string
+  number: number
+  dueDate: string
+  amount: number
+}
+
 export type Order = {
   id: string
   number: number
@@ -59,6 +66,7 @@ export type Order = {
   orderNotes?: string
   suitNotes?: string
   payments?: OrderPayment[]
+  installments?: OrderInstallment[]
 }
 
 const STORAGE_KEY = 'social-express:orders'
@@ -69,10 +77,48 @@ function readAll(): Order[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
-    const parsed = JSON.parse(raw) as Order[]
-    return Array.isArray(parsed) ? parsed : []
+    const parsed = JSON.parse(raw) as Array<Partial<Order> & { notes?: string; fittingDate?: string }>
+    return Array.isArray(parsed) ? parsed.map((item) => normalizeOrder(item)) : []
   } catch {
     return []
+  }
+}
+
+function normalizeOrder(raw: Partial<Order> & { notes?: string; fittingDate?: string }): Order {
+  const lines = Array.isArray(raw.lines)
+    ? raw.lines.map((line) => {
+        const legacy = line as OrderLine & { code?: string; price?: number }
+        const value = Number.isFinite(Number(legacy.value)) ? Number(legacy.value) : Number(legacy.price) || 0
+        return {
+          ...legacy,
+          fullCode: String(legacy.fullCode || legacy.code || ''),
+          value,
+        }
+      })
+    : undefined
+  return {
+    id: String(raw.id || ''),
+    number: Number(raw.number) || 0,
+    clientId: raw.clientId,
+    clientName: String(raw.clientName || ''),
+    phone: String(raw.phone || ''),
+    eventDate: String(raw.eventDate || ''),
+    total: String(raw.total || ''),
+    status: raw.status || 'Aberto',
+    operation: raw.operation === 'Venda' ? 'Venda' : 'Aluguel',
+    createdAt: String(raw.createdAt || ''),
+    kind: raw.kind,
+    origin: raw.origin,
+    attendant: raw.attendant,
+    lines,
+    proofDate: raw.proofDate || raw.fittingDate,
+    pickupDate: raw.pickupDate,
+    returnDate: raw.returnDate,
+    discount: Number(raw.discount) || 0,
+    orderNotes: raw.orderNotes || raw.notes || '',
+    suitNotes: raw.suitNotes || '',
+    payments: Array.isArray(raw.payments) ? raw.payments : [],
+    installments: Array.isArray(raw.installments) ? raw.installments : [],
   }
 }
 
